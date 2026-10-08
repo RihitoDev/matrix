@@ -101,6 +101,7 @@ model Company {
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   workExperiences WorkExperience[]
+  jobOffers       JobOffer[]
 
   @@map("companies")
 }
@@ -225,7 +226,7 @@ model Skill {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  userSkills UserSkill[]
+  userSkills     UserSkill[]
   jobOfferSkills JobOfferSkill[]
 
   @@map("skills")
@@ -561,12 +562,11 @@ model JobOffer {
   @@map("job_offers")
 }
 
-
 model JobOfferModality {
-  id          String   @id @default(uuid()) @db.Uuid
-  title       String   @unique @db.VarChar(100)
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String   @unique @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   jobOffers JobOffer[]
 
@@ -574,10 +574,10 @@ model JobOfferModality {
 }
 
 model JobOfferContractType {
-  id          String   @id @default(uuid()) @db.Uuid
-  title       String   @unique @db.VarChar(100)
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String   @unique @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   jobOffers JobOffer[]
 
@@ -585,14 +585,15 @@ model JobOfferContractType {
 }
 
 model JobOfferStatus {
-  id          String   @id @default(uuid()) @db.Uuid
-  title       String   @unique @db.VarChar(100)
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String   @unique @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   jobOffers JobOffer[]
 
   @@map("job_offer_statuses")
+}
 model AccessRequestStatus {
   id          String   @id @default(uuid()) @db.Uuid
   title       String   @unique @db.VarChar(100)

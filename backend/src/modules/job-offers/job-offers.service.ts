@@ -1,97 +1,89 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../common/prisma/prisma.service.js';
+import { SkillsValidationService } from '../vacancies/services/skills-validation.service.js';
+import type { CreateJobOfferPayload } from './create-job-offer.schema.js';
+import {
+  CompanyNotFoundException,
+  JobOfferCatalogNotFoundException,
+  SalaryRangeInvalidException,
+} from './job-offers.exceptions.js';
 
-interface CreateJobOfferPayload {
-  tituloPuesto: string;
-  descripcion: string;
-  modalidad: 'Presencial' | 'Remoto' | 'Hibrido';
-  ubicacion: string;
-  tipoContrato: 'Tiempo completo' | 'Medio tiempo' | 'Pasantia';
-  categoria: string;
-  numeroVacantes: number;
-  salarioMin: number;
-  salarioMax: number;
-  idiomas: string;
-  enlaceGoogleMaps: string;
-  tecnologias: string[];
-}
+// Título del estado que se asigna al publicar (debe existir en job_offer_statuses)
+export const JOB_OFFER_PUBLISHED_STATUS = 'Publicada';
 
-class CompanyNotFoundException extends Error {
-  readonly statusCode = 404;
-  readonly code = 'COMPANY_NOT_FOUND';
-  constructor() {
-    super('La empresa no existe.');
-    this.name = 'CompanyNotFoundException';
-  }
-}
-
-class SalaryRangeInvalidException extends Error {
-  readonly statusCode = 422;
-  readonly code = 'SALARY_RANGE_INVALID';
-  constructor() {
-    super('El salario minimo no puede ser mayor al salario maximo.');
-    this.name = 'SalaryRangeInvalidException';
-  }
-}
-
-class TechnologyNotFoundException extends Error {
-  readonly statusCode = 422;
-  readonly code = 'TECHNOLOGY_NOT_FOUND';
-  constructor(tecnologias: string[]) {
-    super(`Las siguientes tecnologias no existen en el catalogo: ${tecnologias.join(', ')}.`);
-    this.name = 'TechnologyNotFoundException';
-  }
-}
+const formatBs = (amount: number): string =>
+  amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
 @Injectable()
 export class JobOffersService {
-  constructor(@Inject('PRISMA_SERVICE') private readonly prisma: any) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly skillsValidation: SkillsValidationService,
+  ) {}
 
   async create(empresaId: string, payload: CreateJobOfferPayload) {
     const company = await this.prisma.company.findUnique({
       where: { id: empresaId },
+      select: { id: true },
     });
-
     if (!company) throw new CompanyNotFoundException();
-    if (payload.salarioMin > payload.salarioMax) throw new SalaryRangeInvalidException();
 
-    const tecnologiasValidas = await this.prisma.technology.findMany({
-      where: { name: { in: payload.tecnologias } },
-    });
-
-    if (tecnologiasValidas.length !== payload.tecnologias.length) {
-      const noEncontradas = payload.tecnologias.filter(
-        (t: string) => !tecnologiasValidas.some((tv: any) => tv.name === t)
-      );
-      throw new TechnologyNotFoundException(noEncontradas);
+    if (
+      payload.salarioMax !== undefined &&
+      payload.salarioMin > payload.salarioMax
+    ) {
+      throw new SalaryRangeInvalidException();
     }
+
+    await this.skillsValidation.validateSkillIds(payload.tecnologias);
+
+    const [modality, contractType, status] = await Promise.all([
+      this.prisma.jobOfferModality.findUnique({
+        where: { title: payload.modalidad },
+        select: { id: true },
+      }),
+      this.prisma.jobOfferContractType.findUnique({
+        where: { title: payload.tipoContrato },
+        select: { id: true },
+      }),
+      this.prisma.jobOfferStatus.findUnique({
+        where: { title: JOB_OFFER_PUBLISHED_STATUS },
+        select: { id: true },
+      }),
+    ]);
+    if (!modality) throw new JobOfferCatalogNotFoundException('modalidad');
+    if (!contractType) {
+      throw new JobOfferCatalogNotFoundException('tipo de contrato');
+    }
+    if (!status) throw new JobOfferCatalogNotFoundException('estado');
+
+    const salaryRange =
+      payload.salarioMax === undefined
+        ? `Bs ${formatBs(payload.salarioMin)}`
+        : `Bs ${formatBs(payload.salarioMin)} - ${formatBs(payload.salarioMax)}`;
 
     const jobOffer = await this.prisma.jobOffer.create({
       data: {
         title: payload.tituloPuesto,
         description: payload.descripcion,
-        modality: payload.modalidad,
-        location: payload.ubicacion,
-        contractType: payload.tipoContrato,
-        category: payload.categoria,
-        numberOfPositions: payload.numeroVacantes,
-        salaryMin: payload.salarioMin,
-        salaryMax: payload.salarioMax,
-        languages: payload.idiomas,
-        googleMapsUrl: payload.enlaceGoogleMaps,
-        status: 'DRAFT',
         companyId: empresaId,
-        technologies: {
-          create: tecnologiasValidas.map((t: any) => ({
-            technologyId: t.id,
-          })),
+        modalityId: modality.id,
+        contractTypeId: contractType.id,
+        statusId: status.id,
+        category: payload.categoria,
+        positionsAvailable: payload.numeroVacantes,
+        salaryRange,
+        languages: payload.idiomas,
+        locationUrl: payload.enlaceGoogleMaps,
+        skills: {
+          create: payload.tecnologias.map((skillId) => ({ skillId })),
         },
       },
-      include: { technologies: true },
+      select: { id: true, createdAt: true },
     });
 
     return {
       id: jobOffer.id,
-      estado: jobOffer.status,
       fechaCreacion: jobOffer.createdAt,
       mensaje: 'Oferta publicada correctamente',
     };

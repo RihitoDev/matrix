@@ -1,41 +1,27 @@
-export class SalaryRangeInvalidException extends Error {
-  readonly statusCode = 422;
-  readonly code = 'SALARY_RANGE_INVALID';
+import { DomainException } from '../../common/exceptions/domain.exception.js';
 
+export class CompanyNotFoundException extends DomainException {
   constructor() {
-    super('El salario minimo no puede ser mayor al salario maximo.');
-    this.name = 'SalaryRangeInvalidException';
+    super('La empresa no existe.', 404, 'COMPANY_NOT_FOUND');
   }
 }
 
-export class TechnologyNotFoundException extends Error {
-  readonly statusCode = 422;
-  readonly code = 'TECHNOLOGY_NOT_FOUND';
-
-  constructor(tecnologias: string[]) {
+export class SalaryRangeInvalidException extends DomainException {
+  constructor() {
     super(
-      `Las siguientes tecnologias no existen en el catalogo: ${tecnologias.join(', ')}.`
+      'El salario minimo no puede ser mayor al salario maximo.',
+      422,
+      'SALARY_RANGE_INVALID',
     );
-    this.name = 'TechnologyNotFoundException';
   }
 }
 
-export class TechnologyLimitExceededException extends Error {
-  readonly statusCode = 422;
-  readonly code = 'TECHNOLOGY_LIMIT_EXCEEDED';
-
-  constructor() {
-    super('Se alcanzo el tope maximo de 10 tecnologias por vacante.');
-    this.name = 'TechnologyLimitExceededException';
-  }
-}
-
-export class CompanyNotFoundException extends Error {
-  readonly statusCode = 404;
-  readonly code = 'COMPANY_NOT_FOUND';
-
-  constructor() {
-    super('La empresa no existe.');
-    this.name = 'CompanyNotFoundException';
+export class JobOfferCatalogNotFoundException extends DomainException {
+  constructor(catalog: string) {
+    super(
+      `El valor indicado para ${catalog} no existe.`,
+      422,
+      'JOB_OFFER_CATALOG_NOT_FOUND',
+    );
   }
 }
