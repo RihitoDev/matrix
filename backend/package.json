@@ -8,6 +8,7 @@
   "type": "module",
   "packageManager": "pnpm@12.4.2",
   "scripts": {
+    "prepare": "cd .. && husky",
     "build": "tsc -p tsconfig.build.json",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -63,6 +64,7 @@
     "@types/supertest": "^7.2.1",
     "@vitest/coverage-v8": "^4.1.11",
     "concurrently": "^10.0.5",
+    "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
     "oxlint": "^1.85.0",
     "oxlint-tsgolint": "^7.0.2003",
