@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatDate } from "@/shared/utils/date.utils";
 import { DOCUMENT_TYPE_LABELS } from "@/modules/request-review/constants/request-review.constants";
 import { EMPTY_DOCUMENT_LABEL } from "../constants/registered-users.constants";
+import { EMAIL_SEARCH_NO_RESULTS_MESSAGE } from "../constants/reports.constants";
 import {
   REJECTED_USERS_COLUMN_COUNT as COLUMN_COUNT,
   TABLE_CELL_CLASSES as CELL_CLASSES,
@@ -24,7 +25,7 @@ export function RejectedUsersTable({ users, isLoading, errorMessage, searchTerm 
     }
 
     if (users.length === 0 && searchTerm) {
-      return <TableNoResultsRow columnCount={COLUMN_COUNT} message="No se encontró ningún usuario con el correo" />;
+      return <TableNoResultsRow columnCount={COLUMN_COUNT} message={EMAIL_SEARCH_NO_RESULTS_MESSAGE} />;
     }
 
     if (users.length === 0) {

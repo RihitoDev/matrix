@@ -211,7 +211,7 @@ describe("RegisteredUsersReportView", () => {
     expect(screen.queryByText("Camila Vargas Orellana")).toBeNull();
     expect(screen.getByRole("button", { name: "Gestión I-2026" })).toBeDefined();
     expect(reportsService.getRegisteredUsers).toHaveBeenLastCalledWith({
-      page: 1, limit: 10, userType: undefined, period: "I-2026",
+      page: 1, limit: 10, userType: undefined, period: "I-2026", search: "",
     });
   });
 
@@ -227,7 +227,7 @@ describe("RegisteredUsersReportView", () => {
     await user.click(screen.getByRole("button", { name: "actualizar" }));
     await screen.findByText("Mostrando 1-2 de 2 usuarios");
     expect(reportsService.getRegisteredUsers).toHaveBeenLastCalledWith({
-      page: 1, limit: 10, userType: "empresa", period: "II-2025",
+      page: 1, limit: 10, userType: "empresa", period: "II-2025", search: "",
     });
 
     await selectPeriod(user, "I-2025");
@@ -236,14 +236,14 @@ describe("RegisteredUsersReportView", () => {
     await selectPeriod(user, "Todas");
     expect(await screen.findByText("Mostrando 1-4 de 4 usuarios")).toBeDefined();
     expect(reportsService.getRegisteredUsers).toHaveBeenLastCalledWith({
-      page: 1, limit: 10, userType: "empresa", period: undefined,
+      page: 1, limit: 10, userType: "empresa", period: undefined, search: "",
     });
 
     await selectPeriod(user, "II-2025");
     await selectUserType(user, "Todos");
     expect(await screen.findByText("Mostrando 1-9 de 9 usuarios")).toBeDefined();
     expect(reportsService.getRegisteredUsers).toHaveBeenLastCalledWith({
-      page: 1, limit: 10, userType: undefined, period: "II-2025",
+      page: 1, limit: 10, userType: undefined, period: "II-2025", search: "",
     });
   });
 
@@ -255,7 +255,7 @@ describe("RegisteredUsersReportView", () => {
     await user.click(screen.getByRole("button", { name: "Página 2" }));
     await screen.findByText("Mostrando 11-20 de 24 usuarios");
     expect(reportsService.getRegisteredUsers).toHaveBeenLastCalledWith({
-      page: 2, limit: 10, userType: undefined, period: "I-2025",
+      page: 2, limit: 10, userType: undefined, period: "I-2025", search: "",
     });
 
     const requestCount = vi.mocked(reportsService.getRegisteredUsers).mock.calls.length;
@@ -287,7 +287,7 @@ describe("RegisteredUsersReportView", () => {
     await user.click(screen.getByRole("button", { name: "Página 20" }));
     expect(await screen.findByText("Mostrando 191-200 de 200 usuarios")).toBeDefined();
     expect(reportsService.getRegisteredUsers).toHaveBeenLastCalledWith({
-      page: 20, limit: 10, userType: "empresa", period: "I-2025",
+      page: 20, limit: 10, userType: "empresa", period: "I-2025", search: "",
     });
     expect(screen.queryByRole("button", { name: "Página 10" })).toBeNull();
     expect(screen.getByRole("button", { name: "Página siguiente" })).toBeDisabled();
@@ -295,7 +295,7 @@ describe("RegisteredUsersReportView", () => {
     await user.click(screen.getByRole("button", { name: "Página anterior" }));
     expect(await screen.findByText("Mostrando 181-190 de 200 usuarios")).toBeDefined();
     expect(reportsService.getRegisteredUsers).toHaveBeenLastCalledWith({
-      page: 19, limit: 10, userType: "empresa", period: "I-2025",
+      page: 19, limit: 10, userType: "empresa", period: "I-2025", search: "",
     });
   });
 
@@ -366,7 +366,7 @@ describe("RegisteredUsersReportView", () => {
 
     const exportingButton = screen.getByRole("button", { name: "Exportando..." }) as HTMLButtonElement;
     expect(exportingButton.disabled).toBe(true);
-    expect(exportSpy).toHaveBeenCalledWith({ userType: "empresa", period: "II-2025" });
+    expect(exportSpy).toHaveBeenCalledWith({ userType: "empresa", period: "II-2025", search: "" });
 
     resolveExport({ file, fileName: "usuarios-registrados-2026-10-03.csv" });
     await waitFor(() => {

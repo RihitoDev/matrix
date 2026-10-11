@@ -274,18 +274,24 @@ describe('ReportsService', () => {
       );
     });
 
-    it('busca sin distinguir mayúsculas ni tildes', async () => {
-      const result = await buildService().getRegisteredUsers(
-        registeredQuery({ search: 'PEREZ' }),
+    it('busca por correo sin distinguir mayúsculas', async () => {
+      const service = buildService([
+        buildUser({ id: 'x', email: 'Juan.Perez@gmail.com' }),
+        buildUser({ id: 'y' }),
+      ]);
+
+      const result = await service.getRegisteredUsers(
+        registeredQuery({ search: 'JUAN.PEREZ@' }),
       );
 
-      expect(result.items.map((user) => user.id)).toEqual(['a']);
+      expect(result.items.map((user) => user.id)).toEqual(['x']);
     });
 
-    it('busca también por correo e identificador', async () => {
+    it('busca solo por correo, no por nombre ni identificador', async () => {
       const service = buildService([
         buildUser({
           id: 'x',
+          fullName: 'Hugo Pardo',
           email: 'unico@example.com',
           identifier: 'NIT-777',
         }),
@@ -305,7 +311,11 @@ describe('ReportsService', () => {
             registeredQuery({ search: 'nit-777' }),
           )
         ).items,
-      ).toHaveLength(1);
+      ).toHaveLength(0);
+      expect(
+        (await service.getRegisteredUsers(registeredQuery({ search: 'hugo' })))
+          .items,
+      ).toHaveLength(0);
     });
 
     it('pagina los resultados', async () => {

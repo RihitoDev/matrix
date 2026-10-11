@@ -3,15 +3,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatDate } from "@/shared/utils/date.utils";
 import { DOCUMENT_TYPE_LABELS } from "@/modules/request-review/constants/request-review.constants";
 import { EMPTY_DOCUMENT_LABEL, USER_TYPE_LABELS } from "../constants/registered-users.constants";
+import { EMAIL_SEARCH_NO_RESULTS_MESSAGE } from "../constants/reports.constants";
 import {
   REGISTERED_USERS_COLUMN_COUNT as COLUMN_COUNT,
   TABLE_CELL_CLASSES as CELL_CLASSES,
   USERS_TABLE_HEAD_CLASSES as HEAD_CLASSES,
 } from "../constants/report-table.constants";
 import type { RegisteredUsersTableProps } from "../types/registered-users-table-props.types";
-import { TableMessageRow, TableSkeletonRows } from "./table-state-rows";
+import { TableMessageRow, TableNoResultsRow, TableSkeletonRows } from "./table-state-rows";
 
-export function RegisteredUsersTable({ users, isLoading, errorMessage }: RegisteredUsersTableProps) {
+export function RegisteredUsersTable({ users, isLoading, errorMessage, searchTerm = "" }: RegisteredUsersTableProps) {
   const renderBody = () => {
     if (isLoading) {
       return <TableSkeletonRows columnCount={COLUMN_COUNT} />;
@@ -19,6 +20,10 @@ export function RegisteredUsersTable({ users, isLoading, errorMessage }: Registe
 
     if (errorMessage) {
       return <TableMessageRow columnCount={COLUMN_COUNT} message={errorMessage} />;
+    }
+
+    if (users.length === 0 && searchTerm) {
+      return <TableNoResultsRow columnCount={COLUMN_COUNT} message={EMAIL_SEARCH_NO_RESULTS_MESSAGE} />;
     }
 
     if (users.length === 0) {
