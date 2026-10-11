@@ -9,3 +9,13 @@ export const USERS_TABLE_HEAD_CLASSES = "h-auto px-6 py-3 font-semibold text-ink
 export const REPORT_HISTORY_HEAD_CLASSES = "h-auto px-6 py-3 font-semibold text-text-secondary";
 export const TABLE_CELL_CLASSES = "px-6 py-4 text-ink-soft";
 export const TABLE_CONTAINER_CLASSES = "@container min-h-151 rounded-lg border border-border bg-surface";
+
+export const REJECTION_REASON_SHORT_LABELS: Record<string, string> = {
+  "Documento ilegible": "Documento ilegible",
+  "El nombre no coincide con los datos declarados": "El nombre no coincide",
+  "Documento incompleto o recortado": "Documento incompleto",
+  "El documento no corresponde a la carrera": "No corresponde a la carrera",
+};
+export const OTHER_REJECTION_SHORT_LABEL = "Otro motivo";
+export const REJECTION_BADGE_CLASSES =
+  "mt-2 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-interaction bg-interaction px-2.5 py-0.5 text-[12.5px] font-semibold text-accent";

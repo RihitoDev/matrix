@@ -1,4 +1,4 @@
-import { FileText } from "lucide-react";
+import { FileText, X } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDate } from "@/shared/utils/date.utils";
 import { DOCUMENT_TYPE_LABELS } from "@/modules/request-review/constants/request-review.constants";
@@ -6,6 +6,9 @@ import { EMPTY_DOCUMENT_LABEL } from "../constants/registered-users.constants";
 import { EMAIL_SEARCH_NO_RESULTS_MESSAGE } from "../constants/reports.constants";
 import {
   REJECTED_USERS_COLUMN_COUNT as COLUMN_COUNT,
+  OTHER_REJECTION_SHORT_LABEL,
+  REJECTION_BADGE_CLASSES,
+  REJECTION_REASON_SHORT_LABELS,
   TABLE_CELL_CLASSES as CELL_CLASSES,
   TABLE_CONTAINER_CLASSES as CONTAINER_CLASSES,
   USERS_TABLE_HEAD_CLASSES as HEAD_CLASSES,
@@ -13,6 +16,11 @@ import {
 import type { RejectedUsersTableProps } from "../types/rejected-users-table-props.types";
 import { TableScrollHint } from "./table-scroll-hint";
 import { TableMessageRow, TableNoResultsRow, TableSkeletonRows } from "./table-state-rows";
+
+function getRejectionLabel(reason: string) {
+  const match = Object.keys(REJECTION_REASON_SHORT_LABELS).find((fullReason) => reason.startsWith(fullReason));
+  return match ? REJECTION_REASON_SHORT_LABELS[match] : OTHER_REJECTION_SHORT_LABEL;
+}
 
 export function RejectedUsersTable({ users, isLoading, errorMessage, searchTerm = "" }: RejectedUsersTableProps) {
   const renderBody = () => {
@@ -42,6 +50,12 @@ export function RejectedUsersTable({ users, isLoading, errorMessage, searchTerm 
             <FileText className="size-5 shrink-0 text-ink" strokeWidth={1.5} aria-hidden="true" />
             {user.documentType ? DOCUMENT_TYPE_LABELS[user.documentType] : EMPTY_DOCUMENT_LABEL}
           </span>
+          {user.rejectionReason && (
+            <span title={user.rejectionReason} className={REJECTION_BADGE_CLASSES}>
+              <X className="size-3.5" strokeWidth={1.75} aria-hidden="true" />
+              {getRejectionLabel(user.rejectionReason)}
+            </span>
+          )}
         </TableCell>
         <TableCell className={CELL_CLASSES}>{formatDate(user.registeredAt)}</TableCell>
       </TableRow>
