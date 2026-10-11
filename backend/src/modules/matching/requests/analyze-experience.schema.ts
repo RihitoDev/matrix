@@ -1,7 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
 
-// Limite de caracteres del texto de experiencia (pendiente de confirmar con el equipo)
 export const MAX_EXPERIENCE_TEXT_LENGTH = 5000;
 
 export const analyzeExperienceParamsSchema = z.object({
