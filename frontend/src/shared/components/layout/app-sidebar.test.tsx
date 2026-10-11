@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import { House } from "lucide-react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -67,15 +67,6 @@ describe("AppSidebar", () => {
       .queryAllByRole("listitem")
       .filter((item) => item.getAttribute("data-slot") === "sidebar-menu-item");
     expect(topLevelItems).toHaveLength(SIDEBAR_NAVIGATION.length);
-  });
-
-  it("shows the report history option inside the analytics reports menu", () => {
-    renderSidebar();
-
-    fireEvent.click(screen.getByRole("button", { name: "Reportes Analíticos" }));
-
-    const historyLink = screen.getByRole("link", { name: "Historial de reportes generados" });
-    expect(historyLink.getAttribute("href")).toBe("/reports/history");
   });
 
   it("renders the items and user received by props", () => {

@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import type { PaginatedResult } from '../../../common/types/api-response.types.js';
 import { buildCsv } from '../../../common/utils/csv.js';
+import { buildExportFileName } from '../../../common/utils/file-name.js';
 import { paginate } from '../../../common/utils/pagination.js';
 import {
   REGISTERED_USERS_CSV_HEADERS,
   REJECTED_USERS_CSV_HEADERS,
   toRegisteredUserCsvRow,
   toRejectedUserCsvRow,
+  USER_TYPE_LABELS,
 } from '../mappers/report-user-csv.mapper.js';
 import {
   toRegisteredUserResponse,
@@ -25,9 +27,12 @@ import type {
   ReportCsvFile,
   ReportUser,
 } from '../types/report-user.types.js';
+import { getAcademicPeriod } from '../utils/academic-period.js';
 
 const REGISTERED_USERS_CSV_PREFIX = 'usuarios-registrados';
 const REJECTED_USERS_CSV_PREFIX = 'usuarios-rechazados';
+const CSV_EXTENSION = 'csv';
+const ALL_PERIODS_FILE_NAME_SUFFIX = 'todos';
 
 function normalizeText(text: string): string {
   return text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -50,7 +55,8 @@ function sortByNewest(users: ReportUser[]): ReportUser[] {
   return users.sort(
     (first, second) =>
       new Date(second.registeredAt).getTime() -
-      new Date(first.registeredAt).getTime(),
+        new Date(first.registeredAt).getTime() ||
+      first.id.localeCompare(second.id),
   );
 }
 
@@ -58,41 +64,63 @@ function sortByNewest(users: ReportUser[]): ReportUser[] {
 export class ReportsService {
   constructor(private readonly reportUsersRepository: ReportUsersRepository) {}
 
-  getRegisteredUsers(
+  async getRegisteredUsers(
     query: RegisteredUsersQuery,
-  ): PaginatedResult<RegisteredUserResponse> {
-    return paginate(this.findRegisteredUsers(query), query.page, query.limit);
+  ): Promise<PaginatedResult<RegisteredUserResponse>> {
+    const users = await this.findRegisteredUsers(query);
+    return paginate(users, query.page, query.limit);
   }
 
-  exportRegisteredUsersCsv(filters: RegisteredUsersFilters): ReportCsvFile {
-    const rows = this.findRegisteredUsers(filters).map(toRegisteredUserCsvRow);
+  async exportRegisteredUsersCsv(
+    filters: RegisteredUsersFilters,
+  ): Promise<ReportCsvFile> {
+    const users = await this.findRegisteredUsers(filters);
+    const rows = users.map(toRegisteredUserCsvRow);
+
+    const fileNameFilters = [
+      filters.userType && USER_TYPE_LABELS[filters.userType],
+      filters.search,
+    ];
 
     return {
-      fileName: `${REGISTERED_USERS_CSV_PREFIX}-${todayIsoDate()}.csv`,
+      fileName: buildExportFileName(
+        REGISTERED_USERS_CSV_PREFIX,
+        fileNameFilters,
+        filters.period ?? ALL_PERIODS_FILE_NAME_SUFFIX,
+        CSV_EXTENSION,
+      ),
       content: buildCsv(REGISTERED_USERS_CSV_HEADERS, rows),
     };
   }
 
-  getRejectedUsers(
+  async getRejectedUsers(
     query: RejectedUsersQuery,
-  ): PaginatedResult<RejectedUserResponse> {
-    return paginate(this.findRejectedUsers(query), query.page, query.limit);
+  ): Promise<PaginatedResult<RejectedUserResponse>> {
+    const users = await this.findRejectedUsers(query);
+    return paginate(users, query.page, query.limit);
   }
 
-  exportRejectedUsersCsv(filters: RejectedUsersFilters): ReportCsvFile {
-    const rows = this.findRejectedUsers(filters).map(toRejectedUserCsvRow);
+  async exportRejectedUsersCsv(
+    filters: RejectedUsersFilters,
+  ): Promise<ReportCsvFile> {
+    const users = await this.findRejectedUsers(filters);
+    const rows = users.map(toRejectedUserCsvRow);
 
     return {
-      fileName: `${REJECTED_USERS_CSV_PREFIX}-${todayIsoDate()}.csv`,
+      fileName: buildExportFileName(
+        REJECTED_USERS_CSV_PREFIX,
+        [filters.search],
+        todayIsoDate(),
+        CSV_EXTENSION,
+      ),
       content: buildCsv(REJECTED_USERS_CSV_HEADERS, rows),
     };
   }
 
-  private findRegisteredUsers(
+  private async findRegisteredUsers(
     filters: RegisteredUsersFilters,
-  ): RegisteredUserResponse[] {
-    const users = this.reportUsersRepository
-      .findAll()
+  ): Promise<RegisteredUserResponse[]> {
+    const users = (await this.reportUsersRepository.findAll())
       .filter((user) => user.registrationStatus === 'APPROVED')
       .filter(
         (user) =>
@@ -100,8 +128,8 @@ export class ReportsService {
       )
       .filter(
         (user) =>
-          filters.year === undefined ||
-          new Date(user.registeredAt).getUTCFullYear() === filters.year,
+          filters.period === undefined ||
+          getAcademicPeriod(user.registeredAt) === filters.period,
       )
       .filter((user) =>
         containsSearch(
@@ -113,11 +141,10 @@ export class ReportsService {
     return sortByNewest(users).map(toRegisteredUserResponse);
   }
 
-  private findRejectedUsers(
+  private async findRejectedUsers(
     filters: RejectedUsersFilters,
-  ): RejectedUserResponse[] {
-    const users = this.reportUsersRepository
-      .findAll()
+  ): Promise<RejectedUserResponse[]> {
+    const users = (await this.reportUsersRepository.findAll())
       .filter((user) => user.registrationStatus === 'REJECTED')
       .filter((user) => containsSearch([user.email], filters.search));
 

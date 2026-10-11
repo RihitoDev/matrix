@@ -1,32 +1,27 @@
+import type { DocumentType } from "@/modules/access-request/constants/document-types.constants";
+import type { RoleTag } from "@/modules/auth/types/auth-types";
 import type { PaginatedData } from "@/shared/types/api-response.types";
-
-export type UserType = "STUDENT" | "GRADUATE" | "DEGREE_HOLDER" | "MENTOR" | "COMPANY" | "ADMIN";
-
-export type UserDocumentType =
-  | "ACADEMIC_DEGREE"
-  | "NATIONAL_DEGREE"
-  | "GRADUATION_CERTIFICATE"
-  | "ACADEMIC_DIPLOMA"
-  | "ENROLLMENT_CERTIFICATE"
-  | "NIT";
 
 export interface RegisteredUser {
   id: string;
   fullName: string;
   email: string;
-  userType: UserType;
+  userType: RoleTag;
   identifier: string;
-  documentType: UserDocumentType;
+  documentType: DocumentType | null;
   registeredAt: string;
 }
+
+export type AcademicPeriod = `${"I" | "II"}-${number}`;
 
 export interface RegisteredUsersParams {
   page: number;
   limit: number;
-  userType?: UserType;
+  userType?: RoleTag;
+  period?: AcademicPeriod;
 }
 
-export type RegisteredUsersExportParams = Pick<RegisteredUsersParams, "userType">;
+export type RegisteredUsersExportParams = Pick<RegisteredUsersParams, "userType" | "period">;
 
 export interface ExportedFile {
   file: Blob;

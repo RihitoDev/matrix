@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { Inbox } from "lucide-react";
+import { REPORTS_NAVIGATION_ITEM } from "@/modules/reports";
 import { AppShell } from "@/shared/components/layout";
 import { SidebarToggleButton } from "@/shared/components/layout/sidebar-toggle-button";
 import type { NavigationItem } from "@/shared/types/navigation-item.types";
@@ -15,7 +16,7 @@ import { BackofficeSessionSkeleton } from "./backoffice-session-skeleton";
 import { BackofficeUserFooter } from "./backoffice-user-footer";
 import type { BackofficeShellProps } from "../../types/backoffice-shell-props.types";
 
-const BACKOFFICE_NAVIGATION: NavigationItem[] = [{ label: "Solicitudes", icon: Inbox, href: INBOX_PATH }];
+const BACKOFFICE_NAVIGATION: NavigationItem[] = [{ label: "Solicitudes", icon: Inbox, href: INBOX_PATH }, REPORTS_NAVIGATION_ITEM];
 const PENDING_ONLY: readonly ReviewStatus[] = ["pending"];
 const NONE: readonly ReviewStatus[] = [];
 

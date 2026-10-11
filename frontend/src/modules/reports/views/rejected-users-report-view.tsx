@@ -10,6 +10,7 @@ import {
 } from "../constants/reports.constants";
 import { EmailSearchInput } from "../components/email-search-input";
 import { ExportCsvButton } from "../components/export-csv-button";
+import { ExportSuccessToast } from "../components/export-success-toast";
 import { RefreshButton } from "../components/refresh-button";
 import { RejectedUsersTable } from "../components/rejected-users-table";
 import { TablePagination } from "../components/table-pagination";
@@ -21,7 +22,13 @@ export function RejectedUsersReportView() {
   const [searchInput, setSearchInput] = useState("");
   const search = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
   const { users, totalItems, totalPages, isLoading, errorMessage, refresh } = useRejectedUsers(currentPage, search);
-  const { exportCsv, isExporting, errorMessage: exportErrorMessage } = useExportRejectedUsersCsv(search);
+  const {
+    exportCsv,
+    isExporting,
+    errorMessage: exportErrorMessage,
+    successMessage: exportSuccessMessage,
+    downloadMessage: exportDownloadMessage,
+  } = useExportRejectedUsersCsv(search);
 
   const handleSearchChange = (value: string) => {
     setSearchInput(value);
@@ -67,6 +74,11 @@ export function RejectedUsersReportView() {
           <TablePagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       </div>
+
+      <ExportSuccessToast
+        message={exportSuccessMessage ?? exportDownloadMessage}
+        variant={exportSuccessMessage ? "success" : "info"}
+      />
     </section>
   );
 }

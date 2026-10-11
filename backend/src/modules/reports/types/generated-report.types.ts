@@ -11,3 +11,8 @@ export type RegisterGeneratedReportInput = Pick<
   GeneratedReport,
   'fileName' | 'reportType'
 >;
+
+export interface GeneratedReportsPage {
+  readonly reports: GeneratedReport[];
+  readonly total: number;
+}

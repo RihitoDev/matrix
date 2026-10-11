@@ -1,7 +1,8 @@
 import { FileText } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDate } from "@/shared/utils/date.utils";
-import { USER_DOCUMENT_LABELS, USER_TYPE_LABELS } from "../constants/registered-users.constants";
+import { DOCUMENT_TYPE_LABELS } from "@/modules/request-review/constants/request-review.constants";
+import { EMPTY_DOCUMENT_LABEL, USER_TYPE_LABELS } from "../constants/registered-users.constants";
 import {
   REGISTERED_USERS_COLUMN_COUNT as COLUMN_COUNT,
   TABLE_CELL_CLASSES as CELL_CLASSES,
@@ -33,7 +34,7 @@ export function RegisteredUsersTable({ users, isLoading, errorMessage }: Registe
         <TableCell className={CELL_CLASSES}>
           <span className="flex items-center gap-2">
             <FileText className="size-5 shrink-0 text-ink" strokeWidth={1.5} aria-hidden="true" />
-            {USER_DOCUMENT_LABELS[user.documentType]}
+            {user.documentType ? DOCUMENT_TYPE_LABELS[user.documentType] : EMPTY_DOCUMENT_LABEL}
           </span>
         </TableCell>
         <TableCell className={CELL_CLASSES}>{formatDate(user.registeredAt)}</TableCell>

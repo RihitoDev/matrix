@@ -1,36 +1,25 @@
+import type { RoleName } from '../../../common/enums/roles.enum.js';
+import { toBoliviaTime } from '../../../common/utils/date-time.js';
 import type {
   RegisteredUserResponse,
   RejectedUserResponse,
   ReportDocumentType,
-  ReportUserType,
 } from '../types/report-user.types.js';
 
-const USER_TYPE_LABELS: Record<ReportUserType, string> = {
-  STUDENT: 'Estudiante',
-  GRADUATE: 'Egresado',
-  DEGREE_HOLDER: 'Titulado',
-  MENTOR: 'Mentor',
-  COMPANY: 'Empresa',
-  ADMIN: 'Administrador',
+export const USER_TYPE_LABELS: Record<RoleName, string> = {
+  titulado: 'Titulado',
+  estudiante: 'Estudiante',
+  mentor: 'Mentor',
+  empresa: 'Empresa',
+  administrativo: 'Administrativo',
 };
 
 const DOCUMENT_TYPE_LABELS: Record<ReportDocumentType, string> = {
-  ACADEMIC_DEGREE: 'Título académico',
-  NATIONAL_DEGREE: 'Título en provisión nacional',
-  GRADUATION_CERTIFICATE: 'Certificado de egreso',
-  ACADEMIC_DIPLOMA: 'Diploma académico',
-  ENROLLMENT_CERTIFICATE: 'Certificado de inscripción',
-  NIT: 'NIT',
+  academic_diploma: 'Diploma académico',
+  national_title: 'Título en provisión nacional',
 };
 
-const REPORT_TIME_ZONE = 'America/La_Paz';
-
-const DATE_FORMATTER = new Intl.DateTimeFormat('es-BO', {
-  timeZone: REPORT_TIME_ZONE,
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric',
-});
+const EMPTY_VALUE = '-';
 
 export const REGISTERED_USERS_CSV_HEADERS = [
   'Usuario',
@@ -50,17 +39,16 @@ export const REJECTED_USERS_CSV_HEADERS = [
 ] as const;
 
 export function formatReportDate(isoDate: string): string {
-  const date = new Date(isoDate);
-
-  if (Number.isNaN(date.getTime())) {
-    return '-';
+  if (Number.isNaN(new Date(isoDate).getTime())) {
+    return EMPTY_VALUE;
   }
 
-  const parts = DATE_FORMATTER.formatToParts(date);
-  const getPart = (type: Intl.DateTimeFormatPartTypes) =>
-    parts.find((part) => part.type === type)?.value ?? '';
+  const [year, month, day] = toBoliviaTime(isoDate).date.split('-');
+  return `${day}/${month}/${year}`;
+}
 
-  return `${getPart('day')}/${getPart('month')}/${getPart('year')}`;
+function toDocumentLabel(documentType: ReportDocumentType | null): string {
+  return documentType ? DOCUMENT_TYPE_LABELS[documentType] : EMPTY_VALUE;
 }
 
 export function toRegisteredUserCsvRow(user: RegisteredUserResponse): string[] {
@@ -69,7 +57,7 @@ export function toRegisteredUserCsvRow(user: RegisteredUserResponse): string[] {
     user.email,
     USER_TYPE_LABELS[user.userType],
     user.identifier,
-    DOCUMENT_TYPE_LABELS[user.documentType],
+    toDocumentLabel(user.documentType),
     formatReportDate(user.registeredAt),
   ];
 }
@@ -79,7 +67,7 @@ export function toRejectedUserCsvRow(user: RejectedUserResponse): string[] {
     user.fullName,
     user.email,
     user.identifier,
-    DOCUMENT_TYPE_LABELS[user.documentType],
+    toDocumentLabel(user.documentType),
     formatReportDate(user.registeredAt),
   ];
 }

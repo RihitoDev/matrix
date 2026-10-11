@@ -3,18 +3,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { REGISTERED_USERS_PAGE_SIZE } from "../constants/reports.constants";
 import { reportsService } from "../services/reports.service";
-import type { RegisteredUsersState, UserType } from "../types/registered-user.types";
+import type { AcademicPeriod, RegisteredUsersState } from "../types/registered-user.types";
+import type { RoleTag } from "@/modules/auth/types/auth-types";
 
-export function useRegisteredUsers(page: number, userType?: UserType) {
+export function useRegisteredUsers(page: number, userType?: RoleTag, period?: AcademicPeriod) {
   const [state, setState] = useState<RegisteredUsersState | null>(null);
   const [refreshCount, setRefreshCount] = useState(0);
-  const requestKey = `${page}-${userType ?? "ALL"}-${refreshCount}`;
+  const requestKey = `${page}-${userType ?? "ALL"}-${period ?? "ALL"}-${refreshCount}`;
 
   useEffect(() => {
     let isCancelled = false;
 
     reportsService
-      .getRegisteredUsers({ page, limit: REGISTERED_USERS_PAGE_SIZE, userType })
+      .getRegisteredUsers({ page, limit: REGISTERED_USERS_PAGE_SIZE, userType, period })
       .then((response) => {
         if (!isCancelled) setState({ requestKey, result: response.data });
       })
@@ -27,7 +28,7 @@ export function useRegisteredUsers(page: number, userType?: UserType) {
     return () => {
       isCancelled = true;
     };
-  }, [page, userType, requestKey]);
+  }, [page, userType, period, requestKey]);
 
   const refresh = useCallback(() => setRefreshCount((count) => count + 1), []);
 

@@ -1,5 +1,5 @@
 import type { NavigationItem } from "@/shared/types/navigation-item.types";
-import { CalendarDays, ChartColumn, House, ListChecks, User, UserRound } from "lucide-react";
+import { CalendarDays, House, ListChecks, User, UserRound } from "lucide-react";
 
 export const SIDEBAR_NAVIGATION: NavigationItem[] = [
   { label: "Inicio", icon: House, href: "/" },
@@ -19,15 +19,6 @@ export const SIDEBAR_NAVIGATION: NavigationItem[] = [
         href: "/mentors/participation",
         icon: UserRound,
       },
-    ],
-  },
-  {
-    label: "Reportes Analíticos",
-    icon: ChartColumn,
-    children: [
-      { label: "Reporte de usuarios registrados", href: "/reports/registered-users" },
-      { label: "Reporte de usuarios rechazados", href: "/reports/rejected-users" },
-      { label: "Historial de reportes generados", href: "/reports/history" },
     ],
   },
 ];

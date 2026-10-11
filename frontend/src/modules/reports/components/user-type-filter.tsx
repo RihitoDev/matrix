@@ -3,14 +3,14 @@
 import { useId } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ALL_USER_TYPES_VALUE, USER_TYPE_SELECT_OPTIONS } from "../constants/registered-users.constants";
-import type { UserType } from "../types/registered-user.types";
+import type { RoleTag } from "@/modules/auth/types/auth-types";
 import type { UserTypeFilterProps } from "../types/user-type-filter-props.types";
 
 export function UserTypeFilter({ value, onChange }: UserTypeFilterProps) {
   const labelId = useId();
 
   const handleValueChange = (selectedValue: string | null) => {
-    onChange(!selectedValue || selectedValue === ALL_USER_TYPES_VALUE ? undefined : (selectedValue as UserType));
+    onChange(!selectedValue || selectedValue === ALL_USER_TYPES_VALUE ? undefined : (selectedValue as RoleTag));
   };
 
   return (
