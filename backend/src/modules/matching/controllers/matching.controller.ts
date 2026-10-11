@@ -10,7 +10,6 @@ import type { AnalyzeExperienceResponse } from '../types/matching.types.js';
 export class MatchingController {
   constructor(private readonly matchingService: MatchingService) {}
 
-  // Pendiente: tomar el usuario del token y verificar que la experiencia le pertenece.
   @Post(':id/skills/analysis')
   @HttpCode(HttpStatus.OK)
   analyzeExperience(

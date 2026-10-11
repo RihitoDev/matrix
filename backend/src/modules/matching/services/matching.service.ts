@@ -12,7 +12,6 @@ export class MatchingService {
   analyzeExperience(input: AnalyzeExperienceInput): AnalyzeExperienceResponse {
     const startedAt = performance.now();
 
-    // Por ahora el texto aun no se procesa, asi que no se detecta ninguna habilidad.
     const skills: DetectedSkillResponse[] = [];
 
     return {
