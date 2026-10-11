@@ -34,9 +34,10 @@ export const reportsService = {
   getReportHistory: async ({
     page,
     limit,
+    reportType,
   }: ReportHistoryParams): Promise<ApiResponse<PaginatedData<GeneratedReport>>> => {
     const { data } = await apiClient.get<ApiResponse<PaginatedData<GeneratedReport>>>("/reports/history", {
-      params: { page, limit },
+      params: { page, limit, reportType },
     });
 
     return data;
@@ -47,16 +48,17 @@ export const reportsService = {
     limit,
     userType,
     period,
+    search,
   }: RegisteredUsersParams): Promise<ApiResponse<PaginatedData<RegisteredUser>>> => {
     const { data } = await apiClient.get<ApiResponse<PaginatedData<RegisteredUser>>>("/reports/registered-users", {
-      params: { page, limit, userType, period },
+      params: { page, limit, userType, period, search },
     });
 
     return data;
   },
 
-  exportRegisteredUsersCsv: ({ userType, period }: RegisteredUsersExportParams): Promise<ExportedFile> =>
-    downloadCsv("/reports/registered-users/export", { userType, period }, REGISTERED_USERS_CSV_FALLBACK_NAME),
+  exportRegisteredUsersCsv: ({ userType, period, search }: RegisteredUsersExportParams): Promise<ExportedFile> =>
+    downloadCsv("/reports/registered-users/export", { userType, period, search }, REGISTERED_USERS_CSV_FALLBACK_NAME),
 
   getRejectedUsers: async ({
     page,

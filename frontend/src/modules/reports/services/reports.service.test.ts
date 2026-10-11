@@ -22,6 +22,16 @@ describe("reportsService.getReportHistory", () => {
     expect(getSpy).toHaveBeenCalledWith("/reports/history", { params: { page: 2, limit: 10 } });
     expect(result).toEqual(response);
   });
+
+  it("envía el tipo de reporte cuando hay filtro", async () => {
+    const getSpy = vi.spyOn(apiClient, "get").mockResolvedValueOnce({ data: { data: { items: [], totalItems: 0 } } });
+
+    await reportsService.getReportHistory({ page: 1, limit: 10, reportType: "MENTORS" });
+
+    expect(getSpy).toHaveBeenCalledWith("/reports/history", {
+      params: { page: 1, limit: 10, reportType: "MENTORS" },
+    });
+  });
 });
 
 describe("reportsService.getRegisteredUsers", () => {

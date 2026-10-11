@@ -3,35 +3,36 @@
 import { useEffect, useState } from "react";
 import { REPORT_HISTORY_PAGE_SIZE } from "../constants/reports.constants";
 import { reportsService } from "../services/reports.service";
-import type { ReportHistoryState } from "../types/generated-report.types";
+import type { ReportHistoryState, ReportType } from "../types/generated-report.types";
 
-export function useReportHistory(page: number) {
+export function useReportHistory(page: number, reportType?: ReportType) {
   const [state, setState] = useState<ReportHistoryState | null>(null);
+  const requestKey = `${page}-${reportType ?? "ALL"}`;
 
   useEffect(() => {
     let isCancelled = false;
 
     reportsService
-      .getReportHistory({ page, limit: REPORT_HISTORY_PAGE_SIZE })
+      .getReportHistory({ page, limit: REPORT_HISTORY_PAGE_SIZE, reportType })
       .then((response) => {
-        if (!isCancelled) setState({ page, result: response.data });
+        if (!isCancelled) setState({ requestKey, result: response.data });
       })
       .catch(() => {
-        if (!isCancelled) setState({ page, errorMessage: "No se pudo cargar el historial de reportes." });
+        if (!isCancelled) setState({ requestKey, errorMessage: "No se pudo cargar el historial de reportes." });
       });
 
     return () => {
       isCancelled = true;
     };
-  }, [page]);
+  }, [page, reportType, requestKey]);
 
-  const isCurrentPage = state?.page === page;
+  const isCurrentRequest = state?.requestKey === requestKey;
   const totalItems = state?.result?.totalItems ?? 0;
 
   return {
-    reports: isCurrentPage ? (state.result?.items ?? []) : [],
+    reports: isCurrentRequest ? (state.result?.items ?? []) : [],
     totalPages: Math.max(1, Math.ceil(totalItems / REPORT_HISTORY_PAGE_SIZE)),
-    isLoading: !isCurrentPage,
-    errorMessage: isCurrentPage ? state.errorMessage : undefined,
+    isLoading: !isCurrentRequest,
+    errorMessage: isCurrentRequest ? state.errorMessage : undefined,
   };
 }

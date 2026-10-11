@@ -7,6 +7,7 @@ export interface RejectedUser {
   email: string;
   identifier: string;
   documentType: DocumentType | null;
+  rejectionReason: string | null;
   registeredAt: string;
 }
 
