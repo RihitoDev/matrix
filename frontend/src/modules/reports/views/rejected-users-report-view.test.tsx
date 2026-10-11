@@ -57,7 +57,7 @@ describe("RejectedUsersReportView", () => {
 
     expect(screen.getByRole("heading", { name: "Reporte de usuarios registrados rechazados" })).toBeDefined();
     expect(screen.getByPlaceholderText("Buscar por correo electrónico")).toBeDefined();
-    expect(screen.getByRole("button", { name: "Actualizar" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "actualizar" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Exportar CSV" })).toBeDefined();
     expect(screen.getAllByTestId("skeleton-row")).toHaveLength(10);
 
@@ -149,9 +149,9 @@ describe("RejectedUsersReportView", () => {
       expect(screen.getByText("Juan Carlos Peres Rojas")).toBeDefined();
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Actualizar" }));
+    fireEvent.click(screen.getByRole("button", { name: "actualizar" }));
 
-    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Actualizar" }).disabled).toBe(true);
+    expect(screen.getByRole<HTMLButtonElement>("button", { name: "actualizar" }).disabled).toBe(true);
     await waitFor(() => {
       expect(screen.getByText("Juan Carlos Peres Rojas")).toBeDefined();
     });
@@ -162,7 +162,7 @@ describe("RejectedUsersReportView", () => {
     render(<RejectedUsersReportView />);
     await searchFor("juan.perez@", "Mostrando 1-1 de 1 usuarios");
 
-    fireEvent.click(screen.getByRole("button", { name: "Actualizar" }));
+    fireEvent.click(screen.getByRole("button", { name: "actualizar" }));
 
     await waitFor(() => {
       expect(screen.getByText("Mostrando 1-1 de 1 usuarios")).toBeDefined();

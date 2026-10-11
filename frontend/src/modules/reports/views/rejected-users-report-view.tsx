@@ -71,7 +71,7 @@ export function RejectedUsersReportView() {
             (isLoading ? "Cargando usuarios..." : `Mostrando ${firstVisibleItem}-${lastVisibleItem} de ${totalItems} usuarios`)}
         </p>
         <div className="flex justify-center">
-          <RefreshButton label="Actualizar" onClick={refresh} isRefreshing={isLoading} />
+          <RefreshButton onClick={refresh} isRefreshing={isLoading} />
         </div>
         <div className="flex justify-center md:justify-end">
           <TablePagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
