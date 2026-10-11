@@ -145,17 +145,17 @@ describe('Certification length limits', () => {
     });
   });
 
-  it('accepts an organization of 100 characters and rejects 101', () => {
+  it('accepts an organization of 150 characters and rejects 151', () => {
     expect(
       createCertificationSchema.safeParse({
         ...validBody,
-        issuingOrganization: 'a'.repeat(100),
+        issuingOrganization: 'a'.repeat(150),
       }).success,
     ).toBe(true);
 
     const issues = createCertificationSchema.safeParse({
       ...validBody,
-      issuingOrganization: 'a'.repeat(101),
+      issuingOrganization: 'a'.repeat(151),
     }).error?.issues;
 
     expect(issues).toHaveLength(1);
@@ -291,7 +291,7 @@ describe('Certification validation when editing', () => {
 
     const issues = updateCertificationSchema.safeParse({
       name: '',
-      issuingOrganization: 'a'.repeat(101),
+      issuingOrganization: 'a'.repeat(151),
       issueDate: tomorrowInBolivia(),
     }).error?.issues;
 
@@ -306,7 +306,7 @@ describe('Certification validation when editing', () => {
     expect(
       updateCertificationSchema.safeParse({
         name: 'a'.repeat(150),
-        issuingOrganization: 'a'.repeat(100),
+        issuingOrganization: 'a'.repeat(150),
         issueDate: todayInBolivia(),
       }).success,
     ).toBe(true);

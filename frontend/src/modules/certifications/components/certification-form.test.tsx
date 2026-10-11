@@ -13,15 +13,18 @@ const SAVED_VALUES: CreateCertificationDto = {
   issueDate: "2025-03-10",
 };
 
-function renderForm({
-  initialData,
-  currentDocumentName,
-  onSubmit = vi.fn().mockResolvedValue(null),
-}: {
+function renderForm(options: {
   initialData?: CreateCertificationDto;
   currentDocumentName?: string;
   onSubmit?: CertificationFormProps["onSubmit"];
 } = {}) {
+  const {
+    initialData,
+    currentDocumentName = "currentDocumentName" in options
+      ? options.currentDocumentName
+      : (options.initialData ? "titulo.pdf" : undefined),
+    onSubmit = vi.fn().mockResolvedValue(null),
+  } = options;
   const onCancel = vi.fn();
   render(
     <CertificationForm
@@ -67,10 +70,11 @@ describe("CertificationForm", () => {
     expect(screen.getByRole("button", { name: "Cancelar" })).toHaveAttribute("type", "button");
   });
 
-  it("limits the name to 150 characters and the date to 1950-01-01 or later", () => {
+  it("limits the name and organization to 150 characters and the date to 1950-01-01 or later", () => {
     renderForm();
 
     expect(getNameInput()).toHaveAttribute("maxLength", "150");
+    expect(getOrganizationInput()).toHaveAttribute("maxLength", "150");
     expect(getIssueDateInput()).toHaveAttribute("min", "1950-01-01");
   });
 
@@ -147,16 +151,15 @@ describe("CertificationForm", () => {
       initialData: {
         ...SAVED_VALUES,
         name: "a".repeat(151),
-        issuingOrganization: "b".repeat(101),
+        issuingOrganization: "b".repeat(151),
       },
     });
 
     await user.click(saveButton());
 
-    expect(screen.getByText(CERTIFICATION_VALIDATION_MESSAGES.nameTooLong)).toBeInTheDocument();
     expect(
-      screen.getByText(CERTIFICATION_VALIDATION_MESSAGES.organizationTooLong),
-    ).toBeInTheDocument();
+      screen.getAllByText(CERTIFICATION_VALIDATION_MESSAGES.nameTooLong),
+    ).toHaveLength(2);
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
@@ -327,15 +330,16 @@ describe("CertificationForm", () => {
       expect(onSubmit).toHaveBeenCalledWith(SAVED_VALUES, { type: "keep" });
     });
 
-    it("does not require a document when editing a certification without one", async () => {
-      const { onSubmit, user } = renderForm({ initialData: SAVED_VALUES });
+    it("requires a document when editing a certification without one", async () => {
+      const { onSubmit, user } = renderForm({ initialData: SAVED_VALUES, currentDocumentName: undefined });
 
       await user.click(saveButton());
 
-      expect(onSubmit).toHaveBeenCalledWith(SAVED_VALUES, { type: "keep" });
+      expect(screen.getByText(CERTIFICATION_VALIDATION_MESSAGES.documentRequired)).toBeInTheDocument();
+      expect(onSubmit).not.toHaveBeenCalled();
     });
 
-    it("marks the document for removal without calling the api until saving", async () => {
+    it("shows an error when attempting to save after marking the document for removal without a new file", async () => {
       const { onSubmit, user } = renderForm({ initialData: SAVED_VALUES, currentDocumentName: "titulo.pdf" });
 
       await user.click(screen.getByRole("button", { name: "Eliminar documento actual" }));
@@ -345,7 +349,8 @@ describe("CertificationForm", () => {
 
       await user.click(saveButton());
 
-      expect(onSubmit).toHaveBeenCalledWith(SAVED_VALUES, { type: "remove" });
+      expect(screen.getByText(CERTIFICATION_VALIDATION_MESSAGES.documentRequired)).toBeInTheDocument();
+      expect(onSubmit).not.toHaveBeenCalled();
     });
 
     it("submits the new file as a replacement", async () => {
@@ -370,7 +375,7 @@ describe("CertificationForm", () => {
       expect(onSubmit).toHaveBeenCalledWith(SAVED_VALUES, { type: "replace", file: PDF });
     });
 
-    it("drops the selected file when the document is marked for removal", async () => {
+    it("drops the selected file when the document is marked for removal and blocks saving without file", async () => {
       const { onSubmit, user } = renderForm({ initialData: SAVED_VALUES, currentDocumentName: "titulo.pdf" });
 
       await user.upload(screen.getByLabelText(/Archivo de respaldo/), PDF);
@@ -380,7 +385,8 @@ describe("CertificationForm", () => {
 
       await user.click(saveButton());
 
-      expect(onSubmit).toHaveBeenCalledWith(SAVED_VALUES, { type: "remove" });
+      expect(screen.getByText(CERTIFICATION_VALIDATION_MESSAGES.documentRequired)).toBeInTheDocument();
+      expect(onSubmit).not.toHaveBeenCalled();
     });
 
     it("discards the new file and the removal mark on cancel", async () => {

@@ -40,12 +40,12 @@ describe("validateCertification", () => {
     });
   });
 
-  it("accepts an organization of 100 characters and rejects a longer one", () => {
+  it("accepts an organization of 150 characters and rejects a longer one", () => {
     expect(
-      validateCertification({ ...VALID_VALUES, issuingOrganization: "a".repeat(100) }),
+      validateCertification({ ...VALID_VALUES, issuingOrganization: "a".repeat(150) }),
     ).toEqual({});
     expect(
-      validateCertification({ ...VALID_VALUES, issuingOrganization: "a".repeat(101) }),
+      validateCertification({ ...VALID_VALUES, issuingOrganization: "a".repeat(151) }),
     ).toEqual({ issuingOrganization: CERTIFICATION_VALIDATION_MESSAGES.organizationTooLong });
   });
 
@@ -71,7 +71,7 @@ describe("validateCertification", () => {
   it("counts the length after trimming the spaces", () => {
     expect(validateCertification({ ...VALID_VALUES, name: ` ${"a".repeat(150)} ` })).toEqual({});
     expect(
-      validateCertification({ ...VALID_VALUES, issuingOrganization: ` ${"a".repeat(100)} ` }),
+      validateCertification({ ...VALID_VALUES, issuingOrganization: ` ${"a".repeat(150)} ` }),
     ).toEqual({});
   });
 
