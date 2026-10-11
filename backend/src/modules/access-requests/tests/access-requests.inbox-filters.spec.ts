@@ -87,6 +87,15 @@ describe('AccessRequestsRepository.findPage: filtros', () => {
     ]);
   });
 
+  it('escapa los comodines % y _ para que se busquen como texto literal', async () => {
+    const { accessRequest, repository } = build();
+
+    await repository.findPage({ search: '%_', page: 1, limit: 10 });
+
+    const { AND } = accessRequest.findMany.mock.calls[0][0].where;
+    expect(AND[0].OR[0]).toEqual({ firstName: { contains: '\\%\\_', mode: 'insensitive' } });
+  });
+
   it('con varias palabras todas deben aparecer (nombre y apellido juntos) y se limitan a 5', async () => {
     const { accessRequest, repository } = build();
 

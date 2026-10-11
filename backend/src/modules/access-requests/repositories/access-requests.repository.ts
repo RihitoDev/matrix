@@ -17,6 +17,7 @@ import { ACCESS_REQUEST_SELECT, REQUEST_STATUS_SELECT, LIST_SELECT, DETAIL_SELEC
 import { ACTIVE_STATUSES, LISTED_STATUSES } from '../constants/access-request-status-groups.constants.js';
 import { MAX_SEARCH_TERMS } from '../constants/inbox-filters.constants.js';
 import { DECIDED_STATUSES } from '../constants/inbox-summary.constants.js';
+import { escapeLikePattern } from '../helpers/escape-like-pattern.js';
 
 @Injectable()
 export class AccessRequestsRepository {
@@ -44,7 +45,7 @@ export class AccessRequestsRepository {
   }
 
   async findPage(params: { status?: string; search?: string; career?: string; submittedFrom?: Date; page: number; limit: number }) {
-    const terms = params.search?.split(/\s+/).filter(Boolean).slice(0, MAX_SEARCH_TERMS) ?? [];
+    const terms = params.search?.split(/\s+/).filter(Boolean).slice(0, MAX_SEARCH_TERMS).map(escapeLikePattern) ?? [];
     const where: Prisma.AccessRequestWhereInput = {
       status: { title: params.status ?? { in: LISTED_STATUSES } },
       ...(params.career && { career: { title: params.career } }),
