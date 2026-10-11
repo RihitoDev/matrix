@@ -107,7 +107,7 @@ export function RejectDialog({ detail, open, onOpenChange, onRejected }: RejectD
             value={hint}
             onChange={(event) => setHint(event.target.value)}
             placeholder="Explica qué debe corregir la persona"
-            className="min-h-24 rounded-lg"
+            className="min-h-24 max-w-full rounded-lg [overflow-wrap:anywhere]"
           />
           <p className="text-xs text-text-secondary" aria-live="polite">
             {rejection.length}/{REJECTION_MAX_LENGTH}
