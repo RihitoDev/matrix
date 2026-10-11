@@ -17,6 +17,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 export function failureOf(status: number, body: unknown): ReviewApiResult<never> {
   if (status === 401) return { ok: false, status, message: SESSION_EXPIRED_MESSAGE };
   if (status === 403) return { ok: false, status, message: FORBIDDEN_MESSAGE };
+  const fieldMessage = isRecord(body) && Array.isArray(body.errors) && isRecord(body.errors[0]) ? body.errors[0].message : undefined;
+  if (typeof fieldMessage === "string") return { ok: false, status, message: fieldMessage };
   if (isRecord(body) && typeof body.detail === "string") return { ok: false, status, message: body.detail };
   return { ok: false, status, message: GENERIC_ERROR_MESSAGE };
 }

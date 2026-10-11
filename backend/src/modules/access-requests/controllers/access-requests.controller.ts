@@ -1,5 +1,6 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
 import { MAX_FILE_SIZE_BYTES } from '../../files/constants/file-rules.constants.js';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
@@ -29,7 +30,7 @@ interface DocumentResponse {
 }
 
 const uuidPipe = new ParseUUIDPipe({
-  exceptionFactory: () => new BadRequestException('El identificador de la solicitud no es válido'),
+  exceptionFactory: () => new RequestValidationException([{ field: 'id', message: 'El identificador de la solicitud no es válido' }]),
 });
 
 @Controller('access-requests')

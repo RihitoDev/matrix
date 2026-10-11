@@ -102,6 +102,20 @@ describe("requestReviewService.getRequestDetail", () => {
     expect(await requestReviewService.getRequestDetail("1")).toMatchObject({ status: 403 });
   });
 
+  it("con un id inválido muestra el mensaje de validación en español y no el detalle técnico", async () => {
+    reply(400, {
+      statusCode: 400,
+      ok: false,
+      detail: "id: El identificador de la solicitud no es válido",
+      errors: [{ field: "id", message: "El identificador de la solicitud no es válido" }],
+    });
+    expect(await requestReviewService.getRequestDetail("abc")).toEqual({
+      ok: false,
+      status: 400,
+      message: "El identificador de la solicitud no es válido",
+    });
+  });
+
   it.each([["texto"], [{}], [{ id: 5, history: {} }]])("un 200 inválido %j da error", async (body) => {
     reply(200, body);
     expect(await requestReviewService.getRequestDetail("1")).toMatchObject({ ok: false, status: 0 });
