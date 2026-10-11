@@ -151,7 +151,7 @@ describe("LoginView", () => {
     vi.mocked(useLogin).mockReturnValue({ login, isLoading: false, error: null });
     render(<LoginView />);
 
-    fireEvent.change(screen.getByPlaceholderText("nombre@ejemplo.com"), { target: { value: "axel.santos" } });
+    fireEvent.change(screen.getByPlaceholderText("nombre@ejemplo.com"), { target: { value: "lionel.messi" } });
     fireEvent.change(screen.getByPlaceholderText("********"), { target: { value: "Clave-Segura-9" } });
     fireEvent.submit(screen.getByRole("button", { name: "Iniciar sesión" }).closest("form")!);
 

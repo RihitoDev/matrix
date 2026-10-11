@@ -7,7 +7,7 @@ describe("validateLoginFields", () => {
   });
 
   it("acepta un correo con espacios alrededor", () => {
-    expect(validateLoginFields("  axel.santos@gmail.com  ", "Clave-Segura-9")).toEqual({});
+    expect(validateLoginFields("  lionel.messi@gmail.com  ", "Clave-Segura-9")).toEqual({});
   });
 
   it("pide el correo cuando está vacío o solo tiene espacios", () => {
