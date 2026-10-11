@@ -4,19 +4,37 @@ import { useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Modality, VacancyConditions } from "../hooks/use-job-offer-form";
+import type {
+  Modality,
+  UpdateVacancyField,
+  VacancyConditions,
+  VacancyErrors,
+} from "../hooks/use-job-offer-form";
+import {
+  CONTRACT_TYPES,
+  MAX_LANGUAGES_CHARS,
+  MAX_TITLE_CHARS,
+  MODALITIES,
+} from "../constants/vacancies.constants";
+import { FieldError } from "./field-error";
 
 interface InformationStepProps {
   conditions: VacancyConditions;
-  updateField: (field: keyof VacancyConditions, value: string) => void;
+  errors: VacancyErrors;
+  updateField: UpdateVacancyField;
   selectModality: (modality: Modality) => void;
+  validateField: (field: keyof VacancyConditions) => void;
   onContinue: () => void;
 }
 
-const MODALITIES = ["Presencial", "Remoto", "Hibrido"];
-const CONTRACT_TYPES = ["Tiempo completo", "Medio tiempo", "Pasantia"];
-
-export function InformationStep({ conditions, updateField, selectModality, onContinue }: InformationStepProps) {
+export function InformationStep({
+  conditions,
+  errors,
+  updateField,
+  selectModality,
+  validateField,
+  onContinue,
+}: InformationStepProps) {
   const hasUnsavedChanges = 
     conditions.title !== "" || 
     conditions.salary !== "" || 
@@ -48,7 +66,7 @@ export function InformationStep({ conditions, updateField, selectModality, onCon
     if (allowedKeys.includes(e.key)) return;
 
     const isAlphanumericOrSpace = /^[a-zA-Z0-9\sñÑáéíóúÁÉÍÓÚ]+$/.test(e.key);
-    if (!isAlphanumericOrSpace || conditions.title.length >= 60) {
+    if (!isAlphanumericOrSpace || conditions.title.length >= MAX_TITLE_CHARS) {
       e.preventDefault();
     }
   };
@@ -95,19 +113,7 @@ export function InformationStep({ conditions, updateField, selectModality, onCon
     updateField("salary", formatted);
   };
 
-  const handleSalaryBlur = () => {
-    if (!conditions.salary) return;
-    const rawValue = conditions.salary.replace(/[^\d-]/g, "");
-    const parts = rawValue.split("-");
-    if (parts.length === 2 && parts[0] !== "" && parts[1] !== "") {
-      const min = parseInt(parts[0], 10);
-      const max = parseInt(parts[1], 10);
-      if (min > max) {
-        const formatMiles = (num: number) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-        updateField("salary", `Bs ${formatMiles(max)} - ${formatMiles(min)}`);
-      }
-    }
-  };
+  const handleSalaryBlur = () => validateField("salary");
 
   return (
     <div className="mt-6 rounded-xl border border-border bg-surface">
@@ -123,7 +129,7 @@ export function InformationStep({ conditions, updateField, selectModality, onCon
             <Label htmlFor="title" className="text-[12.5px] font-semibold">
               Titulo del puesto <span className="text-danger">*</span>
             </Label>
-            <span className="text-[11px] text-slate-400">{conditions.title.length}/60</span>
+            <span className="text-[11px] text-slate-400">{conditions.title.length}/{MAX_TITLE_CHARS}</span>
           </div>
           <Input 
             id="title" 
@@ -132,19 +138,23 @@ export function InformationStep({ conditions, updateField, selectModality, onCon
             value={conditions.title} 
             onChange={(event) => updateField("title", event.target.value)}
             onKeyDown={handleTitleKeyDown}
+            maxLength={MAX_TITLE_CHARS}
+            aria-invalid={Boolean(errors.title)}
+            aria-describedby={errors.title ? "title-error" : undefined}
           />
+          <FieldError fieldId="title" message={errors.title} />
         </div>
 
         <div>
           <Label className="text-[12.5px] font-semibold">
             Modalidad  <span className="text-danger">*</span>
           </Label>
-          <div className="mt-1.5 grid grid-cols-3 gap-2">
+          <div id="modality" className="mt-1.5 grid grid-cols-3 gap-2">
             {MODALITIES.map((modality) => (
               <button
                 key={modality}
                 type="button"
-                onClick={() => selectModality(modality as Modality)}
+                onClick={() => selectModality(modality)}
                 className={conditions.modality === modality 
                   ? "rounded-md bg-ink px-3 py-2 text-sm font-semibold text-white" 
                   : "rounded-md border border-border px-3 py-2 text-sm font-semibold text-ink hover:bg-surface-soft"}
@@ -152,6 +162,7 @@ export function InformationStep({ conditions, updateField, selectModality, onCon
               </button>
             ))}
           </div>
+          <FieldError fieldId="modality" message={errors.modality} />
         </div>
 
         <div>
@@ -164,7 +175,11 @@ export function InformationStep({ conditions, updateField, selectModality, onCon
             className="mt-1.5"
             value={conditions.mapsLink} 
             onChange={(event) => updateField("mapsLink" , event.target.value)}
+            onBlur={() => validateField("mapsLink")}
+            aria-invalid={Boolean(errors.mapsLink)}
+            aria-describedby={errors.mapsLink ? "mapsLink-error" : undefined}
           />
+          <FieldError fieldId="mapsLink" message={errors.mapsLink} />
         </div>
 
         <div>
@@ -183,6 +198,7 @@ export function InformationStep({ conditions, updateField, selectModality, onCon
               ))}
             </SelectContent>
           </Select>
+          <FieldError fieldId="contractType" message={errors.contractType} />
         </div>
 
         <div>
@@ -195,7 +211,10 @@ export function InformationStep({ conditions, updateField, selectModality, onCon
             className="mt-1.5" 
             value={conditions.category} 
             onChange={(event) => updateField("category", event.target.value)} 
+            aria-invalid={Boolean(errors.category)}
+            aria-describedby={errors.category ? "category-error" : undefined}
           />
+          <FieldError fieldId="category" message={errors.category} />
         </div>
 
         <div>
@@ -209,11 +228,17 @@ export function InformationStep({ conditions, updateField, selectModality, onCon
             value={conditions.vacancyCount} 
             onChange={handleVacancyChange}
             onKeyDown={handleNumberKeyDown}
+            inputMode="numeric"
+            aria-invalid={Boolean(errors.vacancyCount)}
+            aria-describedby={errors.vacancyCount ? "vacancyCount-error" : undefined}
           />
+          <FieldError fieldId="vacancyCount" message={errors.vacancyCount} />
         </div>
 
         <div>
-          <Label htmlFor="salary" className="text-[12.5px] font-semibold">Salario</Label>
+          <Label htmlFor="salary" className="text-[12.5px] font-semibold">
+            Salario <span className="text-danger">*</span>
+          </Label>
           <Input 
             id="salary" 
             placeholder="Bs 6.500 - 8.000" 
@@ -221,7 +246,10 @@ export function InformationStep({ conditions, updateField, selectModality, onCon
             value={conditions.salary} 
             onChange={handleSalaryChange}
             onBlur={handleSalaryBlur}
+            aria-invalid={Boolean(errors.salary)}
+            aria-describedby={errors.salary ? "salary-error" : undefined}
           />
+          <FieldError fieldId="salary" message={errors.salary} />
         </div>
 
         <div>
@@ -234,7 +262,11 @@ export function InformationStep({ conditions, updateField, selectModality, onCon
             className="mt-1.5"
             value={conditions.languages} 
             onChange={(event) => updateField("languages", event.target.value)} 
+            maxLength={MAX_LANGUAGES_CHARS}
+            aria-invalid={Boolean(errors.languages)}
+            aria-describedby={errors.languages ? "languages-error" : undefined}
           />
+          <FieldError fieldId="languages" message={errors.languages} />
         </div>
       </div>
 

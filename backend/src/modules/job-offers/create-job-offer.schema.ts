@@ -21,7 +21,8 @@ export const createJobOfferSchema = z
     modalidad: z.enum(['Presencial', 'Remoto', 'Híbrido'], {
       message: 'Modalidad invalida',
     }),
-    ubicacion: z.string().trim().min(1, REQUIRED),
+    // La HU solo pide el enlace de Google Maps; la dirección en texto no se persiste.
+    ubicacion: z.string().trim().optional(),
     tipoContrato: z.enum(['Tiempo completo', 'Medio tiempo', 'Pasantía'], {
       message: 'Tipo de contrato invalido',
     }),
@@ -43,7 +44,7 @@ export const createJobOfferSchema = z
       .trim()
       .min(1, REQUIRED)
       .regex(
-        /^https:\/\/(maps\.google\.com\/|goo\.gl\/maps\/)/,
+        /^https:\/\/(maps\.google\.com\/|www\.google\.com\/maps|goo\.gl\/maps\/|maps\.app\.goo\.gl\/)/,
         'Ingresa un enlace valido de Google Maps',
       ),
     tecnologias: z

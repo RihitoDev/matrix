@@ -20,7 +20,7 @@ export function HomeView() {
         <CardHeader>
           <CardTitle>PWA Egresados UMSS</CardTitle>
           <CardDescription>
-            Respuesta del backend: <strong>{backendMessage}</strong>
+            Respuesta del backend: <strong>{backendMessage?.detail}</strong>
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">

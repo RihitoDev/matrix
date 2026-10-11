@@ -7,6 +7,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 
 import { seedAccessRequests } from '../../modules/access-requests/seeds/access-requests.seed.js';
 import { seedAvailability } from '../../modules/availability/seeds/availability.seed.js';
+import { seedJobOffers } from '../../modules/job-offers/seeds/job-offers.seed.js';
 import { seedOrientationTypes } from '../../modules/orientation-types/seeds/orientation-types.seed.js';
 import { seedTechnicalAreas } from '../../modules/technical-areas/seeds/technical-areas.seed.js';
 import { SEED_USERS } from '../../modules/users/constants/seed-users.constants.js';
@@ -19,7 +20,7 @@ import type { SeedSummary } from '../types/seed-summary.types.js';
 import { SeedEnvSchema } from './seed-env.schema.js';
 
 // REGLA DE ORDEN: los seeds se ejecutan en secuencia porque cada uno usa datos de los anteriores.
-// 0. technical-areas y orientation-types: catálogos independientes.
+// 0. technical-areas, orientation-types y job-offers (catálogos, tecnologías y empresas demo): independientes.
 // 1. users: roles y usuarios de prueba.
 // 2. availability: bloques y citas de los mentores y el titulado creados en users.
 // 3. access-requests: catálogos de estados, tipos de documento y carreras (no dependen de los anteriores).
@@ -55,6 +56,7 @@ export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
     return await prisma.$transaction(async (tx) => {
       await seedTechnicalAreas(tx);
       await seedOrientationTypes(tx);
+      await seedJobOffers(tx);
 
       const usersResult = await seedUsers(tx, password);
       const { users } = usersResult;

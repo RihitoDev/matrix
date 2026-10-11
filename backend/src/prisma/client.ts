@@ -112,6 +112,11 @@ export type WorkExperience = Prisma.WorkExperienceModel
  */
 export type Skill = Prisma.SkillModel
 /**
+ * Model JobOfferSkill
+ * 
+ */
+export type JobOfferSkill = Prisma.JobOfferSkillModel
+/**
  * Model UserSkill
  * 
  */
@@ -186,6 +191,26 @@ export type EventRegistration = Prisma.EventRegistrationModel
  * 
  */
 export type EventAttendance = Prisma.EventAttendanceModel
+/**
+ * Model JobOffer
+ * 
+ */
+export type JobOffer = Prisma.JobOfferModel
+/**
+ * Model JobOfferModality
+ * 
+ */
+export type JobOfferModality = Prisma.JobOfferModalityModel
+/**
+ * Model JobOfferContractType
+ * 
+ */
+export type JobOfferContractType = Prisma.JobOfferContractTypeModel
+/**
+ * Model JobOfferStatus
+ * 
+ */
+export type JobOfferStatus = Prisma.JobOfferStatusModel
 /**
  * Model AccessRequestStatus
  * 
