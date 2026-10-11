@@ -3,7 +3,12 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Conversation, ConversationFilter } from '../types/conversation.types';
 import { User } from '../types/user.types';
-import { getConversations, getOrCreateConversation } from '../services/chat-api';
+import {
+  getConversations,
+  getOrCreateConversation,
+  markConversationAsRead,
+} from '../services/chat-api';
+import { setStoredConversationUnreadCount } from '../services/message-storage';
 
 const PAGE_SIZE = 10;
 
@@ -106,6 +111,8 @@ export function useConversations() {
       setKeptInUnreadId(null);
     }
 
+    markConversationAsRead(conversation.id);
+
     if (conversation.unreadCount > 0) {
       setConversationsData((prev) =>
         prev.map((item) =>
@@ -125,10 +132,12 @@ export function useConversations() {
     setConversationsData((prev) => {
       return prev.map((item) => {
         if (item.id === conversationId) {
+          const newUnread = selectedId === conversationId ? 0 : item.unreadCount + 1;
+          setStoredConversationUnreadCount(conversationId, newUnread);
           return {
             ...item,
             updatedAt: timestamp,
-            unreadCount: selectedId === conversationId ? 0 : item.unreadCount + 1,
+            unreadCount: newUnread,
             lastMessage: {
               id: `msg-${Date.now()}`,
               senderId: item.contact.id,

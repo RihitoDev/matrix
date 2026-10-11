@@ -7,6 +7,7 @@ import {
   getPaginatedMessages,
   getOrCreateConversation,
   sendMessage,
+  markConversationAsRead,
 } from '../services/chat-api';
 
 import { CURRENT_USER_ID } from '../mocks/mock-users';
@@ -572,5 +573,51 @@ describe('chat-api — sendMessage (HU-03 Tarea 2)', () => {
     ).rejects.toThrow(
       'El identificador de conversacion es requerido',
     );
+  });
+});
+
+describe('chat-api — persistencia de estado leido y no redisparo de alertas tras recarga', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    clearStoredMessages();
+  });
+
+  it('debe mantener guardado el estado leido (unreadCount: 0) al simular recarga de pagina tras marcar conversacion como leida', async () => {
+    // 1. Inicialmente conv-1 tiene unreadCount: 2
+    const initialList = await getConversations();
+    const conv1Initial = initialList.find((c) => c.id === 'conv-1');
+    expect(conv1Initial?.unreadCount).toBe(2);
+
+    // 2. El usuario revisa/marca la conversacion como leida
+    await markConversationAsRead('conv-1');
+
+    // 3. Simular recarga de pagina (F5) volviendo a invocar getConversations
+    const reloadedList = await getConversations();
+    const conv1Reloaded = reloadedList.find((c) => c.id === 'conv-1');
+
+    // Debe conservar unreadCount: 0 sin redisparar la notificacion
+    expect(conv1Reloaded?.unreadCount).toBe(0);
+
+    // Otras conversaciones que no han sido leidas mantienen su conteo
+    const conv3Reloaded = reloadedList.find((c) => c.id === 'conv-3');
+    expect(conv3Reloaded?.unreadCount).toBe(1);
+  });
+
+  it('debe marcar la conversacion como leida de forma persistente al enviar un mensaje y conservarlo tras recargar', async () => {
+    // Inicialmente conv-1 tiene mensajes no leidos
+    const initialList = await getConversations();
+    expect(initialList.find((c) => c.id === 'conv-1')?.unreadCount).toBe(2);
+
+    // Enviar mensaje en conv-1
+    await sendMessage({
+      conversationId: 'conv-1',
+      content: 'Mensaje de prueba de reordenamiento',
+    });
+
+    // Simular recarga de pagina (F5)
+    const reloadedList = await getConversations();
+    const conv1 = reloadedList.find((c) => c.id === 'conv-1');
+
+    expect(conv1?.unreadCount).toBe(0);
   });
 });

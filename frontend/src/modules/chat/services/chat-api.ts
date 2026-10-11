@@ -15,6 +15,8 @@ import {
 import {
   getMessagesByConversation,
   saveStoredMessage,
+  getStoredConversationReadState,
+  markStoredConversationAsRead,
 } from './message-storage';
 
 const MIN_SEARCH_CHARS = 2;
@@ -35,7 +37,19 @@ export interface PaginatedMessagesResponse {
 export async function getConversations(): Promise<Conversation[]> {
   await new Promise((resolve) => setTimeout(resolve, 400));
 
-  return [...MOCK_CONVERSATIONS].sort((a, b) => {
+  const readState = getStoredConversationReadState();
+
+  const conversations = MOCK_CONVERSATIONS.map((conv) => {
+    if (conv.id in readState) {
+      return {
+        ...conv,
+        unreadCount: readState[conv.id],
+      };
+    }
+    return { ...conv };
+  });
+
+  return conversations.sort((a, b) => {
     return (
       new Date(b.updatedAt).getTime() -
       new Date(a.updatedAt).getTime()
@@ -241,6 +255,7 @@ export async function sendMessage(
   };
 
   saveStoredMessage(createdMessage);
+  markStoredConversationAsRead(payload.conversationId);
 
   return {
     statusCode: 201,
@@ -248,4 +263,10 @@ export async function sendMessage(
     detail: 'Mensaje enviado exitosamente',
     data: createdMessage,
   };
+}
+
+export async function markConversationAsRead(
+  conversationId: string,
+): Promise<void> {
+  markStoredConversationAsRead(conversationId);
 }
