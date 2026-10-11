@@ -86,8 +86,6 @@ export class AccessRequestsService {
       throw new AccessRequestNotEditableException('La solicitud ya fue enviada y no se puede eliminar');
     }
 
-    // TODO: primero se elimina la solicitud (condicional por estado draft) y después el archivo, para no destruir el documento de una solicitud enviada en una carrera.
-    // Si falla el segundo paso queda un archivo huérfano que habrá que limpiar en el futuro.
     await this.accessRequestsRepository.deleteDraft(id);
 
     if (current.documentFileId) {
@@ -110,7 +108,6 @@ export class AccessRequestsService {
     if (!file) {
       throw new MissingDocumentFileException();
     }
-    // Se valida antes de crear el archivo para no dejar huérfanos por un tipo inválido
     if (!this.isDocumentType(documentType)) {
       throw new InvalidDocumentTypeException();
     }
@@ -191,7 +188,6 @@ export class AccessRequestsService {
     return toAccessRequestDetail(updated);
   }
 
-  // Solo se aprueba desde in_review; el código de activación se emite después y su fallo no revierte la aprobación
   async approve(id: string, reviewerId: string) {
     const current = await this.accessRequestsRepository.findDetailById(id);
     if (!current || current.status.title === ACCESS_REQUEST_STATUS.DRAFT) {
@@ -210,7 +206,6 @@ export class AccessRequestsService {
     return { id, status: ACCESS_REQUEST_STATUS.APPROVED, activationCodeSent };
   }
 
-  // Solo se rechaza desde in_review y con motivo; el aviso por correo se envía después y su fallo no revierte el rechazo
   async reject(id: string, reviewerId: string, reason: string) {
     const current = await this.accessRequestsRepository.findDetailById(id);
     if (!current || current.status.title === ACCESS_REQUEST_STATUS.DRAFT) {
@@ -243,7 +238,6 @@ export class AccessRequestsService {
     return this.filesService.getContent(current.documentFileId);
   }
 
-  // Forma { data, page, offset } del contrato paginado; el total viaja dentro de data
   async list(query: ListAccessRequestsQuery, now: Date = new Date()) {
     const { period, ...filters } = query;
     const days = INBOX_PERIOD_DAYS[period];
@@ -292,7 +286,6 @@ export class AccessRequestsService {
     };
   }
 
-  // Un código inexistente y un correo distinto dan el mismo 404 para no revelar si la solicitud existe
   async getStatus(requestCode: string, email: string) {
     const found = await this.accessRequestsRepository.findByRequestCode(requestCode, email.trim().toLowerCase());
     if (!found) {
@@ -316,13 +309,10 @@ export class AccessRequestsService {
     return Object.values<string>(ACCESS_REQUEST_DOCUMENT_TYPE).includes(value as string);
   }
 
-  // Un fallo al borrar no debe romper la operación principal: el archivo queda huérfano
-  // TODO: limpiar archivos huérfanos si falla el borrado del anterior
   private async discardFile(fileId: string) {
     try {
       await this.filesService.delete(fileId);
     } catch {
-      // FileNotFoundException u otro error: se ignora a propósito (ver TODO)
     }
   }
 

@@ -68,7 +68,6 @@ export function RequestTable({ items = [], isLoading = false }: RequestTableProp
                   <StatusBadge status={item.status} />
                 </TableCell>
                 <TableCell className={cn(CELL_CLASS, "text-right")}>
-                  {/* Button con render={<Link />} no es un botón nativo; por eso se usa Link con las clases de buttonVariants */}
                   <Link
                     href={`${INBOX_PATH}/${item.id}`}
                     className={cn(buttonVariants({ variant: "outline" }), "h-[34px] rounded-lg border-border bg-surface px-4 text-[14px] font-semibold text-ink")}

@@ -24,7 +24,6 @@ export class AccessRequestsRepository {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  // En el create, P2025 solo puede venir de un connect: la carrera o el estado no existen (seed sin correr)
   async createDraft(data: CreateAccessRequestDto) {
     const { career, ...rest } = data;
     try {
@@ -95,8 +94,6 @@ export class AccessRequestsRepository {
     return this.prisma.accessRequest.findUnique({ where: { id }, select: DETAIL_SELECT });
   }
 
-  // Pasa de pending a in_review de forma atómica y registra quién la abrió y cuándo.
-  // Devuelve false si la solicitud ya no estaba pendiente (P2025): no es un error, otra persona la abrió antes.
   async markInReview(id: string, reviewerId: string): Promise<boolean> {
     try {
       await this.prisma.accessRequest.update({
@@ -117,7 +114,6 @@ export class AccessRequestsRepository {
     }
   }
 
-  // Dictamen atómico: solo desde in_review. Devuelve false si cambió de estado (P2025) para que el service responda 409
   async setVerdict(id: string, reviewerId: string, verdict: { status: string; rejectionReason?: string }): Promise<boolean> {
     try {
       await this.prisma.accessRequest.update({
@@ -143,7 +139,6 @@ export class AccessRequestsRepository {
     return this.prisma.accessRequest.findUnique({ where: { id }, select: ACCESS_REQUEST_SELECT });
   }
 
-  // Borradores y rechazadas no cuentan; excludeId evita chocar con la propia solicitud
   findActiveDuplicates(fields: { email?: string; idCardNumber?: string; sisCode?: string; excludeId?: string }) {
     const { email, idCardNumber, sisCode, excludeId } = fields;
     const matches: Prisma.AccessRequestWhereInput[] = [];
@@ -171,10 +166,6 @@ export class AccessRequestsRepository {
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        // P2025 puede venir de la solicitud (no existe o ya no es borrador) o de un connect anidado (carrera o estado sin sembrar).
-        // En el segundo caso el runtime de Prisma agrega meta.model con el modelo relacionado que falló; en el primero no.
-        // Es un detalle interno del runtime, no una API documentada.
-        // TODO: confirmar el comportamiento de meta al actualizar Prisma
         if (typeof error.meta?.model === 'string') {
           throw new AccessRequestCatalogMissingException();
         }
@@ -184,7 +175,6 @@ export class AccessRequestsRepository {
     }
   }
 
-  // Lee y actualiza dentro de una transacción para devolver el archivo anterior sin seleccionar nunca su contenido
   setDocument(id: string, fileId: string, documentType: string) {
     return this.replaceDocument(id, {
       documentFile: { connect: { id: fileId } },
@@ -192,7 +182,6 @@ export class AccessRequestsRepository {
     });
   }
 
-  // documentTypeId es opcional en el schema, así que se limpia junto con el archivo
   clearDocument(id: string) {
     return this.replaceDocument(id, { documentFile: { disconnect: true }, documentType: { disconnect: true } });
   }
@@ -213,7 +202,6 @@ export class AccessRequestsRepository {
       });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        // Mismo criterio que updateDraft: meta.model indica un connect fallido (archivo o tipo de documento sin sembrar)
         if (typeof error.meta?.model === 'string') {
           throw new AccessRequestCatalogMissingException();
         }
@@ -223,8 +211,6 @@ export class AccessRequestsRepository {
     }
   }
 
-  // Último código del año por orden descendente de texto: válido mientras los números tengan 4 dígitos
-  // TODO: con más de 9999 solicitudes en un año el orden de texto deja de coincidir con el numérico
   async generateRequestCode(now: Date = new Date()) {
     const year = now.getUTCFullYear();
     const last = await this.prisma.accessRequest.findFirst({
@@ -235,7 +221,6 @@ export class AccessRequestsRepository {
     return nextRequestCode(year, last?.requestCode);
   }
 
-  // Los índices únicos parciales de la base (solo filas enviadas) son la defensa final contra envíos simultáneos con los mismos datos
   async submit(id: string, requestCode: string) {
     try {
       return await this.prisma.accessRequest.update({
@@ -258,9 +243,6 @@ export class AccessRequestsRepository {
     }
   }
 
-  // Una ráfaga de envíos simultáneos calcula el mismo siguiente número; el unique de requestCode da P2002 a los perdedores.
-  // Se recalcula con una pausa aleatoria breve y se reintenta. Un P2002 de correo, C.I. o SIS (índices únicos parciales)
-  // significa que otra solicitud enviada ya ocupa esos datos: responde 409. Cualquier otro error se relanza de inmediato.
   async submitWithGeneratedCode(id: string) {
     for (let attempt = 1; attempt <= MAX_REQUEST_CODE_ATTEMPTS; attempt++) {
       const requestCode = await this.generateRequestCode();
@@ -276,7 +258,6 @@ export class AccessRequestsRepository {
     throw new RequestCodeGenerationException();
   }
 
-  // El correo va en el where (sin distinguir mayúsculas) para no seleccionarlo ni distinguir "código inexistente" de "correo distinto"
   findByRequestCode(requestCode: string, email: string) {
     return this.prisma.accessRequest.findFirst({
       where: { requestCode, email: { equals: email, mode: 'insensitive' } },

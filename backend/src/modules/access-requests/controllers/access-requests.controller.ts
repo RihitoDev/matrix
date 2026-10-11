@@ -50,8 +50,6 @@ export class AccessRequestsController {
     return this.accessRequestsService.getSummary();
   }
 
-  // Se declara antes que cualquier ruta con :id para que "status" no se tome como identificador
-  // TODO: reemplazar el correo en la URL cuando Pablo defina la autenticación (los parámetros de consulta quedan en los logs)
   @Get('status/:code')
   getStatus(
     @Param(new ZodValidationPipe(requestStatusParamsSchema)) params: RequestStatusParams,
@@ -60,7 +58,6 @@ export class AccessRequestsController {
     return this.accessRequestsService.getStatus(params.code, query.email);
   }
 
-  // El documento se entrega como binario con su tipo de contenido; el cuerpo nunca pasa por el formato JSON
   @Get(':id/document')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(BACKOFFICE_ROLE)
@@ -114,7 +111,6 @@ export class AccessRequestsController {
     return this.accessRequestsService.delete(id);
   }
 
-  // DocumentUploadInterceptor va primero para envolver y traducir el error de Multer
   @Post(':id/document')
   @UseInterceptors(DocumentUploadInterceptor, FileInterceptor('file', { limits: { fileSize: MAX_FILE_SIZE_BYTES } }))
   attachDocument(

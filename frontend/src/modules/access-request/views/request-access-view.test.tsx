@@ -44,7 +44,6 @@ async function fillAndContinue() {
   await screen.findByRole("heading", { name: "Documento de respaldo" });
 }
 
-// El encabezado usa useRouter, que necesita el App Router montado
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
 describe("RequestAccessView", () => {

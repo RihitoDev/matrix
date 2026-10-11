@@ -12,7 +12,6 @@ import { RolesGuard } from '../../../common/guards/roles.guard.js';
 
 const ID = '3f2b8a54-6d2e-4c7e-9a41-0b1d5f6c7e88';
 
-// Guards REALES (JwtAuthGuard y RolesGuard) con JwtService y Prisma simulados
 describe('AccessRequestsController: guards compartidos del backoffice', () => {
   const service = { list: vi.fn(), getSummary: vi.fn(), getDetail: vi.fn(), approve: vi.fn(), getStatus: vi.fn(), create: vi.fn() };
   const jwtService = { verifyAsync: vi.fn() };

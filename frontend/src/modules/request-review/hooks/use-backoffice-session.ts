@@ -15,7 +15,6 @@ function readSession(): BackofficeSessionState {
   return getRoleTag(token) === BACKOFFICE_ROLE ? "allowed" : "forbidden";
 }
 
-// Sin token va al login; con otro rol vuelve al inicio. La autorización real la hace el backend
 export function useBackofficeSession() {
   const router = useRouter();
   const pathname = usePathname();

@@ -26,7 +26,6 @@ export function authHeaders(): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-// Lista { data: { items, total }, page, offset }; el cuerpo puede venir envuelto en el formato estándar o no
 async function listRequests(
   status: ReviewStatus,
   page: number,
@@ -107,7 +106,6 @@ async function getSummary(): Promise<ReviewApiResult<InboxSummary>> {
 const NOT_FOUND_MESSAGE = "La solicitud no existe.";
 const NO_DOCUMENT_MESSAGE = "La solicitud no tiene un documento adjunto.";
 
-// Abrir el detalle pasa una solicitud pendiente a en revisión (lo hace el backend)
 async function getRequestDetail(id: string): Promise<ReviewApiResult<ReviewDetail>> {
   try {
     const response = await apiClient.get(`/access-requests/${id}`, { headers: authHeaders(), validateStatus: () => true });
@@ -125,7 +123,6 @@ async function getRequestDetail(id: string): Promise<ReviewApiResult<ReviewDetai
   }
 }
 
-// El dictamen solo se puede emitir desde en revisión: el backend responde 409 si ya cambió de estado
 async function approveRequest(id: string): Promise<ReviewApiResult<ApproveResult>> {
   try {
     const response = await apiClient.patch(`/access-requests/${id}/approve`, undefined, {
@@ -147,7 +144,6 @@ async function approveRequest(id: string): Promise<ReviewApiResult<ApproveResult
   }
 }
 
-// El motivo es obligatorio; el backend responde 400 en español si falta y 409 si la solicitud ya no está en revisión
 async function rejectRequest(id: string, reason: string): Promise<ReviewApiResult<RejectResult>> {
   try {
     const response = await apiClient.patch(
@@ -158,7 +154,6 @@ async function rejectRequest(id: string, reason: string): Promise<ReviewApiResul
     if (response.status === 404) return { ok: false, status: 404, message: NOT_FOUND_MESSAGE };
     if (response.status < 200 || response.status >= 300) {
       const body: unknown = response.data;
-      // Zod llega como body.message [{ path, message }] (Nest) o como body.errors [{ field, message }] (formato estándar)
       const issues = isRecord(body) ? (Array.isArray(body.message) ? body.message : Array.isArray(body.errors) ? body.errors : []) : [];
       const first = issues[0];
       if (response.status === 400 && isRecord(first) && typeof first.message === "string") {
@@ -176,7 +171,6 @@ async function rejectRequest(id: string, reason: string): Promise<ReviewApiResul
   }
 }
 
-// Los bytes se piden con el token y se devuelven como Blob para mostrarlos sin exponer el token en la URL
 async function getDocumentBlob(id: string): Promise<ReviewApiResult<Blob>> {
   try {
     const response = await apiClient.get(`/access-requests/${id}/document`, {
