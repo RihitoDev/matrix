@@ -18,6 +18,8 @@ import { ACTIVE_STATUSES, LISTED_STATUSES } from '../constants/access-request-st
 import { MAX_SEARCH_TERMS } from '../constants/inbox-filters.constants.js';
 import { DECIDED_STATUSES } from '../constants/inbox-summary.constants.js';
 import { escapeLikePattern } from '../helpers/escape-like-pattern.js';
+import { foldAccents } from '../helpers/fold-accents.js';
+import { ACCENT_FOLD_FROM, ACCENT_FOLD_TO } from '../constants/accent-folding.constants.js';
 
 @Injectable()
 export class AccessRequestsRepository {
@@ -44,22 +46,29 @@ export class AccessRequestsRepository {
     }
   }
 
+  private async findIdsBySearch(terms: string[]): Promise<string[]> {
+    const folded = (column: Prisma.Sql) => Prisma.sql`lower(translate(${column}, ${ACCENT_FOLD_FROM}, ${ACCENT_FOLD_TO}))`;
+    const conditions = terms.map((term) => {
+      const pattern = `%${escapeLikePattern(foldAccents(term))}%`;
+      return Prisma.sql`(${folded(Prisma.sql`first_name`)} LIKE ${pattern} ESCAPE '\\'
+        OR ${folded(Prisma.sql`last_name`)} LIKE ${pattern} ESCAPE '\\'
+        OR lower(id_card_number) LIKE ${pattern} ESCAPE '\\'
+        OR lower(sis_code) LIKE ${pattern} ESCAPE '\\')`;
+    });
+    const rows = await this.prisma.$queryRaw<{ id: string }[]>(
+      Prisma.sql`SELECT id FROM access_requests WHERE ${Prisma.join(conditions, ' AND ')}`,
+    );
+    return rows.map((row) => row.id);
+  }
+
   async findPage(params: { status?: string; search?: string; career?: string; submittedFrom?: Date; page: number; limit: number }) {
-    const terms = params.search?.split(/\s+/).filter(Boolean).slice(0, MAX_SEARCH_TERMS).map(escapeLikePattern) ?? [];
+    const terms = params.search?.split(/\s+/).filter(Boolean).slice(0, MAX_SEARCH_TERMS) ?? [];
+    const matchingIds = terms.length > 0 ? await this.findIdsBySearch(terms) : undefined;
     const where: Prisma.AccessRequestWhereInput = {
       status: { title: params.status ?? { in: LISTED_STATUSES } },
       ...(params.career && { career: { title: params.career } }),
       ...(params.submittedFrom && { submittedAt: { gte: params.submittedFrom } }),
-      ...(terms.length > 0 && {
-        AND: terms.map((term) => ({
-          OR: [
-            { firstName: { contains: term, mode: 'insensitive' as const } },
-            { lastName: { contains: term, mode: 'insensitive' as const } },
-            { idCardNumber: { contains: term, mode: 'insensitive' as const } },
-            { sisCode: { contains: term, mode: 'insensitive' as const } },
-          ],
-        })),
-      }),
+      ...(matchingIds && { id: { in: matchingIds } }),
     };
     const [rows, total] = await Promise.all([
       this.prisma.accessRequest.findMany({

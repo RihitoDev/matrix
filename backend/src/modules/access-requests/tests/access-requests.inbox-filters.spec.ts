@@ -48,7 +48,8 @@ describe('listAccessRequestsQuerySchema: filtros de la bandeja', () => {
 describe('AccessRequestsRepository.findPage: filtros', () => {
   function build() {
     const accessRequest = { findMany: vi.fn().mockResolvedValue([]), count: vi.fn().mockResolvedValue(0) };
-    return { accessRequest, repository: new AccessRequestsRepository({ accessRequest } as any) };
+    const prisma = { accessRequest, $queryRaw: vi.fn().mockResolvedValue([]) };
+    return { accessRequest, prisma, repository: new AccessRequestsRepository(prisma as any) };
   }
 
   it('sin filtros adicionales el where solo lleva el estado', async () => {
@@ -72,36 +73,83 @@ describe('AccessRequestsRepository.findPage: filtros', () => {
     expect(accessRequest.count).toHaveBeenCalledWith({ where });
   });
 
-  it('la búsqueda mira nombre, apellidos, C.I. y SIS sin distinguir mayúsculas', async () => {
-    const { accessRequest, repository } = build();
+  const searchCall = (prisma: { $queryRaw: ReturnType<typeof vi.fn> }) => prisma.$queryRaw.mock.calls[0][0] as { sql: string; values: unknown[] };
+
+  it('la búsqueda mira nombre, apellidos, C.I. y SIS y limita la consulta a los ids encontrados', async () => {
+    const { accessRequest, prisma, repository } = build();
+    prisma.$queryRaw.mockResolvedValue([{ id: 'a' }, { id: 'b' }]);
 
     await repository.findPage({ search: '2019', page: 1, limit: 10 });
 
-    const { AND } = accessRequest.findMany.mock.calls[0][0].where;
-    expect(AND).toHaveLength(1);
-    expect(AND[0].OR).toEqual([
-      { firstName: { contains: '2019', mode: 'insensitive' } },
-      { lastName: { contains: '2019', mode: 'insensitive' } },
-      { idCardNumber: { contains: '2019', mode: 'insensitive' } },
-      { sisCode: { contains: '2019', mode: 'insensitive' } },
-    ]);
+    const query = searchCall(prisma);
+    expect(query.sql).toContain('first_name');
+    expect(query.sql).toContain('last_name');
+    expect(query.sql).toContain('id_card_number');
+    expect(query.sql).toContain('sis_code');
+    expect(accessRequest.findMany.mock.calls[0][0].where.id).toEqual({ in: ['a', 'b'] });
+    expect(accessRequest.count).toHaveBeenCalledWith({ where: accessRequest.findMany.mock.calls[0][0].where });
+  });
+
+  it('la búsqueda ignora tildes, ñ y mayúsculas en el término y en las columnas', async () => {
+    const { prisma, repository } = build();
+
+    await repository.findPage({ search: 'PEÑA Núñez', page: 1, limit: 10 });
+
+    const query = searchCall(prisma);
+    expect(query.sql).toContain('translate(');
+    expect(query.values).toContain('%pena%');
+    expect(query.values).toContain('%nunez%');
+    expect(query.values).not.toContain('%PEÑA%');
+  });
+
+  it('el término viaja como parámetro y nunca se concatena en la consulta', async () => {
+    const { prisma, repository } = build();
+    const hostile = "x'; DROP TABLE access_requests; --";
+
+    await repository.findPage({ search: hostile, page: 1, limit: 10 });
+
+    const query = searchCall(prisma);
+    expect(query.sql).not.toContain('DROP');
+    expect(query.sql).not.toContain("x'");
+    expect(query.values.some((value) => typeof value === 'string' && value.includes('drop'))).toBe(true);
+  });
+
+  it.each([
+    ["D'Angelo", "%d'angelo%"],
+    ['Pérez-Gómez', '%perez-gomez%'],
+  ])('busca "%s" con apóstrofe o guion como texto', async (search, pattern) => {
+    const { prisma, repository } = build();
+
+    await repository.findPage({ search, page: 1, limit: 10 });
+
+    expect(searchCall(prisma).values).toContain(pattern);
   });
 
   it('escapa los comodines % y _ para que se busquen como texto literal', async () => {
-    const { accessRequest, repository } = build();
+    const { prisma, repository } = build();
 
     await repository.findPage({ search: '%_', page: 1, limit: 10 });
 
-    const { AND } = accessRequest.findMany.mock.calls[0][0].where;
-    expect(AND[0].OR[0]).toEqual({ firstName: { contains: '\\%\\_', mode: 'insensitive' } });
+    expect(searchCall(prisma).values).toContain('%\\%\\_%');
+  });
+
+  it('sin resultados en la búsqueda la página queda vacía', async () => {
+    const { accessRequest, prisma, repository } = build();
+    prisma.$queryRaw.mockResolvedValue([]);
+
+    await repository.findPage({ search: 'inexistente', page: 1, limit: 10 });
+
+    expect(accessRequest.findMany.mock.calls[0][0].where.id).toEqual({ in: [] });
   });
 
   it('con varias palabras todas deben aparecer (nombre y apellido juntos) y se limitan a 5', async () => {
-    const { accessRequest, repository } = build();
+    const { prisma, repository } = build();
 
     await repository.findPage({ search: 'ana  maría pérez  a b c d', page: 1, limit: 10 });
 
-    expect(accessRequest.findMany.mock.calls[0][0].where.AND).toHaveLength(5);
+    const patterns = searchCall(prisma).values.filter((value) => typeof value === 'string' && value.startsWith('%'));
+    expect(new Set(patterns).size).toBe(5);
+    expect(searchCall(prisma).sql.match(/ AND \(/g)).toHaveLength(4);
   });
 
   it('nunca selecciona el contenido del documento', async () => {
