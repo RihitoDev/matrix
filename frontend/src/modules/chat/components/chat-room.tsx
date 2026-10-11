@@ -1,4 +1,4 @@
-﻿/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import {
@@ -311,7 +311,7 @@ function ChatRoomContent({
               <span
                 data-testid="online-indicator"
                 className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full shadow-xs"
-                title="En línea"
+                title="En linea"
               />
             )}
           </div>
@@ -327,7 +327,7 @@ function ChatRoomContent({
 
             <span className="text-xs font-medium text-emerald-600">
               {conversation.contact.isOnline
-                ? 'En línea'
+                ? 'En linea'
                 : 'Desconectado'}
             </span>
           </div>
@@ -376,7 +376,7 @@ function ChatRoomContent({
               className="flex justify-center py-2"
             >
               <span className="text-xs text-slate-400">
-                Inicio de la conversación
+                Inicio de la conversacion
               </span>
             </div>
           )}
