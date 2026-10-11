@@ -39,12 +39,12 @@ export function ChatView() {
   } = useConversations();
 
   const {
-  data: messages = [],
-  isLoading: isLoadingMessages,
-  hasMoreMessages,
-  loadMoreMessages,
-  isLoadingMoreMessages,
-} = useMessages(selectedId);
+    data: messages = [],
+    isLoading: isLoadingMessages,
+    hasMoreMessages,
+    loadMoreMessages,
+    isLoadingMoreMessages,
+  } = useMessages(selectedId);
 
   const handleBackToList = () => {
     clearSelectedConversation();
@@ -58,6 +58,7 @@ export function ChatView() {
     if (activeFilter !== 'all') {
       setActiveFilter('all');
     }
+
     setIsSearchModalOpen(true);
   };
 
@@ -65,25 +66,34 @@ export function ChatView() {
     if (activeFilter !== 'all') {
       setActiveFilter('all');
     }
+
     await startConversationWithContact(contactUser);
     setIsSearchModalOpen(false);
   };
 
-  const handleSendMessage = async (content: string) => {
-    if (!selectedId || isSending) return;
+  // Enviar mensaje y propagar el error para mostrar la notificación en ChatRoom.
+  const handleSendMessage = async (content: string): Promise<void> => {
+    if (!selectedId || isSending) {
+      throw new Error('No hay una conversación seleccionada o ya se está enviando un mensaje.');
+    }
+
+    const conversationId = selectedId;
 
     setIsSending(true);
+
     try {
       await sendMessage({
-        conversationId: selectedId,
+        conversationId,
         content,
         senderId: CURRENT_USER_ID,
       });
 
       await queryClient.invalidateQueries({
-        queryKey: messagesQueryKey(selectedId),
+        queryKey: messagesQueryKey(conversationId),
       });
-    } catch {
+    } catch (error) {
+      // No ocultar el error: ChatRoom lo necesita para mostrar el aviso.
+      throw error;
     } finally {
       setIsSending(false);
     }

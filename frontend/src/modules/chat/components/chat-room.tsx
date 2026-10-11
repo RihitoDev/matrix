@@ -1,4 +1,3 @@
-﻿
 /* eslint-disable @next/next/no-img-element */
 'use client';
 
@@ -10,6 +9,8 @@ import {
   useState,
 } from 'react';
 
+import type { KeyboardEvent } from 'react';
+
 import { Conversation, Message } from '../types/conversation.types';
 import { MessageInputBar } from './message-input-bar';
 import { getInitials } from '../utils/date-formatter';
@@ -20,7 +21,7 @@ interface ChatRoomProps {
   messages: Message[];
   currentUserId: string;
   onBack: () => void;
-  onSendMessage: (content: string) => void;
+  onSendMessage: (content: string) => void | Promise<void>;
   isLoadingMessages?: boolean;
   isSending?: boolean;
   hasMoreMessages?: boolean;
@@ -86,7 +87,17 @@ function isSameDay(
   );
 }
 
-export function ChatRoom({
+// Este componente reinicia su estado cuando cambia la conversación.
+export function ChatRoom(props: ChatRoomProps) {
+  return (
+    <ChatRoomContent
+      key={props.conversation.id}
+      {...props}
+    />
+  );
+}
+
+function ChatRoomContent({
   conversation,
   messages,
   currentUserId,
@@ -99,6 +110,7 @@ export function ChatRoom({
   isLoadingMoreMessages = false,
 }: ChatRoomProps) {
   const [inputText, setInputText] = useState('');
+  const [sendError, setSendError] = useState('');
 
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -182,6 +194,7 @@ export function ChatRoom({
   }, [messages.length, isLoadingMoreMessages]);
 
   // Reiniciar referencias al cambiar de conversación.
+  // El texto y los errores se reinician mediante key={conversation.id}.
   useEffect(() => {
     previousScrollHeightRef.current = 0;
     previousScrollTopRef.current = 0;
@@ -214,13 +227,36 @@ export function ChatRoom({
     loadOlderMessages,
   ]);
 
-  const handleSend = () => {
-    if (!isContentValidForSend(inputText) || isSending) {
+  // Enviar mensaje y conservar el texto si ocurre un error.
+  const handleSend = async () => {
+    if (isSending || !isContentValidForSend(inputText)) {
       return;
     }
 
-    onSendMessage(inputText.trim());
-    setInputText('');
+    const content = inputText.trim();
+
+    if (!content) return;
+
+    setSendError('');
+
+    try {
+      await onSendMessage(content);
+      setInputText('');
+    } catch {
+      setSendError(
+        'Error de conexión. No se pudo enviar el mensaje. Inténtalo nuevamente.',
+      );
+    }
+  };
+
+  // Enter envía; Shift + Enter agrega una nueva línea.
+  const handleInputKeyDown = (
+    event: KeyboardEvent<HTMLTextAreaElement>,
+  ) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      void handleSend();
+    }
   };
 
   return (
@@ -376,8 +412,7 @@ export function ChatRoom({
           </div>
         ) : (
           messages.map((message, index) => {
-            const isOwn =
-              message.senderId === currentUserId;
+            const isOwn = message.senderId === currentUserId;
 
             const senderName = isOwn
               ? 'Tú'
@@ -451,9 +486,7 @@ export function ChatRoom({
                           : 'text-[#5B6470]'
                       }`}
                     >
-                      <span>
-                        {formatMessageTime(messageDate)}
-                      </span>
+                      <span>{formatMessageTime(messageDate)}</span>
 
                       {isOwn && (
                         <span className="font-medium">
@@ -476,14 +509,33 @@ export function ChatRoom({
         <div data-testid="messages-scroll-anchor" />
       </div>
 
+      {/* Error al enviar el mensaje */}
+      {sendError && (
+        <div
+          role="alert"
+          data-testid="message-send-error"
+          className="mx-3 mb-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+        >
+          <span>{sendError}</span>
+
+          <button
+            type="button"
+            onClick={() => setSendError('')}
+            className="ml-2 font-semibold underline"
+          >
+            Cerrar
+          </button>
+        </div>
+      )}
+
       {/* Barra de envío */}
       <MessageInputBar
         value={inputText}
         onChange={setInputText}
-        onSend={handleSend}
+        onSend={() => void handleSend()}
+        onKeyDown={handleInputKeyDown}
         isSending={isSending}
       />
     </div>
   );
 }
-
