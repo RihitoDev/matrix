@@ -44,7 +44,7 @@ describe("SkillsSelector", () => {
     const user = userEvent.setup();
     renderSelector();
 
-    await user.type(screen.getByLabelText("Buscar en el catálogo"), "  type ");
+    await user.type(screen.getByLabelText("Tecnología o herramienta"), "  type ");
 
     expect(screen.getByText("TypeScript")).toBeInTheDocument();
     expect(screen.queryByText("React")).not.toBeInTheDocument();
@@ -54,7 +54,7 @@ describe("SkillsSelector", () => {
     const user = userEvent.setup();
     renderSelector();
 
-    await user.type(screen.getByLabelText("Buscar en el catálogo"), "Python");
+    await user.type(screen.getByLabelText("Tecnología o herramienta"), "Python");
 
     expect(screen.getByText("No se encontraron coincidencias en el catálogo.")).toBeInTheDocument();
   });
@@ -92,10 +92,10 @@ describe("SkillsSelector", () => {
   it("creates a custom skill with the trimmed name and clears the field", async () => {
     const user = userEvent.setup();
     const { onCreateCustomSkill } = renderSelector();
-    const input = screen.getByLabelText("Agregar habilidad propia");
+    const input = screen.getByLabelText("¿No encuentras la habilidad?");
 
     await user.type(input, "  Docker ");
-    await user.click(screen.getByRole("button", { name: "Agregar" }));
+    await user.click(screen.getByRole("button", { name: "Crear habilidad" }));
 
     expect(onCreateCustomSkill).toHaveBeenCalledWith("Docker");
     expect(input).toHaveValue("");
@@ -104,7 +104,7 @@ describe("SkillsSelector", () => {
   it("limits the custom skill name length and shows the allowed length", async () => {
     const user = userEvent.setup();
     renderSelector();
-    const input = screen.getByLabelText("Agregar habilidad propia");
+    const input = screen.getByLabelText("¿No encuentras la habilidad?");
 
     expect(input).not.toHaveAttribute("placeholder");
     expect(input).toHaveAttribute("maxLength", String(SKILL_NAME_MAX_LENGTH));
@@ -120,8 +120,8 @@ describe("SkillsSelector", () => {
     const user = userEvent.setup();
     const { onCreateCustomSkill } = renderSelector();
 
-    await user.type(screen.getByLabelText("Agregar habilidad propia"), "  spring    boot ");
-    await user.click(screen.getByRole("button", { name: "Agregar" }));
+    await user.type(screen.getByLabelText("¿No encuentras la habilidad?"), "  spring    boot ");
+    await user.click(screen.getByRole("button", { name: "Crear habilidad" }));
 
     expect(onCreateCustomSkill).toHaveBeenCalledWith("spring boot");
   });
@@ -130,11 +130,11 @@ describe("SkillsSelector", () => {
     const user = userEvent.setup();
     const { onCreateCustomSkill } = renderSelector();
 
-    await user.type(screen.getByLabelText("Agregar habilidad propia"), "9999999");
-    await user.click(screen.getByRole("button", { name: "Agregar" }));
+    await user.type(screen.getByLabelText("¿No encuentras la habilidad?"), "9999999");
+    await user.click(screen.getByRole("button", { name: "Crear habilidad" }));
 
     expect(screen.getByText(SKILLS_VALIDATION_MESSAGES.missingLetter)).toBeInTheDocument();
-    expect(screen.getByLabelText("Agregar habilidad propia")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByLabelText("¿No encuentras la habilidad?")).toHaveAttribute("aria-invalid", "true");
     expect(onCreateCustomSkill).not.toHaveBeenCalled();
   });
 
@@ -142,10 +142,10 @@ describe("SkillsSelector", () => {
     const user = userEvent.setup();
     const { onCreateCustomSkill } = renderSelector();
 
-    await user.click(screen.getByRole("button", { name: "Agregar" }));
+    await user.click(screen.getByRole("button", { name: "Crear habilidad" }));
 
     expect(screen.getByText(SKILLS_VALIDATION_MESSAGES.emptyName)).toBeInTheDocument();
-    expect(screen.getByLabelText("Agregar habilidad propia")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByLabelText("¿No encuentras la habilidad?")).toHaveAttribute("aria-invalid", "true");
     expect(onCreateCustomSkill).not.toHaveBeenCalled();
   });
 
@@ -153,8 +153,8 @@ describe("SkillsSelector", () => {
     const user = userEvent.setup();
     const { onCreateCustomSkill } = renderSelector();
 
-    await user.type(screen.getByLabelText("Agregar habilidad propia"), "react");
-    await user.click(screen.getByRole("button", { name: "Agregar" }));
+    await user.type(screen.getByLabelText("¿No encuentras la habilidad?"), "react");
+    await user.click(screen.getByRole("button", { name: "Crear habilidad" }));
 
     expect(screen.getByText(SKILLS_VALIDATION_MESSAGES.duplicated)).toBeInTheDocument();
     expect(onCreateCustomSkill).not.toHaveBeenCalled();
@@ -166,8 +166,8 @@ describe("SkillsSelector", () => {
       selectedSkills: [{ id: "custom-docker", name: "Docker" }],
     });
 
-    await user.type(screen.getByLabelText("Agregar habilidad propia"), "DOCKER");
-    await user.click(screen.getByRole("button", { name: "Agregar" }));
+    await user.type(screen.getByLabelText("¿No encuentras la habilidad?"), "DOCKER");
+    await user.click(screen.getByRole("button", { name: "Crear habilidad" }));
 
     expect(screen.getByText(SKILLS_VALIDATION_MESSAGES.duplicated)).toBeInTheDocument();
     expect(onCreateCustomSkill).not.toHaveBeenCalled();
@@ -177,8 +177,8 @@ describe("SkillsSelector", () => {
     const user = userEvent.setup();
     renderSelector();
 
-    await user.click(screen.getByRole("button", { name: "Agregar" }));
-    await user.type(screen.getByLabelText("Agregar habilidad propia"), "G");
+    await user.click(screen.getByRole("button", { name: "Crear habilidad" }));
+    await user.type(screen.getByLabelText("¿No encuentras la habilidad?"), "G");
 
     expect(screen.queryByText(SKILLS_VALIDATION_MESSAGES.emptyName)).not.toBeInTheDocument();
   });
@@ -208,8 +208,8 @@ describe("SkillsSelector", () => {
 
     expect(screen.getByRole("button", { name: "Quitar React" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Añadir" })).toBeDisabled();
-    expect(screen.getByLabelText("Agregar habilidad propia")).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Agregar" })).toBeDisabled();
+    expect(screen.getByLabelText("¿No encuentras la habilidad?")).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Crear habilidad" })).toBeDisabled();
   });
 
   it("disables actions and enables retry button when hasLoadError is true", async () => {
@@ -226,8 +226,8 @@ describe("SkillsSelector", () => {
     screen.getAllByRole("button", { name: "Añadir" }).forEach((button) => {
       expect(button).toBeDisabled();
     });
-    expect(screen.getByLabelText("Agregar habilidad propia")).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Agregar" })).toBeDisabled();
+    expect(screen.getByLabelText("¿No encuentras la habilidad?")).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Crear habilidad" })).toBeDisabled();
 
     const retryButton = screen.getByRole("button", { name: "Reintentar" });
     expect(retryButton).toBeInTheDocument();
