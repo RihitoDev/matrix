@@ -67,10 +67,11 @@ describe("CertificationForm", () => {
     expect(screen.getByRole("button", { name: "Cancelar" })).toHaveAttribute("type", "button");
   });
 
-  it("limits the name to 150 characters and the date to 1950-01-01 or later", () => {
+  it("limits the name and organization to 150 characters and the date to 1950-01-01 or later", () => {
     renderForm();
 
     expect(getNameInput()).toHaveAttribute("maxLength", "150");
+    expect(getOrganizationInput()).toHaveAttribute("maxLength", "150");
     expect(getIssueDateInput()).toHaveAttribute("min", "1950-01-01");
   });
 
@@ -147,16 +148,15 @@ describe("CertificationForm", () => {
       initialData: {
         ...SAVED_VALUES,
         name: "a".repeat(151),
-        issuingOrganization: "b".repeat(101),
+        issuingOrganization: "b".repeat(151),
       },
     });
 
     await user.click(saveButton());
 
-    expect(screen.getByText(CERTIFICATION_VALIDATION_MESSAGES.nameTooLong)).toBeInTheDocument();
     expect(
-      screen.getByText(CERTIFICATION_VALIDATION_MESSAGES.organizationTooLong),
-    ).toBeInTheDocument();
+      screen.getAllByText(CERTIFICATION_VALIDATION_MESSAGES.nameTooLong),
+    ).toHaveLength(2);
     expect(onSubmit).not.toHaveBeenCalled();
   });
 

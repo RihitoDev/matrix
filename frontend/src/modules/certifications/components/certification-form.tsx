@@ -10,7 +10,10 @@ import type { CertificationFormProps } from "../types/certification-form-props.t
 import type { CreateCertificationDto } from "../types/create-certification-dto.types";
 import { getFieldErrorProps } from "@/modules/profile/utils/get-field-error-props";
 import { trimFormValues } from "@/modules/profile/utils/trim-form-values";
-import { CERTIFICATION_NAME_MAX_LENGTH } from "../config/certification-validation.config";
+import {
+  CERTIFICATION_NAME_MAX_LENGTH,
+  ISSUING_ORGANIZATION_MAX_LENGTH,
+} from "../config/certification-validation.config";
 import { CERTIFICATION_MIN_ISSUE_DATE } from "../constants/certification-form.constants";
 import { readCertificateFile } from "../utils/read-certificate-file";
 import { getTodayIsoDate, validateCertification } from "../utils/validate-certification";
@@ -180,6 +183,7 @@ export function CertificationForm({
             id="certification-issuingOrganization"
             name="issuingOrganization"
             type="text"
+            maxLength={ISSUING_ORGANIZATION_MAX_LENGTH}
             placeholder="Ej. Amazon Web Services"
             value={values.issuingOrganization}
             disabled={isBusy}

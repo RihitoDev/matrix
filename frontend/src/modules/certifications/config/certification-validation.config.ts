@@ -1,6 +1,6 @@
 export const CERTIFICATION_NAME_MAX_LENGTH = 150;
 
-export const ISSUING_ORGANIZATION_MAX_LENGTH = 100;
+export const ISSUING_ORGANIZATION_MAX_LENGTH = 150;
 
 export const CERTIFICATION_VALIDATION_MESSAGES = {
   required: "Este campo es obligatorio.",
