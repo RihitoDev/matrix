@@ -133,6 +133,50 @@ describe("LoginView", () => {
     expect(push).not.toHaveBeenCalled();
   });
 
+  it("con los campos vacíos muestra los mensajes en español y no llama al servidor", async () => {
+    const login = vi.fn();
+    vi.mocked(useLogin).mockReturnValue({ login, isLoading: false, error: null });
+    render(<LoginView />);
+
+    fireEvent.submit(screen.getByRole("button", { name: "Iniciar sesión" }).closest("form")!);
+
+    expect(await screen.findByText("Ingresa tu correo electrónico")).toBeInTheDocument();
+    expect(screen.getByText("Ingresa tu contraseña")).toBeInTheDocument();
+    expect(screen.getByLabelText("Correo electrónico")).toHaveAttribute("aria-invalid", "true");
+    expect(login).not.toHaveBeenCalled();
+  });
+
+  it("con un correo mal escrito muestra el mensaje de formato y no llama al servidor", async () => {
+    const login = vi.fn();
+    vi.mocked(useLogin).mockReturnValue({ login, isLoading: false, error: null });
+    render(<LoginView />);
+
+    fireEvent.change(screen.getByPlaceholderText("nombre@ejemplo.com"), { target: { value: "axel.santos" } });
+    fireEvent.change(screen.getByPlaceholderText("********"), { target: { value: "Clave-Segura-9" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Iniciar sesión" }).closest("form")!);
+
+    expect(await screen.findByText("Ingresa un correo electrónico válido")).toBeInTheDocument();
+    expect(screen.queryByText("Ingresa tu contraseña")).toBeNull();
+    expect(login).not.toHaveBeenCalled();
+  });
+
+  it("al corregir los datos el mensaje desaparece y se envía el formulario", async () => {
+    const login = vi.fn().mockResolvedValue(null);
+    vi.mocked(useLogin).mockReturnValue({ login, isLoading: false, error: null });
+    render(<LoginView />);
+    const form = screen.getByRole("button", { name: "Iniciar sesión" }).closest("form")!;
+
+    fireEvent.submit(form);
+    expect(await screen.findByText("Ingresa tu correo electrónico")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByPlaceholderText("nombre@ejemplo.com"), { target: { value: "lionel.messi@gmail.com" } });
+    fireEvent.change(screen.getByPlaceholderText("********"), { target: { value: "Clave-Segura-9" } });
+    fireEvent.submit(form);
+
+    await waitFor(() => expect(login).toHaveBeenCalledTimes(1));
+    expect(screen.queryByText("Ingresa tu correo electrónico")).toBeNull();
+  });
+
   it("el token queda guardado antes de navegar", async () => {
     await submitLogin(vi.fn().mockResolvedValue({ accessToken: "t-admin", roleTag: "administrativo" }));
 
