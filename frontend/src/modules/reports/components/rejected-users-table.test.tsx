@@ -17,6 +17,7 @@ describe("RejectedUsersTable", () => {
             email: "rechazado.luis.cruz23@hotmail.com",
             identifier: "202334283",
             documentType: "academic_diploma",
+            rejectionReason: null,
             registeredAt: "2026-03-15T14:00:00.000Z",
           },
         ]}

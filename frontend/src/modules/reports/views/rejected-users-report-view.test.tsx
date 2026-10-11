@@ -12,6 +12,7 @@ const REJECTED_USERS: RejectedUser[] = Array.from({ length: 24 }, (_, index) => 
   email: index === 0 ? "juan.perez@gmail.com" : `usuario${index + 1}@gmail.com`,
   identifier: `2019${index.toString().padStart(5, "0")}`,
   documentType: index === 1 ? "national_title" : "academic_diploma",
+  rejectionReason: null,
   registeredAt: "2026-03-15T14:00:00.000Z",
 }));
 

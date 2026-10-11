@@ -1,12 +1,15 @@
 import { FileText, X } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDate } from "@/shared/utils/date.utils";
-import { DOCUMENT_TYPE_LABELS } from "@/modules/request-review/constants/request-review.constants";
+import {
+  DOCUMENT_TYPE_LABELS,
+  OTHER_REJECTION_REASON,
+  REJECTION_REASONS,
+} from "@/modules/request-review/constants/request-review.constants";
 import { EMPTY_DOCUMENT_LABEL } from "../constants/registered-users.constants";
 import { EMAIL_SEARCH_NO_RESULTS_MESSAGE } from "../constants/reports.constants";
 import {
   REJECTED_USERS_COLUMN_COUNT as COLUMN_COUNT,
-  OTHER_REJECTION_SHORT_LABEL,
   REJECTION_BADGE_CLASSES,
   REJECTION_REASON_SHORT_LABELS,
   TABLE_CELL_CLASSES as CELL_CLASSES,
@@ -18,8 +21,8 @@ import { TableScrollHint } from "./table-scroll-hint";
 import { TableMessageRow, TableNoResultsRow, TableSkeletonRows } from "./table-state-rows";
 
 function getRejectionLabel(reason: string) {
-  const match = Object.keys(REJECTION_REASON_SHORT_LABELS).find((fullReason) => reason.startsWith(fullReason));
-  return match ? REJECTION_REASON_SHORT_LABELS[match] : OTHER_REJECTION_SHORT_LABEL;
+  const match = REJECTION_REASONS.find((knownReason) => reason.startsWith(knownReason));
+  return REJECTION_REASON_SHORT_LABELS[match ?? OTHER_REJECTION_REASON];
 }
 
 export function RejectedUsersTable({ users, isLoading, errorMessage, searchTerm = "" }: RejectedUsersTableProps) {
