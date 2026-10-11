@@ -31,20 +31,26 @@ export function ChatView() {
     activeFilter,
     searchQuery,
     isLoading,
+    isError,
+    retryConversations,
     setActiveFilter,
     setSearchQuery,
     handleSelectConversation,
     clearSelectedConversation,
     startConversationWithContact,
+    updateConversationLastMessage,
   } = useConversations();
 
   const {
-  data: messages = [],
-  isLoading: isLoadingMessages,
-  hasMoreMessages,
-  loadMoreMessages,
-  isLoadingMoreMessages,
-} = useMessages(selectedId);
+    data: messages = [],
+    isLoading: isLoadingMessages,
+    hasMoreMessages,
+    loadMoreMessages,
+    isLoadingMoreMessages,
+    isError: isMessagesError,
+    isFetchNextPageError,
+    refetch: retryMessages,
+  } = useMessages(selectedId);
 
   const handleBackToList = () => {
     clearSelectedConversation();
@@ -58,6 +64,7 @@ export function ChatView() {
     if (activeFilter !== 'all') {
       setActiveFilter('all');
     }
+
     setIsSearchModalOpen(true);
   };
 
@@ -65,25 +72,34 @@ export function ChatView() {
     if (activeFilter !== 'all') {
       setActiveFilter('all');
     }
+
     await startConversationWithContact(contactUser);
     setIsSearchModalOpen(false);
   };
 
-  const handleSendMessage = async (content: string) => {
-    if (!selectedId || isSending) return;
+  const handleSendMessage = async (content: string): Promise<void> => {
+    if (!selectedId || isSending) {
+      throw new Error('No hay una conversación seleccionada o ya se está enviando un mensaje.');
+    }
+
+    const conversationId = selectedId;
 
     setIsSending(true);
+
     try {
       await sendMessage({
-        conversationId: selectedId,
+        conversationId,
         content,
         senderId: CURRENT_USER_ID,
       });
 
+      updateConversationLastMessage(conversationId, content, CURRENT_USER_ID);
+
       await queryClient.invalidateQueries({
-        queryKey: messagesQueryKey(selectedId),
+        queryKey: messagesQueryKey(conversationId),
       });
-    } catch {
+    } catch (error) {
+      throw error;
     } finally {
       setIsSending(false);
     }
@@ -100,6 +116,8 @@ export function ChatView() {
           conversations={conversations}
           selectedId={selectedId}
           isLoading={isLoading}
+          isError={isError}
+          onRetry={retryConversations}
           hasMore={hasMore}
           activeFilter={activeFilter}
           searchQuery={searchQuery}
@@ -118,6 +136,7 @@ export function ChatView() {
       >
         {selectedConversation ? (
           <ChatRoom
+            key={selectedConversation.id}
             conversation={selectedConversation}
             messages={messages}
             currentUserId={CURRENT_USER_ID}
@@ -128,6 +147,11 @@ export function ChatView() {
             hasMoreMessages={hasMoreMessages}
             onLoadMoreMessages={loadMoreMessages}
             isLoadingMoreMessages={isLoadingMoreMessages}
+            isMessagesError={isMessagesError}
+            isLoadingOlderError={isFetchNextPageError}
+            onRetryMessages={() => {
+              void retryMessages();
+            }}
           />
         ) : (
           <EmptyChatState
