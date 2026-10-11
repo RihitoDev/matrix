@@ -163,7 +163,7 @@ describe("RequestInboxView", () => {
 
     expect(container.firstElementChild).toHaveClass("w-full", "min-w-0");
     const card = container.querySelector("section > div.overflow-hidden");
-    expect(card).toHaveClass("w-full", "min-w-0", "overflow-hidden");
+    expect(card).toHaveClass("relative", "w-full", "min-w-0", "overflow-hidden");
     expect(container.querySelector("[data-slot='table-container']")).toHaveClass("w-full", "overflow-x-auto");
     expect(container.querySelector("section")).toHaveClass("p-8");
   });

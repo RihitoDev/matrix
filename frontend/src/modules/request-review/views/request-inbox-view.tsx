@@ -27,7 +27,7 @@ export function RequestInboxView() {
       <section className="flex w-full min-w-0 flex-col gap-6 p-8">
         <SummaryCards summary={summary.summary} isLoading={summary.isLoading} error={summary.error} onRetry={summary.retry} />
 
-        <div className="w-full min-w-0 overflow-hidden rounded-[10px] border border-border bg-surface">
+        <div className="relative w-full min-w-0 overflow-hidden rounded-[10px] border border-border bg-surface">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-3 pb-3 xl:pb-0 xl:pt-1.5">
             <Tabs value={list.status} onValueChange={(value) => list.changeStatus(value as ReviewStatus)} className="max-w-full">
               <TabsList variant="line" className="max-w-full gap-2 overflow-x-auto overflow-y-hidden p-0 group-data-horizontal/tabs:h-12 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
