@@ -3,7 +3,6 @@ import { CAREER } from '../types/career.enum.js';
 import { ID_CARD_ISSUED_IN } from '../types/id-card-issued-in.enum.js';
 import { MIN_AGE, NAME_REGEX, DIGITS_REGEX, ISO_DATE_REGEX } from '../constants/access-request-fields.constants.js';
 
-// V8 desplaza fechas como 2000-02-30 al 1 de marzo, por eso se compara el viaje de ida y vuelta
 function isRealIsoDate(value: string): boolean {
   const date = new Date(`${value}T00:00:00.000Z`);
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
@@ -18,7 +17,6 @@ export function isGraduationYearCoherent(graduationYear: number, birthDate: Date
   return graduationYear >= birthDate.getUTCFullYear() + MIN_AGE;
 }
 
-// El superRefine del objeto corre aunque un campo ya haya fallado: solo compara valores ya válidos
 export function hasGraduationYearConflict(data: { graduationYear?: unknown; birthDate?: unknown }): boolean {
   const { graduationYear, birthDate } = data;
   if (typeof graduationYear !== 'number' || !(birthDate instanceof Date) || Number.isNaN(birthDate.getTime())) {

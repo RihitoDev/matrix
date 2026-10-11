@@ -31,7 +31,6 @@ async function pick(name: string, option: string) {
   await user.click(await screen.findByRole("option", { name: option }));
 }
 
-// Llena todo con datos válidos, salvo lo que se omita
 async function fillForm(skip: string[] = []) {
   const text: Array<[string, RegExp, string]> = [
     ["firstName", /^Nombres/, "Ana María"],

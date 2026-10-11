@@ -9,7 +9,6 @@ const DIGITS_REGEX = /^\d+$/;
 const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Se compara el viaje de ida y vuelta para rechazar fechas como 2000-02-30
 function isRealIsoDate(value: string): boolean {
   const date = new Date(`${value}T00:00:00.000Z`);
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
@@ -56,7 +55,6 @@ function validateGraduationYear(value: string, now: Date): string | undefined {
   if (Number(text) > now.getUTCFullYear()) return "El año de titulación no puede ser futuro";
 }
 
-// Devuelve solo los campos con error; un objeto vacío significa que todo es válido
 export function validatePersonalData(values: PersonalDataValues, now: Date = new Date()): FieldErrors {
   const errors: FieldErrors = {};
   const assign = (field: keyof FieldErrors, message: string | undefined) => {
@@ -87,7 +85,6 @@ export function validatePersonalData(values: PersonalDataValues, now: Date = new
     (CAREERS as readonly string[]).includes(values.career) ? undefined : "La carrera no es válida",
   );
 
-  // La coherencia solo se evalúa si ambos campos son válidos por separado
   if (!errors.birthDate && !errors.graduationYear) {
     const birthYear = Number(values.birthDate.trim().slice(0, 4));
     if (Number(values.graduationYear.trim()) < birthYear + MIN_AGE) {
