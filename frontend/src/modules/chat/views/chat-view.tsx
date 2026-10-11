@@ -36,6 +36,7 @@ export function ChatView() {
     handleSelectConversation,
     clearSelectedConversation,
     startConversationWithContact,
+    updateConversationLastMessage,
   } = useConversations();
 
   const {
@@ -71,7 +72,6 @@ export function ChatView() {
     setIsSearchModalOpen(false);
   };
 
-  // Enviar mensaje y propagar el error para mostrar la notificación en ChatRoom.
   const handleSendMessage = async (content: string): Promise<void> => {
     if (!selectedId || isSending) {
       throw new Error('No hay una conversación seleccionada o ya se está enviando un mensaje.');
@@ -88,11 +88,12 @@ export function ChatView() {
         senderId: CURRENT_USER_ID,
       });
 
+      updateConversationLastMessage(conversationId, content, CURRENT_USER_ID);
+
       await queryClient.invalidateQueries({
         queryKey: messagesQueryKey(conversationId),
       });
     } catch (error) {
-      // No ocultar el error: ChatRoom lo necesita para mostrar el aviso.
       throw error;
     } finally {
       setIsSending(false);

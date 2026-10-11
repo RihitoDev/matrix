@@ -14,6 +14,7 @@ import {
 } from '../mocks/mock-users';
 import {
   getMessagesByConversation,
+  getStoredMessages,
   saveStoredMessage,
   getStoredConversationReadState,
   markStoredConversationAsRead,
@@ -37,24 +38,50 @@ export interface PaginatedMessagesResponse {
 export async function getConversations(): Promise<Conversation[]> {
   await new Promise((resolve) => setTimeout(resolve, 400));
 
-  const readState = getStoredConversationReadState();
+  try {
+    const readState = getStoredConversationReadState();
+    const storedMessages = getStoredMessages();
 
-  const conversations = MOCK_CONVERSATIONS.map((conv) => {
-    if (conv.id in readState) {
+    const conversations = MOCK_CONVERSATIONS.map((conv) => {
+      const unread = conv.id in readState ? readState[conv.id] : conv.unreadCount;
+
+      const convMessages = Array.isArray(storedMessages)
+        ? storedMessages.filter((m) => m && m.conversationId === conv.id)
+        : [];
+
+      if (convMessages.length === 0) {
+        return {
+          ...conv,
+          unreadCount: unread,
+        };
+      }
+
+      const lastMsg = convMessages[convMessages.length - 1];
+      const lastDate = lastMsg.timestamp || lastMsg.createdAt || conv.updatedAt;
+
       return {
         ...conv,
-        unreadCount: readState[conv.id],
+        unreadCount: unread,
+        updatedAt: lastDate,
+        lastMessage: {
+          id: lastMsg.id,
+          senderId: lastMsg.senderId,
+          content: lastMsg.content,
+          isAttachment: Boolean(lastMsg.isAttachment),
+          attachmentType: lastMsg.attachmentType,
+          createdAt: lastDate,
+        },
       };
-    }
-    return { ...conv };
-  });
+    });
 
-  return conversations.sort((a, b) => {
-    return (
-      new Date(b.updatedAt).getTime() -
-      new Date(a.updatedAt).getTime()
-    );
-  });
+    return conversations.sort((a, b) => {
+      const dateA = new Date(a.lastMessage?.createdAt || a.updatedAt).getTime();
+      const dateB = new Date(b.lastMessage?.createdAt || b.updatedAt).getTime();
+      return dateB - dateA;
+    });
+  } catch {
+    return [...MOCK_CONVERSATIONS];
+  }
 }
 
 function normalizeText(text: string): string {
