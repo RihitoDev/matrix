@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import {
@@ -13,6 +12,7 @@ import type { KeyboardEvent } from 'react';
 
 import { Conversation, Message } from '../types/conversation.types';
 import { MessageInputBar } from './message-input-bar';
+import { ChatErrorState } from './chat-error-state';
 import { getInitials } from '../utils/date-formatter';
 import { isContentValidForSend } from '../utils/unicode-counter';
 
@@ -27,6 +27,9 @@ interface ChatRoomProps {
   hasMoreMessages?: boolean;
   onLoadMoreMessages?: () => void | Promise<unknown>;
   isLoadingMoreMessages?: boolean;
+  isMessagesError?: boolean;
+  isLoadingOlderError?: boolean;
+  onRetryMessages?: () => void;
 }
 
 function getMessageDate(message: Message): string {
@@ -87,7 +90,6 @@ function isSameDay(
   );
 }
 
-// Este componente reinicia su estado cuando cambia la conversación.
 export function ChatRoom(props: ChatRoomProps) {
   return (
     <ChatRoomContent
@@ -108,9 +110,14 @@ function ChatRoomContent({
   hasMoreMessages = false,
   onLoadMoreMessages,
   isLoadingMoreMessages = false,
+  isMessagesError = false,
+  isLoadingOlderError = false,
+  onRetryMessages,
 }: ChatRoomProps) {
   const [inputText, setInputText] = useState('');
-  const [sendError, setSendError] = useState('');
+  const [sendError, setSendError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const sendPendingRef = useRef(false);
 
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -120,7 +127,6 @@ function ChatRoomContent({
 
   const isLoadingPreviousPageRef = useRef(false);
 
-  // Solicitar mensajes anteriores conservando el scroll.
   const loadOlderMessages = useCallback(async () => {
     const container = messagesContainerRef.current;
 
@@ -149,18 +155,16 @@ function ChatRoomContent({
     onLoadMoreMessages,
   ]);
 
-  // Cargar automáticamente al llegar arriba.
   const handleMessagesScroll = () => {
     const container = messagesContainerRef.current;
 
     if (!container) return;
 
-    if (container.scrollTop <= 80) {
+    if (container.scrollTop <= 80 && !isMessagesError) {
       void loadOlderMessages();
     }
   };
 
-  // Restaurar la posición antes de que el navegador pinte.
   useLayoutEffect(() => {
     const container = messagesContainerRef.current;
 
@@ -183,18 +187,14 @@ function ChatRoomContent({
         isLoadingPreviousPageRef.current = false;
       }
     } else if (previousLength === 0 && currentLength > 0) {
-      // Primera carga: mostrar los mensajes recientes.
       container.scrollTop = container.scrollHeight;
     } else if (currentLength > previousLength) {
-      // Nuevo mensaje: ir al final del historial.
       container.scrollTop = container.scrollHeight;
     }
 
     previousMessagesLengthRef.current = currentLength;
   }, [messages.length, isLoadingMoreMessages]);
 
-  // Reiniciar referencias al cambiar de conversación.
-  // El texto y los errores se reinician mediante key={conversation.id}.
   useEffect(() => {
     previousScrollHeightRef.current = 0;
     previousScrollTopRef.current = 0;
@@ -202,14 +202,13 @@ function ChatRoomContent({
     isLoadingPreviousPageRef.current = false;
   }, [conversation.id]);
 
-  // Si no hay suficiente contenido para generar scroll,
-  // intentar cargar otra página.
   useEffect(() => {
     const container = messagesContainerRef.current;
 
     if (
       !container ||
       messages.length === 0 ||
+      isMessagesError ||
       !hasMoreMessages ||
       isLoadingMoreMessages ||
       isLoadingPreviousPageRef.current
@@ -222,34 +221,41 @@ function ChatRoomContent({
     }
   }, [
     messages.length,
+    isMessagesError,
     hasMoreMessages,
     isLoadingMoreMessages,
     loadOlderMessages,
   ]);
 
-  // Enviar mensaje y conservar el texto si ocurre un error.
   const handleSend = async () => {
-    if (isSending || !isContentValidForSend(inputText)) {
+    if (
+      !isContentValidForSend(inputText) ||
+      isSending ||
+      sendPendingRef.current ||
+      isLoadingMessages ||
+      (isMessagesError && messages.length === 0)
+    ) {
       return;
     }
 
     const content = inputText.trim();
-
     if (!content) return;
 
-    setSendError('');
+    sendPendingRef.current = true;
+    setIsSubmitting(true);
+    setSendError(false);
 
     try {
       await onSendMessage(content);
       setInputText('');
     } catch {
-      setSendError(
-        'Error de conexión. No se pudo enviar el mensaje. Inténtalo nuevamente.',
-      );
+      setSendError(true);
+    } finally {
+      sendPendingRef.current = false;
+      setIsSubmitting(false);
     }
   };
 
-  // Enter envía; Shift + Enter agrega una nueva línea.
   const handleInputKeyDown = (
     event: KeyboardEvent<HTMLTextAreaElement>,
   ) => {
@@ -264,13 +270,11 @@ function ChatRoomContent({
       data-testid="chat-room"
       className="flex flex-col h-full w-full min-w-0 min-h-0 bg-[#F6F7F9] overflow-hidden"
     >
-      {/* Cabecera del chat */}
       <header
         data-testid="chat-room-header"
         className="shrink-0 w-full min-w-0 bg-white border-b border-[#E3E7EC] p-3 md:p-4 flex items-center justify-between z-10"
       >
         <div className="flex items-center gap-3">
-          {/* Botón atrás para móvil */}
           <button
             type="button"
             data-testid="chat-back-button"
@@ -293,7 +297,6 @@ function ChatRoomContent({
             </svg>
           </button>
 
-          {/* Avatar */}
           <div className="relative shrink-0">
             {conversation.contact.avatarUrl ? (
               <img
@@ -316,7 +319,6 @@ function ChatRoomContent({
             )}
           </div>
 
-          {/* Información del contacto */}
           <div>
             <h3
               data-testid="chat-contact-name"
@@ -334,17 +336,33 @@ function ChatRoomContent({
         </div>
       </header>
 
-      {/* Historial de mensajes */}
       <div
         ref={messagesContainerRef}
         data-testid="messages-container"
         onScroll={handleMessagesScroll}
         className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden p-4 md:p-6 space-y-3 bg-[#F6F7F9]"
       >
-        {/* Cargando mensajes anteriores */}
+        {isMessagesError && !isLoadingMessages && (
+          <ChatErrorState
+            message={
+              messages.length === 0
+                ? 'No pudimos cargar los mensajes de esta conversación.'
+                : 'No pudimos actualizar el historial. Tus mensajes siguen visibles.'
+            }
+            onRetry={
+              isLoadingOlderError
+                ? () => {
+                    void loadOlderMessages();
+                  }
+                : onRetryMessages
+            }
+          />
+        )}
+
         {isLoadingMoreMessages && (
           <div
             data-testid="loading-older-messages"
+            role="status"
             className="flex justify-center py-2"
           >
             <span className="text-xs text-[#5B6470]">
@@ -353,8 +371,7 @@ function ChatRoomContent({
           </div>
         )}
 
-        {/* Botón para cargar mensajes anteriores */}
-        {hasMoreMessages && !isLoadingMoreMessages && (
+        {hasMoreMessages && !isLoadingMoreMessages && !isMessagesError && (
           <div className="flex justify-center py-2">
             <button
               type="button"
@@ -366,7 +383,6 @@ function ChatRoomContent({
           </div>
         )}
 
-        {/* Inicio de conversación */}
         {!hasMoreMessages &&
           messages.length > 0 &&
           !isLoadingMessages &&
@@ -381,8 +397,24 @@ function ChatRoomContent({
             </div>
           )}
 
-        {/* Estado sin mensajes */}
-        {messages.length === 0 ? (
+        {isLoadingMessages ? (
+          <div role="status" className="space-y-4 py-6">
+            <p className="text-center text-sm text-[#5B6470]">
+              Sala de chat con {conversation.contact.fullName}
+            </p>
+            <p className="text-center text-sm text-[#5B6470]">
+              Cargando mensajes...
+            </p>
+            <div
+              aria-hidden="true"
+              className="space-y-4 motion-safe:animate-pulse"
+            >
+              <div className="h-12 w-2/3 rounded-2xl bg-slate-200" />
+              <div className="ml-auto h-16 w-1/2 rounded-2xl bg-slate-200" />
+              <div className="h-12 w-1/2 rounded-2xl bg-slate-200" />
+            </div>
+          </div>
+        ) : messages.length === 0 && !isMessagesError ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-6 text-[#5B6470]">
             <div className="w-12 h-12 rounded-full bg-blue-50 text-[#0B1F2E] flex items-center justify-center mx-auto mb-3">
               <svg
@@ -405,9 +437,7 @@ function ChatRoomContent({
             </p>
 
             <p className="text-xs text-slate-400 mt-1">
-              {isLoadingMessages
-                ? 'Cargando mensajes...'
-                : 'Envío e historial de mensajes'}
+              Aún no hay mensajes. Envía el primero para comenzar la conversación.
             </p>
           </div>
         ) : (
@@ -432,7 +462,6 @@ function ChatRoomContent({
 
             return (
               <div key={message.id}>
-                {/* Separador de fecha */}
                 {showDateSeparator && (
                   <div
                     data-testid={`date-separator-${message.id}`}
@@ -448,7 +477,6 @@ function ChatRoomContent({
                   </div>
                 )}
 
-                {/* Mensaje */}
                 <div
                   data-testid={`message-item-${message.id}`}
                   className={`flex w-full min-w-0 ${
@@ -462,7 +490,6 @@ function ChatRoomContent({
                         : 'bg-white text-[#0B1F2E] border border-[#E3E7EC] rounded-tl-xs'
                     }`}
                   >
-                    {/* Nombre del remitente */}
                     <p
                       className={`mb-1 text-xs font-semibold ${
                         isOwn
@@ -473,12 +500,10 @@ function ChatRoomContent({
                       {senderName}
                     </p>
 
-                    {/* Contenido */}
                     <p className="leading-relaxed [overflow-wrap:anywhere] break-words whitespace-pre-wrap">
                       {message.content}
                     </p>
 
-                    {/* Hora y estado */}
                     <div
                       className={`flex items-center gap-1.5 justify-end mt-1 text-[10px] ${
                         isOwn
@@ -505,36 +530,20 @@ function ChatRoomContent({
           })
         )}
 
-        {/* Ancla compatible con las pruebas existentes */}
         <div data-testid="messages-scroll-anchor" />
       </div>
 
-      {/* Error al enviar el mensaje */}
       {sendError && (
-        <div
-          role="alert"
-          data-testid="message-send-error"
-          className="mx-3 mb-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
-        >
-          <span>{sendError}</span>
-
-          <button
-            type="button"
-            onClick={() => setSendError('')}
-            className="ml-2 font-semibold underline"
-          >
-            Cerrar
-          </button>
-        </div>
+        <ChatErrorState message="No se pudo enviar el mensaje. Conservamos tu texto; vuelve a pulsar Enviar para reintentar." />
       )}
 
-      {/* Barra de envío */}
       <MessageInputBar
         value={inputText}
         onChange={setInputText}
         onSend={() => void handleSend()}
         onKeyDown={handleInputKeyDown}
-        isSending={isSending}
+        isSending={isSending || isSubmitting}
+        disabled={isLoadingMessages || (isMessagesError && messages.length === 0)}
       />
     </div>
   );

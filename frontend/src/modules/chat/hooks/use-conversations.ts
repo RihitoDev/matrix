@@ -21,6 +21,7 @@ export function useConversations() {
   const [visibleCount, setVisibleCount] = useState<number>(PAGE_SIZE);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isError, setIsError] = useState<boolean>(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [pendingContactId, setPendingContactId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -43,7 +44,13 @@ export function useConversations() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [loadAttempt]);
+
+  const retryConversations = () => {
+    setIsError(false);
+    setIsLoading(true);
+    setLoadAttempt((attempt) => attempt + 1);
+  };
 
   const sortedConversations = useMemo(() => {
     return [...conversationsData].sort((a, b) => {
@@ -214,6 +221,7 @@ export function useConversations() {
     searchQuery,
     isLoading,
     isError,
+    retryConversations,
     loadMore,
     setActiveFilter,
     setSearchQuery,
