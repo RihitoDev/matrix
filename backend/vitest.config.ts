@@ -20,11 +20,15 @@ export default defineConfig({
         'src/**/*.dto.ts',
         'src/**/*.entity.ts',
         'src/prisma/*',
+        // Los seeds se validan con el e2e (test/seed.e2e-spec.ts), no con tests unitarios.
+        'src/**/*seed*.ts',
+        'src/common/database/**',
       ],
       thresholds: {
         lines: 80,
         functions: 80,
         statements: 80,
+        branches: 80,
       },
     },
   },

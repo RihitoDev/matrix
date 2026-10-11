@@ -1,12 +1,14 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
+
+import type { KeyboardEvent } from 'react';
 
 import { Conversation, Message } from '../types/conversation.types';
 import { MessageInputBar } from './message-input-bar';
@@ -30,7 +32,74 @@ interface ChatRoomProps {
   onRetryMessages?: () => void;
 }
 
-export function ChatRoom({
+function getMessageDate(message: Message): string {
+  return message.timestamp || message.createdAt || '';
+}
+
+function formatMessageTime(isoString?: string | null): string {
+  if (!isoString) return '';
+
+  const date = new Date(isoString);
+
+  if (Number.isNaN(date.getTime())) return '';
+
+  const hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const hour12 = String(hours % 12 || 12).padStart(2, '0');
+  const period = hours >= 12 ? 'PM' : 'AM';
+
+  return `${hour12}:${minutes} ${period}`;
+}
+
+function formatMessageDate(isoString?: string | null): string {
+  if (!isoString) return '';
+
+  const date = new Date(isoString);
+
+  if (Number.isNaN(date.getTime())) return '';
+
+  return new Intl.DateTimeFormat('es-BO', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+    .format(date)
+    .toUpperCase();
+}
+
+function isSameDay(
+  firstDate?: string | null,
+  secondDate?: string | null,
+): boolean {
+  if (!firstDate || !secondDate) return false;
+
+  const first = new Date(firstDate);
+  const second = new Date(secondDate);
+
+  if (
+    Number.isNaN(first.getTime()) ||
+    Number.isNaN(second.getTime())
+  ) {
+    return false;
+  }
+
+  return (
+    first.getFullYear() === second.getFullYear() &&
+    first.getMonth() === second.getMonth() &&
+    first.getDate() === second.getDate()
+  );
+}
+
+export function ChatRoom(props: ChatRoomProps) {
+  return (
+    <ChatRoomContent
+      key={props.conversation.id}
+      {...props}
+    />
+  );
+}
+
+function ChatRoomContent({
   conversation,
   messages,
   currentUserId,
@@ -58,13 +127,6 @@ export function ChatRoom({
 
   const isLoadingPreviousPageRef = useRef(false);
 
-  /**
-   * Carga una pagina de mensajes anteriores.
-   *
-   * Antes de realizar la carga guardamos el alto y la posicion
-   * actuales del scroll. Estos valores permiten mantener al usuario
-   * en el mismo punto cuando los mensajes anteriores se agreguen arriba.
-   */
   const loadOlderMessages = useCallback(async () => {
     const container = messagesContainerRef.current;
 
@@ -93,10 +155,6 @@ export function ChatRoom({
     onLoadMoreMessages,
   ]);
 
-  /**
-   * Cuando el usuario se aproxima a la parte superior del historial,
-   * se solicita automaticamente la pagina anterior.
-   */
   const handleMessagesScroll = () => {
     const container = messagesContainerRef.current;
 
@@ -107,20 +165,7 @@ export function ChatRoom({
     }
   };
 
-  /**
-   * Control del scroll despues de actualizar los mensajes.
-   *
-   * Primera carga:
-   *   muestra los mensajes mas recientes.
-   *
-   * Carga de mensajes anteriores:
-   *   compensa el aumento del scrollHeight para evitar que la
-   *   pantalla salte cuando los mensajes se insertan arriba.
-   *
-   * Mensaje nuevo:
-   *   mueve el historial hacia la parte inferior.
-   */
-  useEffect(() => {
+  useLayoutEffect(() => {
     const container = messagesContainerRef.current;
 
     if (!container) return;
@@ -130,10 +175,9 @@ export function ChatRoom({
 
     if (isLoadingPreviousPageRef.current) {
       if (currentLength > previousLength) {
-        const newScrollHeight = container.scrollHeight;
-
         const heightDifference =
-          newScrollHeight - previousScrollHeightRef.current;
+          container.scrollHeight -
+          previousScrollHeightRef.current;
 
         container.scrollTop =
           previousScrollTopRef.current + heightDifference;
@@ -143,24 +187,14 @@ export function ChatRoom({
         isLoadingPreviousPageRef.current = false;
       }
     } else if (previousLength === 0 && currentLength > 0) {
-      /*
-       * Primera pagina cargada.
-       * Se muestran los mensajes mas recientes.
-       */
       container.scrollTop = container.scrollHeight;
     } else if (currentLength > previousLength) {
-      /*
-       * Mensaje nuevo enviado o recibido.
-       */
       container.scrollTop = container.scrollHeight;
     }
 
     previousMessagesLengthRef.current = currentLength;
   }, [messages.length, isLoadingMoreMessages]);
 
-  /**
-   * Reinicia el control del scroll al seleccionar otra conversacion.
-   */
   useEffect(() => {
     previousScrollHeightRef.current = 0;
     previousScrollTopRef.current = 0;
@@ -168,10 +202,6 @@ export function ChatRoom({
     isLoadingPreviousPageRef.current = false;
   }, [conversation.id]);
 
-  /**
-   * Si una pagina contiene pocos mensajes y no alcanza para producir
-   * scroll vertical, se carga otra pagina automaticamente.
-   */
   useEffect(() => {
     const container = messagesContainerRef.current;
 
@@ -198,15 +228,25 @@ export function ChatRoom({
   ]);
 
   const handleSend = async () => {
-    if (!isContentValidForSend(inputText) || isSending || sendPendingRef.current || isLoadingMessages || (isMessagesError && messages.length === 0)) {
+    if (
+      !isContentValidForSend(inputText) ||
+      isSending ||
+      sendPendingRef.current ||
+      isLoadingMessages ||
+      (isMessagesError && messages.length === 0)
+    ) {
       return;
     }
+
+    const content = inputText.trim();
+    if (!content) return;
 
     sendPendingRef.current = true;
     setIsSubmitting(true);
     setSendError(false);
+
     try {
-      await onSendMessage(inputText.trim());
+      await onSendMessage(content);
       setInputText('');
     } catch {
       setSendError(true);
@@ -216,22 +256,13 @@ export function ChatRoom({
     }
   };
 
-  const formatMessageTime = (
-    isoString?: string | null,
-  ): string => {
-    if (!isoString) return '';
-
-    const date = new Date(isoString);
-
-    if (isNaN(date.getTime())) return '';
-
-    return date
-      .toLocaleTimeString('es-ES', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-      })
-      .toUpperCase();
+  const handleInputKeyDown = (
+    event: KeyboardEvent<HTMLTextAreaElement>,
+  ) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      void handleSend();
+    }
   };
 
   return (
@@ -239,13 +270,11 @@ export function ChatRoom({
       data-testid="chat-room"
       className="flex flex-col h-full w-full min-w-0 min-h-0 bg-[#F6F7F9] overflow-hidden"
     >
-      {/* Cabecera del chat */}
       <header
         data-testid="chat-room-header"
         className="shrink-0 w-full min-w-0 bg-white border-b border-[#E3E7EC] p-3 md:p-4 flex items-center justify-between z-10"
       >
         <div className="flex items-center gap-3">
-          {/* Boton atras para movil */}
           <button
             type="button"
             data-testid="chat-back-button"
@@ -268,7 +297,6 @@ export function ChatRoom({
             </svg>
           </button>
 
-          {/* Avatar */}
           <div className="relative shrink-0">
             {conversation.contact.avatarUrl ? (
               <img
@@ -291,7 +319,6 @@ export function ChatRoom({
             )}
           </div>
 
-          {/* Informacion del contacto */}
           <div>
             <h3
               data-testid="chat-contact-name"
@@ -309,7 +336,6 @@ export function ChatRoom({
         </div>
       </header>
 
-      {/* Historial de mensajes */}
       <div
         ref={messagesContainerRef}
         data-testid="messages-container"
@@ -318,15 +344,21 @@ export function ChatRoom({
       >
         {isMessagesError && !isLoadingMessages && (
           <ChatErrorState
-            message={messages.length === 0
-              ? 'No pudimos cargar los mensajes de esta conversación.'
-              : 'No pudimos actualizar el historial. Tus mensajes siguen visibles.'}
-            onRetry={isLoadingOlderError
-              ? () => { void loadOlderMessages(); }
-              : onRetryMessages}
+            message={
+              messages.length === 0
+                ? 'No pudimos cargar los mensajes de esta conversación.'
+                : 'No pudimos actualizar el historial. Tus mensajes siguen visibles.'
+            }
+            onRetry={
+              isLoadingOlderError
+                ? () => {
+                    void loadOlderMessages();
+                  }
+                : onRetryMessages
+            }
           />
         )}
-        {/* Indicador mientras se cargan mensajes anteriores */}
+
         {isLoadingMoreMessages && (
           <div
             data-testid="loading-older-messages"
@@ -339,7 +371,6 @@ export function ChatRoom({
           </div>
         )}
 
-        {/* Boton alternativo para cargar mensajes anteriores */}
         {hasMoreMessages && !isLoadingMoreMessages && !isMessagesError && (
           <div className="flex justify-center py-2">
             <button
@@ -352,7 +383,6 @@ export function ChatRoom({
           </div>
         )}
 
-        {/* Ya se alcanzo el mensaje mas antiguo */}
         {!hasMoreMessages &&
           messages.length > 0 &&
           !isLoadingMessages &&
@@ -367,12 +397,18 @@ export function ChatRoom({
             </div>
           )}
 
-        {/* Estado sin mensajes */}
         {isLoadingMessages ? (
           <div role="status" className="space-y-4 py-6">
-            <p className="text-center text-sm text-[#5B6470]">Sala de chat con {conversation.contact.fullName}</p>
-            <p className="text-center text-sm text-[#5B6470]">Cargando mensajes...</p>
-            <div aria-hidden="true" className="space-y-4 motion-safe:animate-pulse">
+            <p className="text-center text-sm text-[#5B6470]">
+              Sala de chat con {conversation.contact.fullName}
+            </p>
+            <p className="text-center text-sm text-[#5B6470]">
+              Cargando mensajes...
+            </p>
+            <div
+              aria-hidden="true"
+              className="space-y-4 motion-safe:animate-pulse"
+            >
               <div className="h-12 w-2/3 rounded-2xl bg-slate-200" />
               <div className="ml-auto h-16 w-1/2 rounded-2xl bg-slate-200" />
               <div className="h-12 w-1/2 rounded-2xl bg-slate-200" />
@@ -405,53 +441,88 @@ export function ChatRoom({
             </p>
           </div>
         ) : (
-          messages.map((message) => {
+          messages.map((message, index) => {
             const isOwn = message.senderId === currentUserId;
 
-            return (
-              <div
-                key={message.id}
-                data-testid={`message-item-${message.id}`}
-                className={`flex w-full min-w-0 ${
-                  isOwn
-                    ? 'justify-end'
-                    : 'justify-start'
-                }`}
-              >
-                <div
-                  className={`max-w-[85%] md:max-w-[70%] min-w-0 rounded-2xl px-4 py-2.5 text-sm shadow-xs [overflow-wrap:anywhere] break-words ${
-                    isOwn
-                      ? 'bg-[#0B1F2E] text-white rounded-tr-xs'
-                      : 'bg-white text-[#0B1F2E] border border-[#E3E7EC] rounded-tl-xs'
-                  }`}
-                >
-                  <p className="leading-relaxed [overflow-wrap:anywhere] break-words whitespace-pre-wrap">
-                    {message.content}
-                  </p>
+            const senderName = isOwn
+              ? 'Tú'
+              : conversation.contact.fullName;
 
+            const messageDate = getMessageDate(message);
+
+            const previousMessage =
+              index > 0 ? messages[index - 1] : null;
+
+            const showDateSeparator =
+              !previousMessage ||
+              !isSameDay(
+                getMessageDate(previousMessage),
+                messageDate,
+              );
+
+            return (
+              <div key={message.id}>
+                {showDateSeparator && (
                   <div
-                    className={`flex items-center gap-1.5 justify-end mt-1 text-[10px] ${
-                      isOwn
-                        ? 'text-slate-300'
-                        : 'text-[#5B6470]'
-                    }`}
+                    data-testid={`date-separator-${message.id}`}
+                    className="flex items-center gap-3 my-5"
                   >
-                    <span>
-                      {formatMessageTime(
-                        message.timestamp ||
-                          message.createdAt,
-                      )}
+                    <div className="h-px flex-1 bg-[#E3E7EC]" />
+
+                    <span className="text-[11px] font-semibold text-[#5B6470] text-center whitespace-nowrap">
+                      {formatMessageDate(messageDate)}
                     </span>
 
-                    {isOwn && (
-                      <span className="font-medium">
-                        {message.status === 'sending'
-                          ? 'Enviando...'
-                          : message.status === 'error'
-                            ? 'Error'
-                            : ''}
-                      </span>
-                    )}
+                    <div className="h-px flex-1 bg-[#E3E7EC]" />
+                  </div>
+                )}
+
+                <div
+                  data-testid={`message-item-${message.id}`}
+                  className={`flex w-full min-w-0 ${
+                    isOwn ? 'justify-end' : 'justify-start'
+                  }`}
+                >
+                  <div
+                    className={`max-w-[85%] md:max-w-[70%] min-w-0 rounded-2xl px-4 py-2.5 text-sm shadow-xs [overflow-wrap:anywhere] break-words ${
+                      isOwn
+                        ? 'bg-[#0B1F2E] text-white rounded-tr-xs'
+                        : 'bg-white text-[#0B1F2E] border border-[#E3E7EC] rounded-tl-xs'
+                    }`}
+                  >
+                    <p
+                      className={`mb-1 text-xs font-semibold ${
+                        isOwn
+                          ? 'text-slate-200'
+                          : 'text-[#2563EB]'
+                      }`}
+                    >
+                      {senderName}
+                    </p>
+
+                    <p className="leading-relaxed [overflow-wrap:anywhere] break-words whitespace-pre-wrap">
+                      {message.content}
+                    </p>
+
+                    <div
+                      className={`flex items-center gap-1.5 justify-end mt-1 text-[10px] ${
+                        isOwn
+                          ? 'text-slate-300'
+                          : 'text-[#5B6470]'
+                      }`}
+                    >
+                      <span>{formatMessageTime(messageDate)}</span>
+
+                      {isOwn && (
+                        <span className="font-medium">
+                          {message.status === 'sending'
+                            ? 'Enviando...'
+                            : message.status === 'error'
+                              ? 'Error'
+                              : ''}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -459,18 +530,18 @@ export function ChatRoom({
           })
         )}
 
-        {/* Ancla conservada por compatibilidad con los tests existentes */}
         <div data-testid="messages-scroll-anchor" />
       </div>
 
-      {/* Barra para enviar mensajes */}
       {sendError && (
         <ChatErrorState message="No se pudo enviar el mensaje. Conservamos tu texto; vuelve a pulsar Enviar para reintentar." />
       )}
+
       <MessageInputBar
         value={inputText}
         onChange={setInputText}
-        onSend={handleSend}
+        onSend={() => void handleSend()}
+        onKeyDown={handleInputKeyDown}
         isSending={isSending || isSubmitting}
         disabled={isLoadingMessages || (isMessagesError && messages.length === 0)}
       />

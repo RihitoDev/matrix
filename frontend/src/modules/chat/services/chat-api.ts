@@ -14,7 +14,10 @@ import {
 } from '../mocks/mock-users';
 import {
   getMessagesByConversation,
+  getStoredMessages,
   saveStoredMessage,
+  getStoredConversationReadState,
+  markStoredConversationAsRead,
 } from './message-storage';
 
 const MIN_SEARCH_CHARS = 2;
@@ -35,12 +38,50 @@ export interface PaginatedMessagesResponse {
 export async function getConversations(): Promise<Conversation[]> {
   await new Promise((resolve) => setTimeout(resolve, 400));
 
-  return [...MOCK_CONVERSATIONS].sort((a, b) => {
-    return (
-      new Date(b.updatedAt).getTime() -
-      new Date(a.updatedAt).getTime()
-    );
-  });
+  try {
+    const readState = getStoredConversationReadState();
+    const storedMessages = getStoredMessages();
+
+    const conversations = MOCK_CONVERSATIONS.map((conv) => {
+      const unread = conv.id in readState ? readState[conv.id] : conv.unreadCount;
+
+      const convMessages = Array.isArray(storedMessages)
+        ? storedMessages.filter((m) => m && m.conversationId === conv.id)
+        : [];
+
+      if (convMessages.length === 0) {
+        return {
+          ...conv,
+          unreadCount: unread,
+        };
+      }
+
+      const lastMsg = convMessages[convMessages.length - 1];
+      const lastDate = lastMsg.timestamp || lastMsg.createdAt || conv.updatedAt;
+
+      return {
+        ...conv,
+        unreadCount: unread,
+        updatedAt: lastDate,
+        lastMessage: {
+          id: lastMsg.id,
+          senderId: lastMsg.senderId,
+          content: lastMsg.content,
+          isAttachment: Boolean(lastMsg.isAttachment),
+          attachmentType: lastMsg.attachmentType,
+          createdAt: lastDate,
+        },
+      };
+    });
+
+    return conversations.sort((a, b) => {
+      const dateA = new Date(a.lastMessage?.createdAt || a.updatedAt).getTime();
+      const dateB = new Date(b.lastMessage?.createdAt || b.updatedAt).getTime();
+      return dateB - dateA;
+    });
+  } catch {
+    return [...MOCK_CONVERSATIONS];
+  }
 }
 
 function normalizeText(text: string): string {
@@ -241,6 +282,7 @@ export async function sendMessage(
   };
 
   saveStoredMessage(createdMessage);
+  markStoredConversationAsRead(payload.conversationId);
 
   return {
     statusCode: 201,
@@ -248,4 +290,10 @@ export async function sendMessage(
     detail: 'Mensaje enviado exitosamente',
     data: createdMessage,
   };
+}
+
+export async function markConversationAsRead(
+  conversationId: string,
+): Promise<void> {
+  markStoredConversationAsRead(conversationId);
 }

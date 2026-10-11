@@ -1,9 +1,14 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { SwaggerModule } from '@nestjs/swagger';
+import { cleanupOpenApiDoc } from 'nestjs-zod';
 import { AppModule } from './app.module.js';
+import { validateEnv } from './common/utils/validate-env.js';
+import { buildSwaggerConfig } from './config/swagger.config.js';
 
 async function bootstrap(): Promise<void> {
+  validateEnv();
+
   const app = await NestFactory.create(AppModule);
 
   const corsOrigins = (process.env.CORS_ORIGIN ?? '')
@@ -11,17 +16,18 @@ async function bootstrap(): Promise<void> {
     .map((origin) => origin.trim())
     .filter((origin) => origin.length > 0);
 
-  app.enableCors(corsOrigins.length > 0 ? { origin: corsOrigins } : {});
+  app.enableCors({
+    origin: corsOrigins,
+    exposedHeaders: ['Content-Disposition'],
+  });
   app.setGlobalPrefix('api');
 
-  const config = new DocumentBuilder()
-    .setTitle('API Documentation')
-    .setDescription('None')
-    .setVersion('1.0')
-    .build();
+  const config = buildSwaggerConfig();
 
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, documentFactory);
+  const documentFactory = () => cleanupOpenApiDoc(SwaggerModule.createDocument(app, config));
+  SwaggerModule.setup('docs', app, documentFactory, {
+    swaggerOptions: { persistAuthorization: true },
+  });
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);

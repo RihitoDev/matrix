@@ -79,7 +79,19 @@ export const ModelName = {
   EventCategory: 'EventCategory',
   Event: 'Event',
   EventRegistration: 'EventRegistration',
-  EventAttendance: 'EventAttendance'
+  EventAttendance: 'EventAttendance',
+  AdminExportHistory: 'AdminExportHistory',
+  AccessRequestStatus: 'AccessRequestStatus',
+  AccessRequestDocumentType: 'AccessRequestDocumentType',
+  File: 'File',
+  Career: 'Career',
+  AccessRequest: 'AccessRequest',
+  ActivationOtp: 'ActivationOtp',
+  MessageStatus: 'MessageStatus',
+  Conversation: 'Conversation',
+  ConversationParticipant: 'ConversationParticipant',
+  Message: 'Message',
+  UserPresence: 'UserPresence'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -193,6 +205,7 @@ export const UserScalarFieldEnum = {
   email: 'email',
   password: 'password',
   isActive: 'isActive',
+  isAvailableForMentoring: 'isAvailableForMentoring',
   photoUrl: 'photoUrl',
   cityId: 'cityId',
   phone: 'phone',
@@ -482,6 +495,167 @@ export const EventAttendanceScalarFieldEnum = {
 } as const
 
 export type EventAttendanceScalarFieldEnum = (typeof EventAttendanceScalarFieldEnum)[keyof typeof EventAttendanceScalarFieldEnum]
+
+
+export const AdminExportHistoryScalarFieldEnum = {
+  userId: 'userId',
+  createdAt: 'createdAt',
+  reportName: 'reportName',
+  reportType: 'reportType'
+} as const
+
+export type AdminExportHistoryScalarFieldEnum = (typeof AdminExportHistoryScalarFieldEnum)[keyof typeof AdminExportHistoryScalarFieldEnum]
+
+
+export const AccessRequestStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AccessRequestStatusScalarFieldEnum = (typeof AccessRequestStatusScalarFieldEnum)[keyof typeof AccessRequestStatusScalarFieldEnum]
+
+
+export const AccessRequestDocumentTypeScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AccessRequestDocumentTypeScalarFieldEnum = (typeof AccessRequestDocumentTypeScalarFieldEnum)[keyof typeof AccessRequestDocumentTypeScalarFieldEnum]
+
+
+export const FileScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  extension: 'extension',
+  mimeType: 'mimeType',
+  size: 'size',
+  content: 'content',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FileScalarFieldEnum = (typeof FileScalarFieldEnum)[keyof typeof FileScalarFieldEnum]
+
+
+export const CareerScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CareerScalarFieldEnum = (typeof CareerScalarFieldEnum)[keyof typeof CareerScalarFieldEnum]
+
+
+export const AccessRequestScalarFieldEnum = {
+  id: 'id',
+  requestCode: 'requestCode',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  idCardNumber: 'idCardNumber',
+  idCardIssuedIn: 'idCardIssuedIn',
+  sisCode: 'sisCode',
+  email: 'email',
+  phone: 'phone',
+  birthDate: 'birthDate',
+  graduationYear: 'graduationYear',
+  careerId: 'careerId',
+  statusId: 'statusId',
+  documentTypeId: 'documentTypeId',
+  documentFileId: 'documentFileId',
+  submittedAt: 'submittedAt',
+  reviewedById: 'reviewedById',
+  reviewedAt: 'reviewedAt',
+  rejectionReason: 'rejectionReason',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AccessRequestScalarFieldEnum = (typeof AccessRequestScalarFieldEnum)[keyof typeof AccessRequestScalarFieldEnum]
+
+
+export const ActivationOtpScalarFieldEnum = {
+  id: 'id',
+  accessRequestId: 'accessRequestId',
+  codeHash: 'codeHash',
+  expiresAt: 'expiresAt',
+  attempts: 'attempts',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ActivationOtpScalarFieldEnum = (typeof ActivationOtpScalarFieldEnum)[keyof typeof ActivationOtpScalarFieldEnum]
+
+
+export const MessageStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MessageStatusScalarFieldEnum = (typeof MessageStatusScalarFieldEnum)[keyof typeof MessageStatusScalarFieldEnum]
+
+
+export const ConversationScalarFieldEnum = {
+  id: 'id',
+  userAId: 'userAId',
+  userBId: 'userBId',
+  lastMessageId: 'lastMessageId',
+  lastMessageAt: 'lastMessageAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConversationScalarFieldEnum = (typeof ConversationScalarFieldEnum)[keyof typeof ConversationScalarFieldEnum]
+
+
+export const ConversationParticipantScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  userId: 'userId',
+  lastReadAt: 'lastReadAt',
+  isMuted: 'isMuted',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConversationParticipantScalarFieldEnum = (typeof ConversationParticipantScalarFieldEnum)[keyof typeof ConversationParticipantScalarFieldEnum]
+
+
+export const MessageScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  senderId: 'senderId',
+  content: 'content',
+  statusId: 'statusId',
+  sentAt: 'sentAt',
+  deliveredAt: 'deliveredAt',
+  readAt: 'readAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
+
+
+export const UserPresenceScalarFieldEnum = {
+  userId: 'userId',
+  isOnline: 'isOnline',
+  lastSeenAt: 'lastSeenAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserPresenceScalarFieldEnum = (typeof UserPresenceScalarFieldEnum)[keyof typeof UserPresenceScalarFieldEnum]
 
 
 export const SortOrder = {

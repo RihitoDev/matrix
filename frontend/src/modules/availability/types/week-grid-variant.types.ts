@@ -1,0 +1,1 @@
+export type WeekGridVariant = "owner" | "public" | "selectable";

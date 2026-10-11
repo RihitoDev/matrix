@@ -1,0 +1,1 @@
+export { TechnicalAreasView } from "./views/technical-areas-view";

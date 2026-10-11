@@ -17,6 +17,19 @@ const GROUP_ITEM: NavigationItem = {
   ],
 };
 
+const MENTORSHIP_ITEM: NavigationItem = {
+  label: "Mentorías",
+  icon: User,
+  children: [
+    {
+      label: "Directorio de mentorías",
+      href: "/mentorship/mentors",
+      activePathPatterns: [/^\/mentors\/(?!participation(?:\/|$))[^/]+\/?$/],
+    },
+    { label: "Mi participación", href: "/mentors/participation" },
+  ],
+};
+
 function renderItem(item: NavigationItem, pathname: string) {
   return render(
     <SidebarProvider>
@@ -83,5 +96,24 @@ describe("SidebarNavItem", () => {
 
     fireEvent.click(toggle);
     expect(screen.queryByRole("link", { name: "Datos personales" })).toBeNull();
+  });
+
+  it.each([
+    ["/mentorship/mentors", "Directorio de mentorías"],
+    ["/mentors/42", "Directorio de mentorías"],
+    ["/mentors/participation", "Mi participación"],
+  ])("activates the correct mentorship item for %s", (pathname, activeLabel) => {
+    renderItem(MENTORSHIP_ITEM, pathname);
+
+    expect(screen.getByRole("button", { name: "Mentorías" }).getAttribute("aria-expanded")).toBe(
+      "true",
+    );
+    expect(screen.getByRole("link", { name: activeLabel }).getAttribute("aria-current")).toBe(
+      "page",
+    );
+
+    const inactiveLabel =
+      activeLabel === "Mi participación" ? "Directorio de mentorías" : "Mi participación";
+    expect(screen.getByRole("link", { name: inactiveLabel }).getAttribute("aria-current")).toBeNull();
   });
 });

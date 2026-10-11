@@ -26,6 +26,18 @@ describe("AppShell", () => {
 
     expect(screen.getByText("UMSSY")).toBeDefined();
     expect(screen.getByText("Contenido de la página")).toBeDefined();
+    expect(document.querySelector('[data-slot="sidebar-footer"]')).toBeNull();
+    expect(screen.queryByText("Alejandro Vargas")).toBeNull();
+  });
+
+  it("passes a provided user to the sidebar", () => {
+    render(
+      <AppShell user={{ fullName: "María Pérez", role: "Egresada" }}>
+        Contenido
+      </AppShell>,
+    );
+    expect(screen.getByText("María Pérez")).toBeInTheDocument();
+    expect(screen.getByText("Egresada")).toBeInTheDocument();
   });
 
   it("closes and opens the sidebar with the menu button", () => {

@@ -4,13 +4,20 @@ import { AuthService } from '../services/auth.service.js';
 import { InvalidCredentialsException, RoleNotAssignedException } from '../exceptions/index.js';
 
 describe('AuthService', () => {
-  const authRepository = { findUserByEmailWithRoles: vi.fn() };
+  const authRepository = { findUserByEmailWithRoles: vi.fn(), existsByEmail: vi.fn() };
   const jwtService = { sign: vi.fn() };
   let service: AuthService;
 
   beforeEach(() => {
     vi.clearAllMocks();
     service = new AuthService(authRepository as any, jwtService as any);
+  });
+
+  it.each([true, false])('existsByEmail delega en el repository y devuelve %s', async (exists) => {
+    authRepository.existsByEmail.mockResolvedValue(exists);
+
+    await expect(service.existsByEmail('ana@umss.edu.bo')).resolves.toBe(exists);
+    expect(authRepository.existsByEmail).toHaveBeenCalledWith('ana@umss.edu.bo');
   });
 
   it('lanza InvalidCredentialsException si el usuario no existe', async () => {

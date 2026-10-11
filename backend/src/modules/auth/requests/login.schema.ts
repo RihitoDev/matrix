@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 import { ROLE_NAMES } from '../../../common/enums/roles.enum.js';
 
 export const loginSchema = z.object({
@@ -7,4 +8,4 @@ export const loginSchema = z.object({
   roleTag: z.enum(ROLE_NAMES),
 });
 
-export type LoginDto = z.infer<typeof loginSchema>;
+export class LoginDto extends createZodDto(loginSchema) {}

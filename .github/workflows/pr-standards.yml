@@ -28,7 +28,7 @@ jobs:
         run: |
           fail() { echo "::error::$1"; exit 1; }
 
-          DEVELOP_SOURCES='^(epic/|hotfix/|[a-z]+/devops-)'
+          DEVELOP_SOURCES='^(epic/|hotfix/|chore/|[a-z]+/devops-)'
           EPIC_SOURCE='^epic/'
 
           echo "Source branch: $HEAD_REF | Target branch: $BASE_REF"
@@ -65,13 +65,13 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          DEVOPS_BRANCH='^[a-z]+/devops-'
+          DEVOPS_BRANCH='^(chore/|[a-z]+/devops-)'
           if [[ "$HEAD_REF" == "develop" || "$HEAD_REF" =~ $DEVOPS_BRANCH ]]; then
             echo "DevOps branch or sprint release: skipping this check."
             exit 0
           fi
 
-          changed=$(git diff --name-only "$BASE_SHA...$HEAD_SHA" -- .github/ scripts/)
+          changed=$(git diff --name-only "$BASE_SHA...$HEAD_SHA" -- .github/ scripts/ '*vitest*' '*eslint*' '*prettier*' '*tsconfig*')
           if [[ -n "$changed" ]]; then
             echo "::error::Only DevOps branches can modify CI and scripts."
             echo "$changed"

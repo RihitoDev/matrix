@@ -12,6 +12,10 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  existsByEmail(email: string) {
+    return this.authRepository.existsByEmail(email);
+  }
+
   async login(dto: LoginDto) {
     const user = await this.authRepository.findUserByEmailWithRoles(dto.email);
 

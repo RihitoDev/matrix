@@ -3,6 +3,6 @@ README.md @umssy/DevOps
 .github/ @umssy/DevOps
 .husky/ @umssy/DevOps
 scripts/ @umssy/DevOps
-vitest.config*.ts @umssy/DevOps
-eslint.config.mjs @umssy/DevOps
-vitest.setup.ts @umssy/DevOps
+vitest.config.* @umssy/DevOps
+eslint.config.* @umssy/DevOps
+vitest.setup.* @umssy/DevOps

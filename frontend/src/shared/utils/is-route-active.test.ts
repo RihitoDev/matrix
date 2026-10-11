@@ -13,4 +13,12 @@ describe("isRouteActive", () => {
   it("does not match routes that only share a prefix", () => {
     expect(isRouteActive("/profiles", "/profile")).toBe(false);
   });
+
+  it("matches additional configured route patterns", () => {
+    expect(
+      isRouteActive("/mentors/42", "/mentorship/mentors", [
+        /^\/mentors\/[^/]+$/,
+      ]),
+    ).toBe(true);
+  });
 });

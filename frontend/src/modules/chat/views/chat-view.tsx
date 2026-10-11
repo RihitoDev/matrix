@@ -38,18 +38,19 @@ export function ChatView() {
     handleSelectConversation,
     clearSelectedConversation,
     startConversationWithContact,
+    updateConversationLastMessage,
   } = useConversations();
 
   const {
-  data: messages = [],
-  isLoading: isLoadingMessages,
-  hasMoreMessages,
-  loadMoreMessages,
-  isLoadingMoreMessages,
-  isError: isMessagesError,
-  isFetchNextPageError,
-  refetch: retryMessages,
-} = useMessages(selectedId);
+    data: messages = [],
+    isLoading: isLoadingMessages,
+    hasMoreMessages,
+    loadMoreMessages,
+    isLoadingMoreMessages,
+    isError: isMessagesError,
+    isFetchNextPageError,
+    refetch: retryMessages,
+  } = useMessages(selectedId);
 
   const handleBackToList = () => {
     clearSelectedConversation();
@@ -63,6 +64,7 @@ export function ChatView() {
     if (activeFilter !== 'all') {
       setActiveFilter('all');
     }
+
     setIsSearchModalOpen(true);
   };
 
@@ -70,24 +72,34 @@ export function ChatView() {
     if (activeFilter !== 'all') {
       setActiveFilter('all');
     }
+
     await startConversationWithContact(contactUser);
     setIsSearchModalOpen(false);
   };
 
-  const handleSendMessage = async (content: string) => {
-    if (!selectedId || isSending) return;
+  const handleSendMessage = async (content: string): Promise<void> => {
+    if (!selectedId || isSending) {
+      throw new Error('No hay una conversación seleccionada o ya se está enviando un mensaje.');
+    }
+
+    const conversationId = selectedId;
 
     setIsSending(true);
+
     try {
       await sendMessage({
-        conversationId: selectedId,
+        conversationId,
         content,
         senderId: CURRENT_USER_ID,
       });
 
+      updateConversationLastMessage(conversationId, content, CURRENT_USER_ID);
+
       await queryClient.invalidateQueries({
-        queryKey: messagesQueryKey(selectedId),
+        queryKey: messagesQueryKey(conversationId),
       });
+    } catch (error) {
+      throw error;
     } finally {
       setIsSending(false);
     }
@@ -137,7 +149,9 @@ export function ChatView() {
             isLoadingMoreMessages={isLoadingMoreMessages}
             isMessagesError={isMessagesError}
             isLoadingOlderError={isFetchNextPageError}
-            onRetryMessages={() => { void retryMessages(); }}
+            onRetryMessages={() => {
+              void retryMessages();
+            }}
           />
         ) : (
           <EmptyChatState
