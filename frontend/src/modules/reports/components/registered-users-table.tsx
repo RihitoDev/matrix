@@ -7,6 +7,7 @@ import { EMAIL_SEARCH_NO_RESULTS_MESSAGE } from "../constants/reports.constants"
 import {
   REGISTERED_USERS_COLUMN_COUNT as COLUMN_COUNT,
   TABLE_CELL_CLASSES as CELL_CLASSES,
+  TABLE_CONTAINER_CLASSES as CONTAINER_CLASSES,
   USERS_TABLE_HEAD_CLASSES as HEAD_CLASSES,
 } from "../constants/report-table.constants";
 import type { RegisteredUsersTableProps } from "../types/registered-users-table-props.types";
@@ -48,7 +49,7 @@ export function RegisteredUsersTable({ users, isLoading, errorMessage, searchTer
   };
 
   return (
-    <div className="@container rounded-lg border border-border bg-surface">
+    <div className={CONTAINER_CLASSES}>
       <Table className="min-w-225 text-left text-base">
         <TableHeader className="bg-surface-soft">
           <TableRow className="border-border hover:bg-transparent">
