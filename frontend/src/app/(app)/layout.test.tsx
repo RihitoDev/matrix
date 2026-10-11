@@ -59,12 +59,13 @@ describe("AppLayout", () => {
     expect(replace).toHaveBeenCalledWith("/login?next=%2Fprofile%3Ftab%3Dcv");
   });
 
-  it("Mis pases se muestra sin sesión (la vista maneja la falta de sesión) y sin redirigir", () => {
+  it("Mis pases sin sesión no se muestra y lleva al login con la ruta pedida", () => {
     sessionStorage.clear();
     route.pathname = "/events/my-passes";
+    window.history.replaceState({}, "", "/events/my-passes");
     render(<AppLayout><p>event-content</p></AppLayout>);
 
-    expect(screen.getByText("event-content")).toBeInTheDocument();
-    expect(replace).not.toHaveBeenCalled();
+    expect(screen.queryByText("event-content")).toBeNull();
+    expect(replace).toHaveBeenCalledWith("/login?next=%2Fevents%2Fmy-passes");
   });
 });

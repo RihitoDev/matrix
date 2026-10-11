@@ -5,7 +5,7 @@ import axios from "axios";
 import { usePathname, useRouter } from "next/navigation";
 import { apiClient } from "@/shared/services/api-client";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
-import { isOpenPath } from "../utils/route-access";
+import { isPublicPath } from "../utils/route-access";
 import { buildLoginUrl } from "../utils/safe-next-path";
 import { endSession } from "../utils/session";
 import { setSessionMarker } from "../utils/session-cookie";
@@ -18,7 +18,7 @@ const currentPath = () => `${window.location.pathname}${window.location.search}`
 export function SessionGate({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const open = isOpenPath(pathname ?? "");
+  const open = isPublicPath(pathname ?? "");
 
   const state = useSyncExternalStore<GateState>(
     subscribe,

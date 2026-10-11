@@ -5,5 +5,3 @@ export const NEXT_PARAM = "next";
 export const MAX_NEXT_LENGTH = 300;
 
 export const PUBLIC_ROUTES: readonly string[] = ["/login", "/request-access", "/sidebar-preview"];
-
-export const OFFLINE_ROUTES: readonly string[] = ["/events/my-passes"];

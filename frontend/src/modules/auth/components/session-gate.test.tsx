@@ -49,12 +49,13 @@ describe("SessionGate", () => {
     expect(replace).toHaveBeenCalledTimes(1);
   });
 
-  it("en Mis pases deja pasar sin sesión y sin redirigir", () => {
+  it("en Mis pases sin sesión lleva al login con la ruta pedida", async () => {
     route.pathname = "/events/my-passes";
+    window.history.replaceState({}, "", "/events/my-passes");
     renderGate();
 
-    expect(screen.getByText("contenido privado")).toBeInTheDocument();
-    expect(replace).not.toHaveBeenCalled();
+    expect(screen.queryByText("contenido privado")).toBeNull();
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/login?next=%2Fevents%2Fmy-passes"));
   });
 
   it("un 401 del backend cierra la sesión y lleva al login", async () => {

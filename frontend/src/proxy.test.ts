@@ -40,8 +40,10 @@ describe("proxy: sin cookie de sesión", () => {
     expect(passes(call(path))).toBe(true);
   });
 
-  it("Mis pases no se redirige para no impedir su uso sin conexión", () => {
-    expect(passes(call("/events/my-passes"))).toBe(true);
+  it("Mis pases también exige sesión", () => {
+    const response = call("/events/my-passes");
+    expect(response.status).toBe(307);
+    expect(redirectOf(response)).toBe(`${BASE}/login?next=%2Fevents%2Fmy-passes`);
   });
 
   it("no confunde rutas parecidas con las públicas", () => {
