@@ -33,7 +33,7 @@ const nameField = (label: string) =>
     .trim()
     .min(1, `${label} son obligatorios`)
     .max(100, `${label} no pueden superar los 100 caracteres`)
-    .regex(NAME_REGEX, `${label} solo pueden contener letras y espacios`);
+    .regex(NAME_REGEX, `${label} solo pueden contener letras, espacios, guiones y apóstrofes`);
 
 const digitsField = (label: string) =>
   z

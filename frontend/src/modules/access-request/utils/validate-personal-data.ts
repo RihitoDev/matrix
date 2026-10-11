@@ -4,7 +4,7 @@ import type { FieldErrors, PersonalDataValues } from "../types/access-request.ty
 
 export const MIN_AGE = 18;
 
-const NAME_REGEX = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?: [A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/;
+const NAME_REGEX = /^\p{L}[\p{L}\p{M}]*(?:[ '’-]\p{L}[\p{L}\p{M}]*)*$/u;
 const DIGITS_REGEX = /^\d+$/;
 const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -24,7 +24,7 @@ function validateName(value: string, label: string): string | undefined {
   const text = value.trim();
   if (text.length === 0) return `${label} son obligatorios`;
   if (text.length > 100) return `${label} no pueden superar los 100 caracteres`;
-  if (!NAME_REGEX.test(text)) return `${label} solo pueden contener letras y espacios`;
+  if (!NAME_REGEX.test(text)) return `${label} solo pueden contener letras, espacios, guiones y apóstrofes`;
 }
 
 function validateDigits(value: string, label: string): string | undefined {
