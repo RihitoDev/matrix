@@ -152,6 +152,32 @@ export function useConversations() {
     });
   };
 
+  const updateConversationLastMessage = (
+    conversationId: string,
+    content: string,
+    senderId: string
+  ) => {
+    const timestamp = new Date().toISOString();
+    setConversationsData((prev) => {
+      return prev.map((item) => {
+        if (item.id === conversationId) {
+          return {
+            ...item,
+            updatedAt: timestamp,
+            lastMessage: {
+              id: `msg-${Date.now()}`,
+              senderId,
+              content,
+              isAttachment: false,
+              createdAt: timestamp,
+            },
+          };
+        }
+        return item;
+      });
+    });
+  };
+
   const startConversationWithContact = async (contactUser: User) => {
     if (pendingContactId) return;
 
@@ -194,6 +220,7 @@ export function useConversations() {
     handleSelectConversation,
     clearSelectedConversation,
     simulateIncomingMessage,
+    updateConversationLastMessage,
     startConversationWithContact,
   };
 }
