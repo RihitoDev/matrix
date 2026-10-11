@@ -9,4 +9,5 @@ export const CERTIFICATION_VALIDATION_MESSAGES = {
   invalidDate: "Ingresa una fecha válida.",
   futureDate: "La fecha de emisión no puede ser futura.",
   minDate: "La fecha de emisión no puede ser anterior al 1 de enero de 1950.",
+  documentRequired: "El documento de respaldo es obligatorio.",
 };

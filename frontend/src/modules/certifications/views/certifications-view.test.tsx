@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CERTIFICATION_DOCUMENT_MESSAGES } from "../config/certification-document.config";
 import { CERTIFICATION_FEEDBACK_MESSAGES } from "../config/certification-feedback.config";
+import { CERTIFICATION_VALIDATION_MESSAGES } from "../config/certification-validation.config";
 import { certificationsService } from "../services/certifications.service";
 import type { Certification } from "../types/certification.types";
 import { CertificationsView } from "./certifications-view";
@@ -30,7 +31,7 @@ function createCertification(id: string, name: string, issueDate: string): Certi
   };
 }
 
-const SCRUM = createCertification("scrum", "Scrum Master", "2022-05-10");
+const SCRUM = { ...createCertification("scrum", "Scrum Master", "2022-05-10"), hasDocument: true };
 const AWS = createCertification("aws", "AWS Cloud Practitioner", "2025-02-20");
 
 function createDeferred<T>() {
@@ -65,6 +66,7 @@ async function fillCertificationForm(user: ReturnType<typeof userEvent.setup>) {
 
 describe("CertificationsView", () => {
   beforeEach(() => {
+    sessionStorage.clear();
     vi.mocked(certificationsService.getCertifications).mockResolvedValue([SCRUM, AWS]);
     vi.mocked(certificationsService.deleteCertification).mockResolvedValue(undefined);
   });
@@ -93,7 +95,7 @@ describe("CertificationsView", () => {
 
   it("shows exactly one document indicator per certification card", async () => {
     vi.mocked(certificationsService.getCertifications).mockResolvedValue([
-      { ...SCRUM, hasDocument: true },
+      SCRUM,
       AWS,
     ]);
     await renderView();
@@ -550,24 +552,18 @@ describe("CertificationsView", () => {
         ).toHaveTextContent("certificate.pdf");
       });
 
-      it("removes the document only after saving and updates the card without reloading the page", async () => {
-        vi.mocked(certificationsService.deleteDocument).mockResolvedValue(undefined);
+      it("prevents saving without a document when the current one is removed and shows the required error", async () => {
         const user = await renderView();
 
         await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
         await user.click(screen.getByRole("button", { name: "Eliminar documento actual" }));
-        expect(certificationsService.deleteDocument).not.toHaveBeenCalled();
-
-        vi.mocked(certificationsService.getCertifications).mockResolvedValue([SCRUM, AWS]);
         await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
 
-        await waitFor(() => expect(certificationsService.deleteDocument).toHaveBeenCalledWith("scrum"));
-        await waitFor(() =>
-          expect(
-            screen.queryByRole("button", { name: "Ver documento de Scrum Master" }),
-          ).not.toBeInTheDocument(),
-        );
-        expect(screen.getAllByText("Sin documento de respaldo")).toHaveLength(2);
+        expect(
+          screen.getByText(CERTIFICATION_VALIDATION_MESSAGES.documentRequired),
+        ).toBeInTheDocument();
+        expect(certificationsService.deleteDocument).not.toHaveBeenCalled();
+        expect(certificationsService.updateCertification).not.toHaveBeenCalled();
       });
 
       it("does not call the document api when cancelling after marking the removal", async () => {
@@ -582,17 +578,17 @@ describe("CertificationsView", () => {
       });
 
       it("keeps the form open with an inline error and the data when the document operation fails", async () => {
-        vi.mocked(certificationsService.deleteDocument).mockRejectedValue(new Error("failed"));
+        vi.mocked(certificationsService.uploadDocument).mockRejectedValue(new Error("failed"));
         const user = await renderView();
 
         await user.click(screen.getByRole("button", { name: "Editar Scrum Master" }));
         await user.clear(screen.getByLabelText(/Nombre de la certificación/));
         await user.type(screen.getByLabelText(/Nombre de la certificación/), "Nuevo nombre");
-        await user.click(screen.getByRole("button", { name: "Eliminar documento actual" }));
+        await user.upload(screen.getByLabelText(/Archivo de respaldo/), CERTIFICATE_PDF);
         await user.click(screen.getByRole("button", { name: "Guardar certificación" }));
 
         expect(
-          await screen.findByText(CERTIFICATION_DOCUMENT_MESSAGES.removeError),
+          await screen.findByText(CERTIFICATION_DOCUMENT_MESSAGES.uploadError),
         ).toBeInTheDocument();
         expect(screen.getByRole("form", { name: "Editar certificación" })).toBeInTheDocument();
         expect(screen.getByLabelText(/Nombre de la certificación/)).toHaveValue("Nuevo nombre");

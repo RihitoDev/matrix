@@ -12,6 +12,7 @@ import { getFieldErrorProps } from "@/modules/profile/utils/get-field-error-prop
 import { trimFormValues } from "@/modules/profile/utils/trim-form-values";
 import {
   CERTIFICATION_NAME_MAX_LENGTH,
+  CERTIFICATION_VALIDATION_MESSAGES,
   ISSUING_ORGANIZATION_MAX_LENGTH,
 } from "../config/certification-validation.config";
 import { CERTIFICATION_MIN_ISSUE_DATE } from "../constants/certification-form.constants";
@@ -124,8 +125,9 @@ export function CertificationForm({
     const validationErrors = validateCertification(trimmedValues);
     
     let currentFileError = fileError;
-    if (!isEditing && !selectedFile) {
-      currentFileError = "El documento de respaldo es obligatorio para crear una certificación.";
+    const hasDocument = Boolean(selectedFile) || Boolean(currentDocumentName && !isRemovingDocument);
+    if (!hasDocument) {
+      currentFileError = CERTIFICATION_VALIDATION_MESSAGES.documentRequired;
       setFileError(currentFileError);
     }
 
@@ -217,7 +219,7 @@ export function CertificationForm({
         selectedFile={selectedFile}
         currentDocumentName={currentDocumentName}
         isRemovalPending={isRemovingDocument}
-        isRequired={!isEditing}
+        isRequired={true}
         error={fileError ?? submitFileError}
         disabled={isBusy}
         isReading={isReadingFile}
