@@ -12,11 +12,10 @@ import {
 } from "../constants/reports.constants";
 import { EmailSearchInput } from "../components/email-search-input";
 import { ExportSuccessToast } from "../components/export-success-toast";
-import { RefreshButton } from "../components/refresh-button";
 import { RegisteredUsersTable } from "../components/registered-users-table";
 import { ReportActions } from "../components/report-actions";
 import { ReportAlertToast } from "../components/report-alert-toast";
-import { TablePagination } from "../components/table-pagination";
+import { ReportTableFooter } from "../components/report-table-footer";
 import { UserTypeFilter } from "../components/user-type-filter";
 import { useExportRegisteredUsersCsv } from "../hooks/use-export-registered-users-csv";
 import { useRegisteredUsers } from "../hooks/use-registered-users";
@@ -57,9 +56,6 @@ export function RegisteredUsersReportView() {
     setCurrentPage(1);
   };
 
-  const firstVisibleItem = totalItems === 0 ? 0 : (currentPage - 1) * REGISTERED_USERS_PAGE_SIZE + 1;
-  const lastVisibleItem = Math.min(currentPage * REGISTERED_USERS_PAGE_SIZE, totalItems);
-
   return (
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
@@ -83,17 +79,16 @@ export function RegisteredUsersReportView() {
 
       <RegisteredUsersTable users={users} isLoading={isLoading} errorMessage={errorMessage} searchTerm={search} />
 
-      <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-3">
-        <p className="text-center text-sm text-text-secondary md:text-left">
-          {isLoading ? "Cargando usuarios..." : `Mostrando ${firstVisibleItem}-${lastVisibleItem} de ${totalItems} usuarios`}
-        </p>
-        <div className="flex justify-center">
-          <RefreshButton onClick={refresh} isRefreshing={isLoading} />
-        </div>
-        <div className="flex justify-center md:justify-end">
-          <TablePagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-        </div>
-      </div>
+            <ReportTableFooter
+        currentPage={currentPage}
+        pageSize={REGISTERED_USERS_PAGE_SIZE}
+        totalItems={totalItems}
+        totalPages={totalPages}
+        isLoading={isLoading}
+        itemLabel="usuarios"
+        onPageChange={setCurrentPage}
+        onRefresh={refresh}
+      />
 
       <ExportSuccessToast message={exportSuccessMessage} />
       <ReportAlertToast variant="warning" message={isSlow ? SLOW_REQUEST_MESSAGE : undefined} />
