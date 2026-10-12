@@ -1,6 +1,6 @@
 export const MIN_AGE = 18;
 
-export const NAME_REGEX = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?: +[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/;
+export const NAME_REGEX = /^\p{L}[\p{L}\p{M}]*(?:[ '’-]\p{L}[\p{L}\p{M}]*)*$/u;
 
 export const DIGITS_REGEX = /^\d+$/;
 
