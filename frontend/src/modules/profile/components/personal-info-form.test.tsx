@@ -2,7 +2,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { EMPTY_PERSONAL_INFO_VALUES } from "../config/profile-form-defaults.config";
-import { PROFILE_VALIDATION_MESSAGES } from "../constants/profile-validation.constants";
+import { PHONE_HINT, PROFILE_VALIDATION_MESSAGES } from "../constants/profile-validation.constants";
 import type { PersonalInfoValues } from "../types/personal-info-values.types";
 import { PersonalInfoForm } from "./personal-info-form";
 
@@ -98,6 +98,32 @@ describe("PersonalInfoForm", () => {
     );
   });
 
+  it("shows the allowed phone length from the start", () => {
+    renderForm();
+
+    expect(screen.getByText(PHONE_HINT)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Teléfono/)).toHaveAccessibleDescription(PHONE_HINT);
+  });
+
+  it("does not let the phone have more than 15 digits", async () => {
+    const { user } = renderForm();
+    const phoneInput = screen.getByLabelText(/Teléfono/);
+
+    await user.type(phoneInput, "215478963214587999");
+
+    expect(phoneInput).toHaveValue("215478963214587");
+  });
+
+  it("limits a pasted phone to 15 digits", async () => {
+    const { user } = renderForm();
+    const phoneInput = screen.getByLabelText(/Teléfono/);
+
+    await user.click(phoneInput);
+    await user.paste("+591 5616 5165 1651 5156");
+
+    expect(phoneInput).toHaveValue("+591 5616 5165 1651 ");
+  });
+
   it("shows format errors for the phone and the email", async () => {
     const { onSubmit, user } = renderForm({
       ...SAVED_VALUES,
@@ -109,7 +135,7 @@ describe("PersonalInfoForm", () => {
 
     expect(onSubmit).not.toHaveBeenCalled();
     expect(screen.getByLabelText(/Teléfono/)).toHaveAccessibleDescription(
-      PROFILE_VALIDATION_MESSAGES.invalidPhone,
+      `${PHONE_HINT} ${PROFILE_VALIDATION_MESSAGES.invalidPhone}`,
     );
     expect(screen.getByLabelText(/Correo personal/)).toHaveAccessibleDescription(
       PROFILE_VALIDATION_MESSAGES.invalidEmail,

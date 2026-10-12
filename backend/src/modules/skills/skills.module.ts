@@ -7,17 +7,19 @@ import { UserSkillController } from './controllers/user-skill.controller.js';
 import { SkillMapper } from './mappers/skill.mapper.js';
 import { SkillRepository } from './repositories/skill.repository.js';
 import { UserSkillRepository } from './repositories/user-skill.repository.js';
-import { SkillService } from './services/skill.service.js';
+import { SkillCatalogService } from './services/skill-catalog.service.js';
+import { UserSkillService } from './services/user-skill.service.js';
 
 @Module({
   imports: [PrismaModule, JwtAuthModule, ProfileModule],
   controllers: [SkillController, UserSkillController],
   providers: [
-    SkillService,
+    SkillCatalogService,
+    UserSkillService,
     SkillRepository,
     UserSkillRepository,
     SkillMapper,
   ],
-  exports: [SkillService],
+  exports: [SkillCatalogService, UserSkillService],
 })
 export class SkillsModule {}

@@ -1,19 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { CityNotFoundException } from '../exceptions/city-not-found.exception.js';
 import { ProfileNotFoundException } from '../exceptions/profile-not-found.exception.js';
 import { ProfileMapper } from '../mappers/profile.mapper.js';
-import { CityRepository } from '../repositories/city.repository.js';
 import { ProfileRepository } from '../repositories/profile.repository.js';
 import type { UpdatePersonalInfoRequest } from '../requests/update-personal-info.request.js';
 import type { UpdatePresentationRequest } from '../requests/update-presentation.request.js';
 import type { ProfileCityResponse } from '../responses/profile-city.response.js';
 import type { ProfileResponse } from '../responses/profile.response.js';
+import { CityCatalogService } from './city-catalog.service.js';
 
 @Injectable()
 export class ProfileService {
   constructor(
     private readonly profileRepository: ProfileRepository,
-    private readonly cityRepository: CityRepository,
+    private readonly cityCatalogService: CityCatalogService,
     private readonly profileMapper: ProfileMapper,
   ) {}
 
@@ -32,10 +31,7 @@ export class ProfileService {
     request: UpdatePersonalInfoRequest,
   ): Promise<ProfileResponse> {
     await this.ensureProfileExists(userId);
-
-    if (!(await this.cityRepository.exists(request.cityId))) {
-      throw new CityNotFoundException();
-    }
+    await this.cityCatalogService.ensureCityExists(request.cityId);
 
     const record = await this.profileRepository.update(userId, request);
     return this.profileMapper.toResponse(record);
@@ -52,8 +48,7 @@ export class ProfileService {
   }
 
   async listCities(): Promise<ProfileCityResponse[]> {
-    const cities = await this.cityRepository.findAll();
-    return cities.map((city) => this.profileMapper.toCityResponse(city));
+    return this.cityCatalogService.listCities();
   }
 
   private async ensureProfileExists(userId: string): Promise<void> {
