@@ -5,6 +5,7 @@ import { NlpService } from './services/nlp.service.js';
 import { SkillsClassifierService } from './services/skills-classifier.service.js';
 import { VacancyRankingService } from './services/vacancy-ranking.service.js';
 import { WeightedScoreService } from './services/weighted-score.service.js';
+import { SkillDictionaryService } from '../job-connect/services/skill-dictionary.service.js';
 
 @Module({
   controllers: [MatchingController],
@@ -14,6 +15,7 @@ import { WeightedScoreService } from './services/weighted-score.service.js';
     SkillsClassifierService,
     VacancyRankingService,
     WeightedScoreService,
+    SkillDictionaryService,
   ],
   exports: [
     MatchingService,

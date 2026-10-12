@@ -6,13 +6,21 @@ import type {
   MatchingInput,
   MatchingResult,
 } from '../types/matching.types.js';
+import { SkillDictionaryService } from '../../job-connect/services/skill-dictionary.service.js';
+import { SkillsClassifierService } from './skills-classifier.service.js';
 
 @Injectable()
 export class MatchingService {
+  constructor(
+    private readonly skillDictionaryService: SkillDictionaryService,
+    private readonly skillsClassifierService: SkillsClassifierService,
+  ) {}
   analyzeExperience(input: AnalyzeExperienceInput): AnalyzeExperienceResponse {
     const startedAt = performance.now();
+    const textToProcess = input.text || ''; 
+    const { skills: rawSkills } = this.skillDictionaryService.extract(textToProcess);
 
-    const skills: DetectedSkillResponse[] = [];
+    const skills = this.skillsClassifierService.classify(rawSkills, []);
 
     return {
       experienceId: input.experienceId,

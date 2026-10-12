@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { MatchingService } from '../services/matching.service.js';
+import { SkillDictionaryService } from '../../job-connect/services/skill-dictionary.service.js';
+import { SkillsClassifierService } from '../services/skills-classifier.service.js';
+import { NlpService } from '../services/nlp.service.js';
 
 interface RequirementGapResult {
   totalRequired: number;
@@ -58,7 +61,11 @@ describe('MatchingService', () => {
   let service: MatchingService;
 
   beforeEach(() => {
-    service = new MatchingService();
+    const nlpService = new NlpService();
+    const skillsClassifierService = new SkillsClassifierService(nlpService);
+    const skillDictionaryService = new SkillDictionaryService();
+
+    service = new MatchingService(skillDictionaryService, skillsClassifierService);
   });
 
   it('devuelve el id de la experiencia y una lista de habilidades', () => {
