@@ -34,7 +34,7 @@ import { SkillService } from '../services/skill.service.js';
 
 @ApiTags('skills')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+
 @UseInterceptors(ResponseInterceptor)
 @UsePipes(
   new StandardSchemaValidationPipe({
@@ -54,6 +54,7 @@ export class SkillController {
     return this.skillService.listCatalog(request);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('custom')
   @ApiBody(toApiBody(createCustomSkillSchema))
   @ApiCreatedResponse({ description: 'Custom skill, or the existing skill with the same name' })
