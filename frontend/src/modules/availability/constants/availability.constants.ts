@@ -13,6 +13,8 @@ export const BLOCK_MIN_HOUR = 7;
 export const BLOCK_MAX_HOUR = 22;
 export const BLOCK_STEP_MINUTES = 30;
 
+export const TIME_PLACEHOLDER = "--:--";
+
 export const BLOCK_MESSAGES = {
   endBeforeStart: "La hora de fin debe ser posterior a la hora de inicio",
   startInPast: "La hora de inicio ya pasó",
