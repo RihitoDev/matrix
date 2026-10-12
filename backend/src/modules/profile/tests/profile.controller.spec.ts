@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DomainExceptionFilter } from '../../../common/filters/domain-exception.filter.js';
 import { ProfileController } from '../controllers/profile.controller.js';
 import { ProfileService } from '../services/profile.service.js';
+import { CityCatalogService } from '../services/city-catalog.service.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
 const cityId = '22222222-2222-4222-8222-222222222222';
@@ -39,6 +40,8 @@ describe('ProfileController', () => {
     getProfile: ReturnType<typeof vi.fn>;
     updatePersonalInfo: ReturnType<typeof vi.fn>;
     updatePresentation: ReturnType<typeof vi.fn>;
+  };
+  let cityCatalogService: {
     listCities: ReturnType<typeof vi.fn>;
   };
 
@@ -47,6 +50,8 @@ describe('ProfileController', () => {
       getProfile: vi.fn().mockResolvedValue(profile),
       updatePersonalInfo: vi.fn().mockResolvedValue(profile),
       updatePresentation: vi.fn().mockResolvedValue(profile),
+    };
+    cityCatalogService = {
       listCities: vi.fn().mockResolvedValue([{ id: cityId, title: 'Cochabamba' }]),
     };
 
@@ -55,6 +60,7 @@ describe('ProfileController', () => {
       controllers: [ProfileController],
       providers: [
         { provide: ProfileService, useValue: service },
+        { provide: CityCatalogService, useValue: cityCatalogService },
         { provide: APP_FILTER, useClass: DomainExceptionFilter },
       ],
     }).compile();

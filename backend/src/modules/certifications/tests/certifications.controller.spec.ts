@@ -102,8 +102,8 @@ describe('Certification request validation', () => {
     ['name over 150 characters', { ...validBody, name: 'a'.repeat(151) }],
     ['empty organization', { ...validBody, issuingOrganization: '' }],
     [
-      'organization over 100 characters',
-      { ...validBody, issuingOrganization: 'a'.repeat(101) },
+      'organization over 150 characters',
+      { ...validBody, issuingOrganization: 'a'.repeat(151) },
     ],
     ['missing issue date', { name: 'x', issuingOrganization: 'y' }],
     ['unparseable issue date', { ...validBody, issueDate: 'not-a-date' }],

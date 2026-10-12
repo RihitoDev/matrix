@@ -22,9 +22,9 @@ export function ConfirmDeleteDialog({
   return (
     <AlertDialog open={isOpen} onOpenChange={isDeleting ? undefined : onCancel}>
       <AlertDialogContent className="max-w-md gap-0 rounded-2xl border border-border bg-surface p-8 text-ink shadow-lg ring-0 data-[size=default]:max-w-md data-[size=default]:sm:max-w-md">
-        <AlertDialogHeader className="place-items-start text-left">
-          <AlertDialogTitle className="font-tight text-[22px] font-bold text-ink">{title}</AlertDialogTitle>
-          <AlertDialogDescription className="mt-2 text-[15px] text-text-secondary">{message}</AlertDialogDescription>
+        <AlertDialogHeader className="min-w-0 place-items-start text-left">
+          <AlertDialogTitle className="min-w-0 break-words font-tight text-[22px] font-bold text-ink [overflow-wrap:anywhere]">{title}</AlertDialogTitle>
+          <AlertDialogDescription className="mt-2 min-w-0 break-words text-[15px] text-text-secondary [overflow-wrap:anywhere]">{message}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="mx-0 mb-0 mt-8 flex-row justify-end gap-3 border-t-0 bg-transparent p-0">
           <AlertDialogCancel
