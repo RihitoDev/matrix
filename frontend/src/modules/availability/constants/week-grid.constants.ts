@@ -13,7 +13,7 @@ export const STATE_BUTTON_VARIANT: Record<AvailabilityBlockState, "outline" | "d
 
 export const STATE_BUTTON_CLASSES: Record<AvailabilityBlockState, string> = {
   free: "",
-  pending: "border-dashed border-muted-foreground",
+  pending: "border-2 border-dashed border-ink",
   confirmed: "bg-ink border-ink text-white hover:bg-ink",
 };
 
