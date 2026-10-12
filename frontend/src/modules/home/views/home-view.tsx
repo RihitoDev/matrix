@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useHome } from "../hooks/use-home";
 import { Button } from "@/components/ui/button";
-import { MissingRequirements } from "@/components/missing-requirements";
+import { MissingRequirements } from "@/modules/matching/components/missing-requirements";
 import {
   Card,
   CardHeader,
