@@ -3,11 +3,10 @@ import { ROUTE_ARGS_METADATA } from '@nestjs/common/constants.js';
 import { describe, expect, it } from 'vitest';
 import { CurrentUserId } from '../decorators/current-user-id.decorator.js';
 import { MissingUserException } from '../exceptions/missing-user.exception.js';
-import type { AuthenticatedRequest } from '../types/authenticated-request.type.js';
+import type { AuthenticatedRequest } from '../types/authenticated-request.types.js';
 
 type ParamFactory = (data: unknown, context: ExecutionContext) => string;
 
-// Reads the factory that Nest stores when the decorator is applied to a parameter.
 function getFactory(): ParamFactory {
   class TestController {
     handler(): void {}
@@ -29,7 +28,7 @@ describe('CurrentUserId', () => {
   const factory = getFactory();
 
   it('returns the id of the user authenticated by the guard', () => {
-    const request = { user: { userId: 'user-1', roleTag: 'titulado' } };
+    const request = { user: { id: 'user-1', email: 'user@umss.edu', roles: ['titulado'] } };
 
     expect(factory(undefined, buildContext(request))).toBe('user-1');
   });

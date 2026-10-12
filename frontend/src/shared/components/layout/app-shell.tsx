@@ -25,6 +25,7 @@ export function AppShell({
   children,
   items,
   user,
+  fullBleed = false,
   brand,
   sidebarFooter,
   sidebarItemClassName,
@@ -45,11 +46,11 @@ export function AppShell({
       />
       <SidebarInset className="bg-surface-soft">
         {header ?? (
-          <header className="flex items-center px-4 py-3">
+          <header className={fullBleed ? "absolute left-4 top-3 z-10 flex items-center" : "flex items-center px-4 py-3"}>
             <SidebarToggleButton />
           </header>
         )}
-        <div className={cn("flex-1", contentClassName ?? "px-8 pb-8")}>{children}</div>
+        <div className={cn("flex-1", contentClassName ?? (fullBleed ? "flex min-w-0 flex-col" : "px-8 pb-8"))}>{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

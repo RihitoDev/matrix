@@ -3,6 +3,7 @@ import {
   ExecutionContext,
   Injectable,
   NestInterceptor,
+  StreamableFile,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -56,7 +57,7 @@ export class ResponseInterceptor<T = unknown> implements NestInterceptor<T> {
 
     return next.handle().pipe(
       map((value: unknown) => {
-        if (isAlreadyFormatted(value)) {
+        if (value instanceof StreamableFile || isAlreadyFormatted(value)) {
           return value;
         }
 

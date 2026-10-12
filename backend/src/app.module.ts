@@ -11,6 +11,9 @@ import { PrismaModule } from './common/prisma/prisma.module.js';
 import { AccessRequestsModule } from './modules/access-requests/access-requests.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { AvailabilityModule } from './modules/availability/availability.module.js';
+import { EventRegistrationsModule } from './modules/event-registrations/event-registrations.module.js';
+import { EventCategoriesModule } from './modules/event-categories/event-categories.module.js';
+import { EventsModule } from './modules/events/events.module.js';
 import { CertificationDocumentsModule } from './modules/certification-documents/certification-documents.module.js';
 import { CertificationsModule } from './modules/certifications/certifications.module.js';
 import { CvModule } from './modules/cv/cv.module.js';
@@ -22,15 +25,17 @@ import { ProfileModule } from './modules/profile/profile.module.js';
 import { SkillsModule } from './modules/skills/skills.module.js';
 import { TechnicalAreasModule } from './modules/technical-areas/technical-areas.module.js';
 import { WorkExperienceModule } from './modules/work-experience/work-experience.module.js';
+import { ReportsModule } from './modules/reports/reports.module.js';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+    ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     AvailabilityModule,
     AuthModule,
+    EventsModule,
+    EventCategoriesModule,
+    EventRegistrationsModule,
     ProfileModule,
     CvModule,
     SkillsModule,
@@ -43,6 +48,7 @@ import { WorkExperienceModule } from './modules/work-experience/work-experience.
     OrientationTypesModule,
     MentorsModule,
     AccessRequestsModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -50,6 +56,7 @@ import { WorkExperienceModule } from './modules/work-experience/work-experience.
     { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
     { provide: APP_FILTER, useClass: HttpExceptionFilter }, // mapea Zod a 422
     { provide: APP_FILTER, useClass: DomainExceptionFilter },
+    { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
     { provide: APP_PIPE, useClass: ZodValidationPipe },
   ],
 })

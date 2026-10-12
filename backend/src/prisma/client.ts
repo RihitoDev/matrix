@@ -212,6 +212,11 @@ export type JobOfferContractType = Prisma.JobOfferContractTypeModel
  */
 export type JobOfferStatus = Prisma.JobOfferStatusModel
 /**
+ * Model AdminExportHistory
+ * 
+ */
+export type AdminExportHistory = Prisma.AdminExportHistoryModel
+/**
  * Model AccessRequestStatus
  * 
  */

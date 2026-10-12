@@ -3,4 +3,11 @@ export interface ApiResponse<T> {
   ok: boolean;
   detail: string;
   data: T;
+  page?: number;
+  offset?: number;
+}
+
+export interface PaginatedData<T> {
+  items: T[];
+  totalItems: number;
 }

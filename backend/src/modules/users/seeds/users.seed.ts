@@ -13,25 +13,44 @@ import type { SeedUserDefinition } from '../types/seed-user-definition.types.js'
 import type { SeedUsers } from '../types/seed-users.types.js';
 import type { UsersSeedResult } from '../types/users-seed-result.types.js';
 
-export const hashSeedPassword = (): Promise<string> => bcrypt.hash(SEED_PASSWORD, BCRYPT_ROUNDS);
+export const hashSeedPassword = (): Promise<string> =>
+  bcrypt.hash(SEED_PASSWORD, BCRYPT_ROUNDS);
 
-async function seedRoles(tx: Prisma.TransactionClient): Promise<Map<string, string>> {
-  await tx.role.createMany({ data: ROLE_NAMES.map((name) => ({ name })), skipDuplicates: true });
-  const roles = await tx.role.findMany({ where: { name: { in: [...ROLE_NAMES] } } });
+async function seedRoles(
+  tx: Prisma.TransactionClient,
+): Promise<Map<string, string>> {
+  await tx.role.createMany({
+    data: ROLE_NAMES.map((name) => ({ name })),
+    skipDuplicates: true,
+  });
+  const roles = await tx.role.findMany({
+    where: { name: { in: [...ROLE_NAMES] } },
+  });
   return new Map(roles.map((role) => [role.name, role.id]));
 }
 
-async function removeLegacyRoles(tx: Prisma.TransactionClient): Promise<number> {
-  const legacy = await tx.role.findMany({ where: { name: { in: LEGACY_ROLES } }, select: { id: true } });
+async function removeLegacyRoles(
+  tx: Prisma.TransactionClient,
+): Promise<number> {
+  const legacy = await tx.role.findMany({
+    where: { name: { in: LEGACY_ROLES } },
+    select: { id: true },
+  });
   if (legacy.length === 0) {
     return 0;
   }
 
   const ids = legacy.map((role) => role.id);
-  const seedEmails = [EPIC_1_TEST_USER, ...SEED_USERS].map((user) => user.email);
-  await tx.userRole.deleteMany({ where: { roleId: { in: ids }, user: { email: { in: seedEmails } } } });
+  const seedEmails = [EPIC_1_TEST_USER, ...SEED_USERS].map(
+    (user) => user.email,
+  );
+  await tx.userRole.deleteMany({
+    where: { roleId: { in: ids }, user: { email: { in: seedEmails } } },
+  });
 
-  const references = await tx.userRole.count({ where: { roleId: { in: ids } } });
+  const references = await tx.userRole.count({
+    where: { roleId: { in: ids } },
+  });
   if (references > 0) {
     return 0;
   }
@@ -60,7 +79,9 @@ async function ensureUserWithRole(
     },
   });
 
-  const assigned = await tx.userRole.findFirst({ where: { userId: user.id, roleId, deletedAt: null } });
+  const assigned = await tx.userRole.findFirst({
+    where: { userId: user.id, roleId, deletedAt: null },
+  });
   if (assigned) {
     return { user, roleAssigned: false };
   }
@@ -69,7 +90,10 @@ async function ensureUserWithRole(
   return { user, roleAssigned: true };
 }
 
-export async function seedUsers(tx: Prisma.TransactionClient, password: string): Promise<UsersSeedResult> {
+export async function seedUsers(
+  tx: Prisma.TransactionClient,
+  password: string,
+): Promise<UsersSeedResult> {
   const roleIds = await seedRoles(tx);
   const legacyRoles = await removeLegacyRoles(tx);
 
@@ -82,19 +106,34 @@ export async function seedUsers(tx: Prisma.TransactionClient, password: string):
   };
 
   let userRoles = 0;
-  const testUser = await ensureUserWithRole(tx, EPIC_1_TEST_USER, password, roleIdOf(EPIC_1_TEST_USER.role));
+  const testUser = await ensureUserWithRole(
+    tx,
+    EPIC_1_TEST_USER,
+    password,
+    roleIdOf(EPIC_1_TEST_USER.role),
+  );
   if (testUser.roleAssigned) {
     userRoles += 1;
   }
 
-  const users: Partial<SeedUsers> = {};
+  const users: Partial<SeedUsers> = { eventGraduate: testUser.user };
   for (const definition of SEED_USERS) {
-    const result = await ensureUserWithRole(tx, definition, password, roleIdOf(definition.role));
+    const result = await ensureUserWithRole(
+      tx,
+      definition,
+      password,
+      roleIdOf(definition.role),
+    );
     users[definition.key] = result.user;
     if (result.roleAssigned) {
       userRoles += 1;
     }
   }
 
-  return { users: users as SeedUsers, roles: ROLE_NAMES.length, userRoles, legacyRoles };
+  return {
+    users: users as SeedUsers,
+    roles: ROLE_NAMES.length,
+    userRoles,
+    legacyRoles,
+  };
 }

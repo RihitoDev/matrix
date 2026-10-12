@@ -85,6 +85,7 @@ export const ModelName = {
   JobOfferModality: 'JobOfferModality',
   JobOfferContractType: 'JobOfferContractType',
   JobOfferStatus: 'JobOfferStatus',
+  AdminExportHistory: 'AdminExportHistory',
   AccessRequestStatus: 'AccessRequestStatus',
   AccessRequestDocumentType: 'AccessRequestDocumentType',
   File: 'File',
@@ -556,6 +557,16 @@ export const JobOfferStatusScalarFieldEnum = {
 } as const
 
 export type JobOfferStatusScalarFieldEnum = (typeof JobOfferStatusScalarFieldEnum)[keyof typeof JobOfferStatusScalarFieldEnum]
+
+
+export const AdminExportHistoryScalarFieldEnum = {
+  userId: 'userId',
+  createdAt: 'createdAt',
+  reportName: 'reportName',
+  reportType: 'reportType'
+} as const
+
+export type AdminExportHistoryScalarFieldEnum = (typeof AdminExportHistoryScalarFieldEnum)[keyof typeof AdminExportHistoryScalarFieldEnum]
 
 
 export const AccessRequestStatusScalarFieldEnum = {

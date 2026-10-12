@@ -431,6 +431,7 @@ export const ModelName = {
   JobOfferModality: 'JobOfferModality',
   JobOfferContractType: 'JobOfferContractType',
   JobOfferStatus: 'JobOfferStatus',
+  AdminExportHistory: 'AdminExportHistory',
   AccessRequestStatus: 'AccessRequestStatus',
   AccessRequestDocumentType: 'AccessRequestDocumentType',
   File: 'File',
@@ -452,7 +453,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "activationOtp"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "activationOtp"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2972,6 +2973,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AdminExportHistory: {
+      payload: Prisma.$AdminExportHistoryPayload<ExtArgs>
+      fields: Prisma.AdminExportHistoryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AdminExportHistoryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AdminExportHistoryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload>
+        }
+        findFirst: {
+          args: Prisma.AdminExportHistoryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AdminExportHistoryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload>
+        }
+        findMany: {
+          args: Prisma.AdminExportHistoryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload>[]
+        }
+        create: {
+          args: Prisma.AdminExportHistoryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload>
+        }
+        createMany: {
+          args: Prisma.AdminExportHistoryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AdminExportHistoryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload>[]
+        }
+        delete: {
+          args: Prisma.AdminExportHistoryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload>
+        }
+        update: {
+          args: Prisma.AdminExportHistoryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload>
+        }
+        deleteMany: {
+          args: Prisma.AdminExportHistoryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AdminExportHistoryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AdminExportHistoryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload>[]
+        }
+        upsert: {
+          args: Prisma.AdminExportHistoryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdminExportHistoryPayload>
+        }
+        aggregate: {
+          args: Prisma.AdminExportHistoryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAdminExportHistory>
+        }
+        groupBy: {
+          args: Prisma.AdminExportHistoryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminExportHistoryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AdminExportHistoryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdminExportHistoryCountAggregateOutputType> | number
+        }
+      }
+    }
     AccessRequestStatus: {
       payload: Prisma.$AccessRequestStatusPayload<ExtArgs>
       fields: Prisma.AccessRequestStatusFieldRefs
@@ -3904,6 +3979,16 @@ export const JobOfferStatusScalarFieldEnum = {
 export type JobOfferStatusScalarFieldEnum = (typeof JobOfferStatusScalarFieldEnum)[keyof typeof JobOfferStatusScalarFieldEnum]
 
 
+export const AdminExportHistoryScalarFieldEnum = {
+  userId: 'userId',
+  createdAt: 'createdAt',
+  reportName: 'reportName',
+  reportType: 'reportType'
+} as const
+
+export type AdminExportHistoryScalarFieldEnum = (typeof AdminExportHistoryScalarFieldEnum)[keyof typeof AdminExportHistoryScalarFieldEnum]
+
+
 export const AccessRequestStatusScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -4283,6 +4368,7 @@ export type GlobalOmitConfig = {
   jobOfferModality?: Prisma.JobOfferModalityOmit
   jobOfferContractType?: Prisma.JobOfferContractTypeOmit
   jobOfferStatus?: Prisma.JobOfferStatusOmit
+  adminExportHistory?: Prisma.AdminExportHistoryOmit
   accessRequestStatus?: Prisma.AccessRequestStatusOmit
   accessRequestDocumentType?: Prisma.AccessRequestDocumentTypeOmit
   file?: Prisma.FileOmit
