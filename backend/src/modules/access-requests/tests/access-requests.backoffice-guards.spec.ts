@@ -12,9 +12,8 @@ import { RolesGuard } from '../../../common/guards/roles.guard.js';
 
 const ID = '3f2b8a54-6d2e-4c7e-9a41-0b1d5f6c7e88';
 
-// Guards REALES (JwtAuthGuard y RolesGuard) con JwtService y Prisma simulados
 describe('AccessRequestsController: guards compartidos del backoffice', () => {
-  const service = { list: vi.fn(), getDetail: vi.fn(), approve: vi.fn(), getStatus: vi.fn(), create: vi.fn() };
+  const service = { list: vi.fn(), getSummary: vi.fn(), getDetail: vi.fn(), approve: vi.fn(), getStatus: vi.fn(), create: vi.fn() };
   const jwtService = { verifyAsync: vi.fn() };
   const prisma = { user: { findFirst: vi.fn() } };
   let app: INestApplication;
@@ -50,6 +49,7 @@ describe('AccessRequestsController: guards compartidos del backoffice', () => {
       roles: [{ role: { name: where.id === 'admin-1' ? 'administrativo' : 'titulado' } }],
     }));
     service.list.mockResolvedValue({ data: { items: [], total: 0 }, page: 1, offset: 0 });
+    service.getSummary.mockResolvedValue({ pendingCount: 0 });
     service.getDetail.mockResolvedValue({ id: ID });
     service.getStatus.mockResolvedValue({ requestCode: 'SOL-2026-0001' });
     service.create.mockResolvedValue({ id: ID });
@@ -76,6 +76,18 @@ describe('AccessRequestsController: guards compartidos del backoffice', () => {
     const response = await request(app.getHttpServer()).get('/access-requests').set('Authorization', 'Bearer token-admin');
     expect(response.status).toBe(200);
     expect(service.list).toHaveBeenCalledOnce();
+  });
+
+  it('el resumen exige sesión de administrativo: 401 sin token, 403 con titulado y 200 con administrativo', async () => {
+    const anonymous = await request(app.getHttpServer()).get('/access-requests/summary');
+    const titulado = await request(app.getHttpServer()).get('/access-requests/summary').set('Authorization', 'Bearer token-titulado');
+    expect([anonymous.status, titulado.status]).toEqual([401, 403]);
+    expect(service.getSummary).not.toHaveBeenCalled();
+
+    const admin = await request(app.getHttpServer()).get('/access-requests/summary').set('Authorization', 'Bearer token-admin');
+    expect(admin.status).toBe(200);
+    expect(admin.body).toEqual({ pendingCount: 0 });
+    expect(service.getDetail).not.toHaveBeenCalled();
   });
 
   it('el detalle recibe al administrador de la sesión como persona revisora', async () => {

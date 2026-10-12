@@ -5,8 +5,8 @@ import type { ReviewListItem } from "../types/request-review.types";
 import { RequestInboxView } from "./request-inbox-view";
 
 const listRequests = vi.spyOn(requestReviewService, "listRequests");
-// Las llamadas de listado llevan 2 argumentos; los conteos de las pestañas, 3 (limit=1)
-const listCalls = () => listRequests.mock.calls.filter((call) => call.length === 2);
+const getSummary = vi.spyOn(requestReviewService, "getSummary");
+const listCalls = () => listRequests.mock.calls.filter((call) => call[2] === undefined).map((call) => [call[0], call[1]]);
 
 function row(index: number, status: ReviewListItem["status"] = "pending"): ReviewListItem {
   return {
@@ -21,10 +21,26 @@ function row(index: number, status: ReviewListItem["status"] = "pending"): Revie
   };
 }
 
+const SUMMARY = {
+  pendingCount: 18,
+  pendingOver24hCount: 5,
+  decidedTodayCount: 7,
+  approvedTodayCount: 6,
+  rejectedTodayCount: 1,
+  averageReviewHours: 21,
+  reviewTimeGoalHours: 48,
+  rejectedThisMonthCount: 5,
+  topRejectionReason: null,
+};
+
 const page = (items: ReviewListItem[], total = items.length) => ({ ok: true as const, data: { items, total, page: 1, offset: 0 } });
 
 describe("RequestInboxView", () => {
-  beforeEach(() => listRequests.mockReset());
+  beforeEach(() => {
+    listRequests.mockReset();
+    getSummary.mockReset();
+    getSummary.mockResolvedValue({ ok: true, data: SUMMARY });
+  });
   afterEach(() => cleanup());
 
   it("carga la pestaña Pendientes, muestra el esqueleto y luego las filas", async () => {
@@ -115,6 +131,20 @@ describe("RequestInboxView", () => {
       expect(screen.queryByRole("alert")).toBeNull();
     });
 
+    it("las pestañas no generan scroll vertical: la lista oculta el desborde vertical y la línea activa queda dentro", async () => {
+      listRequests.mockResolvedValue(page([row(1)]));
+      render(<RequestInboxView />);
+      await screen.findByText("Persona 1");
+
+      const list = screen.getByRole("tablist");
+      expect(list).toHaveClass("overflow-x-auto", "overflow-y-hidden");
+      const tabClasses = screen.getByRole("tab", { name: /^Pendientes/ }).className;
+      expect(tabClasses).toContain("after:bottom-0");
+      expect(tabClasses).not.toContain("after:bottom-[-5px]");
+      expect(list.className).toContain("group-data-horizontal/tabs:h-12");
+      expect(tabClasses).toContain("h-full");
+    });
+
     it("la cabecera y la pestaña activa siguen el diseño", async () => {
       listRequests.mockResolvedValue(page([row(1)]));
       render(<RequestInboxView />);
@@ -132,8 +162,8 @@ describe("RequestInboxView", () => {
     await screen.findByText("Persona 1");
 
     expect(container.firstElementChild).toHaveClass("w-full", "min-w-0");
-    const card = container.querySelector(".rounded-\\[10px\\].border");
-    expect(card).toHaveClass("w-full", "min-w-0", "overflow-hidden");
+    const card = container.querySelector("section > div.overflow-hidden");
+    expect(card).toHaveClass("relative", "w-full", "min-w-0", "overflow-hidden");
     expect(container.querySelector("[data-slot='table-container']")).toHaveClass("w-full", "overflow-x-auto");
     expect(container.querySelector("section")).toHaveClass("p-8");
   });

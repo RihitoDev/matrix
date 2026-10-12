@@ -31,7 +31,6 @@ async function pick(name: string, option: string) {
   await user.click(await screen.findByRole("option", { name: option }));
 }
 
-// Llena todo con datos válidos, salvo lo que se omita
 async function fillForm(skip: string[] = []) {
   const text: Array<[string, RegExp, string]> = [
     ["firstName", /^Nombres/, "Ana María"],
@@ -224,7 +223,7 @@ describe("PersonalDataForm: criterios de #500 en el formulario", () => {
 
     await submitForm();
 
-    expect(screen.getByText("Los nombres solo pueden contener letras y espacios")).toBeInTheDocument();
+    expect(screen.getByText("Los nombres solo pueden contener letras, espacios, guiones y apóstrofes")).toBeInTheDocument();
     expect(screen.getByText("El código SIS solo puede contener dígitos")).toBeInTheDocument();
     expect(create).not.toHaveBeenCalled();
   });

@@ -28,6 +28,15 @@ import type { UpdateAccessRequestDto } from '../requests/update-access-request.s
 import { ACCESS_REQUEST_DOCUMENT_TYPE, ACCESS_REQUEST_STATUS } from '../types/access-request.enum.js';
 import type { AttachDocumentInput } from '../types/uploaded-file.types.js';
 import { DUPLICATE_LABELS } from '../constants/duplicate-labels.constants.js';
+import { INBOX_PERIOD_DAYS } from '../constants/inbox-filters.constants.js';
+import {
+  HOUR_MS,
+  PENDING_ALERT_HOURS,
+  REVIEW_TIME_GOAL_HOURS,
+  REVIEW_TIME_WINDOW_DAYS,
+} from '../constants/inbox-summary.constants.js';
+import { DAY_MS } from '../../../common/constants/date-time.constants.js';
+import { toBoliviaTime, toUtcIso } from '../../../common/utils/date-time.js';
 
 type DuplicateField = keyof typeof DUPLICATE_LABELS;
 
@@ -77,8 +86,6 @@ export class AccessRequestsService {
       throw new AccessRequestNotEditableException('La solicitud ya fue enviada y no se puede eliminar');
     }
 
-    // TODO: primero se elimina la solicitud (condicional por estado draft) y después el archivo, para no destruir el documento de una solicitud enviada en una carrera.
-    // Si falla el segundo paso queda un archivo huérfano que habrá que limpiar en el futuro.
     await this.accessRequestsRepository.deleteDraft(id);
 
     if (current.documentFileId) {
@@ -101,7 +108,6 @@ export class AccessRequestsService {
     if (!file) {
       throw new MissingDocumentFileException();
     }
-    // Se valida antes de crear el archivo para no dejar huérfanos por un tipo inválido
     if (!this.isDocumentType(documentType)) {
       throw new InvalidDocumentTypeException();
     }
@@ -182,7 +188,6 @@ export class AccessRequestsService {
     return toAccessRequestDetail(updated);
   }
 
-  // Solo se aprueba desde in_review; el código de activación se emite después y su fallo no revierte la aprobación
   async approve(id: string, reviewerId: string) {
     const current = await this.accessRequestsRepository.findDetailById(id);
     if (!current || current.status.title === ACCESS_REQUEST_STATUS.DRAFT) {
@@ -201,7 +206,6 @@ export class AccessRequestsService {
     return { id, status: ACCESS_REQUEST_STATUS.APPROVED, activationCodeSent };
   }
 
-  // Solo se rechaza desde in_review y con motivo; el aviso por correo se envía después y su fallo no revierte el rechazo
   async reject(id: string, reviewerId: string, reason: string) {
     const current = await this.accessRequestsRepository.findDetailById(id);
     if (!current || current.status.title === ACCESS_REQUEST_STATUS.DRAFT) {
@@ -234,9 +238,11 @@ export class AccessRequestsService {
     return this.filesService.getContent(current.documentFileId);
   }
 
-  // Forma { data, page, offset } del contrato paginado; el total viaja dentro de data
-  async list(query: ListAccessRequestsQuery) {
-    const { rows, total } = await this.accessRequestsRepository.findPage(query);
+  async list(query: ListAccessRequestsQuery, now: Date = new Date()) {
+    const { period, ...filters } = query;
+    const days = INBOX_PERIOD_DAYS[period];
+    const submittedFrom = days === undefined ? undefined : new Date(now.getTime() - days * DAY_MS);
+    const { rows, total } = await this.accessRequestsRepository.findPage({ ...filters, submittedFrom });
     return {
       data: { items: rows.map(toAccessRequestListItem), total },
       page: query.page,
@@ -244,7 +250,42 @@ export class AccessRequestsService {
     };
   }
 
-  // Un código inexistente y un correo distinto dan el mismo 404 para no revelar si la solicitud existe
+  async getSummary(now: Date = new Date()) {
+    const { date: boliviaToday } = toBoliviaTime(now);
+    const todayStart = new Date(toUtcIso(boliviaToday, '00:00'));
+    const monthStart = new Date(toUtcIso(`${boliviaToday.slice(0, 8)}01`, '00:00'));
+    const windowStart = new Date(now.getTime() - REVIEW_TIME_WINDOW_DAYS * DAY_MS);
+    const alertCutoff = new Date(now.getTime() - PENDING_ALERT_HOURS * HOUR_MS);
+    const { PENDING, APPROVED, REJECTED } = ACCESS_REQUEST_STATUS;
+
+    const [pendingCount, pendingOver24hCount, approvedTodayCount, rejectedTodayCount, rejectedThisMonthCount, reviewTimes] =
+      await Promise.all([
+        this.accessRequestsRepository.countByStatus(PENDING),
+        this.accessRequestsRepository.countByStatus(PENDING, { submittedBefore: alertCutoff }),
+        this.accessRequestsRepository.countByStatus(APPROVED, { reviewedFrom: todayStart }),
+        this.accessRequestsRepository.countByStatus(REJECTED, { reviewedFrom: todayStart }),
+        this.accessRequestsRepository.countByStatus(REJECTED, { reviewedFrom: monthStart }),
+        this.accessRequestsRepository.findReviewTimes(windowStart),
+      ]);
+
+    const hours = reviewTimes.flatMap((row) =>
+      row.submittedAt && row.reviewedAt ? [(row.reviewedAt.getTime() - row.submittedAt.getTime()) / HOUR_MS] : [],
+    );
+    const averageReviewHours = hours.length === 0 ? null : Math.round(hours.reduce((sum, value) => sum + value, 0) / hours.length);
+
+    return {
+      pendingCount,
+      pendingOver24hCount,
+      decidedTodayCount: approvedTodayCount + rejectedTodayCount,
+      approvedTodayCount,
+      rejectedTodayCount,
+      averageReviewHours,
+      reviewTimeGoalHours: REVIEW_TIME_GOAL_HOURS,
+      rejectedThisMonthCount,
+      topRejectionReason: null,
+    };
+  }
+
   async getStatus(requestCode: string, email: string) {
     const found = await this.accessRequestsRepository.findByRequestCode(requestCode, email.trim().toLowerCase());
     if (!found) {
@@ -268,13 +309,10 @@ export class AccessRequestsService {
     return Object.values<string>(ACCESS_REQUEST_DOCUMENT_TYPE).includes(value as string);
   }
 
-  // Un fallo al borrar no debe romper la operación principal: el archivo queda huérfano
-  // TODO: limpiar archivos huérfanos si falla el borrado del anterior
   private async discardFile(fileId: string) {
     try {
       await this.filesService.delete(fileId);
     } catch {
-      // FileNotFoundException u otro error: se ignora a propósito (ver TODO)
     }
   }
 

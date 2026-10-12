@@ -16,4 +16,11 @@ describe("RejectDialog: estilo", () => {
     fireEvent.click(cancel);
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
+
+  it("la indicación parte las palabras largas para no desbordar el diálogo", async () => {
+    render(<RejectDialog detail={detail} open onOpenChange={vi.fn()} onRejected={vi.fn()} />);
+
+    const hint = await screen.findByLabelText("Indicación para el solicitante");
+    expect(hint).toHaveClass("max-w-full", "[overflow-wrap:anywhere]");
+  });
 });
