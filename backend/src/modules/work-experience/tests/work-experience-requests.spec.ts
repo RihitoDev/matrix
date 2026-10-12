@@ -48,8 +48,36 @@ describe('createWorkExperienceSchema', () => {
     { ...validBody, endDate: '31/12/2024' },
     { ...validBody, isCurrent: 'yes' },
     { ...validBody, userId: '11111111-1111-4111-8111-111111111111' },
+    { ...validBody, startDate: '0012-02-10' },
+    { ...validBody, startDate: '1949-12-31' },
+    { ...validBody, endDate: '2999-01-01' },
+    { ...validBody, position: 'a'.repeat(151) },
+    { ...validBody, description: 'b'.repeat(2001) },
   ])('rejects invalid data', (body) => {
     expect(createWorkExperienceSchema.safeParse(body).success).toBe(false);
+  });
+
+  it('accepts the limits of the date range and the texts', () => {
+    expect(
+      createWorkExperienceSchema.safeParse({
+        ...validBody,
+        startDate: '1950-01-01',
+        position: 'a'.repeat(150),
+        description: 'b'.repeat(2000),
+      }).success,
+    ).toBe(true);
+  });
+
+  it('explains why a date before 1950 is rejected', () => {
+    const result = createWorkExperienceSchema.safeParse({
+      ...validBody,
+      startDate: '0012-02-10',
+    });
+
+    expect(result.error?.issues[0]).toMatchObject({
+      path: ['startDate'],
+      message: 'La fecha no puede ser anterior al 1 de enero de 1950.',
+    });
   });
 
   it('requires the mandatory fields', () => {

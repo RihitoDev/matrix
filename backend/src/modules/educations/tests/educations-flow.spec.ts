@@ -16,24 +16,24 @@ import type { EducationPeriodSnapshot } from '../types/education-period-snapshot
 const userId = '11111111-1111-4111-8111-111111111111';
 const otherUserId = '22222222-2222-4222-8222-222222222222';
 const body = {
-  institution: 'University',
-  degree: 'Engineering',
+  institution: 'Universidad Mayor de San Simón (UMSS)',
+  degree: 'Ingeniería Civil',
   startDate: '2020-01-01',
   endDate: '2024-01-01',
 };
 
-// The HTTP stack and repository are real; persistence is isolated to this test.
 describe('Education HTTP flow', () => {
   let app: INestApplication;
   let token: string;
   let otherToken: string;
   const records = new Map<string, EducationRecord>();
 
-  function matching(where: Partial<Pick<EducationRecord, 'id' | 'userId'>>) {
+  function matching(where: { id?: string | { not: string }; userId?: string; startDate?: Date; endDate?: Date | null }) {
     return [...records.values()].filter((record) =>
-      Object.entries(where).every(
-        ([key, value]) => record[key as 'id' | 'userId'] === value,
-      ),
+      (!where.userId || record.userId === where.userId)
+      && (!where.id || (typeof where.id === 'string' ? record.id === where.id : record.id !== where.id.not))
+      && (!where.startDate || record.startDate.getTime() === where.startDate.getTime())
+      && (where.endDate === undefined || record.endDate?.getTime() === where.endDate?.getTime()),
     );
   }
 
@@ -48,6 +48,7 @@ describe('Education HTTP flow', () => {
       .useValue(jwt)
       .overrideProvider(PrismaService)
       .useValue({
+        async $transaction(operation: (client: unknown) => Promise<unknown>) { return operation(this); },
         education: {
           create: ({
             data,
@@ -109,6 +110,84 @@ describe('Education HTTP flow', () => {
     await app.close();
   });
 
+  it('serves the authenticated catalogue without accessing persistence', async () => {
+    const api = request(app.getHttpServer());
+    await api.get('/api/educations/institutions').expect(401);
+    const response = await api.get('/api/educations/institutions').set('Authorization', `Bearer ${token}`).expect(200);
+    expect(response.body.data).toHaveLength(17);
+    const names = response.body.data.map((institution: { name: string }) => institution.name);
+    expect(names).toEqual(expect.arrayContaining(['Universidad Central (UNICEN)', 'Universidad Latinoamericana (ULAT)', 'Universidad Villa de Oropesa (UNIVIOR)']));
+    for (const name of ['Universidad Privada Abierta Latinoamericana (UPAL)', 'Universidad NUR', 'Universidad Pedagógica']) {
+      expect(names).not.toContain(name);
+    }
+    expect(records.size).toBe(0);
+  });
+
+  it('validates university and degree together on POST and partial PATCH, preserving ownership checks', async () => {
+    const api = request(app.getHttpServer());
+    const post = (payload: object) => api.post('/api/educations').set('Authorization', `Bearer ${token}`).send(payload);
+    for (const degree of ['ggggg', 'Medicina', 'Ingeniería en Inteligencia Artificial']) {
+      const response = await post({ ...body, degree }).expect(400);
+      expect(response.body.errors).toEqual(expect.arrayContaining([expect.objectContaining({ field: 'degree' })]));
+    }
+    const created = await post({ ...body, degree: '  ingenieria en informatica ' }).expect(201);
+    expect(created.body.data.degree).toBe('Ingeniería Informática');
+    const id = created.body.data.id;
+    const patch = (payload: object) => api.patch(`/api/educations/${id}`).set('Authorization', `Bearer ${token}`).send(payload);
+    await patch({ institution: 'UPB' }).expect(400);
+    await patch({ degree: 'Ingeniería en Inteligencia Artificial' }).expect(400);
+    expect(records.get(id)?.degree).toBe('Ingeniería Informática');
+    await api.patch(`/api/educations/${id}`).set('Authorization', `Bearer ${otherToken}`)
+      .send({ degree: 'Unknown' }).expect(404);
+    const updated = await patch({ institution: 'UPB', degree: 'Ingeniería de Inteligencia Artificial' }).expect(200);
+    expect(updated.body.data).toMatchObject({ institution: 'Universidad Privada Boliviana (UPB)', degree: 'Ingeniería en Inteligencia Artificial' });
+    await patch({ description: 'Updated' }).expect(200);
+    await patch({ institution: 'UMSS' }).expect(400);
+    expect(records.size).toBe(1);
+  });
+
+  it('detects duplicate records through degree aliases, including legacy stored names', async () => {
+    const api = request(app.getHttpServer());
+    const first = await api.post('/api/educations').set('Authorization', `Bearer ${token}`)
+      .send({ ...body, degree: 'Ingeniería Informática' }).expect(201);
+    records.get(first.body.data.id)!.degree = 'Ingeniería en Informática';
+    await api.post('/api/educations').set('Authorization', `Bearer ${token}`)
+      .send({ ...body, degree: 'Ingeniería Informática' }).expect(409);
+    expect(records.size).toBe(1);
+  });
+
+  it('rejects invalid institutions and early dates on POST and PATCH without changing records', async () => {
+    const api = request(app.getHttpServer());
+    const created = await api.post('/api/educations').set('Authorization', `Bearer ${token}`).send(body).expect(201);
+    for (const change of [{ institution: 'gggggg' }, { institution: 'UNIPOL' }, { institution: 'UPAL' }, { institution: 'NUR' }, { institution: 'Universidad Pedagógica' }, { startDate: '0201-01-01' }, { endDate: '1939-12-31' }]) {
+      const response = await api.post('/api/educations').set('Authorization', `Bearer ${token}`).send({ ...body, ...change }).expect(400);
+      expect(response.body.errors).toEqual(expect.arrayContaining([expect.objectContaining({ field: Object.keys(change)[0] })]));
+      await api.patch(`/api/educations/${created.body.data.id}`).set('Authorization', `Bearer ${token}`).send(change).expect(400);
+    }
+    const listed = await api.get('/api/educations').set('Authorization', `Bearer ${token}`).expect(200);
+    expect(listed.body.data).toEqual([created.body.data]);
+  });
+
+  it('rejects duplicate creates and edits while allowing another owner, degree or period', async () => {
+    const api = request(app.getHttpServer());
+    const post = (payload: object, accessToken = token) => api.post('/api/educations')
+      .set('Authorization', `Bearer ${accessToken}`).send(payload);
+    const first = await post(body).expect(201);
+    const duplicate = await post({ ...body, institution: ' umss ', degree: '  INGENIERIA CIVIL ', description: 'Different text' }).expect(409);
+    expect(duplicate.body.data.code).toBe('EDUCATION_DUPLICATE');
+    expect(records.size).toBe(1);
+    await post(body, otherToken).expect(201);
+    const differentDegree = await post({ ...body, degree: 'Licenciatura en Química' }).expect(201);
+    await post({ ...body, startDate: '2019-01-01' }).expect(201);
+    const collision = await api.patch(`/api/educations/${differentDegree.body.data.id}`)
+      .set('Authorization', `Bearer ${token}`).send({ degree: 'ingenieria civil' }).expect(409);
+    expect(collision.body.data.code).toBe('EDUCATION_DUPLICATE');
+    expect(records.get(differentDegree.body.data.id)?.degree).toBe('Licenciatura en Química');
+    await api.patch(`/api/educations/${first.body.data.id}`)
+      .set('Authorization', `Bearer ${token}`).send({ degree: 'Ingeniería Civil', description: 'Updated' }).expect(200);
+    expect(records.size).toBe(4);
+  });
+
   it('creates multiple records, isolates owners, edits and deletes through authenticated requests', async () => {
     const api = request(app.getHttpServer());
     const first = await api
@@ -119,12 +198,12 @@ describe('Education HTTP flow', () => {
     const second = await api
       .post('/api/educations')
       .set('Authorization', `Bearer ${token}`)
-      .send({ ...body, degree: 'Data Science' })
+      .send({ ...body, degree: 'Ingeniería Electromecánica' })
       .expect(201);
     const other = await api
       .post('/api/educations')
       .set('Authorization', `Bearer ${otherToken}`)
-      .send({ ...body, degree: 'Architecture' })
+      .send({ ...body, degree: 'Ingeniería Eléctrica' })
       .expect(201);
     expect(records.get(first.body.data.id)?.userId).toBe(userId);
     expect(records.get(other.body.data.id)?.userId).toBe(otherUserId);
@@ -158,9 +237,9 @@ describe('Education HTTP flow', () => {
     const edited = await api
       .patch(`/api/educations/${first.body.data.id}`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ degree: 'Updated Engineering' })
+      .send({ degree: 'Ingeniería Química' })
       .expect(200);
-    expect(edited.body.data.degree).toBe('Updated Engineering');
+    expect(edited.body.data.degree).toBe('Ingeniería Química');
     const afterEdit = await api
       .get('/api/educations')
       .set('Authorization', `Bearer ${token}`)
