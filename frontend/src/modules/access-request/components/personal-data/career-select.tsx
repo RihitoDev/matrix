@@ -2,6 +2,7 @@
 
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SELECT_ITEM_CONTRAST_CLASS } from "@/shared/constants/select.constants";
 import { CAREERS } from "../../constants/careers.constants";
 import { useAccessRequestForm } from "../../contexts/access-request-context";
 import { FieldError } from "./field-error";
@@ -35,7 +36,7 @@ export function CareerSelect() {
             <SelectItem
               key={career}
               value={career}
-              className="focus:bg-muted focus:text-foreground"
+              className={SELECT_ITEM_CONTRAST_CLASS}
             >
               {career}
             </SelectItem>

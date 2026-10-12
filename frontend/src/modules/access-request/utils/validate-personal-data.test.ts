@@ -39,11 +39,19 @@ describe("validatePersonalData", () => {
   });
 
   it.each(["Juan3", "Juan_", "Juan  Pérez"])("rechaza el nombre %j", (firstName) => {
-    expect(errorsOf({ firstName }).firstName).toBe("Los nombres solo pueden contener letras y espacios");
+    expect(errorsOf({ firstName }).firstName).toBe("Los nombres solo pueden contener letras, espacios, guiones y apóstrofes");
+  });
+
+  it.each(["Lionel Andrés", "D'Angelo", "D’Angelo", "Pérez-Gómez", "María José Peña Núñez", "de la Cruz", "O'Connor-Smith", "Müller"])("acepta el apellido %j", (lastName) => {
+    expect(errorsOf({ lastName }).lastName).toBeUndefined();
+  });
+
+  it.each(["--", "'", "-Pérez", "Pérez-", "''", "Pérez--Gómez", "D''Angelo", "José123", "<script>", String.fromCodePoint(0x1f600), " ", "'Angelo", "Juan  Pérez"])("rechaza el apellido %j", (lastName) => {
+    expect(errorsOf({ lastName }).lastName).toBeDefined();
   });
 
   it("rechaza apellidos con símbolos y nombres largos", () => {
-    expect(errorsOf({ lastName: "Pérez1" }).lastName).toBe("Los apellidos solo pueden contener letras y espacios");
+    expect(errorsOf({ lastName: "Pérez1" }).lastName).toBe("Los apellidos solo pueden contener letras, espacios, guiones y apóstrofes");
     expect(errorsOf({ firstName: "a".repeat(101) }).firstName).toBe("Los nombres no pueden superar los 100 caracteres");
   });
 
