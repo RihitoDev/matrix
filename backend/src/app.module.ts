@@ -24,6 +24,7 @@ import { TechnicalAreasModule } from './modules/technical-areas/technical-areas.
 import { WorkExperienceModule } from './modules/work-experience/work-experience.module.js';
 import { ReportsModule } from './modules/reports/reports.module.js';
 import { AccessRequestsModule } from './modules/access-requests/access-requests.module.js';
+import { ChatModule } from './modules/chat/chat.module.js';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { AccessRequestsModule } from './modules/access-requests/access-requests.
     MentorsModule,
     AccessRequestsModule,
     ReportsModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [
