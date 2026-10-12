@@ -14,8 +14,8 @@ export function CertificationCard({
   return (
     <article className="flex items-center justify-between gap-4 py-3">
       <div className="min-w-0">
-        <h4 className="text-[15px] font-bold text-ink">{certification.name}</h4>
-        <p className="mt-0.5 text-[13px] text-text-secondary">
+        <h4 className="break-words text-[15px] font-bold text-ink [overflow-wrap:anywhere]">{certification.name}</h4>
+        <p className="mt-0.5 break-words text-[13px] text-text-secondary [overflow-wrap:anywhere]">
           {certification.issuingOrganization} · Obtenida el{" "}
           <time dateTime={certification.issueDate}>{formatIssueDate(certification.issueDate)}</time>
         </p>

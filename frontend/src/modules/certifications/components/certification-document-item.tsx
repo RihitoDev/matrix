@@ -25,7 +25,7 @@ export function CertificationDocumentItem({
         >
           {info?.fileName ?? DEFAULT_DOCUMENT_TITLE}
         </Button>
-        <p className="mt-0.5 text-[13px] text-text-secondary">{subtitle}</p>
+        <p className="mt-0.5 break-words text-[13px] text-text-secondary [overflow-wrap:anywhere]">{subtitle}</p>
       </div>
     </article>
   );
