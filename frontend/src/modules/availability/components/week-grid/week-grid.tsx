@@ -174,7 +174,7 @@ export function WeekGrid({
                 aria-hidden="true"
                 className={cn(
                   "inline-block h-3 w-4 rounded-sm",
-                  "border border-dashed border-muted-foreground",
+                  STATE_BUTTON_CLASSES.pending,
                 )}
               />
               {WEEK_GRID_LEGEND.pending}
