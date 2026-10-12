@@ -99,7 +99,7 @@ export function EducationView() {
     >
       <TrajectorySteps activeStep="education" />
       <FeedbackMessage feedback={pendingDelete ? null : deleteMutation.feedback} />
-      <div className={`grid items-start gap-6 ${isFormOpen ? "grid-cols-2" : "grid-cols-1"}`}>
+      <div className={`grid grid-cols-1 items-start gap-6 ${isFormOpen ? "lg:grid-cols-2" : ""}`}>
         <EducationListCard
           educations={educations}
           isLoading={isLoading}

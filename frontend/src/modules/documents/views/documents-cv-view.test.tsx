@@ -103,30 +103,36 @@ describe("DocumentsCvView", () => {
     expect(screen.queryByRole("link", { name: "Ver certificaciones" })).not.toBeInTheDocument();
   });
 
-  it("renders the select button enabled in the server html to avoid a hydration mismatch", () => {
+  it("renders the same loading state in the server html to avoid a hydration mismatch", () => {
     const html = renderToString(<DocumentsCvView />);
-    const selectButton = html.match(/<button[^>]*>Seleccionar PDF<\/button>/)?.[0];
 
-    expect(selectButton).toBeDefined();
-    expect(selectButton).not.toMatch(/\sdisabled(=|\s|>)/);
+    expect(html).toContain('aria-busy="true"');
+    expect(html).not.toContain("Seleccionar PDF");
   });
 
-  it("renders the same enabled actions before and after the saved cv loads", async () => {
+  it("shows loading placeholders until the saved cv loads", async () => {
     const pendingLoad = createDeferred<SavedCv | null>();
     vi.mocked(documentsService.getCv).mockReturnValueOnce(pendingLoad.promise);
     render(<DocumentsCvView />);
 
-    expect(screen.getByRole("button", { name: "Seleccionar PDF" })).toBeEnabled();
     expect(screen.getByText("Cargando tu CV...")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Seleccionar PDF" })).not.toBeInTheDocument();
 
     await act(async () => {
       pendingLoad.resolve(UPLOADED_CV);
     });
 
     expect(screen.queryByText("Cargando tu CV...")).not.toBeInTheDocument();
+    expect(screen.getByText("CV_Valeria_Quispe.pdf")).toBeInTheDocument();
+    expect(screen.getByText("Ya tienes un CV guardado")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Seleccionar PDF" })).not.toBeInTheDocument();
+  });
+
+  it("shows the upload actions once it loads without a saved cv", async () => {
+    await renderView();
 
     expect(screen.getByRole("button", { name: "Seleccionar PDF" })).toBeEnabled();
-    expect(screen.getByText("CV_Valeria_Quispe.pdf")).toBeInTheDocument();
+    expect(screen.queryByText("Ya tienes un CV guardado")).not.toBeInTheDocument();
   });
 
   it("shows the saved cv returned by the server when opening the page", async () => {
@@ -195,27 +201,33 @@ describe("DocumentsCvView", () => {
     expect(screen.getByText("CV_Valeria_Quispe.pdf")).toBeInTheDocument();
     expect(screen.getByText("Cargado correctamente")).toBeInTheDocument();
     expect(screen.queryByText("CV_Valeria_Quispe.pdf · 1.2 MB")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Confirmar carga" })).toBeDisabled();
+    expect(screen.getByText("Ya tienes un CV guardado")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Confirmar carga" })).not.toBeInTheDocument();
   });
 
   it.each([
-    [415, "El CV debe estar en formato PDF."],
-    [413, "El archivo supera el límite de 5 MB."],
-    [400, "El archivo está vacío. Selecciona otro archivo."],
-    [422, "El archivo está dañado o incompleto. Selecciona otro PDF."],
+    ["415", { response: { status: 415 } }, "El CV debe estar en formato PDF."],
+    ["413", { response: { status: 413 } }, "El archivo supera el límite de 5 MB."],
+    ["400", { response: { status: 400 } }, "El archivo está vacío. Selecciona otro archivo."],
+    [
+      "400 with the corrupted file code",
+      { response: { status: 400, data: { data: { code: "CORRUPTED_FILE" } } } },
+      "El archivo está dañado o incompleto. Selecciona otro PDF.",
+    ],
   ])(
-    "shows a spanish message and clears the selection when the server rejects the file with %i",
-    async (status, message) => {
+    "shows a spanish message and clears the selection when the server rejects the file with %s",
+    async (_status, error, message) => {
       const user = userEvent.setup();
-      vi.mocked(documentsService.getCv).mockResolvedValue(UPLOADED_CV);
-      vi.mocked(documentsService.uploadCv).mockRejectedValueOnce({ response: { status } });
+      vi.mocked(documentsService.uploadCv).mockRejectedValueOnce(error);
       await renderView();
 
       await chooseAndConfirm(user, createFile("CV_Nuevo.pdf"));
 
       expect(await screen.findByRole("alert")).toHaveTextContent(message);
-      expect(screen.getByText("CV_Valeria_Quispe.pdf")).toBeInTheDocument();
-      expect(screen.queryByText("CV_Nuevo.pdf")).not.toBeInTheDocument();
+      expect(screen.queryByText("CV_Nuevo.pdf · 1.2 MB")).not.toBeInTheDocument();
+      expect(
+        screen.getByText("Al confirmar la carga, el archivo se mostrará aquí."),
+      ).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Confirmar carga" })).toBeDisabled();
     },
   );
@@ -309,7 +321,6 @@ describe("DocumentsCvView", () => {
   it("shows the spinner and blocks repeated clicks while uploading", async () => {
     const user = userEvent.setup();
     const pendingUpload = createDeferred<SavedCv>();
-    vi.mocked(documentsService.getCv).mockResolvedValue(UPLOADED_CV);
     vi.mocked(documentsService.uploadCv).mockReturnValueOnce(pendingUpload.promise);
     await renderView();
 
@@ -320,8 +331,6 @@ describe("DocumentsCvView", () => {
     expect(uploadingButton).toBeDisabled();
     expect(uploadingButton.querySelector("svg.lucide-loader-circle")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Seleccionar PDF" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Reemplazar CV" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Eliminar CV" })).toBeDisabled();
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
 
     await user.click(uploadingButton);
@@ -332,11 +341,11 @@ describe("DocumentsCvView", () => {
       pendingUpload.resolve({ ...UPLOADED_CV, fileName: "CV_Nuevo.pdf" });
     });
 
-    expect(screen.getByRole("status")).toHaveTextContent("Tu CV se reemplazó correctamente.");
-    expect(screen.getByRole("button", { name: "Confirmar carga" })).toBeDisabled();
+    expect(screen.getByRole("status")).toHaveTextContent("Tu CV se cargó correctamente.");
+    expect(screen.getByText("CV_Nuevo.pdf")).toBeInTheDocument();
   });
 
-  it("replaces the saved cv from Reemplazar CV", async () => {
+  it("asks to confirm the replacement showing the selected file", async () => {
     const user = userEvent.setup();
     vi.mocked(documentsService.getCv).mockResolvedValue(UPLOADED_CV);
     await renderView();
@@ -346,11 +355,124 @@ describe("DocumentsCvView", () => {
 
     expect(clickSpy).toHaveBeenCalledTimes(1);
 
-    await chooseAndConfirm(user, createFile("CV_Nuevo.pdf"));
+    await user.upload(getFileInput(), createFile("CV_Nuevo.pdf"));
 
-    expect(await screen.findByText("Tu CV se reemplazó correctamente.")).toBeInTheDocument();
+    const dialog = await screen.findByRole("alertdialog", { name: "¿Reemplazar tu CV?" });
+
+    expect(dialog).toHaveAccessibleDescription(
+      "Se reemplazará CV_Valeria_Quispe.pdf por el archivo seleccionado. El archivo anterior se eliminará.",
+    );
+    expect(screen.getByText("CV_Nuevo.pdf · 1.2 MB")).toBeInTheDocument();
+    expect(documentsService.uploadCv).not.toHaveBeenCalled();
+  });
+
+  it("replaces the saved cv after confirming", async () => {
+    const user = userEvent.setup();
+    vi.mocked(documentsService.getCv).mockResolvedValue(UPLOADED_CV);
+    await renderView();
+    const file = createFile("CV_Nuevo.pdf");
+
+    await user.upload(getFileInput(), file);
+    await user.click(await screen.findByRole("button", { name: "Reemplazar" }));
+
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+    expect(documentsService.uploadCv).toHaveBeenCalledWith(file);
+    expect(screen.getByRole("status")).toHaveTextContent("Tu CV se reemplazó correctamente.");
     expect(screen.getByText("CV_Nuevo.pdf")).toBeInTheDocument();
     expect(screen.queryByText("CV_Valeria_Quispe.pdf")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reemplazar CV" })).toBeEnabled();
+  });
+
+  it("keeps the saved cv when cancelling the replacement", async () => {
+    const user = userEvent.setup();
+    vi.mocked(documentsService.getCv).mockResolvedValue(UPLOADED_CV);
+    await renderView();
+
+    await user.upload(getFileInput(), createFile("CV_Nuevo.pdf"));
+    await user.click(await screen.findByRole("button", { name: "Cancelar" }));
+
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+    expect(documentsService.uploadCv).not.toHaveBeenCalled();
+    expect(screen.getByText("CV_Valeria_Quispe.pdf")).toBeInTheDocument();
+  });
+
+  it("shows the validation error without opening the dialog for an invalid replacement", async () => {
+    const user = userEvent.setup({ applyAccept: false });
+    vi.mocked(documentsService.getCv).mockResolvedValue(UPLOADED_CV);
+    await renderView();
+
+    await user.upload(getFileInput(), createFile("foto.png", "image/png"));
+
+    expect(screen.getByRole("alert")).toHaveTextContent("El CV debe estar en formato PDF.");
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    expect(screen.getByText("CV_Valeria_Quispe.pdf")).toBeInTheDocument();
+  });
+
+  it("shows the spinner in the dialog and blocks the actions while replacing", async () => {
+    const user = userEvent.setup();
+    const pendingUpload = createDeferred<SavedCv>();
+    vi.mocked(documentsService.getCv).mockResolvedValue(UPLOADED_CV);
+    vi.mocked(documentsService.uploadCv).mockReturnValueOnce(pendingUpload.promise);
+    await renderView();
+
+    await user.upload(getFileInput(), createFile("CV_Nuevo.pdf"));
+    await user.click(await screen.findByRole("button", { name: "Reemplazar" }));
+
+    const replacingButton = screen.getByRole("button", { name: "Reemplazando..." });
+
+    expect(replacingButton).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Cancelar" })).toBeDisabled();
+
+    await user.click(replacingButton);
+
+    expect(documentsService.uploadCv).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      pendingUpload.resolve({ ...UPLOADED_CV, fileName: "CV_Nuevo.pdf" });
+    });
+
+    expect(screen.getByRole("status")).toHaveTextContent("Tu CV se reemplazó correctamente.");
+  });
+
+  it("keeps the dialog open with the error to retry after a network error", async () => {
+    const user = userEvent.setup();
+    vi.mocked(documentsService.getCv).mockResolvedValue(UPLOADED_CV);
+    vi.mocked(documentsService.uploadCv).mockRejectedValueOnce(new Error("Network Error"));
+    await renderView();
+    const file = createFile("CV_Nuevo.pdf");
+
+    await user.upload(getFileInput(), file);
+    await user.click(await screen.findByRole("button", { name: "Reemplazar" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "No se pudo subir tu CV. Intenta de nuevo.",
+    );
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Reemplazar" }));
+
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+    expect(documentsService.uploadCv).toHaveBeenCalledTimes(2);
+    expect(documentsService.uploadCv).toHaveBeenLastCalledWith(file);
+    expect(screen.getByRole("status")).toHaveTextContent("Tu CV se reemplazó correctamente.");
+  });
+
+  it("closes the dialog and keeps the saved cv when the server rejects the replacement", async () => {
+    const user = userEvent.setup();
+    vi.mocked(documentsService.getCv).mockResolvedValue(UPLOADED_CV);
+    vi.mocked(documentsService.uploadCv).mockRejectedValueOnce({
+      response: { status: 400, data: { data: { code: "CORRUPTED_FILE" } } },
+    });
+    await renderView();
+
+    await user.upload(getFileInput(), createFile("CV_Nuevo.pdf"));
+    await user.click(await screen.findByRole("button", { name: "Reemplazar" }));
+
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "El archivo está dañado o incompleto. Selecciona otro PDF.",
+    );
+    expect(screen.getByText("CV_Valeria_Quispe.pdf")).toBeInTheDocument();
   });
 
   it("keeps the cv when cancelling the delete dialog", async () => {
@@ -371,20 +493,18 @@ describe("DocumentsCvView", () => {
     expect(screen.getByText("CV_Valeria_Quispe.pdf")).toBeInTheDocument();
   });
 
-  it("disables the upload actions while deleting", async () => {
+  it("disables the cv actions while deleting and restores the upload card afterwards", async () => {
     const user = userEvent.setup();
     const pendingDelete = createDeferred<void>();
     vi.mocked(documentsService.getCv).mockResolvedValue(UPLOADED_CV);
     vi.mocked(documentsService.deleteCv).mockReturnValueOnce(pendingDelete.promise);
     await renderView();
 
-    await user.upload(getFileInput(), createFile("CV_Nuevo.pdf"));
     await user.click(screen.getByRole("button", { name: "Eliminar CV" }));
     await user.click(await screen.findByRole("button", { name: "Eliminar" }));
 
     expect(screen.getByRole("button", { name: "Eliminando..." })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Seleccionar PDF", hidden: true })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Confirmar carga", hidden: true })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Reemplazar CV", hidden: true })).toBeDisabled();
 
     await act(async () => {
       pendingDelete.resolve();
@@ -392,7 +512,9 @@ describe("DocumentsCvView", () => {
 
     expect(documentsService.deleteCv).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
-    expect(screen.getByRole("button", { name: "Confirmar carga" })).toBeEnabled();
+    expect(screen.queryByText("Ya tienes un CV guardado")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Seleccionar PDF" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Confirmar carga" })).toBeDisabled();
   });
 
   it("deletes the cv on the server after confirming", async () => {

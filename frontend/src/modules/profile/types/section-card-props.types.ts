@@ -6,4 +6,5 @@ export interface SectionCardProps {
   action?: ReactNode;
   children: ReactNode;
   className?: string;
+  contentClassName?: string;
 }

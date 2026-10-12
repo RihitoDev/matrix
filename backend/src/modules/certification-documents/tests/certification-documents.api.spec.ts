@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { CORRUPTED_FILE_ERROR_CODE } from '../../../common/constants/file-error-codes.constants.js';
 import { DomainExceptionFilter } from '../../../common/filters/domain-exception.filter.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { CertificationDocumentsModule } from '../certification-documents.module.js';
@@ -69,6 +70,45 @@ describe('Certification documents API', () => {
   afterEach(async () => {
     await app.close();
   });
+
+  it.each([
+    [
+      'pdf',
+      'application/pdf',
+      Buffer.from('%PDF-1.4\n' + ' '.repeat(80)),
+    ],
+    [
+      'png',
+      'image/png',
+      Buffer.concat([
+        Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+        Buffer.alloc(80, 0x00),
+      ]),
+    ],
+    [
+      'jpg',
+      'image/jpeg',
+      Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(80, 0x00)]),
+    ],
+    ['pdf below the minimum size', 'application/pdf', Buffer.from('%PDF')],
+  ])(
+    'rejects a truncated %s with 400 and the corrupted file code',
+    async (_name, contentType, content) => {
+      const response = await request(app.getHttpServer())
+        .put(documentPath)
+        .set('Authorization', `Bearer ${token}`)
+        .attach('file', content, { filename: 'broken', contentType })
+        .expect(400);
+
+      expect(response.body).toEqual({
+        statusCode: 400,
+        data: { code: CORRUPTED_FILE_ERROR_CODE },
+        detail: 'File content is incomplete or corrupted',
+        ok: false,
+      });
+      expect(documentsRepository.save).not.toHaveBeenCalled();
+    },
+  );
 
   it('uploads, downloads and removes a document through the authenticated API', async () => {
     const uploaded = await request(app.getHttpServer())
