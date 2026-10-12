@@ -25,7 +25,7 @@ import {
   CERTIFICATION_DOCUMENT_UPLOAD_LIMIT_BYTES,
 } from '../constants/certification-document.constants.js';
 import { CertificationDocumentsService } from '../services/certification-documents.service.js';
-import type { CertificationResponse } from '../types/certification-response.type.js';
+import type { CertificationResponse } from '../../certifications/types/certification-response.type.js';
 
 @ApiTags('certifications')
 @ApiBearerAuth()

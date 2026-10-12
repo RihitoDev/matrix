@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CertificationNotFoundException } from '../exceptions/certification-not-found.exception.js';
 import { CertificationMapper } from '../mappers/certification.mapper.js';
-import { CertificationDocumentsRepository } from '../repositories/certification-documents.repository.js';
+import { CertificationDocumentsRepository } from '../../certification-documents/repositories/certification-documents.repository.js';
 import { CertificationsRepository } from '../repositories/certifications.repository.js';
 import { CertificationsService } from '../services/certifications.service.js';
 import type { CertificationRecord } from '../types/certification-record.type.js';

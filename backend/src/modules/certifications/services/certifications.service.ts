@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CertificationNotFoundException } from '../exceptions/certification-not-found.exception.js';
 import { CertificationMapper } from '../mappers/certification.mapper.js';
-import { CertificationDocumentsRepository } from '../repositories/certification-documents.repository.js';
+import { CertificationDocumentsRepository } from '../../certification-documents/repositories/certification-documents.repository.js';
 import { CertificationsRepository } from '../repositories/certifications.repository.js';
 import type { CreateCertificationRequest } from '../requests/create-certification.request.js';
 import type { UpdateCertificationRequest } from '../requests/update-certification.request.js';

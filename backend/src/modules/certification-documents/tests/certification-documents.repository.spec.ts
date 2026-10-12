@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { Prisma } from '../../../prisma/client.js';
-import { CertificationNotFoundException } from '../exceptions/certification-not-found.exception.js';
+import { CertificationNotFoundException } from '../../certifications/exceptions/certification-not-found.exception.js';
 import { CertificationDocumentsRepository } from '../repositories/certification-documents.repository.js';
 
 const recordNotFoundError = new Prisma.PrismaClientKnownRequestError(

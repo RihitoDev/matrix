@@ -3,23 +3,20 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaModule } from '../../../common/prisma/prisma.module.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { FileValidationService } from '../../../common/services/file-validation.service.js';
-import { CertificationsModule } from '../certifications.module.js';
-import { CertificationsController } from '../controllers/certifications.controller.js';
-import { CertificationDocumentsController } from '../controllers/certification-documents.controller.js';
+import { CertificationsModule } from '../../certifications/certifications.module.js';
+import { CertificationDocumentsModule } from '../certification-documents.module.js';
 import { CertificationDocumentFileController } from '../controllers/certification-document-file.controller.js';
-import { CertificationsService } from '../services/certifications.service.js';
-import { CertificationDocumentsService } from '../services/certification-documents.service.js';
-import { CertificationsRepository } from '../repositories/certifications.repository.js';
-import { CertificationDocumentsRepository } from '../repositories/certification-documents.repository.js';
-import { CertificationMapper } from '../mappers/certification.mapper.js';
+import { CertificationDocumentsController } from '../controllers/certification-documents.controller.js';
 import { CertificationDocumentMapper } from '../mappers/certification-document.mapper.js';
+import { CertificationDocumentsRepository } from '../repositories/certification-documents.repository.js';
+import { CertificationDocumentsService } from '../services/certification-documents.service.js';
 
-describe('CertificationsModule', () => {
+describe('CertificationDocumentsModule', () => {
   let moduleRef: TestingModule;
 
   beforeEach(async () => {
     moduleRef = await Test.createTestingModule({
-      imports: [CertificationsModule, PrismaModule],
+      imports: [CertificationDocumentsModule, CertificationsModule, PrismaModule],
     })
       .overrideProvider(PrismaService)
       .useValue({})
@@ -27,14 +24,10 @@ describe('CertificationsModule', () => {
   });
 
   it.each([
-    CertificationsController,
     CertificationDocumentsController,
     CertificationDocumentFileController,
-    CertificationsService,
     CertificationDocumentsService,
-    CertificationsRepository,
     CertificationDocumentsRepository,
-    CertificationMapper,
     CertificationDocumentMapper,
     FileValidationService,
   ])('provides %p', (provider) => {
