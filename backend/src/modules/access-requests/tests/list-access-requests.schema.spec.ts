@@ -9,11 +9,11 @@ const messagesOf = (input: unknown) => {
 
 describe('listAccessRequestsQuerySchema', () => {
   it('usa página 1 y 10 por página por defecto y no exige estado', () => {
-    expect(listAccessRequestsQuerySchema.parse({})).toEqual({ page: 1, limit: 10 });
+    expect(listAccessRequestsQuerySchema.parse({})).toEqual({ page: 1, limit: 10, period: 'all' });
   });
 
   it.each(['pending', 'in_review', 'approved', 'rejected'])('acepta el estado %s', (status) => {
-    expect(listAccessRequestsQuerySchema.parse({ status, page: '2', limit: '5' })).toEqual({ status, page: 2, limit: 5 });
+    expect(listAccessRequestsQuerySchema.parse({ status, page: '2', limit: '5' })).toEqual({ status, page: 2, limit: 5, period: 'all' });
   });
 
   it('rechaza los borradores y estados desconocidos', () => {
