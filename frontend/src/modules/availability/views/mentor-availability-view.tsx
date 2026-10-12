@@ -128,7 +128,7 @@ export function MentorAvailabilityView({ initialWeekStart }: MentorAvailabilityV
         </div>
 
         {isEditing ? (
-          <div className="animate-in fade-in slide-in-from-right duration-200">
+          <div className="min-w-0 animate-in fade-in slide-in-from-right duration-200">
             {isLoading ? (
               <AvailabilityLoading />
             ) : (
@@ -136,13 +136,15 @@ export function MentorAvailabilityView({ initialWeekStart }: MentorAvailabilityV
             )}
           </div>
         ) : (
-          <BlockForm
-            key={formKey}
-            mode="create"
-            isSubmitting={isSubmitting}
-            onSubmit={handleCreate}
-            onCancel={handleCancelCreate}
-          />
+          <div className="min-w-0">
+            <BlockForm
+              key={formKey}
+              mode="create"
+              isSubmitting={isSubmitting}
+              onSubmit={handleCreate}
+              onCancel={handleCancelCreate}
+            />
+          </div>
         )}
       </div>
     </div>
