@@ -48,8 +48,6 @@ export function EducationForm({
     setValues((current) => {
       const previous = resolveEducationInstitution(current.institution, institutions);
       const next = resolveEducationInstitution(institution, institutions);
-      // Keep the previous title while the institution search is incomplete.
-      // It stays disabled and cannot be submitted until a valid institution is entered.
       if (!next || previous === next) return { ...current, institution };
       const degree = resolveEducationDegree(current.degree, getEducationDegrees(next ?? ''));
       return { ...current, institution, degree: degree ?? '' };

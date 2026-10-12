@@ -59,10 +59,8 @@ export class EducationsRepository {
       const where = { id, userId, ...expectedPeriod };
       const current = await tx.education.findFirst({ where, select: EDUCATION_SELECT });
       if (!current) return null;
-      // A concurrent institution edit must not invalidate a degree checked by the service.
       validateEducationDegree(data.institution ?? current.institution, data.degree ?? current.degree);
       await this.assertNoDuplicate(tx, userId, { ...current, ...data }, id);
-      // Preserve the atomic date check used by the service, including after retries.
       const records = await tx.education.updateManyAndReturn({
         where, data, select: EDUCATION_SELECT,
       });
@@ -92,7 +90,6 @@ export class EducationsRepository {
   }
 
   private async withSerializableWrite<T>(operation: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
-    // The duplicate read and write share one serializable transaction to cover concurrent requests.
     for (let attempt = 0; attempt < EDUCATION_TRANSACTION_ATTEMPTS; attempt += 1) {
       try {
         return await this.prisma.$transaction(operation, { isolationLevel: 'Serializable' });

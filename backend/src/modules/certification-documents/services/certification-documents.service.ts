@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { FileValidationService } from '../../../common/services/file-validation.service.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
-import { CertificationNotFoundException } from '../exceptions/certification-not-found.exception.js';
-import { CertificationMapper } from '../mappers/certification.mapper.js';
-import { CertificationsRepository } from '../repositories/certifications.repository.js';
-import type { CertificationRecord } from '../types/certification-record.type.js';
-import type { CertificationResponse } from '../types/certification-response.type.js';
+import { CertificationNotFoundException } from '../../certifications/exceptions/certification-not-found.exception.js';
+import { CertificationMapper } from '../../certifications/mappers/certification.mapper.js';
+import { CertificationsRepository } from '../../certifications/repositories/certifications.repository.js';
+import type { CertificationRecord } from '../../certifications/types/certification-record.type.js';
+import type { CertificationResponse } from '../../certifications/types/certification-response.type.js';
 import { CERTIFICATION_DOCUMENT_VALIDATION_RULES } from '../constants/certification-document.constants.js';
 import { CertificationDocumentNotFoundException } from '../exceptions/certification-document-not-found.exception.js';
 import { CertificationDocumentMapper } from '../mappers/certification-document.mapper.js';

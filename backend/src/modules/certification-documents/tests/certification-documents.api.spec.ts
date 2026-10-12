@@ -7,9 +7,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CORRUPTED_FILE_ERROR_CODE } from '../../../common/constants/file-error-codes.constants.js';
 import { DomainExceptionFilter } from '../../../common/filters/domain-exception.filter.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
-import { CertificationsModule } from '../certifications.module.js';
+import { CertificationDocumentsModule } from '../certification-documents.module.js';
 import { CertificationDocumentsRepository } from '../repositories/certification-documents.repository.js';
-import { CertificationsRepository } from '../repositories/certifications.repository.js';
+import { CertificationsRepository } from '../../certifications/repositories/certifications.repository.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
 const otherUserId = '22222222-2222-4222-8222-222222222222';
@@ -48,7 +48,7 @@ describe('Certification documents API', () => {
     documentsRepository.read.mockResolvedValue(pdfBytes);
 
     const moduleRef = await Test.createTestingModule({
-      imports: [CertificationsModule],
+      imports: [CertificationDocumentsModule],
       providers: [{ provide: APP_FILTER, useClass: DomainExceptionFilter }],
     })
       .overrideProvider(PrismaService)

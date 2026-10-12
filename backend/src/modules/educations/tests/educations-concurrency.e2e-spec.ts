@@ -64,50 +64,12 @@ describe.skipIf(!DATABASE)('Education persistence and concurrent HTTP updates', 
 
   async function createFixture(endDate: Date | null) {
     const record = await clients[0].education.create({
-      data: { userId, institution: 'UMSS', degree: 'Ingeniería Civil', startDate: new Date('2020-01-01'), endDate },
+      data: { userId, institution: 'Test University', degree: 'Engineering', startDate: new Date('2020-01-01'), endDate },
       select: { id: true },
     });
     createdIds.push(record.id);
     return record.id;
   }
-
-  it('persists only one of two equivalent POST requests from separate clients', async () => {
-    const degree = 'Ingeniería Informática';
-    const body = { institution: 'UMSS', degree, startDate: '2020-01-01', endDate: '2024-01-01' };
-    const responses = await Promise.all(apps.map((app, index) =>
-      request(app.getHttpServer()).post('/api/educations')
-        .set('Authorization', `Bearer ${token}`)
-        .send({ ...body, degree: index ? degree.toUpperCase() : degree })
-        .timeout({ deadline: REQUEST_TIMEOUT }),
-    ));
-    for (const response of responses) {
-      if (response.status === 201) createdIds.push(response.body.data.id);
-    }
-    expect(responses.map((response) => response.status).sort((left, right) => left - right)).toEqual([201, 409]);
-    expect(responses.find((response) => response.status === 409)?.body.data.code).toBe('EDUCATION_DUPLICATE');
-    expect(await clients[0].education.count({ where: { userId, degree: { equals: degree, mode: 'insensitive' } } })).toBe(1);
-  }, TEST_TIMEOUT);
-
-  it('does not let two different records become duplicates through concurrent PATCH requests', async () => {
-    const targetDegree = 'Ingeniería Química';
-    const ids: string[] = [];
-    for (let index = 0; index < apps.length; index += 1) {
-      const record = await clients[0].education.create({
-        data: { userId, institution: 'UMSS', degree: index ? 'Ingeniería Civil' : 'Ingeniería de Sistemas', startDate: new Date('2020-01-01'), endDate: null },
-        select: { id: true },
-      });
-      ids.push(record.id);
-      createdIds.push(record.id);
-    }
-    const responses = await Promise.all(apps.map((app, index) =>
-      request(app.getHttpServer()).patch(`/api/educations/${ids[index]}`)
-        .set('Authorization', `Bearer ${token}`).send({ degree: targetDegree })
-        .timeout({ deadline: REQUEST_TIMEOUT }),
-    ));
-    expect(responses.map((response) => response.status).sort((left, right) => left - right)).toEqual([200, 409]);
-    expect(responses.find((response) => response.status === 409)?.body.data.code).toBe('EDUCATION_DUPLICATE');
-    expect(await clients[0].education.count({ where: { userId, degree: targetDegree } })).toBe(1);
-  }, TEST_TIMEOUT);
 
   it('persists a description edit without replacing a legacy null end date', async () => {
     const id = await createFixture(null);

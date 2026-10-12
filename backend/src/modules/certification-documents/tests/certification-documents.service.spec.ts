@@ -4,10 +4,10 @@ import { FileTooLargeException } from '../../../common/exceptions/file-too-large
 import { InvalidFileTypeException } from '../../../common/exceptions/invalid-file-type.exception.js';
 import { FileValidationService } from '../../../common/services/file-validation.service.js';
 import type { MulterFile } from '../../../common/types/multer-file.type.js';
-import { CertificationNotFoundException } from '../exceptions/certification-not-found.exception.js';
-import { CertificationMapper } from '../mappers/certification.mapper.js';
-import { CertificationsRepository } from '../repositories/certifications.repository.js';
-import type { CertificationRecord } from '../types/certification-record.type.js';
+import { CertificationNotFoundException } from '../../certifications/exceptions/certification-not-found.exception.js';
+import { CertificationMapper } from '../../certifications/mappers/certification.mapper.js';
+import { CertificationsRepository } from '../../certifications/repositories/certifications.repository.js';
+import type { CertificationRecord } from '../../certifications/types/certification-record.type.js';
 import { CertificationDocumentNotFoundException } from '../exceptions/certification-document-not-found.exception.js';
 import { CertificationDocumentMapper } from '../mappers/certification-document.mapper.js';
 import { CertificationDocumentsRepository } from '../repositories/certification-documents.repository.js';

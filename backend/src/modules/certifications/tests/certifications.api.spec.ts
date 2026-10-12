@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DomainExceptionFilter } from '../../../common/filters/domain-exception.filter.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { CertificationsModule } from '../certifications.module.js';
-import { CertificationDocumentsRepository } from '../repositories/certification-documents.repository.js';
+import { CertificationDocumentsRepository } from '../../certification-documents/repositories/certification-documents.repository.js';
 import { CertificationsRepository } from '../repositories/certifications.repository.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';

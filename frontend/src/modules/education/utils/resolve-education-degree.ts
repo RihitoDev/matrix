@@ -2,7 +2,6 @@ import { EDUCATION_DEGREES } from '../constants/education-degrees.constants';
 import type { EducationDegree } from '../types/education-degree.types';
 import { normalizeEducationText } from './normalize-education-text';
 
-// The caller resolves institution aliases with the existing institution catalogue.
 export function getEducationDegrees(institution: string): readonly EducationDegree[] {
   const name = normalizeEducationText(institution);
   return EDUCATION_DEGREES.find((entry) => normalizeEducationText(entry.institution) === name)?.degrees ?? [];

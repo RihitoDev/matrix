@@ -57,7 +57,6 @@ describe('EducationsRepository', () => {
   });
 
   it('rejects a degree invalidated by a concurrent institution change before writing', async () => {
-    // The service validated this title against UPB, but the transactional read now sees UMSS.
     education.findFirst.mockResolvedValue({ ...record, institution: 'UMSS' });
     await expect(repository.update(educationId, userId, { degree: 'Ingeniería en Inteligencia Artificial' }, expectedPeriod))
       .rejects.toBeInstanceOf(RequestValidationException);
