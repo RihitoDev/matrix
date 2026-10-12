@@ -5,6 +5,5 @@ import type { ReportAlert } from "../types/report-alert.types";
 export function showReportAlert({ variant, message }: ReportAlert, id: string) {
   const show = variant === "warning" ? toast.warning : toast.error;
 
-  // richColors: amarillo para advertencias y rojo para errores
   show(message, { id, duration: REPORT_ALERT_DURATION_MS, closeButton: true, richColors: true });
 }

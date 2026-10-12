@@ -2,7 +2,6 @@ import type { ReportTableFooterProps } from "../types/report-table-footer-props.
 import { RefreshButton } from "./refresh-button";
 import { TablePagination } from "./table-pagination";
 
-// Pie común de las tablas de reportes: contador, botón actualizar y paginación.
 export function ReportTableFooter({
   currentPage,
   pageSize,

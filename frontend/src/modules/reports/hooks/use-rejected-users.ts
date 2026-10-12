@@ -12,7 +12,6 @@ export function useRejectedUsers(page: number, search = "") {
   const query = useQuery({
     queryKey: REPORTS_QUERY_KEYS.rejectedUsers(page, search),
     queryFn: ({ signal }) => reportsService.getRejectedUsers({ page, limit: REJECTED_USERS_PAGE_SIZE, search }, signal),
-    // Conserva el total mientras carga la página siguiente para que la paginación no parpadee
     placeholderData: keepPreviousData,
   });
   const { error, errorUpdatedAt, refetch } = query;

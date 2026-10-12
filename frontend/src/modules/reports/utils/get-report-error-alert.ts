@@ -11,7 +11,6 @@ import type { ReportAlert } from "../types/report-alert.types";
 export function getReportErrorAlert(error: unknown): ReportAlert | null {
   if (!isAxiosError(error)) return null;
 
-  // El timeout se revisa antes que la conexión porque tampoco trae respuesta
   if (error.code === AxiosError.ECONNABORTED || error.code === AxiosError.ETIMEDOUT) {
     return { variant: "warning", message: SLOW_REQUEST_MESSAGE };
   }

@@ -44,7 +44,6 @@ async function searchFor(value: string, expectedSummary: string) {
 
 describe("RejectedUsersReportView", () => {
   beforeAll(() => {
-    // TanStack Query notifica con setTimeout; con microtareas no depende de los timers falsos
     notifyManager.setScheduler(queueMicrotask);
   });
 

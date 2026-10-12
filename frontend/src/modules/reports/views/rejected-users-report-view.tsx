@@ -39,7 +39,6 @@ export function RejectedUsersReportView() {
   const firstVisibleItem = totalItems === 0 ? 0 : (currentPage - 1) * REJECTED_USERS_PAGE_SIZE + 1;
   const lastVisibleItem = Math.min(currentPage * REJECTED_USERS_PAGE_SIZE, totalItems);
   const hideSummary = Boolean(search) && !errorMessage && !isLoading && totalItems === 0;
-  // Sin datos o con error de carga no hay páginas que recorrer
   const showPagination = !errorMessage && totalItems > 0;
 
   return (
