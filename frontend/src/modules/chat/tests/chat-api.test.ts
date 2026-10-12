@@ -1,4 +1,12 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+vi.mock('@/shared/services/api-client', () => ({
+  apiClient: {
+    get: vi.fn(),
+    post: vi.fn(),
+  },
+}));
 
 import {
   getConversations,
@@ -9,13 +17,13 @@ import {
   sendMessage,
   markConversationAsRead,
 } from '../services/chat-api';
-
-import { CURRENT_USER_ID } from '../mocks/mock-users';
-import { MOCK_CONVERSATIONS } from '../mocks/mock-conversations';
+import { apiClient } from '@/shared/services/api-client';
 import {
   getStoredMessages,
   clearStoredMessages,
 } from '../services/message-storage';
+
+const apiClientMock = vi.mocked(apiClient);
 
 describe('chat-api', () => {
   it('debe retornar las conversaciones ordenadas cronologicamente descendente', async () => {
@@ -38,102 +46,127 @@ describe('chat-api', () => {
   });
 });
 
-describe('chat-api — searchUsers', () => {
-  it('debe retornar lista vacia si la query tiene menos de 2 caracteres', async () => {
+describe('chat-api — searchUsers (HU-2, backend integration)', () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('debe retornar lista vacia si la query tiene menos de 2 caracteres sin llamar al backend', async () => {
     expect(await searchUsers('')).toEqual([]);
     expect(await searchUsers('a')).toEqual([]);
     expect(await searchUsers(' ')).toEqual([]);
     expect(await searchUsers('  a  ')).toEqual([]);
+
+    expect(apiClientMock.get).not.toHaveBeenCalled();
   });
 
-  it('debe encontrar usuarios por coincidencia parcial de nombre', async () => {
-    const results = await searchUsers('maria');
+  it('debe llamar a GET /chat/users/search con el parametro q', async () => {
+    apiClientMock.get.mockResolvedValue({ data: [] });
 
-    expect(results.length).toBeGreaterThan(0);
+    await searchUsers('maria');
 
-    results.forEach((user) => {
-      expect(
-        user.fullName.toLowerCase(),
-      ).toContain('maria');
+    expect(apiClientMock.get).toHaveBeenCalledWith('/chat/users/search', {
+      params: { q: 'maria' },
     });
   });
 
-  it('debe ignorar mayusculas y tildes', async () => {
-    const lower = await searchUsers('maria');
-    const upper = await searchUsers('MARIA');
-    const accented = await searchUsers('maría');
+  it('debe mapear la respuesta del backend al tipo User del frontend', async () => {
+    apiClientMock.get.mockResolvedValue({
+      data: [
+        {
+          id: 'user-1',
+          fullName: 'Maria Peredo',
+          avatarUrl: 'https://example.com/a.jpg',
+          headline: 'Senior IT Recruiter',
+          role: 'RECRUITER',
+          isOnline: true,
+        },
+      ],
+    });
 
-    expect(lower.length).toBe(upper.length);
-    expect(lower.length).toBe(accented.length);
+    const result = await searchUsers('maria');
 
-    const lowerIds = lower.map((u) => u.id).sort();
-    const upperIds = upper.map((u) => u.id).sort();
-    const accentedIds = accented.map((u) => u.id).sort();
-
-    expect(lowerIds).toEqual(upperIds);
-    expect(lowerIds).toEqual(accentedIds);
+    expect(result).toEqual([
+      {
+        id: 'user-1',
+        fullName: 'Maria Peredo',
+        avatarUrl: 'https://example.com/a.jpg',
+        headline: 'Senior IT Recruiter',
+        role: 'RECRUITER',
+        isActive: true,
+      },
+    ]);
   });
 
-  it('no debe incluir al currentUser en los resultados', async () => {
-    const results = await searchUsers('yo');
+  it('debe propagar el error del backend cuando la peticion falla', async () => {
+    apiClientMock.get.mockRejectedValue(new Error('Network Error'));
 
-    expect(
-      results.find((u) => u.id === CURRENT_USER_ID),
-    ).toBeUndefined();
+    await expect(searchUsers('maria')).rejects.toThrow('Network Error');
+  });
+});
+
+describe('chat-api — getOrCreateConversation (HU-2, backend integration)', () => {
+  afterEach(() => {
+    vi.clearAllMocks();
   });
 
-  it('no debe incluir usuarios inactivos', async () => {
-    const results = await searchUsers('ar');
+  it('debe llamar a POST /chat/conversations con el contactId', async () => {
+    apiClientMock.post.mockResolvedValue({
+      data: {
+        id: 'conv-1',
+        contact: {
+          id: 'user-1',
+          fullName: 'Maria Peredo',
+          avatarUrl: null,
+          isOnline: false,
+        },
+        lastMessage: null,
+        unreadCount: 0,
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+    });
 
-    expect(results.length).toBeGreaterThan(0);
+    await getOrCreateConversation('user-1');
 
-    results.forEach((user) => {
-      expect(user.isActive).toBe(true);
+    expect(apiClientMock.post).toHaveBeenCalledWith('/chat/conversations', {
+      contactId: 'user-1',
     });
   });
 
-  it('debe retornar lista vacia si la conversacion no tiene mensajes', async () => {
-    const messages = await getMessages('conv-empty');
+  it('debe retornar la conversacion que devuelve el backend', async () => {
+    const conversation = {
+      id: 'conv-1',
+      contact: {
+        id: 'user-1',
+        fullName: 'Maria Peredo',
+        avatarUrl: 'https://example.com/a.jpg',
+        isOnline: true,
+      },
+      lastMessage: {
+        id: 'msg-1',
+        senderId: 'user-1',
+        content: 'Hola',
+        isAttachment: false,
+        attachmentType: null,
+        createdAt: '2026-01-01T00:00:00.000Z',
+      },
+      unreadCount: 0,
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    };
 
-    expect(messages).toEqual([]);
+    apiClientMock.post.mockResolvedValue({ data: conversation });
+
+    const result = await getOrCreateConversation('user-1');
+
+    expect(result).toEqual(conversation);
   });
 
-  it('debe tratar caracteres especiales como texto plano', async () => {
-    await expect(searchUsers("'")).resolves.toEqual([]);
-    await expect(searchUsers('"')).resolves.toEqual([]);
-    await expect(searchUsers(';')).resolves.toEqual([]);
-    await expect(searchUsers('%')).resolves.toEqual([]);
+  it('debe propagar el error del backend cuando el contacto no existe', async () => {
+    apiClientMock.post.mockRejectedValue(new Error('UserNotFoundException'));
+
     await expect(
-      searchUsers("' OR 1=1 --"),
-    ).resolves.toEqual([]);
-    await expect(
-      searchUsers('<script>'),
-    ).resolves.toEqual([]);
-  });
-
-  it('no debe exponer campos sensibles como email o telefono', async () => {
-    const results = await searchUsers('ar');
-
-    expect(results.length).toBeGreaterThan(0);
-
-    results.forEach((user) => {
-      const keys = Object.keys(user);
-
-      expect(keys).not.toContain('email');
-      expect(keys).not.toContain('phone');
-      expect(keys).not.toContain('phoneNumber');
-    });
-  });
-
-  it('debe filtrar 100+ usuarios en menos de 50 ms de computo', async () => {
-    const start = performance.now();
-
-    await searchUsers('ar');
-
-    const elapsed = performance.now() - start;
-    const computeTime = elapsed - 200;
-
-    expect(computeTime).toBeLessThan(50);
+      getOrCreateConversation('user-inexistente'),
+    ).rejects.toThrow('UserNotFoundException');
   });
 });
 
@@ -311,60 +344,69 @@ describe('chat-api — getPaginatedMessages', () => {
   });
 });
 
-describe('chat-api — getOrCreateConversation', () => {
-  it('debe retornar la conversacion existente si ya hay una con ese contacto', async () => {
-    const existing = MOCK_CONVERSATIONS[0];
-
-    const result =
-      await getOrCreateConversation(
-        existing.contact.id,
-      );
-
-    expect(result.id).toBe(existing.id);
-    expect(result.contact.id).toBe(
-      existing.contact.id,
-    );
+describe('chat-api — getOrCreateConversation ', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
-  it('debe crear una conversacion nueva si no existe con ese contacto', async () => {
-    const result =
-      await getOrCreateConversation(
-        'user-105',
-      );
+  it('debe llamar a POST /chat/conversations con el contactId', async () => {
+    const postSpy = vi.spyOn(apiClient, 'post').mockResolvedValue({
+      data: {
+        id: 'conv-1',
+        contact: {
+          id: 'user-1',
+          fullName: 'Maria Peredo',
+          avatarUrl: null,
+          isOnline: false,
+        },
+        lastMessage: null,
+        unreadCount: 0,
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+    });
 
-    expect(result.id).toBeDefined();
-    expect(result.contact.id).toBe(
-      'user-105',
-    );
-    expect(result.contact.fullName).toBeTruthy();
-    expect(result.lastMessage).toBeNull();
-    expect(result.unreadCount).toBe(0);
-    expect(result.contact.isOnline).toBe(
-      false,
-    );
+    await getOrCreateConversation('user-1');
+
+    expect(postSpy).toHaveBeenCalledWith('/chat/conversations', {
+      contactId: 'user-1',
+    });
   });
 
-  it('debe lanzar error si el contacto no existe', async () => {
+  it('debe retornar la conversacion que devuelve el backend', async () => {
+    const conversation = {
+      id: 'conv-1',
+      contact: {
+        id: 'user-1',
+        fullName: 'Maria Peredo',
+        avatarUrl: 'https://example.com/a.jpg',
+        isOnline: true,
+      },
+      lastMessage: {
+        id: 'msg-1',
+        senderId: 'user-1',
+        content: 'Hola',
+        isAttachment: false,
+        attachmentType: null,
+        createdAt: '2026-01-01T00:00:00.000Z',
+      },
+      unreadCount: 0,
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    };
+
+    vi.spyOn(apiClient, 'post').mockResolvedValue({ data: conversation });
+
+    const result = await getOrCreateConversation('user-1');
+
+    expect(result).toEqual(conversation);
+  });
+
+  it('debe propagar el error del backend cuando el contacto no existe', async () => {
+    const backendError = new Error('UserNotFoundException');
+    vi.spyOn(apiClient, 'post').mockRejectedValue(backendError);
+
     await expect(
-      getOrCreateConversation(
-        'user-inexistente',
-      ),
-    ).rejects.toThrow(
-      'UserNotFoundException',
-    );
-  });
-
-  it('no debe mutar MOCK_CONVERSATIONS al crear una conversacion nueva', async () => {
-    const before =
-      MOCK_CONVERSATIONS.length;
-
-    await getOrCreateConversation(
-      'user-106',
-    );
-
-    expect(
-      MOCK_CONVERSATIONS.length,
-    ).toBe(before);
+      getOrCreateConversation('user-inexistente'),
+    ).rejects.toThrow('UserNotFoundException');
   });
 });
 
