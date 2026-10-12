@@ -7,9 +7,9 @@ describe("getPostLoginPath", () => {
   });
 
   it.each(["titulado", "estudiante", "mentor", "empresa", "", "inventado", null, undefined])(
-    "el rol %j va a la ruta de siempre",
+    "el rol %j va al perfil",
     (role) => {
-      expect(getPostLoginPath(role as string | null | undefined)).toBe("/");
+      expect(getPostLoginPath(role as string | null | undefined)).toBe("/profile");
     },
   );
 });
