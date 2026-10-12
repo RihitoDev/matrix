@@ -4,6 +4,7 @@ import { getFileNameFromDisposition } from "@/shared/utils/download-file";
 import {
   REGISTERED_USERS_CSV_FALLBACK_NAME,
   REJECTED_USERS_CSV_FALLBACK_NAME,
+  SLOW_REQUEST_THRESHOLD_MS,
 } from "../constants/reports.constants";
 import type { GeneratedReport, ReportHistoryParams } from "../types/generated-report.types";
 import type {
@@ -60,13 +61,14 @@ export const reportsService = {
   exportRegisteredUsersCsv: ({ userType, period, search }: RegisteredUsersExportParams): Promise<ExportedFile> =>
     downloadCsv("/reports/registered-users/export", { userType, period, search }, REGISTERED_USERS_CSV_FALLBACK_NAME),
 
-  getRejectedUsers: async ({
-    page,
-    limit,
-    search,
-  }: RejectedUsersParams): Promise<ApiResponse<PaginatedData<RejectedUser>>> => {
+  getRejectedUsers: async (
+    { page, limit, search }: RejectedUsersParams,
+    signal?: AbortSignal,
+  ): Promise<ApiResponse<PaginatedData<RejectedUser>>> => {
     const { data } = await apiClient.get<ApiResponse<PaginatedData<RejectedUser>>>("/reports/rejected-users", {
       params: { page, limit, search: search || undefined },
+      signal,
+      timeout: SLOW_REQUEST_THRESHOLD_MS,
     });
 
     return data;

@@ -11,6 +11,10 @@ export const EMAIL_SEARCH_NO_RESULTS_MESSAGE = "No se encontró ningún usuario 
 export const SLOW_REQUEST_THRESHOLD_MS = 10_000;
 export const SLOW_REQUEST_MESSAGE = "Error 408: La solicitud está tardando demasiado";
 export const CONNECTION_ERROR_MESSAGE = "Error 503/504: Sin conexión con el servidor";
+export const RATE_LIMIT_MESSAGE = "Error 429: Demasiadas solicitudes, intenta nuevamente en unos segundos";
+export const INTERNAL_ERROR_MESSAGE = "Error 500: Ocurrió un error interno en el servidor";
+export const REPORT_ALERT_DURATION_MS = 7_000;
+export const REJECTED_USERS_LOAD_ERROR_MESSAGE = "No se pudo cargar el reporte de usuarios rechazados.";
 
 export const REGISTERED_USERS_CSV_FALLBACK_NAME = "usuarios-registrados.csv";
 export const REJECTED_USERS_CSV_FALLBACK_NAME = "usuarios-rechazados.csv";

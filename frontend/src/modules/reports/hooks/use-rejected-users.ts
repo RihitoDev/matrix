@@ -1,45 +1,40 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { REJECTED_USERS_PAGE_SIZE } from "../constants/reports.constants";
+import { useCallback, useEffect } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { REJECTED_USERS_LOAD_ERROR_MESSAGE, REJECTED_USERS_PAGE_SIZE } from "../constants/reports.constants";
+import { REPORTS_QUERY_KEYS } from "../constants/reports-query-keys.constants";
 import { reportsService } from "../services/reports.service";
-import type { RejectedUsersState } from "../types/rejected-user.types";
+import { getReportErrorAlert } from "../utils/get-report-error-alert";
+import { showReportAlert } from "../utils/show-report-alert";
 
 export function useRejectedUsers(page: number, search = "") {
-  const [state, setState] = useState<RejectedUsersState | null>(null);
-  const [refreshCount, setRefreshCount] = useState(0);
-  const requestKey = `${page}-${search}-${refreshCount}`;
+  const query = useQuery({
+    queryKey: REPORTS_QUERY_KEYS.rejectedUsers(page, search),
+    queryFn: ({ signal }) => reportsService.getRejectedUsers({ page, limit: REJECTED_USERS_PAGE_SIZE, search }, signal),
+    // Conserva el total mientras carga la página siguiente para que la paginación no parpadee
+    placeholderData: keepPreviousData,
+  });
+  const { error, errorUpdatedAt, refetch } = query;
 
   useEffect(() => {
-    let isCancelled = false;
+    const alert = getReportErrorAlert(error);
+    if (alert) showReportAlert(alert, `rejected-users-${errorUpdatedAt}`);
+  }, [error, errorUpdatedAt]);
 
-    reportsService
-      .getRejectedUsers({ page, limit: REJECTED_USERS_PAGE_SIZE, search })
-      .then((response) => {
-        if (!isCancelled) setState({ requestKey, result: response.data });
-      })
-      .catch(() => {
-        if (!isCancelled) {
-          setState({ requestKey, errorMessage: "No se pudo cargar el reporte de usuarios rechazados." });
-        }
-      });
+  const refresh = useCallback(() => {
+    void refetch();
+  }, [refetch]);
 
-    return () => {
-      isCancelled = true;
-    };
-  }, [page, search, requestKey]);
-
-  const refresh = useCallback(() => setRefreshCount((count) => count + 1), []);
-
-  const isCurrentRequest = state?.requestKey === requestKey;
-  const totalItems = state?.result?.totalItems ?? 0;
+  const result = query.isError ? undefined : query.data?.data;
+  const totalItems = result?.totalItems ?? 0;
 
   return {
-    users: isCurrentRequest ? (state.result?.items ?? []) : [],
+    users: result?.items ?? [],
     totalItems,
     totalPages: Math.max(1, Math.ceil(totalItems / REJECTED_USERS_PAGE_SIZE)),
-    isLoading: !isCurrentRequest,
-    errorMessage: isCurrentRequest ? state.errorMessage : undefined,
+    isLoading: query.isFetching,
+    errorMessage: query.isError && !query.isFetching ? REJECTED_USERS_LOAD_ERROR_MESSAGE : undefined,
     refresh,
   };
 }

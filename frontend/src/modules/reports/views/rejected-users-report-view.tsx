@@ -39,6 +39,8 @@ export function RejectedUsersReportView() {
   const firstVisibleItem = totalItems === 0 ? 0 : (currentPage - 1) * REJECTED_USERS_PAGE_SIZE + 1;
   const lastVisibleItem = Math.min(currentPage * REJECTED_USERS_PAGE_SIZE, totalItems);
   const hideSummary = Boolean(search) && !errorMessage && !isLoading && totalItems === 0;
+  // Sin datos o con error de carga no hay páginas que recorrer
+  const showPagination = !errorMessage && totalItems > 0;
 
   return (
     <section className="flex flex-col gap-6">
@@ -74,7 +76,9 @@ export function RejectedUsersReportView() {
           <RefreshButton onClick={refresh} isRefreshing={isLoading} />
         </div>
         <div className="flex justify-center md:justify-end">
-          <TablePagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+          {showPagination && (
+            <TablePagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+          )}
         </div>
       </div>
 
