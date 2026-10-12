@@ -1,10 +1,12 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
 import {
   SKILL_SEARCH_MAX_LENGTH,
@@ -15,6 +17,8 @@ import { SkillsService } from '../services/skills.service.js';
 import type { SkillResponse } from '../types/skills.types.js';
 
 @ApiTags('skills')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('skills')
 export class SkillsController {
   constructor(private readonly skillsService: SkillsService) {}
