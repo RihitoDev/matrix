@@ -10,7 +10,7 @@ export const REPORTS_NAVIGATION_ITEM: NavigationItem = {
   label: "Reportes Analíticos",
   icon: ChartColumn,
   children: [
-    { label: "Reporte de usuarios registrados", href: REGISTERED_USERS_REPORT_PATH },
+    { label: "Reporte de usuarios registrados aceptados", href: REGISTERED_USERS_REPORT_PATH },
     { label: "Reporte de usuarios registrados rechazados", href: REJECTED_USERS_REPORT_PATH },
     { label: "Historial de reportes generados", href: REPORT_HISTORY_PATH },
   ],
