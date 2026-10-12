@@ -52,7 +52,7 @@ describe('seedUsers', () => {
 
     const result = await seedUsers(tx as any, 'hash-compartido');
 
-    expect(SEED_USERS).toHaveLength(6);
+    expect(SEED_USERS).toHaveLength(7);
     expect(result.users.admin.email).toBe('admin.1@umssy.test');
     expect(tx.user.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
