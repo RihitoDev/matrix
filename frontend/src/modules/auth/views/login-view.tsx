@@ -9,10 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
+import { SELECT_ITEM_CONTRAST_CLASS } from "@/shared/constants/select.constants";
 import { useLogin } from "../hooks/use-login";
 import type { RoleTag } from "../types/auth-types";
-import { getPostLoginPath } from "../utils/get-post-login-path";
+import { NEXT_PARAM } from "../constants/session.constants";
+import { resolvePostLoginPath } from "../utils/resolve-post-login-path";
+import { startSession } from "../utils/session";
+import { validateLoginFields, type LoginFieldErrors } from "../utils/validate-login-fields";
 
 const ROLE_OPTIONS: { value: RoleTag; label: string }[] = [
   { value: "titulado", label: "Titulado" },
@@ -28,15 +31,18 @@ export function LoginView() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [roleTag, setRoleTag] = useState<RoleTag>("titulado");
+  const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    const errors = validateLoginFields(email, password);
+    setFieldErrors(errors);
+    if (errors.email || errors.password) return;
     const result = await login({ email, password, roleTag });
     if (result) {
-      saveAccessToken(result.accessToken);
-      const destination = getPostLoginPath(result.roleTag);
-      const next = new URLSearchParams(window.location.search).get('next');
-      router.push(destination === '/' && next === '/events/my-passes' ? next : destination);
+      startSession(result.accessToken);
+      const next = new URLSearchParams(window.location.search).get(NEXT_PARAM);
+      router.push(resolvePostLoginPath(result.roleTag, next));
     }
   }
 
@@ -50,6 +56,7 @@ export function LoginView() {
 
       <form
         onSubmit={handleSubmit}
+        noValidate
         className="w-full max-w-[420px] rounded-[10px] border border-border bg-surface p-6 shadow-sm sm:p-8"
       >
         <h1 className="font-tight text-[26px] font-extrabold text-ink">Iniciar sesión</h1>
@@ -78,7 +85,7 @@ export function LoginView() {
                 <SelectItem
                   key={option.value}
                   value={option.value}
-                  className="focus:bg-muted focus:text-foreground"
+                  className={SELECT_ITEM_CONTRAST_CLASS}
                 >
                   {option.label}
                 </SelectItem>
@@ -98,9 +105,16 @@ export function LoginView() {
             autoComplete="username"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
+            aria-invalid={fieldErrors.email ? true : undefined}
+            aria-describedby={fieldErrors.email ? "login-email-error" : undefined}
             className="h-[42px] rounded-lg border-border bg-surface px-3 text-[15px] text-ink focus-visible:border-accent focus-visible:ring-interaction md:text-[15px]"
             placeholder="nombre@ejemplo.com"
           />
+          {fieldErrors.email ? (
+            <p id="login-email-error" role="alert" className="mt-1.5 text-[13px] font-medium text-accent">
+              {fieldErrors.email}
+            </p>
+          ) : null}
         </div>
 
         <div className="mb-6">
@@ -114,9 +128,16 @@ export function LoginView() {
             autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
+            aria-invalid={fieldErrors.password ? true : undefined}
+            aria-describedby={fieldErrors.password ? "login-password-error" : undefined}
             className="h-[42px] rounded-lg border-border bg-surface px-3 text-[15px] text-ink focus-visible:border-accent focus-visible:ring-interaction md:text-[15px]"
             placeholder="********"
           />
+          {fieldErrors.password ? (
+            <p id="login-password-error" role="alert" className="mt-1.5 text-[13px] font-medium text-accent">
+              {fieldErrors.password}
+            </p>
+          ) : null}
         </div>
 
         {error ? (
