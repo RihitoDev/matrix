@@ -60,7 +60,7 @@ export function RegisteredUsersReportView() {
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
         <PageBreadcrumb items={REGISTERED_USERS_BREADCRUMB} />
-        <h1 className="font-tight text-3xl font-extrabold text-ink">Reporte de usuarios registrados</h1>
+        <h1 className="font-tight text-3xl font-extrabold text-ink">Reporte de usuarios registrados aceptados</h1>
       </header>
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">

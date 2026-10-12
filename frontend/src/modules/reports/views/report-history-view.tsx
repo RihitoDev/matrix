@@ -27,7 +27,7 @@ export function ReportHistoryView() {
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
         <PageBreadcrumb items={REPORT_HISTORY_BREADCRUMB} />
-        <h1 className="font-tight text-3xl font-extrabold text-ink">Historial de Reportes Generados</h1>
+        <h1 className="font-tight text-3xl font-extrabold text-ink">Historial de reportes generados</h1>
       </header>
 
       <ReportTypeFilter value={reportType} onChange={handleReportTypeChange} />

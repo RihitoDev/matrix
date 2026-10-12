@@ -58,7 +58,7 @@ describe("ReportHistoryView", () => {
   it("muestra el título, el breadcrumb y los reportes de la primera página", async () => {
     render(<ReportHistoryView />);
 
-    expect(screen.getByRole("heading", { name: "Historial de Reportes Generados" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Historial de reportes generados" })).toBeDefined();
     expect(screen.getByRole("link", { name: "Inicio" })).toBeDefined();
     expect(screen.getAllByTestId("skeleton-row")).toHaveLength(10);
 
