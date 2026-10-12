@@ -73,10 +73,13 @@ describe("reportsService.getRejectedUsers", () => {
     };
     const getSpy = vi.spyOn(apiClient, "get").mockResolvedValueOnce({ data: response });
 
-    const result = await reportsService.getRejectedUsers({ page: 2, limit: 10, search: "juan" });
+    const signal = new AbortController().signal;
+    const result = await reportsService.getRejectedUsers({ page: 2, limit: 10, search: "juan" }, signal);
 
     expect(getSpy).toHaveBeenCalledWith("/reports/rejected-users", {
       params: { page: 2, limit: 10, search: "juan" },
+      signal,
+      timeout: 10_000,
     });
     expect(result).toEqual(response);
   });
@@ -88,6 +91,8 @@ describe("reportsService.getRejectedUsers", () => {
 
     expect(getSpy).toHaveBeenCalledWith("/reports/rejected-users", {
       params: { page: 1, limit: 10, search: undefined },
+      signal: undefined,
+      timeout: 10_000,
     });
   });
 });

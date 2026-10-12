@@ -58,7 +58,7 @@ describe("ReportHistoryView", () => {
   it("muestra el título, el breadcrumb y los reportes de la primera página", async () => {
     render(<ReportHistoryView />);
 
-    expect(screen.getByRole("heading", { name: "Historial de Reportes Generados" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Historial de reportes generados" })).toBeDefined();
     expect(screen.getByRole("link", { name: "Inicio" })).toBeDefined();
     expect(screen.getAllByTestId("skeleton-row")).toHaveLength(10);
 
@@ -127,6 +127,24 @@ describe("ReportHistoryView", () => {
     });
   });
 
+    it("muestra el contador de reportes y vuelve a cargar con Actualizar", async () => {
+    render(<ReportHistoryView />);
+
+    expect(screen.getByText("Cargando reportes...")).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByText("Mostrando 1-10 de 12 reportes")).toBeDefined();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /actualizar/i }));
+
+    await waitFor(() => {
+      expect(reportsService.getReportHistory).toHaveBeenCalledTimes(2);
+    });
+    await waitFor(() => {
+      expect(screen.getByText(FIRST_PAGE_REPORT)).toBeDefined();
+    });
+  });
+
   it("muestra un mensaje cuando no hay reportes", async () => {
     vi.spyOn(reportsService, "getReportHistory").mockResolvedValueOnce({
       statusCode: 200,
@@ -139,6 +157,7 @@ describe("ReportHistoryView", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Aún no se generaron reportes.")).toBeDefined();
+      expect(screen.getByText("Mostrando 0-0 de 0 reportes")).toBeDefined();
     });
   });
 

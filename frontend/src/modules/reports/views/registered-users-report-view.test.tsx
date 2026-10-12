@@ -85,7 +85,7 @@ describe("RegisteredUsersReportView", () => {
   it("muestra el título, los botones y la primera página de usuarios", async () => {
     render(<RegisteredUsersReportView />);
 
-    expect(screen.getByRole("heading", { name: "Reporte de usuarios registrados" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Reporte de usuarios registrados aceptados" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Exportar CSV" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Gestión" })).toBeDefined();
     expect(screen.getByRole("button", { name: "actualizar" })).toBeDefined();

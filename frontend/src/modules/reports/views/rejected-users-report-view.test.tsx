@@ -1,6 +1,8 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { notifyManager } from "@tanstack/react-query";
+import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ApiResponse, PaginatedData } from "@/shared/types/api-response.types";
+import { renderWithQuery } from "@/shared/testing/render-with-query";
 import * as downloadFileModule from "@/shared/utils/download-file";
 import { reportsService } from "../services/reports.service";
 import type { RejectedUser } from "../types/rejected-user.types";
@@ -41,6 +43,14 @@ async function searchFor(value: string, expectedSummary: string) {
 }
 
 describe("RejectedUsersReportView", () => {
+  beforeAll(() => {
+    notifyManager.setScheduler(queueMicrotask);
+  });
+
+  afterAll(() => {
+    notifyManager.setScheduler((callback) => setTimeout(callback, 0));
+  });
+
   beforeEach(() => {
     vi.spyOn(reportsService, "getRejectedUsers").mockImplementation(async ({ page, limit, search }) =>
       buildResponse(page, limit, search),
@@ -54,7 +64,7 @@ describe("RejectedUsersReportView", () => {
   });
 
   it("muestra el título, el buscador, los botones y la primera página", async () => {
-    render(<RejectedUsersReportView />);
+    renderWithQuery(<RejectedUsersReportView />);
 
     expect(screen.getByRole("heading", { name: "Reporte de usuarios registrados rechazados" })).toBeDefined();
     expect(screen.getByPlaceholderText("Buscar por correo electrónico")).toBeDefined();
@@ -68,11 +78,11 @@ describe("RejectedUsersReportView", () => {
     expect(screen.getAllByText("Diploma académico").length).toBeGreaterThan(0);
     expect(screen.getByText("Título en provisión nacional")).toBeDefined();
     expect(screen.getByText("Mostrando 1-10 de 24 usuarios")).toBeDefined();
-    expect(reportsService.getRejectedUsers).toHaveBeenCalledWith({ page: 1, limit: 10, search: "" });
+    expect(reportsService.getRejectedUsers).toHaveBeenCalledWith({ page: 1, limit: 10, search: "" }, expect.any(AbortSignal));
   });
 
   it("navega a la última página", async () => {
-    render(<RejectedUsersReportView />);
+    renderWithQuery(<RejectedUsersReportView />);
     await waitFor(() => {
       expect(screen.getByText("Juan Carlos Peres Rojas")).toBeDefined();
     });
@@ -86,7 +96,7 @@ describe("RejectedUsersReportView", () => {
   });
 
   it("busca por correo después de dejar de escribir y vuelve a la primera página", async () => {
-    render(<RejectedUsersReportView />);
+    renderWithQuery(<RejectedUsersReportView />);
     await waitFor(() => {
       expect(screen.getByText("Juan Carlos Peres Rojas")).toBeDefined();
     });
@@ -113,11 +123,11 @@ describe("RejectedUsersReportView", () => {
     await waitFor(() => {
       expect(screen.getByText("Mostrando 1-1 de 1 usuarios")).toBeDefined();
     });
-    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 1, limit: 10, search: "juan.perez@" });
+    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 1, limit: 10, search: "juan.perez@" }, expect.any(AbortSignal));
   });
 
   it("limpia la búsqueda con el botón de la x", async () => {
-    render(<RejectedUsersReportView />);
+    renderWithQuery(<RejectedUsersReportView />);
     const searchInput = screen.getByPlaceholderText<HTMLInputElement>("Buscar por correo electrónico");
 
     expect(screen.queryByRole("button", { name: "Limpiar búsqueda" })).toBeNull();
@@ -131,7 +141,7 @@ describe("RejectedUsersReportView", () => {
   it.each(["noexiste@correo.com", "Juan Carlos", "201900000"])(
     'muestra el aviso del correo cuando "%s" no encuentra usuarios',
     async (searchTerm) => {
-      render(<RejectedUsersReportView />);
+      renderWithQuery(<RejectedUsersReportView />);
 
       fireEvent.change(screen.getByPlaceholderText("Buscar por correo electrónico"), {
         target: { value: searchTerm },
@@ -145,14 +155,25 @@ describe("RejectedUsersReportView", () => {
   );
 
   it("vuelve a cargar los datos al presionar Actualizar", async () => {
-    render(<RejectedUsersReportView />);
+    renderWithQuery(<RejectedUsersReportView />);
     await waitFor(() => {
       expect(screen.getByText("Juan Carlos Peres Rojas")).toBeDefined();
     });
 
+    let resolveRefresh: () => void = () => undefined;
+    vi.mocked(reportsService.getRejectedUsers).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveRefresh = () => resolve(buildResponse(1, 10));
+        }),
+    );
+
     fireEvent.click(screen.getByRole("button", { name: "actualizar" }));
 
-    expect(screen.getByRole<HTMLButtonElement>("button", { name: "actualizar" }).disabled).toBe(true);
+    await waitFor(() => {
+      expect(screen.getByRole<HTMLButtonElement>("button", { name: "actualizar" }).disabled).toBe(true);
+    });
+    resolveRefresh();
     await waitFor(() => {
       expect(screen.getByText("Juan Carlos Peres Rojas")).toBeDefined();
     });
@@ -160,7 +181,7 @@ describe("RejectedUsersReportView", () => {
   });
 
   it("conserva el texto buscado al presionar Actualizar", async () => {
-    render(<RejectedUsersReportView />);
+    renderWithQuery(<RejectedUsersReportView />);
     await searchFor("juan.perez@", "Mostrando 1-1 de 1 usuarios");
 
     fireEvent.click(screen.getByRole("button", { name: "actualizar" }));
@@ -169,11 +190,11 @@ describe("RejectedUsersReportView", () => {
       expect(screen.getByText("Mostrando 1-1 de 1 usuarios")).toBeDefined();
     });
     expect(getSearchInput().value).toBe("juan.perez@");
-    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 1, limit: 10, search: "juan.perez@" });
+    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 1, limit: 10, search: "juan.perez@" }, expect.any(AbortSignal));
   });
 
   it("conserva el texto buscado al cambiar de página", async () => {
-    render(<RejectedUsersReportView />);
+    renderWithQuery(<RejectedUsersReportView />);
     await searchFor("usuario", "Mostrando 1-10 de 23 usuarios");
 
     fireEvent.click(screen.getByRole("button", { name: "Página 2" }));
@@ -182,11 +203,11 @@ describe("RejectedUsersReportView", () => {
       expect(screen.getByText("Mostrando 11-20 de 23 usuarios")).toBeDefined();
     });
     expect(getSearchInput().value).toBe("usuario");
-    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 2, limit: 10, search: "usuario" });
+    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 2, limit: 10, search: "usuario" }, expect.any(AbortSignal));
   });
 
   it("se mantiene en la página actual si solo se agregan espacios al inicio o al final de la búsqueda", async () => {
-    render(<RejectedUsersReportView />);
+    renderWithQuery(<RejectedUsersReportView />);
     await searchFor("usuario", "Mostrando 1-10 de 23 usuarios");
     fireEvent.click(screen.getByRole("button", { name: "Página 3" }));
     await waitFor(() => {
@@ -202,22 +223,19 @@ describe("RejectedUsersReportView", () => {
 
     expect(screen.getByText("Mostrando 21-23 de 23 usuarios")).toBeDefined();
     expect(screen.getByRole("button", { name: "Página 3" }).getAttribute("aria-current")).toBe("page");
-    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 3, limit: 10, search: "usuario" });
+    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 3, limit: 10, search: "usuario" }, expect.any(AbortSignal));
   });
 
-  it("muestra la página 1 sin el contador cuando la búsqueda no encuentra usuarios", async () => {
-    render(<RejectedUsersReportView />);
+  it("oculta el contador y la paginación cuando la búsqueda no encuentra usuarios", async () => {
+    renderWithQuery(<RejectedUsersReportView />);
     await searchFor("fg", "No se encontró ningún usuario con el correo");
 
     expect(screen.queryByText(/^Mostrando/)).toBeNull();
-    const pageButtons = screen.getAllByRole("button", { name: /^Página \d+$/ });
-    expect(pageButtons.map((button) => button.textContent)).toEqual(["1"]);
-    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Página anterior" }).disabled).toBe(true);
-    expect(screen.getByRole<HTMLButtonElement>("button", { name: "Página siguiente" }).disabled).toBe(true);
+    expect(screen.queryByRole("navigation", { name: "Paginación" })).toBeNull();
   });
 
   it("muestra solo la página 1 cuando los resultados caben en una página", async () => {
-    render(<RejectedUsersReportView />);
+    renderWithQuery(<RejectedUsersReportView />);
     await searchFor("juan.perez@", "Mostrando 1-1 de 1 usuarios");
 
     const pageButtons = screen.getAllByRole("button", { name: /^Página \d+$/ });
@@ -226,17 +244,17 @@ describe("RejectedUsersReportView", () => {
   });
 
   it("al volver a entrar muestra la barra vacía y la lista completa", async () => {
-    const { unmount } = render(<RejectedUsersReportView />);
+    const { unmount } = renderWithQuery(<RejectedUsersReportView />);
     await searchFor("juan.perez@", "Mostrando 1-1 de 1 usuarios");
 
     unmount();
-    render(<RejectedUsersReportView />);
+    renderWithQuery(<RejectedUsersReportView />);
 
     expect(getSearchInput().value).toBe("");
     await waitFor(() => {
       expect(screen.getByText("Mostrando 1-10 de 24 usuarios")).toBeDefined();
     });
-    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 1, limit: 10, search: "" });
+    expect(reportsService.getRejectedUsers).toHaveBeenLastCalledWith({ page: 1, limit: 10, search: "" }, expect.any(AbortSignal));
   });
 
   it("muestra un mensaje cuando no hay usuarios rechazados", async () => {
@@ -247,22 +265,24 @@ describe("RejectedUsersReportView", () => {
       ok: true,
     });
 
-    render(<RejectedUsersReportView />);
+    renderWithQuery(<RejectedUsersReportView />);
 
     await waitFor(() => {
       expect(screen.getByText("No hay usuarios rechazados.")).toBeDefined();
     });
     expect(screen.getByText("Mostrando 0-0 de 0 usuarios")).toBeDefined();
+    expect(screen.queryByRole("navigation", { name: "Paginación" })).toBeNull();
   });
 
   it("muestra un mensaje de error si falla la carga", async () => {
     vi.mocked(reportsService.getRejectedUsers).mockRejectedValueOnce(new Error("Network error"));
 
-    render(<RejectedUsersReportView />);
+    renderWithQuery(<RejectedUsersReportView />);
 
     await waitFor(() => {
       expect(screen.getByText("No se pudo cargar el reporte de usuarios rechazados.")).toBeDefined();
     });
+    expect(screen.queryByRole("navigation", { name: "Paginación" })).toBeNull();
   });
 
   it("exporta en CSV los rechazados de la búsqueda actual y descarga el archivo", async () => {
@@ -272,7 +292,7 @@ describe("RejectedUsersReportView", () => {
       () => new Promise((resolve) => (resolveExport = resolve)),
     );
     const downloadSpy = vi.spyOn(downloadFileModule, "downloadFile").mockImplementation(() => undefined);
-    render(<RejectedUsersReportView />);
+    renderWithQuery(<RejectedUsersReportView />);
     await searchFor("juan", "Mostrando 1-1 de 1 usuarios");
 
     fireEvent.click(screen.getByRole("button", { name: "Exportar CSV" }));
@@ -293,7 +313,7 @@ describe("RejectedUsersReportView", () => {
   it("muestra un mensaje si falla la exportación", async () => {
     vi.spyOn(reportsService, "exportRejectedUsersCsv").mockRejectedValueOnce(new Error("Network error"));
     const downloadSpy = vi.spyOn(downloadFileModule, "downloadFile");
-    render(<RejectedUsersReportView />);
+    renderWithQuery(<RejectedUsersReportView />);
     await waitFor(() => {
       expect(screen.getByText("Juan Carlos Peres Rojas")).toBeDefined();
     });

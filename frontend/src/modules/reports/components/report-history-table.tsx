@@ -6,6 +6,7 @@ import {
   REPORT_HISTORY_COLUMN_COUNT as COLUMN_COUNT,
   REPORT_HISTORY_HEAD_CLASSES as HEAD_CLASSES,
   TABLE_CELL_CLASSES as CELL_CLASSES,
+  TABLE_CONTAINER_CLASSES as CONTAINER_CLASSES,
 } from "../constants/report-table.constants";
 import type { ReportHistoryTableProps } from "../types/report-history-table-props.types";
 import { TableMessageRow, TableSkeletonRows } from "./table-state-rows";
@@ -63,7 +64,7 @@ export function ReportHistoryTable({
   };
 
   return (
-    <div className="@container rounded-lg border border-border bg-surface">
+    <div className={CONTAINER_CLASSES}>
       <Table className="text-left text-xs sm:text-sm md:min-w-160 md:text-base">
         <TableHeader className="bg-surface-soft">
           <TableRow className="border-border hover:bg-transparent">

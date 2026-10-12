@@ -39,12 +39,13 @@ export function RejectedUsersReportView() {
   const firstVisibleItem = totalItems === 0 ? 0 : (currentPage - 1) * REJECTED_USERS_PAGE_SIZE + 1;
   const lastVisibleItem = Math.min(currentPage * REJECTED_USERS_PAGE_SIZE, totalItems);
   const hideSummary = Boolean(search) && !errorMessage && !isLoading && totalItems === 0;
+  const showPagination = !errorMessage && totalItems > 0;
 
   return (
     <section className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
         <PageBreadcrumb items={REJECTED_USERS_BREADCRUMB} />
-        <h1 className="font-tight text-3xl font-extrabold uppercase text-ink">Reporte de usuarios registrados rechazados</h1>
+        <h1 className="font-tight text-3xl font-extrabold text-ink">Reporte de usuarios registrados rechazados</h1>
       </header>
 
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -74,7 +75,9 @@ export function RejectedUsersReportView() {
           <RefreshButton onClick={refresh} isRefreshing={isLoading} />
         </div>
         <div className="flex justify-center md:justify-end">
-          <TablePagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+          {showPagination && (
+            <TablePagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+          )}
         </div>
       </div>
 

@@ -12,6 +12,8 @@ import {
   REJECTED_USERS_COLUMN_COUNT as COLUMN_COUNT,
   REJECTION_BADGE_CLASSES,
   REJECTION_REASON_SHORT_LABELS,
+  STICKY_CELL_CLASSES,
+  STICKY_HEAD_CLASSES,
   TABLE_CELL_CLASSES as CELL_CLASSES,
   TABLE_CONTAINER_CLASSES as CONTAINER_CLASSES,
   USERS_TABLE_HEAD_CLASSES as HEAD_CLASSES,
@@ -44,8 +46,8 @@ export function RejectedUsersTable({ users, isLoading, errorMessage, searchTerm 
     }
 
     return users.map((user) => (
-      <TableRow key={user.id} className="border-border hover:bg-surface-soft">
-        <TableCell className={`${CELL_CLASSES} text-ink`}>{user.fullName}</TableCell>
+      <TableRow key={user.id} className="group border-border hover:bg-surface-soft">
+        <TableCell className={`${CELL_CLASSES} ${STICKY_CELL_CLASSES} text-ink`}>{user.fullName}</TableCell>
         <TableCell className={CELL_CLASSES}>{user.email}</TableCell>
         <TableCell className={`${CELL_CLASSES} tabular-nums`}>{user.identifier}</TableCell>
         <TableCell className={CELL_CLASSES}>
@@ -72,7 +74,7 @@ export function RejectedUsersTable({ users, isLoading, errorMessage, searchTerm 
         <Table className="min-w-200 text-left text-base">
           <TableHeader className="bg-surface-soft">
             <TableRow className="border-border hover:bg-transparent">
-              <TableHead scope="col" className={HEAD_CLASSES}>Usuario</TableHead>
+              <TableHead scope="col" className={`${HEAD_CLASSES} ${STICKY_HEAD_CLASSES}`}>Usuario</TableHead>
               <TableHead scope="col" className={HEAD_CLASSES}>Correo</TableHead>
               <TableHead scope="col" className={HEAD_CLASSES}>Identificador</TableHead>
               <TableHead scope="col" className={HEAD_CLASSES}>Documento</TableHead>
