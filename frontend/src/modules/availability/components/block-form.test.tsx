@@ -15,8 +15,13 @@ function renderForm(props: Partial<React.ComponentProps<typeof BlockForm>> = {})
 
 async function fillForm(user: ReturnType<typeof userEvent.setup>, day: string, start: string, end: string) {
   await user.click(screen.getByRole("button", { name: day }))
-  await user.selectOptions(screen.getByLabelText(/Hora de inicio/), start)
-  await user.selectOptions(screen.getByLabelText(/Hora de fin/), end)
+  await selectTime(user, /Hora de inicio/, start)
+  await selectTime(user, /Hora de fin/, end)
+}
+
+async function selectTime(user: ReturnType<typeof userEvent.setup>, label: RegExp, value: string) {
+  await user.click(screen.getByLabelText(label))
+  await user.click(await screen.findByRole("option", { name: value }))
 }
 
 describe("BlockForm", () => {
@@ -59,17 +64,17 @@ describe("BlockForm", () => {
     expect(screen.getByRole("button", { name: /jueves, 8 de octubre de 2026/ })).toBeEnabled()
   })
 
-  it("ofrece horas de 07:00 a 22:00 cada 30 minutos", () => {
-    renderForm()
+  it("ofrece horas de 07:00 a 22:00 cada 30 minutos en una lista compacta", async () => {
+    const { user } = renderForm()
 
-    const options = Array.from((screen.getByLabelText(/Hora de inicio/) as HTMLSelectElement).options)
-      .map((option) => option.value)
-      .filter(Boolean)
+    await user.click(screen.getByLabelText(/Hora de inicio/))
+    const options = (await screen.findAllByRole("option")).map((option) => option.textContent)
 
     expect(options).toHaveLength(31)
     expect(options[0]).toBe("07:00")
     expect(options[1]).toBe("07:30")
     expect(options.at(-1)).toBe("22:00")
+    expect(screen.getByRole("listbox").closest('[data-slot="select-content"]')).toHaveClass("max-h-[min(200px,var(--available-height))]")
   })
 
   it("muestra los campos obligatorios sin llamar a onSubmit", async () => {
@@ -112,7 +117,7 @@ describe("BlockForm", () => {
 
     await fillForm(user, "martes, 13 de octubre de 2026", "20:00", "18:00")
     await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
-    await user.selectOptions(screen.getByLabelText(/Hora de fin/), "21:00")
+    await selectTime(user, /Hora de fin/, "21:00")
 
     expect(screen.queryByText("La hora de fin debe ser posterior a la hora de inicio")).not.toBeInTheDocument()
   })
@@ -147,7 +152,7 @@ describe("BlockForm", () => {
     expect(onSubmit).not.toHaveBeenCalled()
   })
 
-  it("en modo edición carga initialValues en hora de Bolivia", async () => {
+  it("en modo edición permite cambiar las horas y conserva el día original de solo lectura", async () => {
     const { onSubmit, user } = renderForm({
       mode: "edit",
       initialValues: { startAt: "2026-10-13T22:00:00.000Z", endAt: "2026-10-14T00:00:00.000Z" },
@@ -155,16 +160,21 @@ describe("BlockForm", () => {
 
     expect(screen.getByText("Editar bloque")).toBeInTheDocument()
     expect(screen.getByLabelText(/Día/)).toHaveValue("2026-10-13")
+    expect(screen.getByLabelText(/Día/)).toHaveAttribute("readonly")
     expect(screen.getByText("Martes 13 de octubre")).toBeInTheDocument()
-    expect(screen.getByLabelText(/Desde/)).toHaveValue("18:00")
-    expect(screen.getByLabelText(/Hasta/)).toHaveValue("20:00")
+    expect(screen.getByLabelText(/Desde/)).toHaveTextContent("18:00")
+    expect(screen.getByLabelText(/Hasta/)).toHaveTextContent("20:00")
     expect(screen.queryByText(/Horario en hora de Bolivia/)).not.toBeInTheDocument()
 
+    await user.type(screen.getByLabelText(/Día/), "2026-10-15")
+    expect(screen.getByLabelText(/Día/)).toHaveValue("2026-10-13")
+    await selectTime(user, /Desde/, "17:00")
+    await selectTime(user, /Hasta/, "19:00")
     await user.click(screen.getByRole("button", { name: "Guardar cambios" }))
 
     expect(onSubmit).toHaveBeenCalledWith({
-      startAt: "2026-10-13T22:00:00.000Z",
-      endAt: "2026-10-14T00:00:00.000Z",
+      startAt: "2026-10-13T21:00:00.000Z",
+      endAt: "2026-10-13T23:00:00.000Z",
     })
   })
 
