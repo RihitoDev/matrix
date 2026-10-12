@@ -25,4 +25,16 @@ describe('authService', () => {
     vi.mocked(apiClient.post).mockResolvedValue({ data: { data } });
     await expect(authService.login(payload)).rejects.toThrow('token de sesión válido');
   });
+  it('acepta también el cuerpo plano { accessToken, roleTag }', async () => {
+    const session = { accessToken: 'token', roleTag: 'administrativo' };
+    vi.mocked(apiClient.post).mockResolvedValue({ data: session });
+    await expect(authService.login(payload)).resolves.toEqual(session);
+  });
+  it.each([undefined, null, {}, { roleTag: 'titulado' }, { accessToken: 'token' }, { accessToken: '', roleTag: 'titulado' }, { data: { accessToken: 'token' } }])(
+    'rechaza un cuerpo sin token o sin rol: %j',
+    async (data) => {
+      vi.mocked(apiClient.post).mockResolvedValue({ data });
+      await expect(authService.login(payload)).rejects.toThrow('token de sesión válido');
+    },
+  );
 });

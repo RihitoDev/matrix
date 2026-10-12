@@ -4,12 +4,11 @@ import type { FieldErrors, PersonalDataValues } from "../types/access-request.ty
 
 export const MIN_AGE = 18;
 
-const NAME_REGEX = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?: [A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/;
+const NAME_REGEX = /^\p{L}[\p{L}\p{M}]*(?:[ '’-]\p{L}[\p{L}\p{M}]*)*$/u;
 const DIGITS_REGEX = /^\d+$/;
 const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Se compara el viaje de ida y vuelta para rechazar fechas como 2000-02-30
 function isRealIsoDate(value: string): boolean {
   const date = new Date(`${value}T00:00:00.000Z`);
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
@@ -24,7 +23,7 @@ function validateName(value: string, label: string): string | undefined {
   const text = value.trim();
   if (text.length === 0) return `${label} son obligatorios`;
   if (text.length > 100) return `${label} no pueden superar los 100 caracteres`;
-  if (!NAME_REGEX.test(text)) return `${label} solo pueden contener letras y espacios`;
+  if (!NAME_REGEX.test(text)) return `${label} solo pueden contener letras, espacios, guiones y apóstrofes`;
 }
 
 function validateDigits(value: string, label: string): string | undefined {
@@ -56,7 +55,6 @@ function validateGraduationYear(value: string, now: Date): string | undefined {
   if (Number(text) > now.getUTCFullYear()) return "El año de titulación no puede ser futuro";
 }
 
-// Devuelve solo los campos con error; un objeto vacío significa que todo es válido
 export function validatePersonalData(values: PersonalDataValues, now: Date = new Date()): FieldErrors {
   const errors: FieldErrors = {};
   const assign = (field: keyof FieldErrors, message: string | undefined) => {
@@ -87,7 +85,6 @@ export function validatePersonalData(values: PersonalDataValues, now: Date = new
     (CAREERS as readonly string[]).includes(values.career) ? undefined : "La carrera no es válida",
   );
 
-  // La coherencia solo se evalúa si ambos campos son válidos por separado
   if (!errors.birthDate && !errors.graduationYear) {
     const birthYear = Number(values.birthDate.trim().slice(0, 4));
     if (Number(values.graduationYear.trim()) < birthYear + MIN_AGE) {

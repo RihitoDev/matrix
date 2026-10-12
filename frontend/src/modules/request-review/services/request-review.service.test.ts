@@ -102,6 +102,20 @@ describe("requestReviewService.getRequestDetail", () => {
     expect(await requestReviewService.getRequestDetail("1")).toMatchObject({ status: 403 });
   });
 
+  it("con un id inválido muestra el mensaje de validación en español y no el detalle técnico", async () => {
+    reply(400, {
+      statusCode: 400,
+      ok: false,
+      detail: "id: El identificador de la solicitud no es válido",
+      errors: [{ field: "id", message: "El identificador de la solicitud no es válido" }],
+    });
+    expect(await requestReviewService.getRequestDetail("abc")).toEqual({
+      ok: false,
+      status: 400,
+      message: "El identificador de la solicitud no es válido",
+    });
+  });
+
   it.each([["texto"], [{}], [{ id: 5, history: {} }]])("un 200 inválido %j da error", async (body) => {
     reply(200, body);
     expect(await requestReviewService.getRequestDetail("1")).toMatchObject({ ok: false, status: 0 });
@@ -223,5 +237,96 @@ describe("requestReviewService.rejectRequest", () => {
     expect(await requestReviewService.rejectRequest("1", "m")).toMatchObject({ ok: false, status: 0 });
     patch.mockRejectedValueOnce(new Error("red"));
     expect(await requestReviewService.rejectRequest("1", "m")).toMatchObject({ ok: false, status: 0, message: "No se pudo conectar con el servidor. Inténtalo de nuevo." });
+  });
+});
+
+describe("requestReviewService.listRequests: filtros", () => {
+  beforeEach(() => {
+    get.mockReset();
+    get.mockResolvedValue({ status: 200, data: { data: { items: [], total: 0 } } } as never);
+  });
+  afterEach(() => sessionStorage.clear());
+
+  const paramsOf = () => get.mock.calls[0][1]?.params;
+
+  it("envía search, career y period cuando hay valor", async () => {
+    await requestReviewService.listRequests("pending", 1, undefined, { search: "ana", career: "Licenciatura en Ingeniería de Sistemas", period: "7d" });
+
+    expect(paramsOf()).toEqual({ status: "pending", page: 1, limit: 10, search: "ana", career: "Licenciatura en Ingeniería de Sistemas", period: "7d" });
+  });
+
+  it("no envía los filtros vacíos ni el período por defecto (all)", async () => {
+    await requestReviewService.listRequests("pending", 2, 10, { search: "", career: "", period: "all" });
+
+    expect(paramsOf()).toEqual({ status: "pending", page: 2, limit: 10 });
+  });
+
+  it("envía el período de 30 días", async () => {
+    await requestReviewService.listRequests("approved", 1, 10, { period: "30d" });
+
+    expect(paramsOf()).toMatchObject({ period: "30d" });
+  });
+});
+
+describe("requestReviewService.getSummary", () => {
+  const summary = {
+    pendingCount: 18,
+    pendingOver24hCount: 5,
+    decidedTodayCount: 7,
+    approvedTodayCount: 6,
+    rejectedTodayCount: 1,
+    averageReviewHours: 21,
+    reviewTimeGoalHours: 48,
+    rejectedThisMonthCount: 5,
+    topRejectionReason: null,
+  };
+
+  beforeEach(() => {
+    get.mockReset();
+    sessionStorage.setItem("accessToken", "token-de-prueba");
+  });
+  afterEach(() => sessionStorage.clear());
+
+  it("lee el cuerpo plano con el token Bearer", async () => {
+    get.mockResolvedValue({ status: 200, data: summary } as never);
+
+    await expect(requestReviewService.getSummary()).resolves.toEqual({ ok: true, data: summary });
+    expect(get).toHaveBeenCalledWith("/access-requests/summary", expect.objectContaining({ headers: { Authorization: "Bearer token-de-prueba" } }));
+  });
+
+  it("lee también el cuerpo envuelto en el formato estándar", async () => {
+    get.mockResolvedValue({ status: 200, data: { statusCode: 200, data: summary, detail: "ok", ok: true } } as never);
+
+    await expect(requestReviewService.getSummary()).resolves.toEqual({ ok: true, data: summary });
+  });
+
+  it("acepta un tiempo medio nulo y un motivo principal de texto", async () => {
+    get.mockResolvedValue({ status: 200, data: { ...summary, averageReviewHours: null, topRejectionReason: "Documento ilegible" } } as never);
+
+    await expect(requestReviewService.getSummary()).resolves.toMatchObject({
+      ok: true,
+      data: { averageReviewHours: null, topRejectionReason: "Documento ilegible" },
+    });
+  });
+
+  it.each([
+    [401, "Tu sesión expiró. Inicia sesión de nuevo."],
+    [403, "No tienes permiso para ver las solicitudes."],
+  ])("traduce el %d", async (status, message) => {
+    get.mockResolvedValue({ status, data: {} } as never);
+
+    await expect(requestReviewService.getSummary()).resolves.toEqual({ ok: false, status, message });
+  });
+
+  it.each([[{}], ["texto"], [{ ...summary, pendingCount: "18" }], [{ ...summary, averageReviewHours: "21" }]])("un 200 con cuerpo inválido %j da error", async (body) => {
+    get.mockResolvedValue({ status: 200, data: body } as never);
+
+    await expect(requestReviewService.getSummary()).resolves.toMatchObject({ ok: false, status: 0 });
+  });
+
+  it("devuelve error de conexión si la petición falla", async () => {
+    get.mockRejectedValue(new Error("red"));
+
+    await expect(requestReviewService.getSummary()).resolves.toMatchObject({ ok: false, message: "No se pudo conectar con el servidor. Inténtalo de nuevo." });
   });
 });

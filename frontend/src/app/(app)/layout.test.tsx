@@ -1,12 +1,14 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import AppLayout from "./layout";
 
 const { route } = vi.hoisted(() => ({ route: { pathname: "/profile" } }));
 
+const replace = vi.fn();
 vi.mock("next/navigation", () => ({
   usePathname: () => route.pathname,
+  useRouter: () => ({ replace }),
 }));
 
 vi.mock("@/shared/components/layout", () => ({
@@ -16,8 +18,12 @@ vi.mock("@/shared/components/layout", () => ({
 }));
 
 describe("AppLayout", () => {
+  beforeEach(() => sessionStorage.setItem("accessToken", "token-de-prueba"));
   afterEach(() => {
     cleanup();
+    sessionStorage.clear();
+    window.history.replaceState({}, "", "/");
+    replace.mockReset();
     route.pathname = "/profile";
   });
 
@@ -42,5 +48,24 @@ describe("AppLayout", () => {
     expect(screen.getByTestId("app-shell")).toContainElement(screen.getByText("event-content"));
     expect(screen.getByTestId("app-shell")).toHaveAttribute("data-navigation", "Talleres,Mis pases");
     expect(screen.getByTestId("app-shell")).toHaveAttribute("data-full-bleed", fullBleed);
+  });
+
+  it("sin sesión no muestra la página privada y lleva al login con la ruta pedida", () => {
+    sessionStorage.clear();
+    window.history.replaceState({}, "", "/profile?tab=cv");
+    render(<AppLayout><p>page-content</p></AppLayout>);
+
+    expect(screen.queryByText("page-content")).toBeNull();
+    expect(replace).toHaveBeenCalledWith("/login?next=%2Fprofile%3Ftab%3Dcv");
+  });
+
+  it("Mis pases sin sesión no se muestra y lleva al login con la ruta pedida", () => {
+    sessionStorage.clear();
+    route.pathname = "/events/my-passes";
+    window.history.replaceState({}, "", "/events/my-passes");
+    render(<AppLayout><p>event-content</p></AppLayout>);
+
+    expect(screen.queryByText("event-content")).toBeNull();
+    expect(replace).toHaveBeenCalledWith("/login?next=%2Fevents%2Fmy-passes");
   });
 });
