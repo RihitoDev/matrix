@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import {
+  CERTIFICATION_MIN_ISSUE_DATE,
   CERTIFICATION_NAME_MAX_LENGTH,
   CERTIFICATION_VALIDATION_MESSAGES,
   ISO_DATE_PATTERN,
@@ -50,6 +51,10 @@ export const issueDateSchema = z
   .min(1, { error: CERTIFICATION_VALIDATION_MESSAGES.required, abort: true })
   .refine(isCalendarDate, {
     error: CERTIFICATION_VALIDATION_MESSAGES.invalidDate,
+    abort: true,
+  })
+  .refine((value) => value >= CERTIFICATION_MIN_ISSUE_DATE, {
+    error: CERTIFICATION_VALIDATION_MESSAGES.minDate,
     abort: true,
   })
   .transform((value) => new Date(`${value}T00:00:00.000Z`))

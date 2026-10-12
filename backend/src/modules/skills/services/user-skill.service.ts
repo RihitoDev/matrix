@@ -6,30 +6,17 @@ import { SkillNotFoundException } from '../exceptions/skill-not-found.exception.
 import { SkillMapper } from '../mappers/skill.mapper.js';
 import { SkillRepository } from '../repositories/skill.repository.js';
 import { UserSkillRepository } from '../repositories/user-skill.repository.js';
-import type { CreateCustomSkillRequest } from '../requests/create-custom-skill.request.js';
-import type { SearchSkillsRequest } from '../requests/search-skills.request.js';
 import type { UpdateUserSkillsRequest } from '../requests/update-user-skills.request.js';
 import type { SkillResponse } from '../responses/skill.response.js';
 
 @Injectable()
-export class SkillService {
+export class UserSkillService {
   constructor(
-    private readonly skillRepository: SkillRepository,
     private readonly userSkillRepository: UserSkillRepository,
+    private readonly skillRepository: SkillRepository,
     private readonly profileRepository: ProfileRepository,
     private readonly skillMapper: SkillMapper,
   ) {}
-
-  async listCatalog(request: SearchSkillsRequest): Promise<SkillResponse[]> {
-    const skills = await this.skillRepository.findCatalog(request.search || undefined);
-    return skills.map((skill) => this.skillMapper.toResponse(skill));
-  }
-
-  async createCustomSkill(request: CreateCustomSkillRequest): Promise<SkillResponse> {
-    const existingSkill = await this.skillRepository.findByName(request.name);
-    const skill = existingSkill ?? (await this.skillRepository.createCustom(request.name));
-    return this.skillMapper.toResponse(skill);
-  }
 
   async getUserSkills(userId: string): Promise<SkillResponse[]> {
     await this.ensureProfileExists(userId);

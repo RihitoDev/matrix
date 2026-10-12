@@ -4,6 +4,7 @@ import { useRef, useState, type ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { ConfirmDeleteDialog } from "@/modules/profile/components/confirm-delete-dialog";
 import { CvUploadCard } from "../components/cv-upload-card";
+import { ReplaceCvDialog } from "../components/replace-cv-dialog";
 import { FeedbackMessage } from "@/modules/profile/components/feedback-message";
 import { ProfilePageLayout } from "@/modules/profile/components/profile-page-layout";
 import { SavedCvCard } from "../components/saved-cv-card";
@@ -19,6 +20,8 @@ export function DocumentsCvView() {
   const { savedCv, isLoading, loadError, uploadCv, deleteCv } = useCvDocument();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [pendingReplacement, setPendingReplacement] = useState<File | null>(null);
+  const [replaceError, setReplaceError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -49,26 +52,56 @@ export function DocumentsCvView() {
     }
 
     setFeedback(null);
+
+    if (savedCv) {
+      setReplaceError(null);
+      setPendingReplacement(file);
+      return;
+    }
+
     setSelectedFile(file);
   };
 
   const handleConfirmUpload = async (file: File) => {
-    const isReplacing = savedCv !== null;
     setFeedback(null);
     setIsUploading(true);
 
     try {
       await uploadCv(file);
       setSelectedFile(null);
-      setFeedback({
-        type: "success",
-        message: isReplacing ? "Tu CV se reemplazó correctamente." : "Tu CV se cargó correctamente.",
-      });
+      setFeedback({ type: "success", message: "Tu CV se cargó correctamente." });
     } catch (error) {
       if (isCvFileRejection(error)) {
         setSelectedFile(null);
       }
       setFeedback({ type: "error", message: getCvErrorMessage(error, CV_ERROR_MESSAGES.upload) });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const closeReplaceDialog = () => {
+    setPendingReplacement(null);
+    setReplaceError(null);
+  };
+
+  const handleConfirmReplace = async (file: File) => {
+    setReplaceError(null);
+    setIsUploading(true);
+
+    try {
+      await uploadCv(file);
+      closeReplaceDialog();
+      setFeedback({ type: "success", message: "Tu CV se reemplazó correctamente." });
+    } catch (error) {
+      const message = getCvErrorMessage(error, CV_ERROR_MESSAGES.upload);
+
+      if (isCvFileRejection(error)) {
+        closeReplaceDialog();
+        setFeedback({ type: "error", message });
+      } else {
+        setReplaceError(message);
+      }
     } finally {
       setIsUploading(false);
     }
@@ -115,6 +148,8 @@ export function DocumentsCvView() {
       <div className="grid grid-cols-2 items-start gap-6">
         <CvUploadCard
           selectedFile={selectedFile}
+          hasSavedCv={savedCv !== null}
+          isLoading={isLoading}
           isUploading={isUploading}
           isBusy={isBusy}
           onSelectFile={openFilePicker}
@@ -128,6 +163,14 @@ export function DocumentsCvView() {
           onDelete={openDeleteDialog}
         />
       </div>
+      <ReplaceCvDialog
+        file={pendingReplacement}
+        currentFileName={savedCv?.fileName}
+        isReplacing={isUploading}
+        errorMessage={replaceError}
+        onConfirm={handleConfirmReplace}
+        onCancel={closeReplaceDialog}
+      />
       <ConfirmDeleteDialog
         isOpen={isDeleteDialogOpen}
         title="¿Eliminar tu CV?"

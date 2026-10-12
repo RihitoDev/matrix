@@ -25,6 +25,7 @@ import {
 import type { ProfileCityResponse } from '../responses/profile-city.response.js';
 import type { ProfileResponse } from '../responses/profile.response.js';
 import { ProfileService } from '../services/profile.service.js';
+import { CityCatalogService } from '../services/city-catalog.service.js';
 
 @ApiTags('profile')
 @ApiBearerAuth()
@@ -37,7 +38,10 @@ import { ProfileService } from '../services/profile.service.js';
 )
 @Controller('profile')
 export class ProfileController {
-  constructor(private readonly profileService: ProfileService) {}
+  constructor(
+    private readonly profileService: ProfileService,
+    private readonly cityCatalogService: CityCatalogService,
+  ) {}
 
   @Get('me')
   @ApiOkResponse({ description: 'Profile of the authenticated user' })
@@ -68,6 +72,6 @@ export class ProfileController {
   @Get('cities')
   @ApiOkResponse({ description: 'Cities available for the profile' })
   listCities(): Promise<ProfileCityResponse[]> {
-    return this.profileService.listCities();
+    return this.cityCatalogService.listCities();
   }
 }

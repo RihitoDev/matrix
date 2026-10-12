@@ -3,6 +3,7 @@ import {
   CERTIFICATION_VALIDATION_MESSAGES,
   ISSUING_ORGANIZATION_MAX_LENGTH,
 } from "../config/certification-validation.config";
+import { CERTIFICATION_MIN_ISSUE_DATE } from "../constants/certification-form.constants";
 import { BUSINESS_TIMEZONE, ISO_DATE_PATTERN } from "@/modules/profile/constants/validation.constants";
 import type { CertificationErrors } from "../types/certification-errors.types";
 import type { CreateCertificationDto } from "../types/create-certification-dto.types";
@@ -50,6 +51,8 @@ export function validateCertification(values: CreateCertificationDto): Certifica
     errors.issueDate = CERTIFICATION_VALIDATION_MESSAGES.required;
   } else if (!isValidIsoDate(issueDate)) {
     errors.issueDate = CERTIFICATION_VALIDATION_MESSAGES.invalidDate;
+  } else if (issueDate < CERTIFICATION_MIN_ISSUE_DATE) {
+    errors.issueDate = CERTIFICATION_VALIDATION_MESSAGES.minDate;
   } else if (issueDate > getTodayIsoDate()) {
     errors.issueDate = CERTIFICATION_VALIDATION_MESSAGES.futureDate;
   }
