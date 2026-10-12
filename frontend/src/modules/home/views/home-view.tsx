@@ -20,7 +20,7 @@ export function HomeView() {
         <CardHeader>
           <CardTitle> UMSSY</CardTitle>
           <CardDescription>
-            Respuesta del backend: <strong>{backendMessage?.detail}</strong>
+            Respuesta del backend: <strong>{backendMessage}</strong>
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
@@ -29,8 +29,6 @@ export function HomeView() {
           skills={["Python", "Django", "Scrum"]}
           processingTime={1.5}
           />
-
-
 
           <Button>Botón de ejemplo</Button>
         </CardContent>
