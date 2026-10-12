@@ -4,4 +4,5 @@ export interface TimeSelectProps {
   onValueChange: (value: string) => void;
   invalid?: boolean;
   describedBy?: string;
+  disabled?: boolean;
 }

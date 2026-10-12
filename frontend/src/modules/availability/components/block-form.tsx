@@ -192,6 +192,7 @@ export function BlockForm({
                   onValueChange={handleStartChange}
                   invalid={Boolean(errors.startAt)}
                   describedBy={errors.startAt ? "startAt-error" : undefined}
+                  disabled={disabled}
                 />
                 {errors.startAt && <FieldError id="startAt-error">{errors.startAt}</FieldError>}
               </Field>
@@ -207,6 +208,7 @@ export function BlockForm({
                   onValueChange={handleEndChange}
                   invalid={Boolean(errors.endAt)}
                   describedBy={errors.endAt ? "endAt-error" : undefined}
+                  disabled={disabled}
                 />
                 {errors.endAt && <FieldError id="endAt-error">{errors.endAt}</FieldError>}
               </Field>

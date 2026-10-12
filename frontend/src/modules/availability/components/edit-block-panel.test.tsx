@@ -48,10 +48,12 @@ describe("EditBlockPanel", () => {
   })
 
   it.each(["pending", "confirmed"] as const)(
-    "deshabilita Guardar y Eliminar cuando el bloque está %s",
+    "deshabilita las horas, Guardar y Eliminar cuando el bloque está %s",
     (state) => {
       renderWithQuery(<EditBlockPanel block={{ ...mockBlock, state }} onClose={vi.fn()} />)
 
+      expect(screen.getByLabelText(/Desde/)).toBeDisabled()
+      expect(screen.getByLabelText(/Hasta/)).toBeDisabled()
       expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeDisabled()
       expect(screen.getByRole("button", { name: "Eliminar bloque" })).toBeDisabled()
       expect(
