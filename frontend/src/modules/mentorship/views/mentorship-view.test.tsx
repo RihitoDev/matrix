@@ -207,16 +207,14 @@ describe("MentorshipView", () => {
     ).toBeDefined();
   });
 
-  it("deshabilita Volver en el primer paso", () => {
+  it("no muestra Volver en el primer paso", () => {
     renderWithQuery(<MentorshipView />);
 
-    const backButton = screen.getByRole("button", {
-      name: /Volver/i,
-    });
-
     expect(
-      (backButton as HTMLButtonElement).disabled,
-    ).toBe(true);
+      screen.queryByRole("button", {
+        name: /Volver/i,
+      }),
+    ).not.toBeInTheDocument();
   });
 
   it("permite regresar al paso anterior", () => {

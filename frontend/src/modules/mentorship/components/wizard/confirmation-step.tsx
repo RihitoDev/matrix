@@ -145,7 +145,7 @@ export function ConfirmationStep({
         type="button"
         onClick={onActivate}
         disabled={isActivating}
-        className="h-auto w-full rounded-md bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
+        className="h-auto w-full rounded-md bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-danger active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isActivating ? "Activando..." : "Activar participación"}
       </Button>
