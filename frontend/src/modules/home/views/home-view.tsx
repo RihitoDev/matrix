@@ -18,7 +18,7 @@ export function HomeView() {
     <div className="flex flex-1 items-center justify-center bg-surface-soft p-6">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>PWA Egresados UMSS</CardTitle>
+          <CardTitle> UMSSY</CardTitle>
           <CardDescription>
             Respuesta del backend: <strong>{backendMessage}</strong>
           </CardDescription>

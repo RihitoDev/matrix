@@ -1,3 +1,4 @@
+import type { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { ReportUsersRepository } from '../repositories/report-users.repository.js';
 import { CSV_BOM } from '../../../common/utils/csv.js';
 import {
@@ -14,9 +15,9 @@ function buildUser(overrides: Partial<ReportUser>): ReportUser {
     id: 'user-1',
     fullName: 'Usuario de prueba',
     email: 'usuario@example.com',
-    userType: 'DEGREE_HOLDER',
+    userType: 'titulado',
     identifier: 'ID-1',
-    documentType: 'ACADEMIC_DEGREE',
+    documentType: 'academic_diploma',
     registeredAt: '2026-01-01T00:00:00.000Z',
     registrationStatus: 'APPROVED',
     rejectionReason: null,
@@ -33,16 +34,15 @@ const USERS: ReportUser[] = [
   buildUser({
     id: 'b',
     fullName: 'Bruno Díaz',
-    userType: 'COMPANY',
+    userType: 'empresa',
     registeredAt: '2026-05-01T00:00:00.000Z',
   }),
   buildUser({
     id: 'c',
     fullName: 'Carla Ríos',
-    userType: 'ADMIN',
+    userType: 'administrativo',
     registeredAt: '2025-02-01T00:00:00.000Z',
   }),
-  buildUser({ id: 'd', fullName: 'Dario Paz', registrationStatus: 'PENDING' }),
   buildUser({
     id: 'e',
     fullName: 'Elena Soto',
@@ -59,8 +59,8 @@ const USERS: ReportUser[] = [
 ];
 
 function buildService(users: readonly ReportUser[] = USERS): ReportsService {
-  const repository = new ReportUsersRepository();
-  vi.spyOn(repository, 'findAll').mockReturnValue(users);
+  const repository = new ReportUsersRepository({} as PrismaService);
+  vi.spyOn(repository, 'findAll').mockResolvedValue([...users]);
   return new ReportsService(repository);
 }
 
@@ -80,12 +80,12 @@ describe('ReportsService', () => {
       vi.useRealTimers();
     });
 
-    it('exporta todos los aprobados sin paginar, del más reciente al más antiguo', () => {
+    it('exporta todos los aprobados sin paginar, del más reciente al más antiguo', async () => {
       const users = Array.from({ length: 15 }, (_, index) =>
         buildUser({ id: `user-${index}`, fullName: `Usuario ${index}` }),
       );
 
-      const { content } = buildService(users).exportRegisteredUsersCsv(
+      const { content } = await buildService(users).exportRegisteredUsersCsv(
         registeredUsersFiltersSchema.parse({}),
       );
 
@@ -93,21 +93,53 @@ describe('ReportsService', () => {
       expect(content.trim().split('\r\n')).toHaveLength(16);
     });
 
-    it('aplica los filtros y usa las etiquetas de la tabla', () => {
-      const { content } = buildService().exportRegisteredUsersCsv(
-        registeredUsersFiltersSchema.parse({ userType: 'COMPANY' }),
+    it('aplica los filtros y usa las etiquetas de la tabla', async () => {
+      const { content } = await buildService().exportRegisteredUsersCsv(
+        registeredUsersFiltersSchema.parse({ userType: 'empresa' }),
       );
 
       expect(content).toBe(
         `${CSV_BOM}Usuario,Correo,Tipo de Usuario,Identificador,Documento,Fecha de Registro\r\n` +
-          'Bruno Díaz,usuario@example.com,Empresa,ID-1,Título académico,30/04/2026\r\n',
+          'Bruno Díaz,usuario@example.com,Empresa,ID-1,Diploma académico,30/04/2026\r\n',
       );
     });
 
-    it('nombra el archivo con la fecha de exportación', () => {
-      const { fileName } = buildService().exportRegisteredUsersCsv({});
+    it('termina el nombre del archivo en "todos" si no se filtró por gestión', async () => {
+      const { fileName } = await buildService().exportRegisteredUsersCsv({});
 
-      expect(fileName).toBe('usuarios-registrados-2026-10-03.csv');
+      expect(fileName).toBe('usuarios-registrados-todos.csv');
+    });
+
+    it('agrega al nombre del archivo los filtros usados', async () => {
+      const { fileName } = await buildService().exportRegisteredUsersCsv(
+        registeredUsersFiltersSchema.parse({
+          userType: 'estudiante',
+          search: 'Ana Pérez',
+        }),
+      );
+
+      expect(fileName).toBe(
+        'usuarios-registrados-estudiante-ana-perez-todos.csv',
+      );
+    });
+
+    it('termina el nombre del archivo en la gestión en vez de la fecha', async () => {
+      const { fileName } = await buildService().exportRegisteredUsersCsv(
+        registeredUsersFiltersSchema.parse({ period: 'II-2025' }),
+      );
+
+      expect(fileName).toBe('usuarios-registrados-II-2025.csv');
+    });
+
+    it('combina el tipo de usuario con la gestión', async () => {
+      const { fileName } = await buildService().exportRegisteredUsersCsv(
+        registeredUsersFiltersSchema.parse({
+          userType: 'estudiante',
+          period: 'I-2026',
+        }),
+      );
+
+      expect(fileName).toBe('usuarios-registrados-estudiante-I-2026.csv');
     });
   });
 
@@ -121,19 +153,19 @@ describe('ReportsService', () => {
       vi.useRealTimers();
     });
 
-    it('exporta solo rechazados, del más reciente al más antiguo', () => {
-      const { content } = buildService().exportRejectedUsersCsv(
+    it('exporta solo rechazados, del más reciente al más antiguo', async () => {
+      const { content } = await buildService().exportRejectedUsersCsv(
         rejectedUsersFiltersSchema.parse({}),
       );
 
       expect(content).toBe(
         `${CSV_BOM}Usuario,Correo,Identificador,Documento,Fecha de Registro\r\n` +
-          'Fabio León,usuario@example.com,ID-1,Título académico,31/07/2026\r\n' +
-          'Elena Soto,usuario@example.com,ID-1,Título académico,31/12/2025\r\n',
+          'Fabio León,usuario@example.com,ID-1,Diploma académico,31/07/2026\r\n' +
+          'Elena Soto,usuario@example.com,ID-1,Diploma académico,31/12/2025\r\n',
       );
     });
 
-    it('aplica la búsqueda por correo', () => {
+    it('aplica la búsqueda por correo', async () => {
       const users = [
         buildUser({
           id: 'x',
@@ -149,7 +181,7 @@ describe('ReportsService', () => {
         }),
       ];
 
-      const { content } = buildService(users).exportRejectedUsersCsv(
+      const { content } = await buildService(users).exportRejectedUsersCsv(
         rejectedUsersFiltersSchema.parse({ search: 'yola' }),
       );
 
@@ -158,58 +190,99 @@ describe('ReportsService', () => {
       expect(content).not.toContain('Xavier Luna');
     });
 
-    it('nombra el archivo con la fecha de exportación', () => {
-      const { fileName } = buildService().exportRejectedUsersCsv({});
+    it('nombra el archivo con la fecha de exportación', async () => {
+      const { fileName } = await buildService().exportRejectedUsersCsv({});
 
       expect(fileName).toBe('usuarios-rechazados-2026-10-03.csv');
+    });
+
+    it('agrega al nombre del archivo lo que se buscó', async () => {
+      const { fileName } = await buildService().exportRejectedUsersCsv(
+        rejectedUsersFiltersSchema.parse({ search: ' Juan.Perez@gmail.com ' }),
+      );
+
+      expect(fileName).toBe(
+        'usuarios-rechazados-juan.perez@gmail.com-2026-10-03.csv',
+      );
     });
   });
 
   describe('getRegisteredUsers', () => {
-    it('devuelve solo aprobados, del más reciente al más antiguo', () => {
-      const result = buildService().getRegisteredUsers(registeredQuery());
+    it('devuelve solo aprobados, del más reciente al más antiguo', async () => {
+      const result = await buildService().getRegisteredUsers(registeredQuery());
 
       expect(result.items.map((user) => user.id)).toEqual(['b', 'a', 'c']);
       expect(result).toMatchObject({ totalItems: 3, page: 1, limit: 10 });
     });
 
-    it('no expone el estado de registro ni el motivo de rechazo', () => {
-      const [user] = buildService().getRegisteredUsers(registeredQuery()).items;
+    it('no expone el estado de registro ni el motivo de rechazo', async () => {
+      const [user] = (
+        await buildService().getRegisteredUsers(registeredQuery())
+      ).items;
 
       expect(user).not.toHaveProperty('registrationStatus');
       expect(user).not.toHaveProperty('rejectionReason');
     });
 
     it.each([
-      { userType: 'COMPANY', expectedId: 'b' },
-      { userType: 'STUDENT', expectedId: 'student-1' },
-    ])('filtra por tipo de usuario $userType', ({ userType, expectedId }) => {
+      { userType: 'empresa', expectedId: 'b' },
+      { userType: 'estudiante', expectedId: 'student-1' },
+    ])(
+      'filtra por tipo de usuario $userType',
+      async ({ userType, expectedId }) => {
+        const service = buildService([
+          ...USERS,
+          buildUser({ id: 'student-1', userType: 'estudiante' }),
+        ]);
+        const result = await service.getRegisteredUsers(
+          registeredQuery({ userType }),
+        );
+
+        expect(result.items.map((user) => user.id)).toEqual([expectedId]);
+      },
+    );
+
+    it.each([
+      { period: 'I-2026', expectedIds: ['b', 'a'] },
+      { period: 'I-2025', expectedIds: ['c'] },
+      { period: 'II-2025', expectedIds: ['h'] },
+      { period: 'II-2026', expectedIds: [] },
+    ])('filtra por la gestión $period', async ({ period, expectedIds }) => {
       const service = buildService([
         ...USERS,
-        buildUser({ id: 'student-1', userType: 'STUDENT' }),
+        buildUser({ id: 'h', registeredAt: '2025-08-10T00:00:00.000Z' }),
       ]);
-      const result = service.getRegisteredUsers(registeredQuery({ userType }));
 
-      expect(result.items.map((user) => user.id)).toEqual([expectedId]);
-    });
-
-    it('filtra por gestión', () => {
-      const result = buildService().getRegisteredUsers(
-        registeredQuery({ year: '2025' }),
+      const result = await service.getRegisteredUsers(
+        registeredQuery({ period }),
       );
 
-      expect(result.items.map((user) => user.id)).toEqual(['c']);
+      expect(result.items.map((user) => user.id)).toEqual(expectedIds);
     });
 
-    it('busca sin distinguir mayúsculas ni tildes', () => {
-      const result = buildService().getRegisteredUsers(
+    it.each([
+      'III-2025',
+      '1-2025',
+      '2-2025',
+      'i-2025',
+      'I2025',
+      '2025',
+      'I-25',
+    ])('rechaza la gestión inválida %s', (period) => {
+      expect(registeredUsersQuerySchema.safeParse({ period }).success).toBe(
+        false,
+      );
+    });
+
+    it('busca sin distinguir mayúsculas ni tildes', async () => {
+      const result = await buildService().getRegisteredUsers(
         registeredQuery({ search: 'PEREZ' }),
       );
 
       expect(result.items.map((user) => user.id)).toEqual(['a']);
     });
 
-    it('busca también por correo e identificador', () => {
+    it('busca también por correo e identificador', async () => {
       const service = buildService([
         buildUser({
           id: 'x',
@@ -220,16 +293,23 @@ describe('ReportsService', () => {
       ]);
 
       expect(
-        service.getRegisteredUsers(registeredQuery({ search: 'unico@' })).items,
+        (
+          await service.getRegisteredUsers(
+            registeredQuery({ search: 'unico@' }),
+          )
+        ).items,
       ).toHaveLength(1);
       expect(
-        service.getRegisteredUsers(registeredQuery({ search: 'nit-777' }))
-          .items,
+        (
+          await service.getRegisteredUsers(
+            registeredQuery({ search: 'nit-777' }),
+          )
+        ).items,
       ).toHaveLength(1);
     });
 
-    it('pagina los resultados', () => {
-      const result = buildService().getRegisteredUsers(
+    it('pagina los resultados', async () => {
+      const result = await buildService().getRegisteredUsers(
         registeredQuery({ page: '2', limit: '2' }),
       );
 
@@ -239,18 +319,18 @@ describe('ReportsService', () => {
   });
 
   describe('getRejectedUsers', () => {
-    it('devuelve solo rechazados con su documento y motivo', () => {
-      const result = buildService().getRejectedUsers(rejectedQuery());
+    it('devuelve solo rechazados con su documento y motivo', async () => {
+      const result = await buildService().getRejectedUsers(rejectedQuery());
 
       expect(result.items.map((user) => user.id)).toEqual(['f', 'e']);
       expect(result.items[0]).toMatchObject({
-        documentType: 'ACADEMIC_DEGREE',
+        documentType: 'academic_diploma',
         rejectionReason: 'Correo inválido',
       });
       expect(result.items[0]).not.toHaveProperty('userType');
     });
 
-    it('busca dentro de los rechazados por correo', () => {
+    it('busca dentro de los rechazados por correo', async () => {
       const service = buildService([
         ...USERS,
         buildUser({
@@ -260,14 +340,14 @@ describe('ReportsService', () => {
         }),
       ]);
 
-      const result = service.getRejectedUsers(
+      const result = await service.getRejectedUsers(
         rejectedQuery({ search: 'juan.perez@' }),
       );
 
       expect(result.items.map((user) => user.id)).toEqual(['g']);
     });
 
-    it('no busca por nombre ni por identificador', () => {
+    it('no busca por nombre ni por identificador', async () => {
       const service = buildService([
         buildUser({
           id: 'h',
@@ -279,24 +359,17 @@ describe('ReportsService', () => {
       ]);
 
       expect(
-        service.getRejectedUsers(rejectedQuery({ search: 'hugo' })).items,
+        (await service.getRejectedUsers(rejectedQuery({ search: 'hugo' })))
+          .items,
       ).toHaveLength(0);
       expect(
-        service.getRejectedUsers(rejectedQuery({ search: 'nit-555' })).items,
+        (await service.getRejectedUsers(rejectedQuery({ search: 'nit-555' })))
+          .items,
       ).toHaveLength(0);
       expect(
-        service.getRejectedUsers(rejectedQuery({ search: 'contacto@' })).items,
+        (await service.getRejectedUsers(rejectedQuery({ search: 'contacto@' })))
+          .items,
       ).toHaveLength(1);
     });
-  });
-
-  it('el repositorio por defecto no tiene usuarios', () => {
-    const service = new ReportsService(new ReportUsersRepository());
-
-    const registered = service.getRegisteredUsers(registeredQuery());
-    const rejected = service.getRejectedUsers(rejectedQuery());
-
-    expect(registered.totalItems).toBe(0);
-    expect(rejected.totalItems).toBe(0);
   });
 });

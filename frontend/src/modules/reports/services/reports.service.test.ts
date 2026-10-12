@@ -29,7 +29,7 @@ describe("reportsService.getRegisteredUsers", () => {
     vi.restoreAllMocks();
   });
 
-  it("consulta el endpoint de registrados con la página, el límite y el tipo de usuario", async () => {
+  it("consulta registrados con la página, el límite, el tipo y la gestión", async () => {
     const response = {
       statusCode: 200,
       data: { items: [], totalItems: 0 },
@@ -39,10 +39,10 @@ describe("reportsService.getRegisteredUsers", () => {
     };
     const getSpy = vi.spyOn(apiClient, "get").mockResolvedValueOnce({ data: response });
 
-    const result = await reportsService.getRegisteredUsers({ page: 1, limit: 10, userType: "COMPANY" });
+    const result = await reportsService.getRegisteredUsers({ page: 1, limit: 10, userType: "empresa", period: "II-2025" });
 
     expect(getSpy).toHaveBeenCalledWith("/reports/registered-users", {
-      params: { page: 1, limit: 10, userType: "COMPANY" },
+      params: { page: 1, limit: 10, userType: "empresa", period: "II-2025" },
     });
     expect(result).toEqual(response);
   });
@@ -87,17 +87,17 @@ describe("reportsService.exportRegisteredUsersCsv", () => {
     vi.restoreAllMocks();
   });
 
-  it("descarga el CSV como archivo con el filtro de tipo de usuario", async () => {
+  it("descarga el CSV con los filtros de tipo de usuario y gestión", async () => {
     const file = new Blob(["Usuario"], { type: "text/csv" });
     const getSpy = vi.spyOn(apiClient, "get").mockResolvedValueOnce({
       data: file,
       headers: { "content-disposition": 'attachment; filename="usuarios-registrados-2026-10-03.csv"' },
     });
 
-    const result = await reportsService.exportRegisteredUsersCsv({ userType: "COMPANY" });
+    const result = await reportsService.exportRegisteredUsersCsv({ userType: "empresa", period: "II-2025" });
 
     expect(getSpy).toHaveBeenCalledWith("/reports/registered-users/export", {
-      params: { userType: "COMPANY" },
+      params: { userType: "empresa", period: "II-2025" },
       responseType: "blob",
     });
     expect(result).toEqual({ file, fileName: "usuarios-registrados-2026-10-03.csv" });

@@ -44,7 +44,7 @@ describe('seedUsers', () => {
     expect(tx.user.upsert).toHaveBeenCalledTimes(1 + SEED_USERS.length);
     expect(tx.user.upsert).toHaveBeenCalledWith(expect.objectContaining({ where: { email: EPIC_1_TEST_USER.email } }));
     expect(result).toMatchObject({ roles: ROLE_NAMES.length, userRoles: 1 + SEED_USERS.length, legacyRoles: 0 });
-    expect(Object.keys(result.users)).toHaveLength(SEED_USERS.length);
+    expect(Object.keys(result.users)).toHaveLength(1 + SEED_USERS.length);
   });
 
   it('siembra un usuario administrativo con la misma contraseña de siembra', async () => {
@@ -52,7 +52,7 @@ describe('seedUsers', () => {
 
     const result = await seedUsers(tx as any, 'hash-compartido');
 
-    expect(SEED_USERS).toHaveLength(5);
+    expect(SEED_USERS).toHaveLength(6);
     expect(result.users.admin.email).toBe('admin.1@umssy.test');
     expect(tx.user.upsert).toHaveBeenCalledWith(
       expect.objectContaining({

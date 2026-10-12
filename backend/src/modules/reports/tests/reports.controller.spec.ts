@@ -1,5 +1,10 @@
 import { StreamableFile } from '@nestjs/common';
+import { GUARDS_METADATA } from '@nestjs/common/constants.js';
 import { Test, type TestingModule } from '@nestjs/testing';
+import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { ROLES_KEY } from '../../../common/constants/roles.constants.js';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { ReportsController } from '../controllers/reports.controller.js';
 import { GeneratedReportsRepository } from '../repositories/generated-reports.repository.js';
 import { ReportUsersRepository } from '../repositories/report-users.repository.js';
@@ -19,59 +24,101 @@ describe('ReportsController', () => {
         ReportUsersRepository,
         ReportHistoryService,
         GeneratedReportsRepository,
+        { provide: PrismaService, useValue: {} },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(RolesGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = moduleRef.get(ReportsController);
     service = moduleRef.get(ReportsService);
     historyService = moduleRef.get(ReportHistoryService);
   });
 
-  it('delega el reporte de registrados al service', () => {
-    const query = { page: 1, limit: 10 };
-    const spy = vi.spyOn(service, 'getRegisteredUsers');
+  it('exige sesión con rol administrativo en todos los endpoints', () => {
+    expect(Reflect.getMetadata(GUARDS_METADATA, ReportsController)).toEqual([
+      JwtAuthGuard,
+      RolesGuard,
+    ]);
+    expect(Reflect.getMetadata(ROLES_KEY, ReportsController)).toEqual([
+      'administrativo',
+    ]);
+  });
 
-    const result = controller.getRegisteredUsers(query);
+  it('delega el reporte de registrados al service', async () => {
+    const query = { page: 1, limit: 10 };
+    const spy = vi
+      .spyOn(service, 'getRegisteredUsers')
+      .mockResolvedValue({ items: [], totalItems: 0, totalPages: 0, ...query });
+
+    const result = await controller.getRegisteredUsers(query);
 
     expect(spy).toHaveBeenCalledWith(query);
     expect(result.page).toBe(1);
   });
 
-  it('devuelve el CSV de registrados como archivo descargable', () => {
-    const filters = { userType: 'COMPANY' as const };
-    const spy = vi.spyOn(service, 'exportRegisteredUsersCsv').mockReturnValue({
-      fileName: 'usuarios-registrados-2026-10-03.csv',
-      content: 'Usuario\r\n',
+  it('devuelve el CSV de registrados como archivo descargable', async () => {
+    const filters = { userType: 'empresa' as const };
+    const spy = vi
+      .spyOn(service, 'exportRegisteredUsersCsv')
+      .mockResolvedValue({
+        fileName: 'usuarios-registrados-1-2026.csv',
+        content: 'Usuario\r\n',
+      });
+
+    vi.spyOn(historyService, 'registerGeneratedReport').mockResolvedValue({
+      id: 'r',
+      fileName: 'f',
+      reportType: 'REGISTERED_USERS',
+      generatedAt: '',
     });
 
-    const file = controller.exportRegisteredUsersCsv(filters);
+    const file = await controller.exportRegisteredUsersCsv(filters, 'admin-1');
 
     expect(spy).toHaveBeenCalledWith(filters);
     expect(file).toBeInstanceOf(StreamableFile);
     expect(file.getHeaders()).toMatchObject({
       type: 'text/csv; charset=utf-8',
-      disposition: 'attachment; filename="usuarios-registrados-2026-10-03.csv"',
+      disposition: 'attachment; filename="usuarios-registrados-1-2026.csv"',
     });
   });
 
-  it('delega el reporte de rechazados al service', () => {
+  it('delega el reporte de rechazados al service', async () => {
     const query = { page: 1, limit: 10 };
-    const spy = vi.spyOn(service, 'getRejectedUsers');
+    const spy = vi
+      .spyOn(service, 'getRejectedUsers')
+      .mockResolvedValue({ items: [], totalItems: 0, totalPages: 0, ...query });
 
-    const result = controller.getRejectedUsers(query);
+    const result = await controller.getRejectedUsers(query);
 
     expect(spy).toHaveBeenCalledWith(query);
-    expect(result).toEqual({ items: [], totalItems: 0, page: 1, limit: 10 });
+    expect(result).toEqual({
+      items: [],
+      totalItems: 0,
+      totalPages: 0,
+      page: 1,
+      limit: 10,
+    });
   });
 
-  it('devuelve el CSV de rechazados como archivo descargable', () => {
+  it('devuelve el CSV de rechazados como archivo descargable', async () => {
     const filters = { search: 'correo' };
-    const spy = vi.spyOn(service, 'exportRejectedUsersCsv').mockReturnValue({
+    const spy = vi.spyOn(service, 'exportRejectedUsersCsv').mockResolvedValue({
       fileName: 'usuarios-rechazados-2026-10-03.csv',
       content: 'Usuario\r\n',
     });
 
-    const file = controller.exportRejectedUsersCsv(filters);
+    vi.spyOn(historyService, 'registerGeneratedReport').mockResolvedValue({
+      id: 'r',
+      fileName: 'f',
+      reportType: 'REGISTERED_USERS',
+      generatedAt: '',
+    });
+
+    const file = await controller.exportRejectedUsersCsv(filters, 'admin-1');
 
     expect(spy).toHaveBeenCalledWith(filters);
     expect(file).toBeInstanceOf(StreamableFile);
@@ -81,13 +128,21 @@ describe('ReportsController', () => {
     });
   });
 
-  it('delega el historial de reportes al service', () => {
+  it('delega el historial de reportes al service', async () => {
     const query = { page: 1, limit: 10 };
-    const spy = vi.spyOn(historyService, 'getReportHistory');
+    const spy = vi
+      .spyOn(historyService, 'getReportHistory')
+      .mockResolvedValue({ items: [], totalItems: 0, totalPages: 0, ...query });
 
-    const result = controller.getReportHistory(query);
+    const result = await controller.getReportHistory(query);
 
     expect(spy).toHaveBeenCalledWith(query);
-    expect(result).toEqual({ items: [], totalItems: 0, page: 1, limit: 10 });
+    expect(result).toEqual({
+      items: [],
+      totalItems: 0,
+      totalPages: 0,
+      page: 1,
+      limit: 10,
+    });
   });
 });

@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { buildDatabaseConnectionString } from '../prisma/build-connection-string.js';
-
 function stubDbEnv(overrides: Record<string, string> = {}): void {
   vi.stubEnv('DB_USER', 'user');
   vi.stubEnv('DB_PASSWORD', 'password_db');
@@ -13,7 +12,6 @@ function stubDbEnv(overrides: Record<string, string> = {}): void {
     vi.stubEnv(key, value);
   }
 }
-
 afterEach(() => {
   vi.unstubAllEnvs();
 });
@@ -68,3 +66,4 @@ describe('buildDatabaseConnectionString', () => {
     );
   });
 });
+

@@ -47,6 +47,7 @@ describe('DomainExceptionFilter', () => {
       data: errors,
       detail: 'email: Invalid email',
       ok: false,
+      errors,
     });
   });
 });

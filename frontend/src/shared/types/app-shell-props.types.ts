@@ -6,4 +6,5 @@ export interface AppShellProps {
   children: ReactNode;
   items?: NavigationItem[];
   user?: SidebarUser;
+  fullBleed?: boolean;
 }

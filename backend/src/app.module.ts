@@ -1,13 +1,17 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { DomainExceptionFilter } from './common/filters/domain-exception.filter.js';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor.js';
 import { PrismaModule } from './common/prisma/prisma.module.js';
-import { AuthModule } from './modules/auth/auth.module.js';
 import { AvailabilityModule } from './modules/availability/availability.module.js';
+import { AuthModule } from './modules/auth/auth.module.js';
+import { EventRegistrationsModule } from './modules/event-registrations/event-registrations.module.js';
+import { EventCategoriesModule } from './modules/event-categories/event-categories.module.js';
+import { EventsModule } from './modules/events/events.module.js';
 import { CertificationDocumentsModule } from './modules/certification-documents/certification-documents.module.js';
 import { CertificationsModule } from './modules/certifications/certifications.module.js';
 import { CvModule } from './modules/cv/cv.module.js';
@@ -23,12 +27,13 @@ import { AccessRequestsModule } from './modules/access-requests/access-requests.
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+    ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     AvailabilityModule,
     AuthModule,
+    EventsModule,
+    EventCategoriesModule,
+    EventRegistrationsModule,
     ProfileModule,
     CvModule,
     SkillsModule,
@@ -46,6 +51,7 @@ import { AccessRequestsModule } from './modules/access-requests/access-requests.
   providers: [
     AppService,
     { provide: APP_FILTER, useClass: DomainExceptionFilter },
+    { provide: APP_INTERCEPTOR, useClass: ResponseInterceptor },
     { provide: APP_PIPE, useClass: ZodValidationPipe },
   ],
 })

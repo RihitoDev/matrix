@@ -1,6 +1,6 @@
-import type { UserType } from "./registered-user.types";
+import type { RoleTag } from "@/modules/auth/types/auth-types";
 
 export interface UserTypeFilterProps {
-  value?: UserType;
-  onChange: (userType?: UserType) => void;
+  value?: RoleTag;
+  onChange: (userType?: RoleTag) => void;
 }

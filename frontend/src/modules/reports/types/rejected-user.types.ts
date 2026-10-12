@@ -1,12 +1,12 @@
 import type { PaginatedData } from "@/shared/types/api-response.types";
-import type { UserDocumentType } from "./registered-user.types";
+import type { DocumentType } from "@/modules/access-request/constants/document-types.constants";
 
 export interface RejectedUser {
   id: string;
   fullName: string;
   email: string;
   identifier: string;
-  documentType: UserDocumentType;
+  documentType: DocumentType | null;
   registeredAt: string;
 }
 

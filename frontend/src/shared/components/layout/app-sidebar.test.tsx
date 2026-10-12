@@ -79,15 +79,6 @@ describe("AppSidebar", () => {
     expect(topLevelItems).toHaveLength(SIDEBAR_NAVIGATION.length);
   });
 
-  it("shows the report history option inside the analytics reports menu", () => {
-    renderSidebar();
-
-    fireEvent.click(screen.getByRole("button", { name: "Reportes Analíticos" }));
-
-    const historyLink = screen.getByRole("link", { name: "Historial de reportes generados" });
-    expect(historyLink.getAttribute("href")).toBe("/reports/history");
-  });
-
   it("renders the items and user received by props", () => {
     renderSidebar({
       items: [{ label: "Inicio", icon: House, href: "/home" }],

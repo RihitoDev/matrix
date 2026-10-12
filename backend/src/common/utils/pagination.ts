@@ -24,6 +24,7 @@ export function paginate<T>(
   return {
     items: items.slice(start, start + limit),
     totalItems: items.length,
+    totalPages: Math.ceil(items.length / limit),
     page,
     limit,
   };

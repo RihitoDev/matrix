@@ -5,25 +5,23 @@ import { pathToFileURL } from 'node:url';
 import { Logger } from '@nestjs/common';
 import { PrismaPg } from '@prisma/adapter-pg';
 
+import { seedEvents } from '../../modules/events/seeds/events.seed.js';
+import { seedEventRegistrations } from '../../modules/event-registrations/seeds/event-registrations.seed.js';
 import { seedAccessRequests } from '../../modules/access-requests/seeds/access-requests.seed.js';
 import { seedAvailability } from '../../modules/availability/seeds/availability.seed.js';
 import { seedOrientationTypes } from '../../modules/orientation-types/seeds/orientation-types.seed.js';
 import { seedTechnicalAreas } from '../../modules/technical-areas/seeds/technical-areas.seed.js';
 import { SEED_USERS } from '../../modules/users/constants/seed-users.constants.js';
-import { hashSeedPassword, seedUsers } from '../../modules/users/seeds/users.seed.js';
+import {
+  hashSeedPassword,
+  seedUsers,
+} from '../../modules/users/seeds/users.seed.js';
 import { PrismaClient } from '../../prisma/client.js';
 import { SEED_TRANSACTION_OPTIONS } from '../constants/seed.constants.js';
 import { buildDatabaseConnectionString } from '../prisma/build-connection-string.js';
 import type { SeedEnv } from '../types/seed-env.types.js';
 import type { SeedSummary } from '../types/seed-summary.types.js';
 import { SeedEnvSchema } from './seed-env.schema.js';
-
-// REGLA DE ORDEN: los seeds se ejecutan en secuencia porque cada uno usa datos de los anteriores.
-// 0. technical-areas y orientation-types: catálogos independientes.
-// 1. users: roles y usuarios de prueba.
-// 2. availability: bloques y citas de los mentores y el titulado creados en users.
-// 3. access-requests: catálogos de estados, tipos de documento y carreras (no dependen de los anteriores).
-// Un seed nuevo se agrega después de todos los seeds de los que depende.
 
 export function loadSeedEnv(source: NodeJS.ProcessEnv = process.env): SeedEnv {
   const parsed = SeedEnvSchema.safeParse(source);
@@ -58,6 +56,8 @@ export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
 
       const usersResult = await seedUsers(tx, password);
       const { users } = usersResult;
+      await seedEvents(tx, users.eventGraduate.id);
+      await seedEventRegistrations(tx, users.eventGraduate.id);
       const availabilityResult = await seedAvailability(
         tx,
         {
@@ -75,7 +75,7 @@ export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
         plan: availabilityResult.plan,
         roles: usersResult.roles,
         statuses: availabilityResult.statuses,
-        users: SEED_USERS.length,
+        users: SEED_USERS.length + 1,
         userRoles: usersResult.userRoles,
         blocks: availabilityResult.blocks,
         appointments: availabilityResult.appointments,
@@ -108,14 +108,19 @@ async function main(): Promise<void> {
       logger.warn(warning);
     }
   } catch (error) {
-    logger.error('El seed falló y la transacción se revirtió', error instanceof Error ? error.stack : String(error));
+    logger.error(
+      'El seed falló y la transacción se revirtió',
+      error instanceof Error ? error.stack : String(error),
+    );
     process.exitCode = 1;
   } finally {
     await client?.$disconnect();
   }
 }
 
-const isDirectRun = process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
+const isDirectRun =
+  process.argv[1] !== undefined &&
+  import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isDirectRun) {
   void main();
 }
