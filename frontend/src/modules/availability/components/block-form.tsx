@@ -9,10 +9,10 @@ import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { TimeSelect } from "./time-select";
 import { toBoliviaTime, toUtcIso } from "@/shared/utils/date-time";
 import { cn } from "cn";
-import { FORM_TEXT, REQUIRED_MESSAGES, TIME_OPTIONS } from "../constants/availability.constants";
+import { FORM_TEXT, REQUIRED_MESSAGES } from "../constants/availability.constants";
 import type { BlockFormErrors } from "../types/block-form-errors.types";
 import type { BlockFormField } from "../types/block-form-field.types";
 import type { BlockFormProps } from "../types/block-form-props.types";
@@ -65,13 +65,13 @@ export function BlockForm({
     clearErrors("date", "startAt");
   };
 
-  const handleStartChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setStartTime(event.target.value);
+  const handleStartChange = (value: string) => {
+    setStartTime(value);
     clearErrors("startAt", "endAt");
   };
 
-  const handleEndChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setEndTime(event.target.value);
+  const handleEndChange = (value: string) => {
+    setEndTime(value);
     clearErrors("endAt");
   };
 
@@ -135,16 +135,10 @@ export function BlockForm({
                       id="date"
                       type="date"
                       value={date}
-                      min={toDateString(today)}
-                      onChange={(event) =>
-                        handleDateSelect(event.target.value ? toCalendarDate(event.target.value) : undefined)
-                      }
+                      readOnly
                       aria-invalid={errors.date ? true : undefined}
                       aria-describedby={errors.date ? "date-error" : undefined}
-                      className={cn(
-                        "absolute inset-0 h-full w-full cursor-pointer opacity-0",
-                        "[&::-webkit-calendar-picker-indicator]:cursor-pointer",
-                      )}
+                      className="absolute inset-0 h-full w-full cursor-default opacity-0"
                     />
                   </>
                 ) : (
@@ -153,7 +147,7 @@ export function BlockForm({
                       id="date"
                       readOnly
                       value={date ? formatLongDate(date) : ""}
-                      placeholder="Selecciona una fecha en el calendario"
+                      placeholder="Selecciona una fecha"
                       aria-invalid={errors.date ? true : undefined}
                       aria-describedby={errors.date ? "date-error" : "date-hint"}
                       className="h-10 pr-10"
@@ -174,7 +168,7 @@ export function BlockForm({
                     onSelect={handleDateSelect}
                     defaultMonth={selectedDate ?? today}
                     disabled={{ before: today }}
-                    className="w-full rounded-lg border [--cell-size:--spacing(9)]"
+                    className="w-full rounded-lg border [--cell-size:--spacing(7)] sm:[--cell-size:--spacing(9)]"
                   />
                   <FieldDescription id="date-hint" className="text-xs">
                     Los días anteriores a hoy no se pueden elegir.
@@ -185,29 +179,21 @@ export function BlockForm({
             </Field>
 
             <FieldGroup
-              className="grid grid-cols-2 gap-4"
+              className="grid grid-cols-1 gap-4 sm:grid-cols-2"
             >
               <Field data-invalid={errors.startAt ? true : undefined}>
                 <FieldLabel htmlFor="startAt" className="font-semibold">
                   {text.startLabel}
                   <RequiredMark />
                 </FieldLabel>
-                <NativeSelect
+                <TimeSelect
                   id="startAt"
-                  name="startAt"
                   value={startTime}
-                  onChange={handleStartChange}
-                  aria-invalid={errors.startAt ? true : undefined}
-                  aria-describedby={errors.startAt ? "startAt-error" : undefined}
-                  className="w-full [&>select]:h-10"
-                >
-                  <NativeSelectOption value="">--:--</NativeSelectOption>
-                  {TIME_OPTIONS.map((time) => (
-                    <NativeSelectOption key={time} value={time}>
-                      {time}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
+                  onValueChange={handleStartChange}
+                  invalid={Boolean(errors.startAt)}
+                  describedBy={errors.startAt ? "startAt-error" : undefined}
+                  disabled={disabled}
+                />
                 {errors.startAt && <FieldError id="startAt-error">{errors.startAt}</FieldError>}
               </Field>
 
@@ -216,27 +202,19 @@ export function BlockForm({
                   {text.endLabel}
                   <RequiredMark />
                 </FieldLabel>
-                <NativeSelect
+                <TimeSelect
                   id="endAt"
-                  name="endAt"
                   value={endTime}
-                  onChange={handleEndChange}
-                  aria-invalid={errors.endAt ? true : undefined}
-                  aria-describedby={errors.endAt ? "endAt-error" : undefined}
-                  className="w-full [&>select]:h-10"
-                >
-                  <NativeSelectOption value="">--:--</NativeSelectOption>
-                  {TIME_OPTIONS.map((time) => (
-                    <NativeSelectOption key={time} value={time}>
-                      {time}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
+                  onValueChange={handleEndChange}
+                  invalid={Boolean(errors.endAt)}
+                  describedBy={errors.endAt ? "endAt-error" : undefined}
+                  disabled={disabled}
+                />
                 {errors.endAt && <FieldError id="endAt-error">{errors.endAt}</FieldError>}
               </Field>
 
               {mode !== "edit" && (
-                <FieldDescription className="col-span-2 text-xs">
+                <FieldDescription className="col-span-1 text-xs sm:col-span-2">
                   La hora de fin debe ser posterior a la de inicio. Horario en hora de Bolivia (GMT-4).
                 </FieldDescription>
               )}

@@ -33,11 +33,11 @@ describe("EditBlockPanel", () => {
     renderWithQuery(<EditBlockPanel block={mockBlock} onClose={vi.fn()} />)
 
     expect(screen.getByText("Editar bloque")).toBeInTheDocument()
-    expect(screen.getByText("Modifica la fecha o el horario del bloque.")).toBeInTheDocument()
+    expect(screen.getByText("Modifica la hora de inicio o de fin del bloque.")).toBeInTheDocument()
     expect(screen.getByText("Lunes 13 de mayo")).toBeInTheDocument()
     expect(screen.getByLabelText(/Día/)).toHaveValue("2030-05-13")
-    expect(screen.getByLabelText(/Desde/)).toHaveValue("10:00")
-    expect(screen.getByLabelText(/Hasta/)).toHaveValue("12:00")
+    expect(screen.getByLabelText(/Desde/)).toHaveTextContent("10:00")
+    expect(screen.getByLabelText(/Hasta/)).toHaveTextContent("12:00")
     expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeInTheDocument()
     expect(
       screen.getByRole("button", { name: "Eliminar bloque" }),
@@ -48,10 +48,12 @@ describe("EditBlockPanel", () => {
   })
 
   it.each(["pending", "confirmed"] as const)(
-    "deshabilita Guardar y Eliminar cuando el bloque está %s",
+    "deshabilita las horas, Guardar y Eliminar cuando el bloque está %s",
     (state) => {
       renderWithQuery(<EditBlockPanel block={{ ...mockBlock, state }} onClose={vi.fn()} />)
 
+      expect(screen.getByLabelText(/Desde/)).toBeDisabled()
+      expect(screen.getByLabelText(/Hasta/)).toBeDisabled()
       expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeDisabled()
       expect(screen.getByRole("button", { name: "Eliminar bloque" })).toBeDisabled()
       expect(
