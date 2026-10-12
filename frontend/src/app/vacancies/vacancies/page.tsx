@@ -25,7 +25,7 @@ export default async function VacancyDetailPage({
           </h1>
 
           <Link
-            href="/vacantes"
+            href="/vacancies"
             className="mt-6 inline-block rounded-md bg-black px-4 py-2 text-white"
           >
             ← Volver a vacantes
@@ -39,7 +39,7 @@ export default async function VacancyDetailPage({
     <main className="min-h-screen bg-surface-soft p-6">
       <div className="mx-auto w-full max-w-3xl">
         <Link
-          href="/vacantes"
+          href="/vacancies"
           className="mb-6 inline-block text-sm font-medium"
         >
           ← Volver a vacantes

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useHome } from "../hooks/use-home";
 import { Button } from "@/components/ui/button";
 import { MissingRequirements } from "@/modules/matching/components/missing-requirements";
+import { MatchScoreBar } from "@/modules/matching/components/match-score-bar.js";
 import {
   Card,
   CardHeader,
@@ -14,7 +15,7 @@ import {
 import { SkillsDetectedList } from "../components/skills-detected-list";
 
 export function HomeView() {
-  const { backendMessage } = useHome();
+  const { backendMessage, requirements, compatibilityScore } = useHome();
 
   return (
     <div className="flex flex-1 items-center justify-center bg-surface-soft p-6">
@@ -32,19 +33,17 @@ export function HomeView() {
             processingTime={1.5}
           />
 
+          {}
+          <MatchScoreBar score={compatibilityScore} />
+
           <Button>Botón de ejemplo</Button>
 
-          <Link href="/vacantes" passHref>
+          <Link href="/vacancies" passHref>
             <Button className="w-full">Vacantes</Button>
           </Link>
           
-          <MissingRequirements 
-            requirements={[
-              { id: "1", name: "Licenciatura en Ingeniería de Sistemas", status: "cumple" },
-              { id: "2", name: "3 años de experiencia en React", status: "pendiente" },
-              { id: "3", name: "Inglés B2 (Intermedio alto)", status: "cumple" },
-              { id: "4", name: "Certificación en AWS o Azure", status: "pendiente" }
-            ]}           />
+          {}
+          <MissingRequirements requirements={requirements} />  
         </CardContent>
       </Card>
     </div>
