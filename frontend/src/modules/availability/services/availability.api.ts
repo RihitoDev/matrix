@@ -15,7 +15,9 @@ export const availabilityApi = {
     if (filters?.from) params.append("from", toISOString(filters.from));
     if (filters?.to) params.append("to", toISOString(filters.to));
     const query = params.toString();
-    const response = await apiClient.get<ApiResponse<AvailabilityBlock[]>>(`/availability-blocks${query ? `?${query}` : ""}`);
+    const response = await apiClient.get<ApiResponse<AvailabilityBlock[]>>(
+      `/availability-blocks${query ? `?${query}` : ""}`,
+    );
     return response.data.data;
   },
 
@@ -45,7 +47,10 @@ export const availabilityApi = {
     const payload: Partial<CreateAvailabilityBlockInput> = {};
     if (input.startAt) payload.startAt = toISOString(input.startAt);
     if (input.endAt) payload.endAt = toISOString(input.endAt);
-    const response = await apiClient.patch<ApiResponse<AvailabilityBlock>>(`/availability-blocks/${encodeURIComponent(id)}`, payload);
+    const response = await apiClient.patch<ApiResponse<AvailabilityBlock>>(
+      `/availability-blocks/${encodeURIComponent(id)}`,
+      payload,
+    );
     return response.data.data;
   },
 
