@@ -80,7 +80,7 @@ describe('ReportHistoryService', () => {
         historyQuery({ page: 3, limit: 10 }),
       );
 
-      expect(findPage).toHaveBeenCalledWith(20, 10);
+      expect(findPage).toHaveBeenCalledWith(20, 10, undefined);
       expect(result).toMatchObject({
         totalItems: 25,
         totalPages: 3,
@@ -101,6 +101,35 @@ describe('ReportHistoryService', () => {
         page: 1,
         limit: 10,
       });
+    });
+  });
+
+  describe('filtro por tipo de reporte', () => {
+    it('pide al repositorio solo los reportes del tipo indicado', async () => {
+      const { service, findPage } = buildService();
+
+      await service.getReportHistory(
+        historyQuery({ reportType: 'REJECTED_USERS' }),
+      );
+
+      expect(findPage).toHaveBeenCalledWith(0, 10, 'REJECTED_USERS');
+    });
+
+    it.each([{}, { reportType: 'ALL' }])(
+      'con "ALL" o sin filtro pide todos los tipos',
+      async (input) => {
+        const { service, findPage } = buildService();
+
+        await service.getReportHistory(historyQuery(input));
+
+        expect(findPage).toHaveBeenCalledWith(0, 10, undefined);
+      },
+    );
+
+    it('rechaza un tipo de reporte que no existe', () => {
+      expect(
+        reportHistoryQuerySchema.safeParse({ reportType: 'GRADUATES' }).success,
+      ).toBe(false);
     });
   });
 
