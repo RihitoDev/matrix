@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useHome } from "../hooks/use-home";
 import { Button } from "@/components/ui/button";
 import { MissingRequirements } from "@/modules/matching/components/missing-requirements";
+import { MatchScoreBar } from "@/modules/matching/components/match-score-bar";
 import {
   Card,
   CardHeader,
@@ -32,9 +33,11 @@ export function HomeView() {
             processingTime={1.5}
           />
 
+          <MatchScoreBar score={85} />
+
           <Button>Botón de ejemplo</Button>
 
-          <Link href="/vacantes" passHref>
+          <Link href="/vacancies" passHref>
             <Button className="w-full">Vacantes</Button>
           </Link>
           
@@ -44,7 +47,8 @@ export function HomeView() {
               { id: "2", name: "3 años de experiencia en React", status: "pendiente" },
               { id: "3", name: "Inglés B2 (Intermedio alto)", status: "cumple" },
               { id: "4", name: "Certificación en AWS o Azure", status: "pendiente" }
-            ]}           />
+            ]}
+          />
         </CardContent>
       </Card>
     </div>
