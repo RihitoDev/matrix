@@ -87,6 +87,28 @@ beforeEach(() => {
 });
 
 describe("EventsView", () => {
+  it.each(["button", "escape"])("closes the selected workshop using %s", (method) => {
+    vi.mocked(useEvent).mockImplementation((id) => ({
+      event: id ? { ...MOCK_EVENTS[0], modality: { id: "m1", title: "Presencial" } } : null,
+      isLoading: false,
+      error: null,
+      notFound: false,
+      retry: vi.fn(),
+    }));
+    render(<EventsView />);
+    const card = within(screen.getByRole("region", { name: /listado de talleres/i }))
+      .getByRole("button", { name: /desarrollo web con react/i });
+    fireEvent.click(card);
+    expect(screen.getByRole("button", { name: "Inscribirme" })).toBeInTheDocument();
+    if (method === "button") {
+      fireEvent.click(screen.getByRole("button", { name: "Cerrar detalle del taller" }));
+    } else {
+      fireEvent.keyDown(document, { key: "Escape" });
+    }
+    expect(card).toHaveAttribute("aria-pressed", "false");
+    expect(screen.queryByRole("button", { name: "Inscribirme" })).not.toBeInTheDocument();
+    expect(useEvent).toHaveBeenLastCalledWith(null);
+  });
   it("renderiza el encabezado principal, buscador, categorias y panel lateral", () => {
     render(<EventsView />);
 

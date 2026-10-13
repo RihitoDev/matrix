@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RequestFeedback } from '../components/request-feedback';
 import { EventDetailState } from '../components/event-detail-state';
 import { EventCard } from '../components/event-card';
@@ -32,6 +32,15 @@ export function EventsView() {
   };
 
   const detail = useEvent(selectedEventId);
+
+  useEffect(() => {
+    if (!selectedEventId) return;
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setSelectedEventId(null);
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [selectedEventId]);
 
   return (
     <div className="flex min-h-svh w-full flex-1 flex-col bg-surface-soft text-foreground lg:flex-row">
@@ -110,7 +119,7 @@ export function EventsView() {
       </div>
 
       {detail.event ? (
-        <EventDetailPanel event={detail.event} />
+        <EventDetailPanel event={detail.event} onClose={() => setSelectedEventId(null)} />
       ) : (
         <EventDetailState
           selectedId={selectedEventId}
@@ -118,6 +127,7 @@ export function EventsView() {
           error={detail.error}
           notFound={detail.notFound}
           retry={detail.retry}
+          onClose={() => setSelectedEventId(null)}
         />
       )}
     </div>
