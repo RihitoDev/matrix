@@ -41,7 +41,7 @@ describe('seedUsers', () => {
     expect(users.users.eventGraduate.id).toBe('prueba@umss.edu.bo');
     expect(users.users.emptyGraduate.id).toBe('sinpases@umss.edu.bo');
     expect(users.users.mentorA.id).toBe('mentor.a@umssy.test');
-    expect(tx.userRole.create).toHaveBeenCalledTimes(7);
+    expect(tx.userRole.create).toHaveBeenCalledTimes(8);
     expect(tx.user.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
         update: expect.objectContaining({ password: 'hashed-password' }),

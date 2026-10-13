@@ -19,9 +19,10 @@ export interface RegisteredUsersParams {
   limit: number;
   userType?: RoleTag;
   period?: AcademicPeriod;
+  search?: string;
 }
 
-export type RegisteredUsersExportParams = Pick<RegisteredUsersParams, "userType" | "period">;
+export type RegisteredUsersExportParams = Pick<RegisteredUsersParams, "userType" | "period" | "search">;
 
 export interface ExportedFile {
   file: Blob;
@@ -32,4 +33,5 @@ export interface RegisteredUsersState {
   requestKey: string;
   result?: PaginatedData<RegisteredUser>;
   errorMessage?: string;
+  hasConnectionError?: boolean;
 }
