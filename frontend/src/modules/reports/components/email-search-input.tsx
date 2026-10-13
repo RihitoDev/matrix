@@ -23,10 +23,10 @@ export function EmailSearchInput({ value, onChange }: EmailSearchInputProps) {
         <Button
           type="button"
           variant="ghost"
-          size="icon-xs"
+          size="icon-sm"
           onClick={() => onChange("")}
           aria-label="Limpiar búsqueda"
-          className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md text-text-secondary hover:bg-transparent hover:text-ink"
+          className="absolute right-1 top-1/2 size-8 -translate-y-1/2 rounded-md text-text-secondary hover:bg-transparent hover:text-ink"
         >
           <X className="size-4" aria-hidden="true" />
         </Button>
