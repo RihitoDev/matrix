@@ -8,20 +8,31 @@ import type {
 } from '../types/matching.types.js';
 import { SkillDictionaryService } from '../../job-connect/services/skill-dictionary.service.js';
 import { SkillsClassifierService } from './skills-classifier.service.js';
+import { NlpService } from './nlp.service.js'; 
+import { SkillCatalogService } from '../../skills/services/skill-catalog.service.js';
+import { UserSkillService } from '../../skills/services/user-skill.service.js';
 
 @Injectable()
 export class MatchingService {
   constructor(
     private readonly skillDictionaryService: SkillDictionaryService,
     private readonly skillsClassifierService: SkillsClassifierService,
+    private readonly nlpService: NlpService,
+    private readonly skillCatalogService: SkillCatalogService,
+    private readonly userSkillService: UserSkillService,
   ) {}
-  analyzeExperience(input: AnalyzeExperienceInput): AnalyzeExperienceResponse {
+  async analyzeExperience(input: AnalyzeExperienceInput): Promise<AnalyzeExperienceResponse> {
     const startedAt = performance.now();
-    const textToProcess = input.text || ''; 
-    const { skills: rawSkills } = this.skillDictionaryService.extract(textToProcess);
-
-    const skills = this.skillsClassifierService.classify(rawSkills, []);
-
+    const text = input.text ?? ''; 
+    let skills: DetectedSkillResponse[] = [];
+    
+    if (text.trim().length > 0) {
+      const catalog = await this.skillCatalogService.listCatalog({});
+      skills = this.skillsClassifierService.classify(this.buildCandidates(text), catalog);
+      if (skills.length > 0) {
+        await this.saveDetectedSkills(input.userId, skills);
+      }
+    }
     return {
       experienceId: input.experienceId,
       skills,
@@ -32,7 +43,7 @@ export class MatchingService {
   intersectRequirements(input: MatchingInput): MatchingResult {
     const careerMatch =
       !input.requiredCareer ||
-      input.userCareer.toLowerCase() === input.requiredCareer.toLowerCase();
+      input.userCareer.trim().toLowerCase() === input.requiredCareer.trim().toLowerCase();
 
     const experienceMatch =
       input.userExperienceYears >= input.minimumExperienceYears;
@@ -54,5 +65,21 @@ export class MatchingService {
       matchedSkills,
       allRequiredSkillsMatch,
     };
+  }
+
+  private buildCandidates(text: string): string[] {
+    const tokens = this.nlpService.tokenizeAndFilter(this.nlpService.normalizeText(text));
+    const ngrams = this.nlpService.generateNGrams(tokens);
+    const fromDictionary = this.skillDictionaryService
+      .extract(text)
+      .skills.map((name) => this.nlpService.normalizeText(name).replace(/ /g, '_'));
+    return [...tokens, ...ngrams, ...fromDictionary];
+  }
+
+  private async saveDetectedSkills(userId: string, skills: DetectedSkillResponse[]): Promise<void> {
+    const current = await this.userSkillService.getUserSkills(userId);
+    const skillIds = [...new Set([...current.map(({ id }) => id), ...skills.map(({ id }) => id)])];
+        
+    await this.userSkillService.updateUserSkills(userId, { skillIds });
   }
 }

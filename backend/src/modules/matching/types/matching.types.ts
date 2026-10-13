@@ -4,6 +4,7 @@ export interface DetectedSkillResponse {
 }
 
 export interface AnalyzeExperienceInput {
+  userId: string;
   experienceId: string;
   text?: string | null;
 }
