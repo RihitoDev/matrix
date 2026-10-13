@@ -16,7 +16,6 @@ export async function getMentorProfile(
 
     const mentor = response.data.data;
 
-    // Resolve API-relative photo paths with the same base URL as profile requests.
     return mentor?.photoUrl
       ? { ...mentor, photoUrl: resolveMentorPhotoUrl(mentor.photoUrl) }
       : mentor;
