@@ -87,7 +87,7 @@ beforeEach(() => {
 });
 
 describe("EventsView", () => {
-  it.each(["button", "escape"])("closes the selected workshop using %s", (method) => {
+  it.each(["button", "escape", "empty space", "heading", "search click", "search focus", "search change", "category", "all categories"])("closes the selected workshop using %s", (method) => {
     vi.mocked(useEvent).mockImplementation((id) => ({
       event: id ? { ...MOCK_EVENTS[0], modality: { id: "m1", title: "Presencial" } } : null,
       isLoading: false,
@@ -102,12 +102,42 @@ describe("EventsView", () => {
     expect(screen.getByRole("button", { name: "Inscribirme" })).toBeInTheDocument();
     if (method === "button") {
       fireEvent.click(screen.getByRole("button", { name: "Cerrar detalle del taller" }));
-    } else {
+    } else if (method === "escape") {
       fireEvent.keyDown(document, { key: "Escape" });
+    } else if (method === "heading") {
+      fireEvent.click(screen.getByRole("heading", { name: "Talleres disponibles" }));
+    } else if (method === "search click") {
+      fireEvent.click(screen.getByRole("searchbox", { name: "Buscar taller" }));
+    } else if (method === "search focus") {
+      fireEvent.focusIn(screen.getByRole("searchbox", { name: "Buscar taller" }));
+    } else if (method === "search change") {
+      fireEvent.change(screen.getByRole("searchbox", { name: "Buscar taller" }), { target: { value: "Prisma" } });
+    } else if (method === "category" || method === "all categories") {
+      fireEvent.click(screen.getByRole("button", { name: method === "category" ? "Tecnología" : "Todos" }));
+    } else {
+      fireEvent.click(screen.getByRole("region", { name: /listado de talleres/i }));
     }
     expect(card).toHaveAttribute("aria-pressed", "false");
     expect(screen.queryByRole("button", { name: "Inscribirme" })).not.toBeInTheDocument();
     expect(useEvent).toHaveBeenLastCalledWith(null);
+    expect(screen.getByRole("heading", { name: "Selecciona un taller" })).toBeInTheDocument();
+  });
+  it("keeps the selection when interacting with cards and detail", () => {
+    vi.mocked(useEvent).mockImplementation((id) => ({
+      event: id ? { ...MOCK_EVENTS[0], modality: { id: "m1", title: "Presencial" } } : null,
+      isLoading: false,
+      error: null,
+      notFound: false,
+      retry: vi.fn(),
+    }));
+    render(<EventsView />);
+    const card = within(screen.getByRole("region", { name: /listado de talleres/i }))
+      .getByRole("button", { name: /desarrollo web con react/i });
+    fireEvent.click(within(card).getByRole("heading"));
+    fireEvent.click(screen.getByRole("complementary", { name: "Detalle de Desarrollo Web con React" }));
+    fireEvent.click(document.body);
+    expect(card).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Inscribirme" })).toBeInTheDocument();
   });
   it("renderiza el encabezado principal, buscador, categorias y panel lateral", () => {
     render(<EventsView />);

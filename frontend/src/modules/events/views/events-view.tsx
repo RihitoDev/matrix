@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { RequestFeedback } from '../components/request-feedback';
 import { EventDetailState } from '../components/event-detail-state';
 import { EventCard } from '../components/event-card';
@@ -26,6 +26,7 @@ export function EventsView() {
   const { events, error, hasMore, isLoading, isLoadingMore, loadMore, retry } =
     useEvents(filters);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const viewRef = useRef<HTMLDivElement>(null);
 
   const handleSelectEvent = (selectedEvent: EventItem) => {
     setSelectedEventId(selectedEvent.id);
@@ -38,12 +39,34 @@ export function EventsView() {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') setSelectedEventId(null);
     }
+    function handleOutsideClick(event: MouseEvent) {
+      const target = event.target;
+      if (!(target instanceof Element) || !viewRef.current?.contains(target)) return;
+      if (target.closest('[role="search"]')) {
+        setSelectedEventId(null);
+        return;
+      }
+      if (target.closest('aside, button, a, input, textarea, select, label, [role="button"], [contenteditable="true"]')) return;
+      setSelectedEventId(null);
+    }
+    function handleSearchFocus(event: FocusEvent) {
+      const target = event.target;
+      if (target instanceof Element && viewRef.current?.contains(target) && target.matches('input[type="search"]')) {
+        setSelectedEventId(null);
+      }
+    }
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener('click', handleOutsideClick);
+    document.addEventListener('focusin', handleSearchFocus);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('click', handleOutsideClick);
+      document.removeEventListener('focusin', handleSearchFocus);
+    };
   }, [selectedEventId]);
 
   return (
-    <div className="flex min-h-svh w-full flex-1 flex-col bg-surface-soft text-foreground lg:flex-row">
+    <div ref={viewRef} className="flex min-h-svh w-full flex-1 flex-col bg-surface-soft text-foreground lg:flex-row">
       <div className="flex min-w-0 flex-1 flex-col gap-6 px-6 pb-8 pt-20 sm:px-10">
         <header className="flex flex-col gap-1">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">
@@ -59,11 +82,17 @@ export function EventsView() {
           aria-label="Filtros de talleres"
           className="flex flex-wrap items-center gap-2.5"
         >
-          <EventsSearchInput value={searchInput} onChange={setSearchInput} />
+          <EventsSearchInput value={searchInput} onChange={(value) => {
+            setSelectedEventId(null);
+            setSearchInput(value);
+          }} />
           <CategoryFilterChips
             categories={categories}
             selectedId={categoryId}
-            onSelect={setCategoryId}
+            onSelect={(id) => {
+              setSelectedEventId(null);
+              setCategoryId(id);
+            }}
           />
         </div>
 
