@@ -20,6 +20,6 @@ import { SkillDictionaryService } from '../job-connect/services/skill-dictionary
     SkillMapper,
     SkillDictionaryService,
   ],
-  exports: [SkillService,SkillDictionaryService ],
+  exports: [SkillService,SkillDictionaryService, SkillDictionaryService],
 })
 export class SkillsModule {}
