@@ -40,12 +40,12 @@ describe("validateCertification", () => {
     });
   });
 
-  it("accepts an organization of 100 characters and rejects a longer one", () => {
+  it("accepts an organization of 150 characters and rejects a longer one", () => {
     expect(
-      validateCertification({ ...VALID_VALUES, issuingOrganization: "a".repeat(100) }),
+      validateCertification({ ...VALID_VALUES, issuingOrganization: "a".repeat(150) }),
     ).toEqual({});
     expect(
-      validateCertification({ ...VALID_VALUES, issuingOrganization: "a".repeat(101) }),
+      validateCertification({ ...VALID_VALUES, issuingOrganization: "a".repeat(151) }),
     ).toEqual({ issuingOrganization: CERTIFICATION_VALIDATION_MESSAGES.organizationTooLong });
   });
 
@@ -71,7 +71,7 @@ describe("validateCertification", () => {
   it("counts the length after trimming the spaces", () => {
     expect(validateCertification({ ...VALID_VALUES, name: ` ${"a".repeat(150)} ` })).toEqual({});
     expect(
-      validateCertification({ ...VALID_VALUES, issuingOrganization: ` ${"a".repeat(100)} ` }),
+      validateCertification({ ...VALID_VALUES, issuingOrganization: ` ${"a".repeat(150)} ` }),
     ).toEqual({});
   });
 
@@ -138,6 +138,19 @@ describe("validateCertification", () => {
 
     vi.setSystemTime(new Date("2026-06-16T04:00:00Z"));
     expect(validateCertification({ ...VALID_VALUES, issueDate: "2026-06-16" })).toEqual({});
+  });
+
+  it("rejects an issue date before 1950-01-01 and accepts the boundary", () => {
+    expect(validateCertification({ ...VALID_VALUES, issueDate: "1949-12-31" })).toEqual({
+      issueDate: CERTIFICATION_VALIDATION_MESSAGES.minDate,
+    });
+    expect(validateCertification({ ...VALID_VALUES, issueDate: "1950-01-01" })).toEqual({});
+  });
+
+  it("reports an impossible date before the minimum date", () => {
+    expect(validateCertification({ ...VALID_VALUES, issueDate: "1949-02-30" })).toEqual({
+      issueDate: CERTIFICATION_VALIDATION_MESSAGES.invalidDate,
+    });
   });
 
   it("rejects a future issue date", () => {

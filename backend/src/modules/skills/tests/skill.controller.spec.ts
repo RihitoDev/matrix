@@ -6,7 +6,7 @@ import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DomainExceptionFilter } from '../../../common/filters/domain-exception.filter.js';
 import { SkillController } from '../controllers/skill.controller.js';
-import { SkillService } from '../services/skill.service.js';
+import { SkillCatalogService } from '../services/skill-catalog.service.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
 const python = { id: '33333333-3333-4333-8333-333333333333', name: 'Python', isCustom: false };
@@ -29,7 +29,7 @@ describe('SkillController', () => {
       imports: [JwtModule.register({ global: true, secret: 'test-secret' })],
       controllers: [SkillController],
       providers: [
-        { provide: SkillService, useValue: service },
+        { provide: SkillCatalogService, useValue: service },
         { provide: APP_FILTER, useClass: DomainExceptionFilter },
       ],
     }).compile();

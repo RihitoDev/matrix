@@ -1,5 +1,13 @@
 import { Injectable } from '@nestjs/common';
+import type { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
+import { EDUCATION_SERIALIZATION_ERROR_CODE, EDUCATION_TRANSACTION_ATTEMPTS } from '../constants/education-conflict.constants.js';
+import { DuplicateEducationException } from '../exceptions/duplicate-education.exception.js';
+import { EducationWriteConflictException } from '../exceptions/education-write-conflict.exception.js';
+import { normalizeEducationText } from '../utils/normalize-education-text.js';
+import { resolveEducationInstitution } from '../utils/resolve-education-institution.js';
+import { resolveEducationDegree } from '../utils/resolve-education-degree.js';
+import { validateEducationDegree } from '../utils/validate-education-degree.js';
 import { EDUCATION_SELECT } from '../constants/education-select.constants.js';
 import type { CreateEducationRequest } from '../requests/create-education.request.js';
 import type { UpdateEducationRequest } from '../requests/update-education.request.js';
@@ -32,9 +40,12 @@ export class EducationsRepository {
     userId: string,
     data: CreateEducationRequest,
   ): Promise<EducationRecord> {
-    return this.prisma.education.create({
-      data: { ...data, userId },
-      select: EDUCATION_SELECT,
+    return this.withSerializableWrite(async (tx) => {
+      await this.assertNoDuplicate(tx, userId, data);
+      return tx.education.create({
+        data: { ...data, userId },
+        select: EDUCATION_SELECT,
+      });
     });
   }
 
@@ -44,18 +55,50 @@ export class EducationsRepository {
     data: UpdateEducationRequest,
     expectedPeriod: EducationPeriodSnapshot,
   ): Promise<EducationRecord | null> {
-    // Match the dates used by the service validation in the same atomic write.
-    const records = await this.prisma.education.updateManyAndReturn({
-      where: {
-        id,
-        userId,
-        startDate: expectedPeriod.startDate,
-        endDate: expectedPeriod.endDate,
-      },
-      data,
-      select: EDUCATION_SELECT,
+    return this.withSerializableWrite(async (tx) => {
+      const where = { id, userId, ...expectedPeriod };
+      const current = await tx.education.findFirst({ where, select: EDUCATION_SELECT });
+      if (!current) return null;
+      validateEducationDegree(data.institution ?? current.institution, data.degree ?? current.degree);
+      await this.assertNoDuplicate(tx, userId, { ...current, ...data }, id);
+      const records = await tx.education.updateManyAndReturn({
+        where, data, select: EDUCATION_SELECT,
+      });
+      return records[0] ?? null;
     });
-    return records[0] ?? null;
+  }
+
+  private async assertNoDuplicate(
+    tx: Prisma.TransactionClient,
+    userId: string,
+    candidate: Pick<EducationRecord, 'institution' | 'degree' | 'startDate' | 'endDate'>,
+    excludedId?: string,
+  ): Promise<void> {
+    const records = await tx.education.findMany({
+      where: {
+        userId, startDate: candidate.startDate, endDate: candidate.endDate,
+        ...(excludedId ? { id: { not: excludedId } } : {}),
+      },
+      select: { institution: true, degree: true },
+    });
+    const institution = normalizeEducationText(resolveEducationInstitution(candidate.institution) ?? candidate.institution);
+    if (records.some((record) => normalizeEducationText(resolveEducationInstitution(record.institution) ?? record.institution) === institution
+      && normalizeEducationText(resolveEducationDegree(record.institution, record.degree) ?? record.degree)
+        === normalizeEducationText(resolveEducationDegree(candidate.institution, candidate.degree) ?? candidate.degree))) {
+      throw new DuplicateEducationException();
+    }
+  }
+
+  private async withSerializableWrite<T>(operation: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
+    for (let attempt = 0; attempt < EDUCATION_TRANSACTION_ATTEMPTS; attempt += 1) {
+      try {
+        return await this.prisma.$transaction(operation, { isolationLevel: 'Serializable' });
+      } catch (error: unknown) {
+        if (typeof error !== 'object' || error === null || !('code' in error)
+          || error.code !== EDUCATION_SERIALIZATION_ERROR_CODE) throw error;
+      }
+    }
+    throw new EducationWriteConflictException();
   }
 
   async delete(id: string, userId: string): Promise<boolean> {

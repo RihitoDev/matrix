@@ -145,17 +145,17 @@ describe('Certification length limits', () => {
     });
   });
 
-  it('accepts an organization of 100 characters and rejects 101', () => {
+  it('accepts an organization of 150 characters and rejects 151', () => {
     expect(
       createCertificationSchema.safeParse({
         ...validBody,
-        issuingOrganization: 'a'.repeat(100),
+        issuingOrganization: 'a'.repeat(150),
       }).success,
     ).toBe(true);
 
     const issues = createCertificationSchema.safeParse({
       ...validBody,
-      issuingOrganization: 'a'.repeat(101),
+      issuingOrganization: 'a'.repeat(151),
     }).error?.issues;
 
     expect(issues).toHaveLength(1);
@@ -194,6 +194,51 @@ describe('Certification issue date', () => {
       path: ['issueDate'],
       message: CERTIFICATION_VALIDATION_MESSAGES.futureDate,
     });
+  });
+
+  it('rejects 1949-12-31 and accepts 1950-01-01', () => {
+    const issues = createCertificationSchema.safeParse({
+      ...validBody,
+      issueDate: '1949-12-31',
+    }).error?.issues;
+
+    expect(issues).toHaveLength(1);
+    expect(issues?.[0]).toMatchObject({
+      path: ['issueDate'],
+      message: CERTIFICATION_VALIDATION_MESSAGES.minDate,
+    });
+
+    const accepted = createCertificationSchema.safeParse({
+      ...validBody,
+      issueDate: '1950-01-01',
+    });
+
+    expect(accepted.success).toBe(true);
+    expect(accepted.data?.issueDate.toISOString()).toBe(
+      '1950-01-01T00:00:00.000Z',
+    );
+  });
+
+  it('applies the minimum date when editing', () => {
+    expect(
+      updateCertificationSchema.safeParse({ issueDate: '1949-12-31' }).error
+        ?.issues[0],
+    ).toMatchObject({
+      path: ['issueDate'],
+      message: CERTIFICATION_VALIDATION_MESSAGES.minDate,
+    });
+    expect(
+      updateCertificationSchema.safeParse({ issueDate: '1950-01-01' }).success,
+    ).toBe(true);
+  });
+
+  it('reports the invalid date message instead of the minimum for impossible dates', () => {
+    expect(
+      createCertificationSchema.safeParse({
+        ...validBody,
+        issueDate: '1949-02-30',
+      }).error?.issues[0]?.message,
+    ).toBe(CERTIFICATION_VALIDATION_MESSAGES.invalidDate);
   });
 
   it('converts a valid date to a Date at midnight UTC', () => {
@@ -246,7 +291,7 @@ describe('Certification validation when editing', () => {
 
     const issues = updateCertificationSchema.safeParse({
       name: '',
-      issuingOrganization: 'a'.repeat(101),
+      issuingOrganization: 'a'.repeat(151),
       issueDate: tomorrowInBolivia(),
     }).error?.issues;
 
@@ -261,7 +306,7 @@ describe('Certification validation when editing', () => {
     expect(
       updateCertificationSchema.safeParse({
         name: 'a'.repeat(150),
-        issuingOrganization: 'a'.repeat(100),
+        issuingOrganization: 'a'.repeat(150),
         issueDate: todayInBolivia(),
       }).success,
     ).toBe(true);

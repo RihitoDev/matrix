@@ -22,6 +22,6 @@ import { SkillDictionaryService } from '../job-connect/services/skill-dictionary
     SkillMapper,
     SkillDictionaryService,
   ],
-  exports: [SkillCatalogService, UserSkillService, SkillDictionaryService ],
+  exports: [SkillCatalogService, UserSkillService, SkillDictionaryService],
 })
 export class SkillsModule {}

@@ -19,7 +19,7 @@ import {
   type UpdateUserSkillsRequest,
 } from '../requests/update-user-skills.request.js';
 import type { SkillResponse } from '../responses/skill.response.js';
-import { SkillService } from '../services/skill.service.js';
+import { UserSkillService } from '../services/user-skill.service.js';
 
 @ApiTags('skills')
 @ApiBearerAuth()
@@ -32,12 +32,12 @@ import { SkillService } from '../services/skill.service.js';
 )
 @Controller('profile/me/skills')
 export class UserSkillController {
-  constructor(private readonly skillService: SkillService) {}
+  constructor(private readonly userSkillService: UserSkillService) {}
 
   @Get()
   @ApiOkResponse({ description: 'Skills of the authenticated user' })
   getUserSkills(@CurrentUserId() userId: string): Promise<SkillResponse[]> {
-    return this.skillService.getUserSkills(userId);
+    return this.userSkillService.getUserSkills(userId);
   }
 
   @Put()
@@ -47,6 +47,6 @@ export class UserSkillController {
     @CurrentUserId() userId: string,
     @Body({ schema: updateUserSkillsSchema }) request: UpdateUserSkillsRequest,
   ): Promise<SkillResponse[]> {
-    return this.skillService.updateUserSkills(userId, request);
+    return this.userSkillService.updateUserSkills(userId, request);
   }
 }
