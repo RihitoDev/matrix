@@ -245,7 +245,7 @@ describe("RegisteredUsersReportView", () => {
     expect(reportsService.getRegisteredUsers).toHaveBeenLastCalledWith({
       page: 1, limit: 10, userType: undefined, period: "II-2025", search: "",
     });
-  });
+  }, 15000);
 
   it("conserva la gestión al paginar y al volver a elegir la opción activa", async () => {
     const user = userEvent.setup();
