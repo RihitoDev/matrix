@@ -101,6 +101,7 @@ model Company {
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   workExperiences WorkExperience[]
+  jobOffers       JobOffer[]
 
   @@map("companies")
 }
@@ -226,9 +227,25 @@ model Skill {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  userSkills UserSkill[]
+  userSkills     UserSkill[]
+  jobOfferSkills JobOfferSkill[]
 
   @@map("skills")
+}
+
+model JobOfferSkill {
+  id         String   @id @default(uuid()) @db.Uuid
+  jobOfferId String   @map("job_offer_id") @db.Uuid
+  skillId    String   @map("skill_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  jobOffer JobOffer @relation(fields: [jobOfferId], references: [id], onDelete: Cascade)
+  skill    Skill    @relation(fields: [skillId], references: [id], onDelete: Restrict)
+
+  @@unique([jobOfferId, skillId])
+  @@index([skillId])
+  @@map("job_offer_skills")
 }
 
 model UserSkill {
@@ -516,6 +533,68 @@ model EventAttendance {
   @@map("event_attendances")
 }
 
+model JobOffer {
+  id                 String    @id @default(uuid()) @db.Uuid
+  title              String    @db.VarChar(60)
+  description        String
+  companyId          String    @map("company_id") @db.Uuid
+  modalityId         String    @map("modality_id") @db.Uuid
+  contractTypeId     String    @map("contract_type_id") @db.Uuid
+  statusId           String    @map("status_id") @db.Uuid
+  category           String
+  positionsAvailable Int       @default(1) @map("positions_available")
+  salaryRange        String    @map("salary_range")
+  languages          String
+  locationUrl        String    @map("location_url")
+  expiresAt          DateTime? @map("expires_at") @db.Timestamptz(6)
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  company      Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  modality     JobOfferModality     @relation(fields: [modalityId], references: [id], onDelete: Restrict)
+  contractType JobOfferContractType @relation(fields: [contractTypeId], references: [id], onDelete: Restrict)
+  status       JobOfferStatus       @relation(fields: [statusId], references: [id], onDelete: Restrict)
+  skills       JobOfferSkill[]
+
+  @@index([companyId])
+  @@index([modalityId])
+  @@index([contractTypeId])
+  @@index([statusId])
+  @@map("job_offers")
+}
+
+model JobOfferModality {
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String   @unique @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  jobOffers JobOffer[]
+
+  @@map("job_offer_modalities")
+}
+
+model JobOfferContractType {
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String   @unique @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  jobOffers JobOffer[]
+
+  @@map("job_offer_contract_types")
+}
+
+model JobOfferStatus {
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String   @unique @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  jobOffers JobOffer[]
+
+  @@map("job_offer_statuses")
+}
 model AdminExportHistory {
   userId     String   @map("user_id") @db.Uuid
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)

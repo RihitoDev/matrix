@@ -3,11 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { downloadFile } from "@/shared/utils/download-file";
 import { saveFile, selectCsvDestination } from "@/shared/utils/save-file";
-import {
-  EXPORT_DOWNLOAD_STARTED_MESSAGE,
-  EXPORT_SUCCESS_MESSAGE,
-  EXPORT_SUCCESS_TOAST_DURATION_MS,
-} from "../constants/reports.constants";
+import { EXPORT_SUCCESS_MESSAGE, EXPORT_SUCCESS_TOAST_DURATION_MS } from "../constants/reports.constants";
 import type { ExportedFile } from "../types/registered-user.types";
 
 export function useExportReportCsv(exportReport: () => Promise<ExportedFile>, suggestedFileName: string) {
@@ -15,20 +11,16 @@ export function useExportReportCsv(exportReport: () => Promise<ExportedFile>, su
   const [isExporting, setIsExporting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const [successMessage, setSuccessMessage] = useState<string | undefined>(undefined);
-  const [downloadMessage, setDownloadMessage] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    if (!successMessage && !downloadMessage) {
+    if (!successMessage) {
       return;
     }
 
-    const timeoutId = setTimeout(() => {
-      setSuccessMessage(undefined);
-      setDownloadMessage(undefined);
-    }, EXPORT_SUCCESS_TOAST_DURATION_MS);
+    const timeoutId = setTimeout(() => setSuccessMessage(undefined), EXPORT_SUCCESS_TOAST_DURATION_MS);
 
     return () => clearTimeout(timeoutId);
-  }, [successMessage, downloadMessage]);
+  }, [successMessage]);
 
   const exportCsv = useCallback(async () => {
     if (exportInProgress.current) return;
@@ -36,7 +28,6 @@ export function useExportReportCsv(exportReport: () => Promise<ExportedFile>, su
     setIsExporting(true);
     setErrorMessage(undefined);
     setSuccessMessage(undefined);
-    setDownloadMessage(undefined);
 
     try {
       const destination = selectCsvDestination(suggestedFileName);
@@ -54,11 +45,10 @@ export function useExportReportCsv(exportReport: () => Promise<ExportedFile>, su
       const { file, fileName } = await exportReport();
       if (fileHandle) {
         await saveFile(file, fileHandle);
-        setSuccessMessage(EXPORT_SUCCESS_MESSAGE);
       } else {
         downloadFile(file, fileName);
-        setDownloadMessage(EXPORT_DOWNLOAD_STARTED_MESSAGE);
       }
+      setSuccessMessage(EXPORT_SUCCESS_MESSAGE);
     } catch {
       setErrorMessage("No se pudo exportar el reporte. Inténtalo de nuevo.");
     } finally {
@@ -67,5 +57,5 @@ export function useExportReportCsv(exportReport: () => Promise<ExportedFile>, su
     }
   }, [exportReport, suggestedFileName]);
 
-  return { exportCsv, isExporting, errorMessage, successMessage, downloadMessage };
+  return { exportCsv, isExporting, errorMessage, successMessage };
 }

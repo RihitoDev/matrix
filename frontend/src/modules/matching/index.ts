@@ -9,3 +9,4 @@ export type {
   CandidateWithMatch,
   Vacancy,
 } from "./types/matching-types";
+export * from './types/match-score.types';
