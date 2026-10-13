@@ -28,8 +28,8 @@ export function MentorshipWizardShell({
   children,
 }: MentorshipWizardShellProps) {
   return (
-    <main className="min-h-full bg-surface-soft px-4 py-6 sm:py-8">
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 sm:gap-8">
+    <main className="min-h-full bg-surface-soft px-3 py-4 sm:px-4 sm:py-8">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 sm:gap-8">
         <ProgressStepper currentStep={currentStep} />
 
         <Card className="gap-6 overflow-visible rounded-lg border border-border bg-surface py-0 shadow-sm ring-0">
@@ -47,7 +47,7 @@ export function MentorshipWizardShell({
             </p>
           </CardHeader>
 
-          <CardContent className="px-4 sm:px-6">
+          <CardContent className="px-3 sm:px-6">
             <div className="min-h-48 rounded-md border border-border bg-surface-soft p-4 sm:p-6">
               {children}
             </div>
