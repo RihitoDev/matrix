@@ -3,8 +3,18 @@
 import axios from "axios";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, LoaderCircle } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -34,6 +44,7 @@ export function OrientationConfigView() {
   const [isMentorActive, setIsMentorActive] = useState(true);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [showToast, setShowToast] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -109,6 +120,7 @@ export function OrientationConfigView() {
       );
     } finally {
       setIsSaving(false);
+      setIsConfirmModalOpen(false);
     }
   };
 
@@ -268,7 +280,7 @@ export function OrientationConfigView() {
               </Link>
               <Button
                 type="button"
-                onClick={handleSave}
+                onClick={() => setIsConfirmModalOpen(true)}
                 disabled={selectedIds.length === 0 || isSaving || hasLoadError}
                 className="h-10 rounded-lg bg-red-600 px-6 text-sm font-semibold text-white shadow-sm hover:bg-red-700 active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -278,6 +290,44 @@ export function OrientationConfigView() {
           </Card>
         </div>
       </div>
+
+      <AlertDialog
+        open={isConfirmModalOpen}
+        onOpenChange={(open) => {
+          if (!isSaving) setIsConfirmModalOpen(open);
+        }}
+      >
+        <AlertDialogContent className="max-w-md gap-0 rounded-2xl border border-border bg-surface p-8 text-ink shadow-lg ring-0 data-[size=default]:max-w-md data-[size=default]:sm:max-w-md">
+          <AlertDialogHeader className="place-items-start text-left">
+            <AlertDialogTitle className="font-tight text-[22px] font-bold text-ink">
+              ¿Guardar cambios?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="mt-2 text-[15px] text-text-secondary">
+              Se actualizarán los tipos de orientación que seleccionaste.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mx-0 mb-0 mt-8 flex-row justify-end gap-3 border-t-0 bg-transparent p-0">
+            <AlertDialogCancel
+              type="button"
+              disabled={isSaving}
+              className="h-12 border-border-strong bg-surface px-6 text-[14px] font-semibold text-ink hover:bg-surface-soft"
+            >
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              type="button"
+              onClick={handleSave}
+              disabled={isSaving}
+              className="h-12 bg-accent px-6 text-[14px] font-semibold text-white hover:bg-danger"
+            >
+              {isSaving ? (
+                <LoaderCircle aria-hidden="true" className="animate-spin" />
+              ) : null}
+              {isSaving ? "Guardando..." : "Sí, guardar cambios"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {showToast && (
         <Alert
