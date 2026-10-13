@@ -8,7 +8,8 @@ import { UserSkillController } from '../controllers/user-skill.controller.js';
 import { SkillMapper } from '../mappers/skill.mapper.js';
 import { SkillRepository } from '../repositories/skill.repository.js';
 import { UserSkillRepository } from '../repositories/user-skill.repository.js';
-import { SkillService } from '../services/skill.service.js';
+import { SkillCatalogService } from '../services/skill-catalog.service.js';
+import { UserSkillService } from '../services/user-skill.service.js';
 import { SkillsModule } from '../skills.module.js';
 
 describe('SkillsModule', () => {
@@ -26,7 +27,8 @@ describe('SkillsModule', () => {
   it.each([
     SkillController,
     UserSkillController,
-    SkillService,
+    SkillCatalogService,
+    UserSkillService,
     SkillRepository,
     UserSkillRepository,
     SkillMapper,
