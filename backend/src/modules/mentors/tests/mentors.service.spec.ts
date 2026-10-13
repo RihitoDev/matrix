@@ -38,6 +38,10 @@ describe('MentorsService', () => {
         firstName: 'Ana',
         lastName: 'Rojas',
         headline: 'Arquitecta de Software',
+        photoVersion: null,
+        educations: [],
+        isAvailableForMentoring: false,
+        mentorOrientationTypes: [],
         mentorTechnicalAreas: [
           {
             technicalArea: {
@@ -71,6 +75,10 @@ describe('MentorsService', () => {
         fullName: 'Ana Rojas',
         headline: 'Arquitecta de Software',
         technicalAreas: ['Backend', 'Cloud'],
+        photoUrl: null,
+        education: null,
+        isAvailable: false,
+        orientationTypes: [],
       },
     ]);
   });
@@ -82,6 +90,10 @@ describe('MentorsService', () => {
         firstName: 'Ana',
         lastName: 'Rojas',
         headline: null,
+        photoVersion: null,
+        educations: [],
+        isAvailableForMentoring: false,
+        mentorOrientationTypes: [],
         mentorTechnicalAreas: [],
       },
     ]);
@@ -98,6 +110,10 @@ describe('MentorsService', () => {
         fullName: 'Ana Rojas',
         headline: null,
         technicalAreas: [],
+        photoUrl: null,
+        education: null,
+        isAvailable: false,
+        orientationTypes: [],
       },
     ]);
   });
@@ -109,6 +125,10 @@ describe('MentorsService', () => {
         firstName: 'Ana',
         lastName: 'Rojas',
         headline: 'Arquitecta de Software',
+        photoVersion: null,
+        educations: [],
+        isAvailableForMentoring: false,
+        mentorOrientationTypes: [],
         mentorTechnicalAreas: [],
       },
     ]);
@@ -144,7 +164,7 @@ describe('MentorsService', () => {
       headline: 'Arquitecta de Software',
       aboutMe: 'Mentora de ingeniería de software.',
       isAvailableForMentoring: true,
-      photoUrl: new TextEncoder().encode('https://cdn.test/ana.jpg'),
+      photoUrl: new Uint8Array([0xff, 0xd8, 0xff]),
       city: { id: 'city-1', title: 'Cochabamba' },
       educations: [
         {
@@ -218,7 +238,7 @@ describe('MentorsService', () => {
       headline: 'Arquitecta de Software',
       aboutMe: 'Mentora de ingeniería de software.',
       isAvailable: true,
-      photoUrl: 'https://cdn.test/ana.jpg',
+      photoUrl: expect.stringMatching(/^\/mentors\/[^/]+\/photo\?v=[a-f0-9]{64}$/),
       city: { id: 'city-1', title: 'Cochabamba' },
       educations: [
         {

@@ -12,7 +12,7 @@ function buildProfileRecord(): NonNullable<
     headline: 'Arquitecta de Software',
     aboutMe: 'Mentora de ingeniería.',
     isAvailableForMentoring: true,
-    photoUrl: new TextEncoder().encode('https://cdn.test/María.jpg'),
+    photoUrl: new Uint8Array([0x89, 0x50, 0x4e, 0x47]),
     city: { id: 'city-1', title: 'Cochabamba' },
     educations: [
       {
@@ -69,12 +69,64 @@ function buildProfileRecord(): NonNullable<
 describe('MentorMapper', () => {
   const mapper = new MentorMapper();
 
+  it('expone solo los datos públicos previstos para la tarjeta', () => {
+    const record = {
+      ...buildProfileRecord(),
+      photoVersion: '2026-10-09T12:00:00.000Z',
+      educations: [{ degree: 'Ingeniería', institution: 'UMSS' }],
+      isAvailableForMentoring: true,
+      mentorOrientationTypes: [
+        { orientationType: { name: 'Orientación técnica' } },
+      ],
+      email: 'private@example.test',
+      phone: 'private',
+    };
+    expect(mapper.toDirectoryResponse(record)).toEqual({
+      id: 'mentor-1',
+      fullName: 'Ana María Rojas',
+      headline: 'Arquitecta de Software',
+      photoUrl: '/mentors/mentor-1/photo?v=2026-10-09T12%3A00%3A00.000Z',
+      education: { degree: 'Ingeniería', institution: 'UMSS' },
+      isAvailable: true,
+      technicalAreas: ['Backend'],
+      orientationTypes: ['Orientación técnica'],
+    });
+  });
+
+  it('mantiene el endpoint compartido y versiona ambos consumidores sin exponer bytes', () => {
+    const record = { ...buildProfileRecord(), photoVersion: 'version-1' };
+    const directory = mapper.toDirectoryResponse(record);
+    const profile = mapper.toProfileResponse(record);
+    expect(directory.photoUrl?.split('?')[0]).toBe(profile.photoUrl?.split('?')[0]);
+    record.photoVersion = 'version-2';
+    expect(mapper.toDirectoryResponse(record).photoUrl).not.toBe(directory.photoUrl);
+    expect(mapper.toDirectoryResponse({ ...record, photoVersion: null }).photoUrl).toBeNull();
+  });
+
+  it('usa solo el estudio seleccionado, o ninguno, sin inventar formación', () => {
+    const record = {
+      ...buildProfileRecord(),
+      photoVersion: null,
+      educations: [
+        { degree: 'Maestría', institution: 'Universidad A' },
+        { degree: 'Licenciatura', institution: 'Universidad B' },
+      ],
+      mentorOrientationTypes: [],
+    };
+    expect(mapper.toDirectoryResponse(record).education).toEqual(record.educations[0]);
+    expect(mapper.toDirectoryResponse({ ...record, educations: [] }).education).toBeNull();
+  });
+
   it('construye fullName y technicalAreas sin exponer campos internos del directorio', () => {
     const record = {
       id: 'mentor-1',
       firstName: 'Ana María',
       lastName: 'Rojas',
       headline: 'Arquitecta de Software',
+      photoVersion: null,
+      educations: [],
+      isAvailableForMentoring: false,
+      mentorOrientationTypes: [],
       mentorTechnicalAreas: [
         { technicalArea: { name: 'Backend' } },
         { technicalArea: { name: 'Cloud' } },
@@ -87,6 +139,10 @@ describe('MentorMapper', () => {
       fullName: 'Ana María Rojas',
       headline: 'Arquitecta de Software',
       technicalAreas: ['Backend', 'Cloud'],
+      photoUrl: null,
+      education: null,
+      isAvailable: false,
+      orientationTypes: [],
     });
   });
 
@@ -96,6 +152,10 @@ describe('MentorMapper', () => {
       firstName: 'Ana',
       lastName: 'Rojas',
       headline: null,
+      photoVersion: null,
+      educations: [],
+      isAvailableForMentoring: false,
+      mentorOrientationTypes: [],
       mentorTechnicalAreas: [],
     };
     const second = { ...first, id: 'mentor-2', firstName: 'Luis' };
@@ -106,17 +166,25 @@ describe('MentorMapper', () => {
         fullName: 'Ana Rojas',
         headline: null,
         technicalAreas: [],
+        photoUrl: null,
+        education: null,
+        isAvailable: false,
+        orientationTypes: [],
       },
       {
         id: 'mentor-2',
         fullName: 'Luis Rojas',
         headline: null,
         technicalAreas: [],
+        photoUrl: null,
+        education: null,
+        isAvailable: false,
+        orientationTypes: [],
       },
     ]);
   });
 
-  it('mapea el perfil completo y convierte URLs UTF-8 sin alterar fechas ni records', () => {
+  it('mapea la foto a una ruta API sin alterar certificados, fechas ni records', () => {
     const record = buildProfileRecord();
 
     expect(mapper.toProfileResponse(record)).toEqual({
@@ -125,7 +193,7 @@ describe('MentorMapper', () => {
       headline: 'Arquitecta de Software',
       aboutMe: 'Mentora de ingeniería.',
       isAvailable: true,
-      photoUrl: 'https://cdn.test/María.jpg',
+      photoUrl: expect.stringMatching(/^\/mentors\/mentor-1\/photo\?v=[a-f0-9]{64}$/),
       city: { id: 'city-1', title: 'Cochabamba' },
       educations: [
         {
@@ -180,8 +248,18 @@ describe('MentorMapper', () => {
 
     const result = mapper.toProfileResponse(record);
 
-    expect(result.photoUrl).toBe(expected);
+    expect(result.photoUrl).toBeNull();
     expect(result.certifications[0]?.documentUrl).toBe(expected);
+  });
+
+  it('cambia la URL al actualizar los bytes y devuelve null al eliminar la foto', () => {
+    const record = buildProfileRecord();
+    const original = mapper.toProfileResponse(record).photoUrl;
+    expect(mapper.toProfileResponse(record).photoUrl).toBe(original);
+    record.photoUrl = new Uint8Array([0xff, 0xd8, 0xff]);
+    expect(mapper.toProfileResponse(record).photoUrl).not.toBe(original);
+    record.photoUrl = null;
+    expect(mapper.toProfileResponse(record).photoUrl).toBeNull();
   });
 
   it('conserva todos los campos del perfil con nulls y relaciones vacias', () => {
