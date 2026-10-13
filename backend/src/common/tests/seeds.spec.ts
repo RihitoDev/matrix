@@ -7,6 +7,7 @@ const seedEvents = vi.fn();
 const seedEventRegistrations = vi.fn();
 const seedTechnicalAreas = vi.fn();
 const seedOrientationTypes = vi.fn();
+const seedJobOffers = vi.fn();
 
 vi.mock('../../modules/users/seeds/users.seed.js', () => ({
   hashSeedPassword: vi.fn().mockResolvedValue('hash'),
@@ -29,6 +30,9 @@ vi.mock('../../modules/technical-areas/seeds/technical-areas.seed.js', () => ({
 }));
 vi.mock('../../modules/orientation-types/seeds/orientation-types.seed.js', () => ({
   seedOrientationTypes: (...args: unknown[]) => seedOrientationTypes(...args),
+}));
+vi.mock('../../modules/job-offers/seeds/job-offers.seed.js', () => ({
+  seedJobOffers: (...args: unknown[]) => seedJobOffers(...args),
 }));
 
 const { createSeedClient, loadSeedEnv, runSeed } = await import('../database/seeds.js');
@@ -94,6 +98,7 @@ describe('runSeed', () => {
     expect(client.$transaction).toHaveBeenCalledOnce();
     expect(seedTechnicalAreas).toHaveBeenCalledWith(tx);
     expect(seedOrientationTypes).toHaveBeenCalledWith(tx);
+    expect(seedJobOffers).toHaveBeenCalledWith(tx);
     expect(seedUsers).toHaveBeenCalledWith(tx, 'hash');
     expect(seedEvents).toHaveBeenCalledWith(tx, 'e1');
     expect(seedEventRegistrations).toHaveBeenCalledWith(tx, 'e1');
