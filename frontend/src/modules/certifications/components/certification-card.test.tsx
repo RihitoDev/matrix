@@ -13,18 +13,20 @@ const CERTIFICATION: Certification = {
   updatedAt: "2025-03-08T10:00:00.000Z",
 };
 
-function renderCard(isBusy = false) {
+function renderCard(isBusy = false, certification: Certification = CERTIFICATION) {
   const onEdit = vi.fn();
   const onDelete = vi.fn();
+  const onViewDocument = vi.fn();
   render(
     <CertificationCard
-      certification={CERTIFICATION}
+      certification={certification}
       isBusy={isBusy}
       onEdit={onEdit}
       onDelete={onDelete}
+      onViewDocument={onViewDocument}
     />,
   );
-  return { onEdit, onDelete, user: userEvent.setup() };
+  return { onEdit, onDelete, onViewDocument, user: userEvent.setup() };
 }
 
 describe("CertificationCard", () => {
@@ -42,6 +44,7 @@ describe("CertificationCard", () => {
         }}
         onEdit={vi.fn()}
         onDelete={vi.fn()}
+        onViewDocument={vi.fn()}
       />,
     );
 
@@ -78,6 +81,42 @@ describe("CertificationCard", () => {
 
     expect(onDelete).toHaveBeenCalledWith(CERTIFICATION);
     expect(onEdit).not.toHaveBeenCalled();
+  });
+
+  it("shows the persistent warning badge when the certification has no document", () => {
+    renderCard();
+
+    const badge = screen.getByText("Sin documento de respaldo");
+
+    expect(badge).toHaveAttribute("data-slot", "badge");
+    expect(badge.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
+    expect(screen.queryByRole("button", { name: /Previsualizar documento/ })).not.toBeInTheDocument();
+  });
+
+  it("shows the warning badge when hasDocument is explicitly false", () => {
+    renderCard(false, { ...CERTIFICATION, hasDocument: false });
+
+    expect(screen.getByText("Sin documento de respaldo")).toBeInTheDocument();
+  });
+
+  it("shows the preview chip instead of the badge when the certification has a document", async () => {
+    const { onViewDocument, user } = renderCard(false, { ...CERTIFICATION, hasDocument: true });
+
+    expect(screen.queryByText("Sin documento de respaldo")).not.toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: "Previsualizar documento de AWS Certified Cloud Practitioner" }),
+    );
+
+    expect(onViewDocument).toHaveBeenCalledWith({ ...CERTIFICATION, hasDocument: true });
+  });
+
+  it("disables the preview chip while busy", () => {
+    renderCard(true, { ...CERTIFICATION, hasDocument: true });
+
+    expect(
+      screen.getByRole("button", { name: "Previsualizar documento de AWS Certified Cloud Practitioner" }),
+    ).toBeDisabled();
   });
 
   it("disables the actions while busy", () => {

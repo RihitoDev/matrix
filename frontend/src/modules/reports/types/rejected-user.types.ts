@@ -1,4 +1,3 @@
-import type { PaginatedData } from "@/shared/types/api-response.types";
 import type { DocumentType } from "@/modules/access-request/constants/document-types.constants";
 
 export interface RejectedUser {
@@ -7,6 +6,7 @@ export interface RejectedUser {
   email: string;
   identifier: string;
   documentType: DocumentType | null;
+  rejectionReason: string | null;
   registeredAt: string;
 }
 
@@ -17,9 +17,3 @@ export interface RejectedUsersParams {
 }
 
 export type RejectedUsersExportParams = Pick<RejectedUsersParams, "search">;
-
-export interface RejectedUsersState {
-  requestKey: string;
-  result?: PaginatedData<RejectedUser>;
-  errorMessage?: string;
-}

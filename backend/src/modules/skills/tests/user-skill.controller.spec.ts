@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DomainExceptionFilter } from '../../../common/filters/domain-exception.filter.js';
 import { UserSkillController } from '../controllers/user-skill.controller.js';
 import { DuplicateSkillException } from '../exceptions/duplicate-skill.exception.js';
-import { SkillService } from '../services/skill.service.js';
+import { UserSkillService } from '../services/user-skill.service.js';
 
 const userId = '11111111-1111-4111-8111-111111111111';
 const pythonId = '33333333-3333-4333-8333-333333333333';
@@ -31,7 +31,7 @@ describe('UserSkillController', () => {
       imports: [JwtModule.register({ global: true, secret: 'test-secret' })],
       controllers: [UserSkillController],
       providers: [
-        { provide: SkillService, useValue: service },
+        { provide: UserSkillService, useValue: service },
         { provide: APP_FILTER, useClass: DomainExceptionFilter },
       ],
     }).compile();

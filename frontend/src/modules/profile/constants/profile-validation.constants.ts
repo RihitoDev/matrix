@@ -8,6 +8,10 @@ export const PHONE_MIN_DIGITS = 7;
 
 export const PHONE_MAX_DIGITS = 15;
 
+export const PHONE_HINT_ID = "phone-hint";
+
+export const PHONE_HINT =`De ${PHONE_MIN_DIGITS} a ${PHONE_MAX_DIGITS} dígitos. Puedes usar +, espacios o guiones.`;
+
 export const PROFILE_VALIDATION_MESSAGES = {
   required: "Este campo es obligatorio.",
   cityRequired: "Selecciona tu ciudad de residencia.",
