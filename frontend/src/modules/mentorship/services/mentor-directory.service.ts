@@ -1,6 +1,7 @@
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 import type { MentorDirectoryItem } from "../types/mentor-directory.types";
+import { resolveMentorPhotoUrl } from "../utils/resolve-mentor-photo-url";
 
 export async function getMentorDirectory(
   signal?: AbortSignal,
@@ -10,5 +11,8 @@ export async function getMentorDirectory(
     { signal },
   );
 
-  return response.data.data;
+  return response.data.data.map((mentor) => ({
+    ...mentor,
+    photoUrl: resolveMentorPhotoUrl(mentor.photoUrl),
+  }));
 }

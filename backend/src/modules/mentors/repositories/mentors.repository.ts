@@ -57,8 +57,8 @@ export class MentorsRepository {
     });
   }
 
-  findActiveMentors(now: Date) {
-    return this.prisma.user.findMany({
+  async findActiveMentors(now: Date) {
+    const mentors = await this.prisma.user.findMany({
       where: {
         isActive: true,
         roles: {
@@ -78,6 +78,17 @@ export class MentorsRepository {
         firstName: true,
         lastName: true,
         headline: true,
+        isAvailableForMentoring: true,
+        educations: {
+          select: { degree: true, institution: true },
+          orderBy: [{ startDate: 'desc' }, { id: 'asc' }],
+          take: 1,
+        },
+        mentorOrientationTypes: {
+          where: { orientationType: { isActive: true } },
+          select: { orientationType: { select: { name: true } } },
+          orderBy: { orientationType: { name: 'asc' } },
+        },
         mentorTechnicalAreas: {
           select: {
             technicalArea: {
@@ -97,6 +108,25 @@ export class MentorsRepository {
         },
       ],
     });
+
+    const photos = mentors.length
+      ? await this.prisma.user.findMany({
+          where: {
+            id: { in: mentors.map((mentor) => mentor.id) },
+            photoUrl: { not: null },
+            NOT: { photoUrl: new Uint8Array() },
+          },
+          select: { id: true, updatedAt: true },
+        })
+      : [];
+    const photoVersions = new Map(
+      photos.map((photo) => [photo.id, photo.updatedAt.toISOString()]),
+    );
+
+    return mentors.map((mentor) => ({
+      ...mentor,
+      photoVersion: photoVersions.get(mentor.id) ?? null,
+    }));
   }
 
   findActiveMentorParticipation(userId: string, now: Date) {
