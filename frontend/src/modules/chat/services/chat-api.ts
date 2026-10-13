@@ -8,9 +8,7 @@ import {
 import { MOCK_CONVERSATIONS } from '../mocks/mock-conversations';
 import { User } from '../types/user.types';
 import {
-  MOCK_USERS,
-  CURRENT_USER_ID,
-  MOCK_USER_BY_ID,
+  CURRENT_USER_ID
 } from '../mocks/mock-users';
 import {
   getMessagesByConversation,
@@ -19,7 +17,8 @@ import {
   getStoredConversationReadState,
   markStoredConversationAsRead,
 } from './message-storage';
-
+import { apiClient } from '@/shared/services/api-client';
+import type { UserRole } from '../types/user.types';
 const MIN_SEARCH_CHARS = 2;
 const DEFAULT_MESSAGE_PAGE_SIZE = 10;
 
@@ -35,6 +34,14 @@ export interface PaginatedMessagesResponse {
   hasMore: boolean;
 }
 
+interface ChatUserResponse {
+  id: string;
+  fullName: string;
+  avatarUrl: string | null;
+  headline: string | null;
+  role: string;
+  isOnline: boolean;
+}
 export async function getConversations(): Promise<Conversation[]> {
   await new Promise((resolve) => setTimeout(resolve, 400));
 
@@ -84,29 +91,34 @@ export async function getConversations(): Promise<Conversation[]> {
   }
 }
 
-function normalizeText(text: string): string {
-  return text
-    .trim()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
-}
 
+
+/**
+ * HU-2: búsqueda de contactos.
+ * Llama a GET /chat/users/search?q=... en el backend.
+ * El backend excluye al usuario de la sesión, filtra inactivos
+ * y no expone email/teléfono.
+ */
 export async function searchUsers(rawQuery: string): Promise<User[]> {
-  await new Promise((resolve) => setTimeout(resolve, 200));
-
-  const query = normalizeText(rawQuery);
+  const query = rawQuery.trim();
 
   if (query.length < MIN_SEARCH_CHARS) {
     return [];
   }
 
-  return MOCK_USERS.filter((user) => {
-    if (user.id === CURRENT_USER_ID) return false;
-    if (!user.isActive) return false;
+  const { data } = await apiClient.get<ChatUserResponse[]>(
+    '/chat/users/search',
+    { params: { q: query } },
+  );
 
-    return normalizeText(user.fullName).includes(query);
-  });
+  return data.map((u) => ({
+    id: u.id,
+    fullName: u.fullName,
+    avatarUrl: u.avatarUrl,
+    headline: u.headline,
+    role: u.role as UserRole,
+    isActive: true,
+  }));
 }
 
 export async function getMessages(
@@ -188,35 +200,22 @@ export async function getPaginatedMessages({
   };
 }
 
+
+/**
+ * HU-2: obtiene o crea la conversación con un contacto.
+ * Llama a POST /chat/conversations.
+ * El backend usa el JWT para saber quién es el usuario de la sesión,
+ * y aplica la regla del par ordenado (no duplica conversaciones).
+ */
 export async function getOrCreateConversation(
   contactId: string,
 ): Promise<Conversation> {
-  await new Promise((resolve) => setTimeout(resolve, 300));
-
-  const existing = MOCK_CONVERSATIONS.find(
-    (conversation) => conversation.contact.id === contactId,
+  const { data } = await apiClient.post<Conversation>(
+    '/chat/conversations',
+    { contactId },
   );
 
-  if (existing) return existing;
-
-  const contact = MOCK_USER_BY_ID[contactId];
-
-  if (!contact) {
-    throw new Error('UserNotFoundException');
-  }
-
-  return {
-    id: `conv-${contactId}-${Date.now()}`,
-    contact: {
-      id: contact.id,
-      fullName: contact.fullName,
-      avatarUrl: contact.avatarUrl,
-      isOnline: false,
-    },
-    lastMessage: null,
-    unreadCount: 0,
-    updatedAt: new Date().toISOString(),
-  };
+  return data;
 }
 
 export async function sendMessage(
