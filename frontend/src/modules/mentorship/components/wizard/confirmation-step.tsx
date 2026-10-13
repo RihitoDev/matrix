@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { ActivationConfirmDialog } from "./activation-confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -17,7 +19,7 @@ type ConfirmationStepProps = {
   activationError: string | null;
   onEditTechnicalAreas: () => void;
   onEditOrientationTypes: () => void;
-  onActivate: () => void;
+  onActivate: () => void | Promise<void>;
 };
 
 export function ConfirmationStep({
@@ -30,6 +32,12 @@ export function ConfirmationStep({
   onEditOrientationTypes,
   onActivate,
 }: ConfirmationStepProps) {
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
+  const handleConfirmActivation = async () => {
+    await onActivate();
+    setIsConfirmOpen(false);
+  };
   return (
     <div className="space-y-6">
       <div>
@@ -143,12 +151,19 @@ export function ConfirmationStep({
       ) : null}
       <Button
         type="button"
-        onClick={onActivate}
+        onClick={() => setIsConfirmOpen(true)}
         disabled={isActivating}
         className="h-auto w-full rounded-md bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-danger active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isActivating ? "Activando..." : "Activar participación"}
       </Button>
+
+      <ActivationConfirmDialog
+        open={isConfirmOpen}
+        isActivating={isActivating}
+        onConfirm={handleConfirmActivation}
+        onCancel={() => setIsConfirmOpen(false)}
+      />
     </div>
   );
 }
