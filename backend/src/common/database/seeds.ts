@@ -77,7 +77,7 @@ export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
         plan: availabilityResult.plan,
         roles: usersResult.roles,
         statuses: availabilityResult.statuses,
-        users: SEED_USERS.length + 1,
+        users: SEED_USERS.length,
         userRoles: usersResult.userRoles,
         blocks: availabilityResult.blocks,
         appointments: availabilityResult.appointments,
