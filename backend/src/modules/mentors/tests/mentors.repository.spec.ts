@@ -4,6 +4,34 @@ import { MENTOR_ROLE_NAME } from '../constants/mentor.constants.js';
 import { MentorsRepository } from '../repositories/mentors.repository.js';
 
 describe('MentorsRepository', () => {
+  it('no consulta metadatos de fotos si el directorio está vacío', async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const repository = new MentorsRepository({ user: { findMany } } as unknown as PrismaService);
+    expect(await repository.findActiveMentors(new Date())).toEqual([]);
+    expect(findMany).toHaveBeenCalledTimes(1);
+  });
+
+  it('resuelve las versiones de muchas fotografías en un único lote sin seleccionar binarios', async () => {
+    const records = Array.from({ length: 20 }, (_, index) => ({ id: `mentor-${index}` }));
+    const updatedAt = new Date('2026-10-09T12:00:00.000Z');
+    const findMany = vi.fn().mockResolvedValueOnce(records).mockResolvedValueOnce([
+      { id: 'mentor-0', updatedAt },
+      { id: 'mentor-19', updatedAt },
+    ]);
+    const repository = new MentorsRepository({ user: { findMany } } as unknown as PrismaService);
+    const result = await repository.findActiveMentors(new Date());
+    expect(findMany).toHaveBeenCalledTimes(2);
+    expect(result[0]?.photoVersion).toBe(updatedAt.toISOString());
+    expect(result[1]?.photoVersion).toBeNull();
+    expect(result[19]?.photoVersion).toBe(updatedAt.toISOString());
+    expect(findMany.mock.calls[1]?.[0].where.id.in).toEqual(records.map(({ id }) => id));
+    for (const [query] of findMany.mock.calls) {
+      expect(query.select).not.toHaveProperty('photoUrl');
+      expect(query.select).not.toHaveProperty('email');
+      expect(query.select).not.toHaveProperty('phone');
+      expect(query.select).not.toHaveProperty('certifications');
+    }
+  });
   it('busca solo el id del rol mentor', async () => {
     const role = { id: 'mentor-role-id' };
     const findUnique = vi.fn().mockResolvedValue(role);
@@ -186,13 +214,13 @@ describe('MentorsRepository', () => {
         ],
       },
     ];
-    const findMany = vi.fn().mockResolvedValue(mentors);
+    const findMany = vi.fn().mockResolvedValueOnce(mentors).mockResolvedValueOnce([]);
     const prisma = { user: { findMany } } as unknown as PrismaService;
     const repository = new MentorsRepository(prisma);
 
     const result = await repository.findActiveMentors(now);
 
-    expect(findMany).toHaveBeenCalledTimes(1);
+    expect(findMany).toHaveBeenCalledTimes(2);
     expect(findMany).toHaveBeenCalledWith({
       where: {
         isActive: true,
@@ -213,6 +241,17 @@ describe('MentorsRepository', () => {
         firstName: true,
         lastName: true,
         headline: true,
+        isAvailableForMentoring: true,
+        educations: {
+          select: { degree: true, institution: true },
+          orderBy: [{ startDate: 'desc' }, { id: 'asc' }],
+          take: 1,
+        },
+        mentorOrientationTypes: {
+          where: { orientationType: { isActive: true } },
+          select: { orientationType: { select: { name: true } } },
+          orderBy: { orientationType: { name: 'asc' } },
+        },
         mentorTechnicalAreas: {
           select: {
             technicalArea: {
@@ -232,7 +271,15 @@ describe('MentorsRepository', () => {
         },
       ],
     });
-    expect(result).toBe(mentors);
+    expect(result).toEqual(mentors.map((mentor) => ({ ...mentor, photoVersion: null })));
+    expect(findMany).toHaveBeenLastCalledWith({
+      where: {
+        id: { in: ['user-1'] },
+        photoUrl: { not: null },
+        NOT: { photoUrl: new Uint8Array() },
+      },
+      select: { id: true, updatedAt: true },
+    });
   });
 
   it('consulta el perfil publico por el id real de un mentor activo', async () => {
