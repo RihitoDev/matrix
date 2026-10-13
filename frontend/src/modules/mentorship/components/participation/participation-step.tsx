@@ -23,7 +23,7 @@ export function ParticipationStep({
         </p>
       </div>
 
-      <label className="flex cursor-pointer items-start gap-3 rounded-md border border-border p-4">
+      <label className="flex cursor-pointer items-start gap-3 rounded-md border border-border bg-surface p-4">
         <Checkbox
           checked={isParticipating}
           onCheckedChange={onParticipationChange}
