@@ -26,6 +26,30 @@ const RECORD: EducationItem = {
 };
 
 describe("useSaveEducation", () => {
+  it.each([false, true])("reports a duplicate separately from stale dates (editing: %s)", async (editing) => {
+    const error = { isAxiosError: true, response: { status: 409, data: { data: { code: "EDUCATION_DUPLICATE" } } } };
+    vi.mocked(educationsService.createEducation).mockRejectedValue(error);
+    vi.mocked(educationsService.updateEducation).mockRejectedValue(error);
+    const onSaved = vi.fn();
+    const { result } = renderHook(() => useSaveEducation(onSaved));
+    await act(async () => {
+      if (editing) await result.current.save(PAYLOAD, RECORD.id);
+      else await result.current.save(PAYLOAD);
+    });
+    expect(result.current.feedback?.message).toBe(EDUCATION_FEEDBACK_MESSAGES.duplicate);
+    expect(onSaved).not.toHaveBeenCalled();
+  });
+
+  it("reports exhausted transaction retries without clearing the form", async () => {
+    vi.mocked(educationsService.createEducation).mockRejectedValue({
+      isAxiosError: true, response: { status: 409, data: { data: { code: "EDUCATION_WRITE_CONFLICT" } } },
+    });
+    const onSaved = vi.fn();
+    const { result } = renderHook(() => useSaveEducation(onSaved));
+    await act(async () => { await result.current.save(PAYLOAD); });
+    expect(result.current.feedback?.message).toBe(EDUCATION_FEEDBACK_MESSAGES.writeConflict);
+    expect(onSaved).not.toHaveBeenCalled();
+  });
   afterEach(() => {
     cleanup();
     vi.resetAllMocks();

@@ -88,7 +88,6 @@ describe("ActivationConfirmDialog", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Activando..." }));
     fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
-    // Escape no debe cerrar el diálogo mientras se procesa la activación
     fireEvent.keyDown(screen.getByRole("alertdialog"), { key: "Escape" });
 
     expect(onConfirm).not.toHaveBeenCalled();
