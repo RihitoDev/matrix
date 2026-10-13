@@ -8,6 +8,26 @@ afterEach(() => {
 });
 
 describe("mentor profile service", () => {
+  it.each([
+    "http://localhost:8081/api",
+    "https://dev.umssy.test/api/",
+    "https://umssy.test/api",
+  ])("resuelve la fotografía con la base API %s", async (baseURL) => {
+    const photoUrl = `/mentors/${MENTOR_PROFILE_FIXTURE.id}/photo?v=abc`;
+    vi.spyOn(apiClient, "get").mockResolvedValue({
+      data: { data: { ...MENTOR_PROFILE_FIXTURE, photoUrl } },
+    });
+    const previousBaseURL = apiClient.defaults.baseURL;
+    apiClient.defaults.baseURL = baseURL;
+    try {
+      const result = await getMentorProfile(MENTOR_PROFILE_FIXTURE.id);
+      expect(result?.photoUrl).toBe(`${baseURL.replace(/\/$/, "")}${photoUrl}`);
+      expect(apiClient.get).toHaveBeenCalledTimes(1);
+    } finally {
+      apiClient.defaults.baseURL = previousBaseURL;
+    }
+  });
+
   it("consulta el endpoint real con el UUID y AbortSignal recibidos", async () => {
     const controller = new AbortController();
     const request = vi

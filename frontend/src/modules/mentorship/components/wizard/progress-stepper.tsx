@@ -11,7 +11,7 @@ type ProgressStepperProps = {
 export function ProgressStepper({ currentStep }: ProgressStepperProps) {
   return (
     <nav aria-label="Progreso de configuración de mentoría">
-      <ol className="flex flex-col gap-4 sm:grid sm:grid-cols-4 sm:gap-2">
+      <ol className="grid grid-cols-4 gap-1 sm:gap-3">
         {MENTORSHIP_STEPS.map((step, index) => {
           const isActive = step.id === currentStep;
           const isCompleted = step.id < currentStep;
@@ -20,11 +20,11 @@ export function ProgressStepper({ currentStep }: ProgressStepperProps) {
           return (
             <li
               key={step.id}
-              className="relative flex items-start gap-3 sm:flex-col sm:items-center sm:text-center"
+              className="relative flex min-w-0 flex-col items-center gap-2 text-center"
             >
               <div
                 className={[
-                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold transition-colors",
+                  "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold transition-colors sm:h-9 sm:w-9 sm:text-sm",
                   isCompleted
                     ? "bg-accent text-white"
                     : isActive
@@ -43,7 +43,7 @@ export function ProgressStepper({ currentStep }: ProgressStepperProps) {
               <div className="min-w-0 flex-1 pt-1 sm:pt-0">
                 <span
                   className={[
-                    "block text-xs font-semibold leading-tight",
+                    "w-full break-words text-[10px] leading-tight sm:text-xs sm:leading-snug",
                     isActive || isCompleted ? "text-ink" : "text-text-secondary",
                   ].join(" ")}
                 >
@@ -53,7 +53,10 @@ export function ProgressStepper({ currentStep }: ProgressStepperProps) {
 
               {!isLast && (
                 <div
-                  className="absolute left-[18px] top-9 hidden h-[calc(100%-2.25rem)] w-0.5 bg-slate-200 sm:left-auto sm:right-[-50%] sm:top-[18px] sm:h-0.5 sm:w-[calc(100%-2.25rem)]"
+                  className={[
+                    "absolute left-[calc(50%+1rem)] right-[calc(-50%+1rem)] top-4 z-0 h-0.5",
+                    isCompleted ? "bg-accent" : "bg-slate-200",
+                  ].join(" ")}
                   aria-hidden
                 />
               )}
