@@ -13,9 +13,9 @@ type MentorCareerProps = {
 };
 
 export function MentorCareer({ mentor }: MentorCareerProps) {
-  const currentExperience =
-    mentor.workExperiences.find((experience) => experience.isCurrent) ??
-    mentor.workExperiences[0];
+  const currentExperience = mentor.workExperiences.find(
+    (experience) => experience.isCurrent,
+  );
   const education = mentor.educations[0];
 
   if (!currentExperience && !education) {
@@ -35,7 +35,7 @@ export function MentorCareer({ mentor }: MentorCareerProps) {
             aria-level={2}
             className="text-xl font-bold text-ink"
           >
-            Trayectoria profesional
+            Trayectoria actual
           </CardTitle>
         </div>
       </CardHeader>
@@ -48,7 +48,7 @@ export function MentorCareer({ mentor }: MentorCareerProps) {
                 Cargo
               </p>
 
-              <p className="mt-1 break-words font-semibold text-ink">
+              <p className="mt-1 [overflow-wrap:anywhere] font-semibold text-ink">
                 {currentExperience.position}
               </p>
             </div>
@@ -58,7 +58,7 @@ export function MentorCareer({ mentor }: MentorCareerProps) {
                 Empresa
               </p>
 
-              <p className="mt-1 text-ink">
+              <p className="mt-1 [overflow-wrap:anywhere] text-ink">
                 {currentExperience.company.title}
               </p>
             </div>
@@ -73,8 +73,8 @@ export function MentorCareer({ mentor }: MentorCareerProps) {
               Formación
             </p>
 
-            <p className="mt-1 font-semibold text-ink">{education.degree}</p>
-            <p className="mt-1 text-ink">{education.institution}</p>
+            <p className="mt-1 [overflow-wrap:anywhere] font-semibold text-ink">{education.degree}</p>
+            <p className="mt-1 [overflow-wrap:anywhere] text-ink">{education.institution}</p>
           </div>
         )}
       </CardContent>
