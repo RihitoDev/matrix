@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { createHash } from 'node:crypto';
 import type { MentorsRepository } from '../repositories/mentors.repository.js';
 
 @Injectable()
@@ -10,8 +11,14 @@ export class MentorMapper {
       id: mentor.id,
       fullName: `${mentor.firstName} ${mentor.lastName}`,
       headline: mentor.headline,
+      photoUrl: this.toPhotoUrl(mentor.id, mentor.photoVersion),
+      education: mentor.educations[0] ?? null,
+      isAvailable: mentor.isAvailableForMentoring,
       technicalAreas: mentor.mentorTechnicalAreas.map(
         (relation) => relation.technicalArea.name,
+      ),
+      orientationTypes: mentor.mentorOrientationTypes.map(
+        (relation) => relation.orientationType.name,
       ),
     };
   }
@@ -33,7 +40,12 @@ export class MentorMapper {
       headline: mentor.headline,
       aboutMe: mentor.aboutMe,
       isAvailable: mentor.isAvailableForMentoring,
-      photoUrl: this.bytesToString(mentor.photoUrl),
+      photoUrl: this.toPhotoUrl(
+        mentor.id,
+        mentor.photoUrl?.length
+          ? createHash('sha256').update(mentor.photoUrl).digest('hex')
+          : null,
+      ),
       city: mentor.city,
       educations: mentor.educations,
       workExperiences: mentor.workExperiences,
@@ -65,6 +77,12 @@ export class MentorMapper {
     >,
   ) {
     return relations.map((relation) => relation.orientationType);
+  }
+
+  private toPhotoUrl(userId: string, version: string | null): string | null {
+    return version
+      ? `/mentors/${userId}/photo?v=${encodeURIComponent(version)}`
+      : null;
   }
 
   private bytesToString(value: Uint8Array | null): string | null {

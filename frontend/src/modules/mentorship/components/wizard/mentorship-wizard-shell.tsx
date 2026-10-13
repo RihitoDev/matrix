@@ -28,8 +28,8 @@ export function MentorshipWizardShell({
   children,
 }: MentorshipWizardShellProps) {
   return (
-    <main className="min-h-full bg-surface-soft px-4 py-6 sm:py-8">
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 sm:gap-8">
+    <main className="min-h-full bg-surface-soft px-3 py-4 sm:px-4 sm:py-8">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 sm:gap-8">
         <ProgressStepper currentStep={currentStep} />
 
         <Card className="gap-6 overflow-visible rounded-lg border border-border bg-surface py-0 shadow-sm ring-0">
@@ -47,35 +47,35 @@ export function MentorshipWizardShell({
             </p>
           </CardHeader>
 
-          <CardContent className="px-4 sm:px-6">
+          <CardContent className="px-3 sm:px-6">
             <div className="min-h-48 rounded-md border border-border bg-surface-soft p-4 sm:p-6">
               {children}
             </div>
           </CardContent>
 
           <CardFooter
-            className={`border-0 bg-transparent px-4 pb-4 pt-0 sm:px-6 sm:pb-6 ${
-              currentStep < 4
+            className={`border-0 bg-transparent px-4 pb-4 pt-0 sm:px-6 sm:pb-6 ${currentStep < 4
                 ? "items-stretch flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between"
                 : ""
-            }`}
+              }`}
           >
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onBack}
-              disabled={!canGoBack}
-              className="h-auto rounded-md border-border-strong bg-transparent px-4 py-2.5 text-sm font-semibold text-ink hover:bg-transparent hover:text-ink active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50 dark:bg-transparent dark:hover:bg-transparent"
-            >
-              ← Volver
-            </Button>
-
+            {canGoBack && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onBack}
+                disabled={!canGoBack}
+                className="h-11 sm:h-10 w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-border-strong bg-surface px-4 sm:px-6 text-[14px] font-semibold text-ink hover:bg-surface-soft disabled:opacity-50 disabled:cursor-not-allowed"
+               >
+                ← Volver
+              </Button>
+            )}
             {currentStep < 4 && (
               <Button
                 type="button"
                 onClick={onNext}
                 disabled={!canAdvance}
-                className="h-auto rounded-md bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-11 sm:h-10 w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-transparent bg-accent px-4 sm:px-6 text-[14px] font-semibold text-white hover:bg-danger disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continuar →
               </Button>
