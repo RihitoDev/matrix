@@ -86,6 +86,60 @@ describe('ReportsController', () => {
     });
   });
 
+  it.each([
+    [undefined, 'REGISTERED_USERS'],
+    ['estudiante', 'STUDENTS'],
+    ['titulado', 'DEGREE_HOLDERS'],
+    ['mentor', 'MENTORS'],
+    ['empresa', 'COMPANIES'],
+    ['administrativo', 'ADMINS'],
+  ] as const)(
+    'registra en el historial la exportación de registrados con filtro %s como %s',
+    async (userType, reportType) => {
+      vi.spyOn(service, 'exportRegisteredUsersCsv').mockResolvedValue({
+        fileName: 'usuarios-registrados.csv',
+        content: 'Usuario\r\n',
+      });
+      const spy = vi
+        .spyOn(historyService, 'registerGeneratedReport')
+        .mockResolvedValue({
+          id: 'r',
+          fileName: 'usuarios-registrados.csv',
+          reportType,
+          generatedAt: '',
+        });
+
+      await controller.exportRegisteredUsersCsv({ userType }, 'admin-1');
+
+      expect(spy).toHaveBeenCalledWith('admin-1', {
+        fileName: 'usuarios-registrados.csv',
+        reportType,
+      });
+    },
+  );
+
+  it('registra en el historial la exportación de rechazados como REJECTED_USERS', async () => {
+    vi.spyOn(service, 'exportRejectedUsersCsv').mockResolvedValue({
+      fileName: 'usuarios-rechazados-2026-10-08.csv',
+      content: 'Usuario\r\n',
+    });
+    const spy = vi
+      .spyOn(historyService, 'registerGeneratedReport')
+      .mockResolvedValue({
+        id: 'r',
+        fileName: 'usuarios-rechazados-2026-10-08.csv',
+        reportType: 'REJECTED_USERS',
+        generatedAt: '',
+      });
+
+    await controller.exportRejectedUsersCsv({}, 'admin-1');
+
+    expect(spy).toHaveBeenCalledWith('admin-1', {
+      fileName: 'usuarios-rechazados-2026-10-08.csv',
+      reportType: 'REJECTED_USERS',
+    });
+  });
+
   it('delega el reporte de rechazados al service', async () => {
     const query = { page: 1, limit: 10 };
     const spy = vi
