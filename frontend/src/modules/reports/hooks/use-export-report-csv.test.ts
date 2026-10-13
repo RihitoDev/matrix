@@ -2,11 +2,7 @@ import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SaveFileHandle } from "@/shared/types/save-file.types";
 import * as downloadFileModule from "@/shared/utils/download-file";
-import {
-  EXPORT_DOWNLOAD_STARTED_MESSAGE,
-  EXPORT_SUCCESS_MESSAGE,
-  EXPORT_SUCCESS_TOAST_DURATION_MS,
-} from "../constants/reports.constants";
+import { EXPORT_SUCCESS_MESSAGE, EXPORT_SUCCESS_TOAST_DURATION_MS } from "../constants/reports.constants";
 import { useExportReportCsv } from "./use-export-report-csv";
 
 const EXPORTED_FILE = { file: new Blob(["Usuario"], { type: "text/csv" }), fileName: "usuarios.csv" };
@@ -92,7 +88,6 @@ describe("useExportReportCsv", () => {
     });
 
     expect(result.current.successMessage).toBe(EXPORT_SUCCESS_MESSAGE);
-    expect(result.current.downloadMessage).toBeUndefined();
     expect(result.current.isExporting).toBe(false);
   });
 
@@ -146,18 +141,17 @@ describe("useExportReportCsv", () => {
     });
   });
 
-  it("muestra solo Descarga iniciada cuando el navegador no permite confirmar el guardado", async () => {
+  it("muestra el aviso de éxito al descargar cuando el navegador no permite elegir destino", async () => {
     vi.stubGlobal("showSaveFilePicker", undefined);
     const { result } = renderHook(() => useExportReportCsv(() => Promise.resolve(EXPORTED_FILE), "reporte.csv"));
 
     await act(async () => { await result.current.exportCsv(); });
 
     expect(downloadFileModule.downloadFile).toHaveBeenCalledWith(EXPORTED_FILE.file, "usuarios.csv");
-    expect(result.current.successMessage).toBeUndefined();
-    expect(result.current.downloadMessage).toBe(EXPORT_DOWNLOAD_STARTED_MESSAGE);
+    expect(result.current.successMessage).toBe(EXPORT_SUCCESS_MESSAGE);
     expect(result.current.errorMessage).toBeUndefined();
     await act(async () => { await vi.advanceTimersByTimeAsync(EXPORT_SUCCESS_TOAST_DURATION_MS); });
-    expect(result.current.downloadMessage).toBeUndefined();
+    expect(result.current.successMessage).toBeUndefined();
   });
 
   it("no muestra éxito si falla la generación del CSV", async () => {

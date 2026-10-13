@@ -14,6 +14,7 @@ import { PhotoFileRepository } from '../repositories/photo-file.repository.js';
 import { ProfileRepository } from '../repositories/profile.repository.js';
 import { ProfilePhotoService } from '../services/profile-photo.service.js';
 import { ProfileService } from '../services/profile.service.js';
+import { CityCatalogService } from '../services/city-catalog.service.js';
 
 describe('ProfileModule', () => {
   let moduleRef: TestingModule;
@@ -31,6 +32,7 @@ describe('ProfileModule', () => {
     ProfileController,
     ProfilePhotoController,
     ProfileService,
+    CityCatalogService,
     ProfilePhotoService,
     ProfileRepository,
     CityRepository,

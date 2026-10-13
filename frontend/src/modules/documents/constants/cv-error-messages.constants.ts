@@ -12,7 +12,10 @@ export const CV_ERROR_MESSAGES_BY_STATUS: Record<number, string> = {
   404: "No encontramos tu CV. Recarga la página.",
   413: FILE_VALIDATION_MESSAGES.fileTooLarge,
   415: FILE_VALIDATION_MESSAGES.invalidCvType,
-  422: "El archivo está dañado o incompleto. Selecciona otro PDF.",
 };
 
-export const CV_FILE_REJECTION_STATUSES: readonly number[] = [400, 413, 415, 422];
+export const CV_CORRUPTED_FILE_ERROR_CODE = "CORRUPTED_FILE";
+
+export const CV_CORRUPTED_FILE_MESSAGE = "El archivo está dañado o incompleto. Selecciona otro PDF.";
+
+export const CV_FILE_REJECTION_STATUSES: readonly number[] = [400, 413, 415];

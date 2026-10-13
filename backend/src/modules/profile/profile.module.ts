@@ -11,12 +11,14 @@ import { PhotoFileRepository } from './repositories/photo-file.repository.js';
 import { ProfileRepository } from './repositories/profile.repository.js';
 import { ProfilePhotoService } from './services/profile-photo.service.js';
 import { ProfileService } from './services/profile.service.js';
+import { CityCatalogService } from './services/city-catalog.service.js';
 
 @Module({
   imports: [PrismaModule, JwtAuthModule],
   controllers: [ProfileController, ProfilePhotoController],
   providers: [
     ProfileService,
+    CityCatalogService,
     ProfileRepository,
     CityRepository,
     ProfileMapper,
@@ -25,6 +27,6 @@ import { ProfileService } from './services/profile.service.js';
     ProfilePhotoMapper,
     FileValidationService,
   ],
-  exports: [ProfileRepository],
+  exports: [ProfileRepository, ProfileService, CityCatalogService],
 })
 export class ProfileModule {}

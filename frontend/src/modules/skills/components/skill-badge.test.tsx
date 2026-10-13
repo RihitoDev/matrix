@@ -19,4 +19,18 @@ describe("SkillBadge", () => {
 
     expect(handleRemove).toHaveBeenCalledWith("skill-1");
   });
+
+  it("keeps the remove option available for a very long name", async () => {
+    const user = userEvent.setup();
+    const handleRemove = vi.fn();
+    const longName = "a".repeat(300);
+    render(<SkillBadge skill={{ id: "skill-1", name: longName }} onRemove={handleRemove} />);
+
+    expect(screen.getByText(longName)).toHaveClass("truncate");
+    expect(screen.getByText(longName)).toHaveAttribute("title", longName);
+
+    await user.click(screen.getByRole("button", { name: `Quitar ${longName}` }));
+
+    expect(handleRemove).toHaveBeenCalledWith("skill-1");
+  });
 });
