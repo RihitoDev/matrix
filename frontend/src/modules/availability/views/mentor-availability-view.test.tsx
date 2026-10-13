@@ -218,8 +218,10 @@ describe("MentorAvailabilityView", () => {
     async function fillAndSave(user: ReturnType<typeof userEvent.setup>) {
       await screen.findByText("Aún no registraste bloques esta semana")
       await user.click(screen.getByRole("button", { name: "jueves, 8 de octubre de 2026" }))
-      await user.selectOptions(screen.getByLabelText(/Hora de inicio/), "18:00")
-      await user.selectOptions(screen.getByLabelText(/Hora de fin/), "18:30")
+      await user.click(screen.getByLabelText(/Hora de inicio/))
+      await user.click(await screen.findByRole("option", { name: "18:00" }))
+      await user.click(screen.getByLabelText(/Hora de fin/))
+      await user.click(await screen.findByRole("option", { name: "18:30" }))
       await user.click(screen.getByRole("button", { name: "Guardar bloque" }))
     }
 

@@ -4,4 +4,5 @@ export interface RegisteredUsersTableProps {
   users: RegisteredUser[];
   isLoading: boolean;
   errorMessage?: string;
+  searchTerm?: string;
 }

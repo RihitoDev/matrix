@@ -1,34 +1,18 @@
-export const REPORT_USER_TYPES = [
-  'STUDENT',
-  'GRADUATE',
-  'DEGREE_HOLDER',
-  'MENTOR',
-  'COMPANY',
-  'ADMIN',
-] as const;
+import type { RoleName } from '../../../common/enums/roles.enum.js';
+import type { ACCESS_REQUEST_DOCUMENT_TYPE } from '../../access-requests/types/access-request.enum.js';
 
-export const REPORT_DOCUMENT_TYPES = [
-  'ACADEMIC_DEGREE',
-  'NATIONAL_DEGREE',
-  'GRADUATION_CERTIFICATE',
-  'ACADEMIC_DIPLOMA',
-  'ENROLLMENT_CERTIFICATE',
-  'NIT',
-] as const;
+export type ReportDocumentType =
+  (typeof ACCESS_REQUEST_DOCUMENT_TYPE)[keyof typeof ACCESS_REQUEST_DOCUMENT_TYPE];
 
-export type ReportUserType = (typeof REPORT_USER_TYPES)[number];
-
-export type ReportDocumentType = (typeof REPORT_DOCUMENT_TYPES)[number];
-
-export type ReportRegistrationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+export type ReportRegistrationStatus = 'APPROVED' | 'REJECTED';
 
 export interface ReportUser {
   readonly id: string;
   readonly fullName: string;
   readonly email: string;
-  readonly userType: ReportUserType;
+  readonly userType: RoleName;
   readonly identifier: string;
-  readonly documentType: ReportDocumentType;
+  readonly documentType: ReportDocumentType | null;
   readonly registeredAt: string;
   readonly registrationStatus: ReportRegistrationStatus;
   readonly rejectionReason: string | null;
@@ -38,9 +22,9 @@ export interface RegisteredUserResponse {
   readonly id: string;
   readonly fullName: string;
   readonly email: string;
-  readonly userType: ReportUserType;
+  readonly userType: RoleName;
   readonly identifier: string;
-  readonly documentType: ReportDocumentType;
+  readonly documentType: ReportDocumentType | null;
   readonly registeredAt: string;
 }
 
@@ -49,7 +33,7 @@ export interface RejectedUserResponse {
   readonly fullName: string;
   readonly email: string;
   readonly identifier: string;
-  readonly documentType: ReportDocumentType;
+  readonly documentType: ReportDocumentType | null;
   readonly rejectionReason: string | null;
   readonly registeredAt: string;
 }

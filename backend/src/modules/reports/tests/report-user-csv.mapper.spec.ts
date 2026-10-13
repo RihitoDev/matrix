@@ -10,9 +10,9 @@ describe('report-user-csv.mapper', () => {
       id: 'user-1',
       fullName: 'Ana Pérez',
       email: 'ana@example.com',
-      userType: 'DEGREE_HOLDER',
+      userType: 'titulado',
       identifier: '201942394',
-      documentType: 'NATIONAL_DEGREE',
+      documentType: 'national_title',
       registeredAt: '2026-03-15T14:00:00.000Z',
     });
 
@@ -32,7 +32,7 @@ describe('report-user-csv.mapper', () => {
       fullName: 'Elena Soto',
       email: 'elena@example.com',
       identifier: '201912345',
-      documentType: 'NIT',
+      documentType: null,
       rejectionReason: 'Documento ilegible',
       registeredAt: '2026-03-15T14:00:00.000Z',
     });
@@ -41,7 +41,7 @@ describe('report-user-csv.mapper', () => {
       'Elena Soto',
       'elena@example.com',
       '201912345',
-      'NIT',
+      '-',
       '15/03/2026',
     ]);
   });

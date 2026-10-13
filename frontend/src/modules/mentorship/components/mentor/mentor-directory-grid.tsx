@@ -11,11 +11,13 @@ export function MentorDirectoryGrid({
   return (
     <section
       aria-label="Listado de mentores"
-      className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3"
+      className="@container w-full min-w-0"
     >
-      {mentors.map((mentor) => (
-        <MentorCard key={mentor.id} mentor={mentor} />
-      ))}
+      <div className="grid grid-cols-1 gap-5 @min-[50rem]:grid-cols-2">
+        {mentors.map((mentor) => (
+          <MentorCard key={mentor.id} mentor={mentor} />
+        ))}
+      </div>
     </section>
   );
 }

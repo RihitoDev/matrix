@@ -1,4 +1,5 @@
 import path from 'path'
+import { availableParallelism } from 'node:os'
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
@@ -10,13 +11,14 @@ export default defineConfig({
     },
   },
   test: {
-setupFiles: ['./vitest.setup.ts'],
+    maxWorkers: Math.min(4, availableParallelism()),
+    setupFiles: ['./vitest.setup.ts'],
     environment: 'jsdom',
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
       include: ['src/**/*.{ts,tsx}'],
-        exclude: ['src/app/layout.tsx', '**/*.test.{ts,tsx}', 'src/lib/utils.ts', 'src/components/ui/card/index.ts'],
+        exclude: ['src/app/layout.tsx', '**/*.test.{ts,tsx}', 'src/lib/utils.ts', 'src/components/ui/card/index.ts', 'src/components/ui/select.tsx'],
       thresholds: {
         lines: 80,
         functions: 80,

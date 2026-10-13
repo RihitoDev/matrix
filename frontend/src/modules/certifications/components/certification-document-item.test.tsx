@@ -22,19 +22,15 @@ const INFO: UploadedDocumentInfo = {
 
 function renderItem(info?: UploadedDocumentInfo, isBusy = false) {
   const onView = vi.fn();
-  const onReplace = vi.fn();
-  const onRemove = vi.fn();
   render(
     <CertificationDocumentItem
       certification={CERTIFICATION}
       info={info}
       isBusy={isBusy}
       onView={onView}
-      onReplace={onReplace}
-      onRemove={onRemove}
     />,
   );
-  return { onView, onReplace, onRemove, user: userEvent.setup() };
+  return { onView, user: userEvent.setup() };
 }
 
 describe("CertificationDocumentItem", () => {
@@ -60,23 +56,24 @@ describe("CertificationDocumentItem", () => {
     expect(screen.getByText("Scrum Master")).toBeInTheDocument();
   });
 
-  it("notifies the view, replace and remove actions", async () => {
-    const { onView, onReplace, onRemove, user } = renderItem(INFO);
+  it("notifies the view action", async () => {
+    const { onView, user } = renderItem(INFO);
 
     await user.click(screen.getByRole("button", { name: "Ver documento de Scrum Master" }));
-    await user.click(screen.getByRole("button", { name: "Reemplazar documento de Scrum Master" }));
-    await user.click(screen.getByRole("button", { name: "Eliminar documento de Scrum Master" }));
 
     expect(onView).toHaveBeenCalledWith(CERTIFICATION);
-    expect(onReplace).toHaveBeenCalledWith(CERTIFICATION);
-    expect(onRemove).toHaveBeenCalledWith(CERTIFICATION);
   });
 
-  it("disables the actions while busy", () => {
+  it("does not render replace or remove actions", () => {
+    renderItem(INFO);
+
+    expect(screen.queryByRole("button", { name: /Reemplazar/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Eliminar/ })).not.toBeInTheDocument();
+  });
+
+  it("disables the view action while busy", () => {
     renderItem(INFO, true);
 
     expect(screen.getByRole("button", { name: "Ver documento de Scrum Master" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Reemplazar documento de Scrum Master" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Eliminar documento de Scrum Master" })).toBeDisabled();
   });
 });

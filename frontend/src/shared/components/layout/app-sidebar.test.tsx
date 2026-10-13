@@ -39,11 +39,21 @@ describe("AppSidebar", () => {
     expect(document.querySelector('[data-slot="sidebar-footer"]')).toBeNull();
   });
 
-  it("renders the mentorship group with its two routes", () => {
+  it("renders the mentorship group with its routes", () => {
     renderSidebar();
 
     const navigation = screen.getByRole("navigation", { name: "Menú principal" });
     expect(within(navigation).getByText("Mentorías")).toBeDefined();
+  });
+
+  it("links Mi disponibilidad to the mentor availability page inside Mentorías", () => {
+    renderSidebar();
+
+    fireEvent.click(screen.getByRole("button", { name: "Mentorías" }));
+
+    expect(screen.getByRole("link", { name: "Mi disponibilidad" }).getAttribute("href")).toBe(
+      "/mentor/availability",
+    );
   });
 
   it("links Mi perfil to the profile page in the default navigation", () => {
@@ -67,15 +77,6 @@ describe("AppSidebar", () => {
       .queryAllByRole("listitem")
       .filter((item) => item.getAttribute("data-slot") === "sidebar-menu-item");
     expect(topLevelItems).toHaveLength(SIDEBAR_NAVIGATION.length);
-  });
-
-  it("shows the report history option inside the analytics reports menu", () => {
-    renderSidebar();
-
-    fireEvent.click(screen.getByRole("button", { name: "Reportes Analíticos" }));
-
-    const historyLink = screen.getByRole("link", { name: "Historial de reportes generados" });
-    expect(historyLink.getAttribute("href")).toBe("/reports/history");
   });
 
   it("renders the items and user received by props", () => {

@@ -9,7 +9,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { SectionCardProps } from "../types/section-card-props.types";
 
-export function SectionCard({ title, description, action, children, className }: SectionCardProps) {
+export function SectionCard({ title, description, action, children, className, contentClassName }: SectionCardProps) {
   return (
     <Card
       className={cn(
@@ -25,7 +25,7 @@ export function SectionCard({ title, description, action, children, className }:
         ) : null}
         {action ? <CardAction className="row-span-3">{action}</CardAction> : null}
       </CardHeader>
-      <CardContent className="px-8">{children}</CardContent>
+      <CardContent className={cn("px-8", contentClassName)}>{children}</CardContent>
     </Card>
   );
 }

@@ -146,4 +146,58 @@ describe("WorkExperienceForm", () => {
 
     expect(screen.getByRole("alert")).toHaveTextContent("No se pudo agregar la experiencia laboral.");
   });
+
+  it("does not save a start date before 1950 and shows why", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(<WorkExperienceForm onSubmit={onSubmit} onCancel={vi.fn()} />);
+
+    await user.type(screen.getByLabelText(/Empresa/), "Banco Unión S.A.");
+    await user.type(screen.getByLabelText(/Cargo/), "Analista de Calidad QA");
+    fireEvent.change(screen.getByLabelText(/Desde/), { target: { value: "0012-02-10" } });
+    fireEvent.change(screen.getByLabelText("Hasta"), { target: { value: "2010-09-10" } });
+    await user.click(screen.getByRole("button", { name: "Guardar experiencia" }));
+
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(
+      screen.getByText(WORK_EXPERIENCE_VALIDATION_MESSAGES.dateBeforeMinimum),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText(/Desde/)).toHaveAttribute("min", "1950-01-01");
+  });
+
+  it("limits the position and the description and shows how many characters are used", async () => {
+    const user = userEvent.setup();
+    render(<WorkExperienceForm onSubmit={vi.fn()} onCancel={vi.fn()} />);
+
+    expect(screen.getByLabelText(/Cargo/)).toHaveAttribute("maxLength", "150");
+    expect(screen.getByLabelText(/Descripción de funciones/)).toHaveAttribute("maxLength", "2000");
+    await user.type(screen.getByLabelText(/Cargo/), "Analista");
+
+    expect(screen.getByText("8/150")).toBeInTheDocument();
+    expect(screen.getByText("0/2000")).toBeInTheDocument();
+  });
+
+  it("asks to shorten a saved position that is longer than the limit", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(
+      <WorkExperienceForm
+        initialValues={{
+          companyName: "Banco",
+          position: "a".repeat(1200),
+          startDate: "2020-02-10",
+          endDate: "2023-07-01",
+          isCurrent: false,
+          description: "",
+        }}
+        onSubmit={onSubmit}
+        onCancel={vi.fn()}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Guardar experiencia" }));
+
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(screen.getByText(WORK_EXPERIENCE_VALIDATION_MESSAGES.positionTooLong)).toBeInTheDocument();
+  });
 });

@@ -7,6 +7,7 @@ import { educationsService } from "../services/educations.service";
 import type { SaveEducationArguments } from "../types/save-education-arguments.types";
 import type { Feedback } from "@/modules/profile/types/feedback.types";
 import { getHttpStatus } from "@/modules/profile/utils/get-http-status";
+import { getEducationSaveError } from "../utils/get-education-save-error";
 
 export function useSaveEducation(onSaved: () => void | Promise<void>) {
   const [isSaving, setIsSaving] = useState(false);
@@ -37,9 +38,9 @@ export function useSaveEducation(onSaved: () => void | Promise<void>) {
     } catch (error) {
       setFeedback({
         type: "error",
-        message: id !== undefined && getHttpStatus(error) === EDUCATION_CONFLICT_STATUS
+        message: getEducationSaveError(error) ?? (id !== undefined && getHttpStatus(error) === EDUCATION_CONFLICT_STATUS
           ? EDUCATION_FEEDBACK_MESSAGES.updateConflict
-          : id ? EDUCATION_FEEDBACK_MESSAGES.updateError : EDUCATION_FEEDBACK_MESSAGES.createError,
+          : id ? EDUCATION_FEEDBACK_MESSAGES.updateError : EDUCATION_FEEDBACK_MESSAGES.createError),
       });
     } finally {
       isSavingRef.current = false;
