@@ -1,12 +1,15 @@
-// Los títulos de los catálogos deben coincidir con los que envía el frontend
-// (create-job-offer.schema.ts) y con JOB_OFFER_PUBLISHED_STATUS del servicio.
-export const SEED_JOB_OFFER_MODALITIES = ['Presencial', 'Remoto', 'Híbrido'] as const;
+import {
+  JobOfferContractType,
+  JobOfferModality,
+  JobOfferStatus,
+} from '../types/job-offer.enum.js';
 
-export const SEED_JOB_OFFER_CONTRACT_TYPES = ['Tiempo completo', 'Medio tiempo', 'Pasantía'] as const;
+export const SEED_JOB_OFFER_MODALITIES = Object.values(JobOfferModality);
 
-export const SEED_JOB_OFFER_STATUSES = ['Borrador', 'Publicada', 'Pausada', 'Cerrada', 'Archivada'] as const;
+export const SEED_JOB_OFFER_CONTRACT_TYPES = Object.values(JobOfferContractType);
 
-// Catálogo cerrado de tecnologías del mockup (GET /skills).
+export const SEED_JOB_OFFER_STATUSES = Object.values(JobOfferStatus);
+
 export const SEED_JOB_OFFER_SKILLS = [
   'Python',
   'Java',
@@ -30,8 +33,6 @@ export const SEED_JOB_OFFER_SKILLS = [
   'Assembly',
 ] as const;
 
-// Empresas de demostración. Los ids fijos permiten configurar NEXT_PUBLIC_DEMO_COMPANY_ID
-// en el frontend sin consultar la base; si la empresa ya existía, se conserva su id.
 export const SEED_JOB_OFFER_COMPANIES = [
   {
     id: 'a0000000-0000-4000-8000-000000000001',

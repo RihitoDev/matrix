@@ -30,11 +30,11 @@ import {
   type SearchSkillsRequest,
 } from '../requests/search-skills.request.js';
 import type { SkillResponse } from '../responses/skill.response.js';
-import { SkillService } from '../services/skill.service.js';
+import { SkillCatalogService } from '../services/skill-catalog.service.js';
 
 @ApiTags('skills')
 @ApiBearerAuth()
-
+@UseGuards(JwtAuthGuard)
 @UseInterceptors(ResponseInterceptor)
 @UsePipes(
   new StandardSchemaValidationPipe({
@@ -43,7 +43,7 @@ import { SkillService } from '../services/skill.service.js';
 )
 @Controller('skills')
 export class SkillController {
-  constructor(private readonly skillService: SkillService) {}
+  constructor(private readonly skillCatalogService: SkillCatalogService) {}
 
   @Get()
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -51,16 +51,15 @@ export class SkillController {
   listCatalog(
     @Query({ schema: searchSkillsSchema }) request: SearchSkillsRequest,
   ): Promise<SkillResponse[]> {
-    return this.skillService.listCatalog(request);
+    return this.skillCatalogService.listCatalog(request);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('custom')
   @ApiBody(toApiBody(createCustomSkillSchema))
   @ApiCreatedResponse({ description: 'Custom skill, or the existing skill with the same name' })
   createCustomSkill(
     @Body({ schema: createCustomSkillSchema }) request: CreateCustomSkillRequest,
   ): Promise<SkillResponse> {
-    return this.skillService.createCustomSkill(request);
+    return this.skillCatalogService.createCustomSkill(request);
   }
 }

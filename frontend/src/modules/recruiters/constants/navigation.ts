@@ -1,9 +1,14 @@
-import { Dot } from "lucide-react";
+import { BriefcaseBusiness, Building2, House, SquarePlus } from "lucide-react";
 import type { NavigationItem } from "@/shared/types/navigation-item.types";
 
+export const RECRUITERS_ROUTES = {
+  home: "/recruiters",
+  newJobOffer: "/recruiters/job-offers/new",
+} as const;
+
 export const RECRUITERS_NAVIGATION: NavigationItem[] = [
-  { label: "Inicio", icon: Dot, href: "/recruiters" },
-  { label: "Mis vacantes", icon: Dot, href: "/recruiters/jobs" },
-  { label: "Registrar nueva vacante", icon: Dot, href: "/recruiters/wizard" },
-  { label: "Perfil de empresa", icon: Dot, href: "/recruiters/profile" }
+  { label: "Inicio", icon: House, href: RECRUITERS_ROUTES.home },
+  { label: "Mis vacantes", icon: BriefcaseBusiness },
+  { label: "Registrar nueva vacante", icon: SquarePlus, href: RECRUITERS_ROUTES.newJobOffer },
+  { label: "Perfil de empresa", icon: Building2 },
 ];

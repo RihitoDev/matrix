@@ -13,6 +13,8 @@ export const BLOCK_MIN_HOUR = 7;
 export const BLOCK_MAX_HOUR = 22;
 export const BLOCK_STEP_MINUTES = 30;
 
+export const TIME_PLACEHOLDER = "--:--";
+
 export const BLOCK_MESSAGES = {
   endBeforeStart: "La hora de fin debe ser posterior a la hora de inicio",
   startInPast: "La hora de inicio ya pasó",
@@ -35,7 +37,7 @@ export const FORM_TEXT: Record<
   },
   edit: {
     title: "Editar bloque",
-    description: "Modifica la fecha o el horario del bloque.",
+    description: "Modifica la hora de inicio o de fin del bloque.",
     submit: "Guardar cambios",
     dateLabel: "Día",
     startLabel: "Desde",

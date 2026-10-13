@@ -13,7 +13,6 @@ export class ZodValidationPipe implements PipeTransform {
           field: issue.path.join('.') || 'valor',
           message: issue.message,
         })),
-        
       );
     }
     return result.data;

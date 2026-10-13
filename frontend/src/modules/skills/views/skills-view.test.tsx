@@ -33,7 +33,7 @@ describe("SkillsView", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Cargando habilidades...");
     expect(await screen.findByRole("button", { name: "Quitar Python" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 1, name: "Trayectoria" })).toBeInTheDocument();
-    expect(screen.getByText("Habilidades técnicas")).toBeInTheDocument();
+    expect(screen.getByText("Buscar en el catálogo")).toBeInTheDocument();
   });
 
   it("marks Habilidades as the active step", async () => {

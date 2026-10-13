@@ -97,11 +97,11 @@ describe('AccessRequestsController (documento de respaldo)', () => {
   it.each([
     ['post', 'POST'],
     ['delete', 'DELETE'],
-  ] as const)('%s con UUID inválido responde 400 con el mensaje existente', async (method) => {
+  ] as const)('%s con un id inválido responde 400 con el formato de errores de la API', async (method) => {
     const res = await request(app.getHttpServer())[method]('/access-requests/no-es-uuid/document').field('documentType', 'national_title');
 
     expect(res.status).toBe(400);
-    expect(res.body.message).toBe('El identificador de la solicitud no es válido');
+    expect(res.body.errors).toEqual([{ field: 'id', message: 'El identificador de la solicitud no es válido' }]);
     expect(service.attachDocument).not.toHaveBeenCalled();
     expect(service.removeDocument).not.toHaveBeenCalled();
   });

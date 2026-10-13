@@ -1,15 +1,15 @@
-import { render } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
-import RecruitersPage from './page';
-import React from 'react';
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import RecruitersPage from "./page";
 
-vi.mock('@/modules/recruiters/views/recruiters-base-view', () => ({
-  RecruitersBaseView: ({ children }: { children: React.ReactNode }) => <div data-testid="base-view">{children}</div>
+vi.mock("@/modules/recruiters", () => ({
+  RecruitersHomeView: () => <div data-testid="recruiters-home">Portal de empresas</div>,
 }));
 
-describe('RecruitersPage', () => {
-  it('renderiza la página principal de reclutadores', () => {
-    const { container } = render(<RecruitersPage />);
-    expect(container).toBeTruthy();
+describe("RecruitersPage", () => {
+  it("renderiza el inicio del portal de empresas", () => {
+    render(<RecruitersPage />);
+
+    expect(screen.getByTestId("recruiters-home")).toBeInTheDocument();
   });
 });

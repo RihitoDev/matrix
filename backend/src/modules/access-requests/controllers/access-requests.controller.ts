@@ -1,5 +1,6 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
 import { MAX_FILE_SIZE_BYTES } from '../../files/constants/file-rules.constants.js';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
@@ -29,7 +30,7 @@ interface DocumentResponse {
 }
 
 const uuidPipe = new ParseUUIDPipe({
-  exceptionFactory: () => new BadRequestException('El identificador de la solicitud no es válido'),
+  exceptionFactory: () => new RequestValidationException([{ field: 'id', message: 'El identificador de la solicitud no es válido' }]),
 });
 
 @Controller('access-requests')
@@ -43,8 +44,13 @@ export class AccessRequestsController {
     return this.accessRequestsService.list(query);
   }
 
-  // Se declara antes que cualquier ruta con :id para que "status" no se tome como identificador
-  // TODO: reemplazar el correo en la URL cuando Pablo defina la autenticación (los parámetros de consulta quedan en los logs)
+  @Get('summary')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(BACKOFFICE_ROLE)
+  getSummary() {
+    return this.accessRequestsService.getSummary();
+  }
+
   @Get('status/:code')
   getStatus(
     @Param(new ZodValidationPipe(requestStatusParamsSchema)) params: RequestStatusParams,
@@ -53,7 +59,6 @@ export class AccessRequestsController {
     return this.accessRequestsService.getStatus(params.code, query.email);
   }
 
-  // El documento se entrega como binario con su tipo de contenido; el cuerpo nunca pasa por el formato JSON
   @Get(':id/document')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(BACKOFFICE_ROLE)
@@ -107,7 +112,6 @@ export class AccessRequestsController {
     return this.accessRequestsService.delete(id);
   }
 
-  // DocumentUploadInterceptor va primero para envolver y traducir el error de Multer
   @Post(':id/document')
   @UseInterceptors(DocumentUploadInterceptor, FileInterceptor('file', { limits: { fileSize: MAX_FILE_SIZE_BYTES } }))
   attachDocument(

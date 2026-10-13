@@ -4,6 +4,7 @@ import { ArrowLeft, Check, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SELECT_ITEM_CONTRAST_CLASS } from "@/shared/constants/select.constants";
 import type { DocumentType } from "../../constants/document-types.constants";
 import { useAccessRequestForm } from "../../contexts/access-request-context";
 import { DocumentDropzone } from "./document-dropzone";
@@ -62,7 +63,7 @@ export function DocumentStep() {
             </SelectTrigger>
             <SelectContent>
               {DOCUMENT_TYPE_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value} className="focus:bg-muted focus:text-foreground">
+                <SelectItem key={option.value} value={option.value} className={SELECT_ITEM_CONTRAST_CLASS}>
                   {option.label}
                 </SelectItem>
               ))}

@@ -28,7 +28,7 @@ import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { ResponseInterceptor } from '../../../common/interceptors/response.interceptor.js';
 import { buildRequestValidationException } from '../../../common/utils/build-request-validation-exception.js';
 import { toApiBody } from '../../../common/utils/to-api-body.js';
-import { EDUCATION_CONFLICT_MESSAGE } from '../constants/education-conflict.constants.js';
+import { EDUCATION_CONFLICT_MESSAGE, EDUCATION_DUPLICATE_MESSAGE } from '../constants/education-conflict.constants.js';
 import {
   createEducationSchema,
   type CreateEducationRequest,
@@ -40,6 +40,8 @@ import {
 } from '../requests/update-education.request.js';
 import type { EducationResponse } from '../responses/education.response.js';
 import { EducationsService } from '../services/educations.service.js';
+import { EducationCatalogService } from '../services/education-catalog.service.js';
+import type { EducationInstitution } from '../types/education-institution.type.js';
 
 @ApiTags('educations')
 @ApiBearerAuth()
@@ -54,7 +56,16 @@ import { EducationsService } from '../services/educations.service.js';
 )
 @Controller('educations')
 export class EducationsController {
-  constructor(private readonly service: EducationsService) {}
+  constructor(
+    private readonly service: EducationsService,
+    private readonly catalogService: EducationCatalogService,
+  ) {}
+
+  @Get('institutions')
+  @ApiOkResponse({ description: 'Allowed education institutions and their aliases' })
+  getInstitutions(): readonly EducationInstitution[] {
+    return this.catalogService.getInstitutions();
+  }
 
   @Get()
   @ApiOkResponse({ description: 'Education records of the authenticated user' })
@@ -65,6 +76,7 @@ export class EducationsController {
   @Post()
   @ApiBody(toApiBody(createEducationSchema))
   @ApiCreatedResponse({ description: 'Created education record' })
+  @ApiConflictResponse({ description: EDUCATION_DUPLICATE_MESSAGE })
   create(
     @CurrentUserId() userId: string,
     @Body({ schema: createEducationSchema }) request: CreateEducationRequest,
@@ -76,7 +88,7 @@ export class EducationsController {
   @ApiParam({ name: 'id', type: String, format: 'uuid' })
   @ApiBody(toApiBody(updateEducationSchema))
   @ApiOkResponse({ description: 'Updated education record' })
-  @ApiConflictResponse({ description: EDUCATION_CONFLICT_MESSAGE })
+  @ApiConflictResponse({ description: `${EDUCATION_CONFLICT_MESSAGE}; ${EDUCATION_DUPLICATE_MESSAGE}` })
   @ApiNotFoundResponse({
     description: 'Education record not found for this user',
   })

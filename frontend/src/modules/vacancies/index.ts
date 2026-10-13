@@ -1,1 +1,0 @@
-export {RegisterVacancyView} from "./views/register-vacancy-view";

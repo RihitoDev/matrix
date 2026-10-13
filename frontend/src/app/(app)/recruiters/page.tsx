@@ -1,8 +1,5 @@
-import { RecruitersBaseView } from "@/modules/recruiters";
+import { RecruitersHomeView } from "@/modules/recruiters";
 
 export default function RecruitersPage() {
-  return (
-    <RecruitersBaseView>
-    </RecruitersBaseView>
-  );
+  return <RecruitersHomeView />;
 }

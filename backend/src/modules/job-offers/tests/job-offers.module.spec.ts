@@ -2,13 +2,11 @@ import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { describe, expect, it } from 'vitest';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
-import { SkillsValidationService } from '../../vacancies/services/skills-validation.service.js';
-import { JobOffersController } from '../job-offers.controller.js';
+import { JobOffersController } from '../controllers/job-offers.controller.js';
 import { JobOffersModule } from '../job-offers.module.js';
-import { JobOffersService } from '../job-offers.service.js';
+import { JobOfferSkillsService } from '../services/job-offer-skills.service.js';
+import { JobOffersService } from '../services/job-offers.service.js';
 
-// Los demás specs mockean las dependencias, así que no detectan un módulo mal cableado
-// (Nest falla al arrancar con UnknownDependenciesException). Este compila el módulo real.
 describe('JobOffersModule', () => {
   it('resuelve todas sus dependencias al compilar', async () => {
     const moduleRef = await Test.createTestingModule({
@@ -20,6 +18,6 @@ describe('JobOffersModule', () => {
 
     expect(moduleRef.get(JobOffersController)).toBeDefined();
     expect(moduleRef.get(JobOffersService)).toBeDefined();
-    expect(moduleRef.get(SkillsValidationService)).toBeDefined();
+    expect(moduleRef.get(JobOfferSkillsService)).toBeDefined();
   });
 });

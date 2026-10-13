@@ -2,6 +2,7 @@
 
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SELECT_ITEM_CONTRAST_CLASS } from "@/shared/constants/select.constants";
 import { ID_CARD_ISSUED_IN } from "../../constants/id-card-issued-in.constants";
 import { useAccessRequestForm } from "../../contexts/access-request-context";
 import { usePersonalDataBind } from "../../hooks/use-personal-data-bind";
@@ -51,7 +52,7 @@ export function IdCardField() {
                 <SelectItem
                   key={code}
                   value={code}
-                  className="focus:bg-muted focus:text-foreground"
+                  className={SELECT_ITEM_CONTRAST_CLASS}
                 >
                   {code}
                 </SelectItem>

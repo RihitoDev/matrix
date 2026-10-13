@@ -49,4 +49,39 @@ describe("validateWorkExperience", () => {
       WORK_EXPERIENCE_VALIDATION_MESSAGES.companyNameTooLong,
     );
   });
+
+  it.each([
+    ["0012-02-10", WORK_EXPERIENCE_VALIDATION_MESSAGES.dateBeforeMinimum],
+    ["1949-12-31", WORK_EXPERIENCE_VALIDATION_MESSAGES.dateBeforeMinimum],
+    ["20245-01-01", WORK_EXPERIENCE_VALIDATION_MESSAGES.invalidDate],
+    ["2024-02-30", WORK_EXPERIENCE_VALIDATION_MESSAGES.invalidDate],
+    ["2999-01-01", WORK_EXPERIENCE_VALIDATION_MESSAGES.futureDate],
+  ])("rejects the start date %s", (startDate, message) => {
+    expect(validateWorkExperience({ ...VALID_VALUES, startDate }).startDate).toBe(message);
+  });
+
+  it("accepts the minimum date", () => {
+    expect(
+      validateWorkExperience({ ...VALID_VALUES, startDate: "1950-01-01" }),
+    ).toEqual({});
+  });
+
+  it("rejects an end date out of range without comparing it with the start date", () => {
+    expect(validateWorkExperience({ ...VALID_VALUES, endDate: "0012-01-01" })).toEqual({
+      endDate: WORK_EXPERIENCE_VALIDATION_MESSAGES.dateBeforeMinimum,
+    });
+  });
+
+  it("rejects a position and a description longer than the limits", () => {
+    expect(
+      validateWorkExperience({
+        ...VALID_VALUES,
+        position: "a".repeat(151),
+        description: "b".repeat(2001),
+      }),
+    ).toEqual({
+      position: WORK_EXPERIENCE_VALIDATION_MESSAGES.positionTooLong,
+      description: WORK_EXPERIENCE_VALIDATION_MESSAGES.descriptionTooLong,
+    });
+  });
 });

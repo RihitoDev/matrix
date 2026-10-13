@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CityNotFoundException } from '../exceptions/city-not-found.exception.js';
 import { ProfileNotFoundException } from '../exceptions/profile-not-found.exception.js';
 import { ProfileMapper } from '../mappers/profile.mapper.js';
-import type { CityRepository } from '../repositories/city.repository.js';
 import type { ProfileRepository } from '../repositories/profile.repository.js';
+import { CityCatalogService } from '../services/city-catalog.service.js';
 import { ProfileService } from '../services/profile.service.js';
 import type { ProfileRecord } from '../types/profile-record.type.js';
 
@@ -37,17 +37,22 @@ describe('ProfileService', () => {
     findByUserId: ReturnType<typeof vi.fn>;
     update: ReturnType<typeof vi.fn>;
   };
-  let cityRepository: {
-    findAll: ReturnType<typeof vi.fn>;
+  let cityCatalogService: {
+    listCities: ReturnType<typeof vi.fn>;
     exists: ReturnType<typeof vi.fn>;
+    ensureCityExists: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
     profileRepository = { findByUserId: vi.fn(), update: vi.fn() };
-    cityRepository = { findAll: vi.fn(), exists: vi.fn() };
+    cityCatalogService = {
+      listCities: vi.fn().mockResolvedValue([{ id: cityId, title: 'Cochabamba' }]),
+      exists: vi.fn(),
+      ensureCityExists: vi.fn().mockResolvedValue(undefined),
+    };
     service = new ProfileService(
       profileRepository as unknown as ProfileRepository,
-      cityRepository as unknown as CityRepository,
+      cityCatalogService as unknown as CityCatalogService,
       new ProfileMapper(),
     );
   });
@@ -76,19 +81,19 @@ describe('ProfileService', () => {
   describe('updatePersonalInfo', () => {
     it('saves the personal info after checking the city', async () => {
       profileRepository.findByUserId.mockResolvedValue(record);
-      cityRepository.exists.mockResolvedValue(true);
+      cityCatalogService.ensureCityExists.mockResolvedValue(undefined);
       profileRepository.update.mockResolvedValue(record);
 
       const response = await service.updatePersonalInfo(userId, personalInfo);
 
-      expect(cityRepository.exists).toHaveBeenCalledWith(cityId);
+      expect(cityCatalogService.ensureCityExists).toHaveBeenCalledWith(cityId);
       expect(profileRepository.update).toHaveBeenCalledWith(userId, personalInfo);
       expect(response.firstName).toBe('Valeria');
     });
 
     it('throws when the city does not exist', async () => {
       profileRepository.findByUserId.mockResolvedValue(record);
-      cityRepository.exists.mockResolvedValue(false);
+      cityCatalogService.ensureCityExists.mockRejectedValue(new CityNotFoundException());
 
       await expect(service.updatePersonalInfo(userId, personalInfo)).rejects.toBeInstanceOf(
         CityNotFoundException,
@@ -129,8 +134,9 @@ describe('ProfileService', () => {
   });
 
   it('lists the cities', async () => {
-    cityRepository.findAll.mockResolvedValue([{ id: cityId, title: 'Cochabamba' }]);
+    cityCatalogService.listCities.mockResolvedValue([{ id: cityId, title: 'Cochabamba' }]);
 
     await expect(service.listCities()).resolves.toEqual([{ id: cityId, title: 'Cochabamba' }]);
+    expect(cityCatalogService.listCities).toHaveBeenCalled();
   });
 });

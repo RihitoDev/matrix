@@ -1,130 +1,157 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { JobOffersService } from '../job-offers.service.js';
-import type { PrismaService } from '../../../common/prisma/prisma.service.js';
-import type { SkillsValidationService } from '../../vacancies/services/skills-validation.service.js';
-import type { CreateJobOfferPayload } from '../create-job-offer.schema.js';
-import {
-  CompanyNotFoundException,
-  JobOfferCatalogNotFoundException,
-  SalaryRangeInvalidException,
-} from '../job-offers.exceptions.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { CompanyNotFoundException, JobOfferCatalogNotFoundException } from '../exceptions/index.js';
+import { JobOfferMapper } from '../mappers/job-offer.mapper.js';
+import type { JobOffersRepository } from '../repositories/job-offers.repository.js';
+import type { CreateJobOfferRequest } from '../requests/create-job-offer.request.js';
+import type { JobOfferSkillsService } from '../services/job-offer-skills.service.js';
+import { JobOffersService } from '../services/job-offers.service.js';
+import { JobOfferContractType, JobOfferModality } from '../types/job-offer.enum.js';
+import type { JobOfferRecord } from '../types/job-offer-record.type.js';
 
-const payload: CreateJobOfferPayload = {
-  tituloPuesto: 'Desarrollador Backend',
-  descripcion: 'Descripción',
-  modalidad: 'Remoto',
-  ubicacion: 'Cochabamba',
-  tipoContrato: 'Tiempo completo',
-  categoria: 'Tecnología',
-  numeroVacantes: 2,
-  salarioMin: 6500,
-  salarioMax: 8000,
-  idiomas: 'Español',
-  enlaceGoogleMaps: 'https://maps.google.com/?q=x',
-  tecnologias: ['s1', 's2'],
+const CREATED_AT = new Date('2026-10-12T15:00:00.000Z');
+
+const REQUEST: CreateJobOfferRequest = {
+  title: 'DevOps Senior',
+  description: 'Descripción',
+  modality: JobOfferModality.HYBRID,
+  contractType: JobOfferContractType.FULL_TIME,
+  category: 'Tecnología',
+  positionsAvailable: 2,
+  salaryMin: 6500,
+  salaryMax: 8000,
+  languages: 'Español',
+  locationUrl: 'https://maps.google.com/?q=x',
+  skillIds: ['skill-1'],
 };
 
-describe('JobOffersService', () => {
-  let prisma: {
-    company: { findUnique: ReturnType<typeof vi.fn> };
-    jobOfferModality: { findUnique: ReturnType<typeof vi.fn> };
-    jobOfferContractType: { findUnique: ReturnType<typeof vi.fn> };
-    jobOfferStatus: { findUnique: ReturnType<typeof vi.fn> };
-    jobOffer: { create: ReturnType<typeof vi.fn> };
+const RECORD: JobOfferRecord = {
+  id: 'offer-1',
+  title: 'DevOps Senior',
+  description: 'Descripción',
+  category: 'Tecnología',
+  positionsAvailable: 2,
+  salaryRange: 'Bs 6.500 - 8.000',
+  languages: 'Español',
+  locationUrl: 'https://maps.google.com/?q=x',
+  expiresAt: null,
+  createdAt: CREATED_AT,
+  company: { id: 'company-1', title: 'TechBolivia S.R.L.' },
+  modality: { title: 'Híbrido' },
+  contractType: { title: 'Tiempo completo' },
+  status: { title: 'Publicada' },
+  skills: [{ skill: { id: 'skill-1', name: 'Docker' } }],
+};
+
+function createRepository() {
+  return {
+    companyExists: vi.fn().mockResolvedValue(true),
+    findCatalogIds: vi.fn().mockResolvedValue({
+      modalityId: 'modality-1',
+      contractTypeId: 'contract-1',
+      statusId: 'status-1',
+    }),
+    create: vi.fn().mockResolvedValue({ id: 'offer-1', createdAt: CREATED_AT }),
+    findPublished: vi.fn().mockResolvedValue([RECORD]),
+    findByCompany: vi.fn().mockResolvedValue([RECORD]),
   };
-  let skillsValidation: { validateSkillIds: ReturnType<typeof vi.fn> };
+}
+
+describe('JobOffersService', () => {
+  let repository: ReturnType<typeof createRepository>;
+  let skillsService: { validateSkillIds: ReturnType<typeof vi.fn>; listCatalog: ReturnType<typeof vi.fn> };
   let service: JobOffersService;
 
   beforeEach(() => {
-    prisma = {
-      company: { findUnique: vi.fn().mockResolvedValue({ id: 'c1' }) },
-      jobOfferModality: { findUnique: vi.fn().mockResolvedValue({ id: 'm1' }) },
-      jobOfferContractType: {
-        findUnique: vi.fn().mockResolvedValue({ id: 't1' }),
-      },
-      jobOfferStatus: { findUnique: vi.fn().mockResolvedValue({ id: 'st1' }) },
-      jobOffer: {
-        create: vi.fn().mockResolvedValue({
-          id: 'j1',
-          createdAt: new Date('2026-10-07T00:00:00Z'),
-        }),
-      },
+    repository = createRepository();
+    skillsService = {
+      validateSkillIds: vi.fn().mockResolvedValue(undefined),
+      listCatalog: vi.fn().mockResolvedValue([{ id: 'skill-1', name: 'Docker' }]),
     };
-    skillsValidation = { validateSkillIds: vi.fn().mockResolvedValue(undefined) };
     service = new JobOffersService(
-      prisma as unknown as PrismaService,
-      skillsValidation as unknown as SkillsValidationService,
+      repository as unknown as JobOffersRepository,
+      skillsService as unknown as JobOfferSkillsService,
+      new JobOfferMapper(),
     );
   });
 
-  it('crea la vacante y devuelve id, fecha y mensaje', async () => {
-    const result = await service.create('c1', payload);
-    expect(result).toEqual({
-      id: 'j1',
-      fechaCreacion: new Date('2026-10-07T00:00:00Z'),
-      mensaje: 'Oferta publicada correctamente',
+  describe('create', () => {
+    it('publica la vacante con el estado Publicada y el salario formateado', async () => {
+      const result = await service.create('company-1', REQUEST);
+
+      expect(repository.findCatalogIds).toHaveBeenCalledWith('Híbrido', 'Tiempo completo', 'Publicada');
+      expect(repository.create).toHaveBeenCalledWith({
+        companyId: 'company-1',
+        modalityId: 'modality-1',
+        contractTypeId: 'contract-1',
+        statusId: 'status-1',
+        title: 'DevOps Senior',
+        description: 'Descripción',
+        category: 'Tecnología',
+        positionsAvailable: 2,
+        salaryRange: 'Bs 6.500 - 8.000',
+        languages: 'Español',
+        locationUrl: 'https://maps.google.com/?q=x',
+        skillIds: ['skill-1'],
+      });
+      expect(result).toEqual({ id: 'offer-1', createdAt: CREATED_AT.toISOString() });
+    });
+
+    it('valida las tecnologías antes de guardar', async () => {
+      skillsService.validateSkillIds.mockRejectedValue(new Error('habilidad inválida'));
+
+      await expect(service.create('company-1', REQUEST)).rejects.toThrow('habilidad inválida');
+      expect(skillsService.validateSkillIds).toHaveBeenCalledWith(['skill-1']);
+      expect(repository.create).not.toHaveBeenCalled();
+    });
+
+    it('rechaza una empresa que no existe', async () => {
+      repository.companyExists.mockResolvedValue(false);
+
+      await expect(service.create('missing', REQUEST)).rejects.toBeInstanceOf(CompanyNotFoundException);
+      expect(repository.create).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['modalityId', 'modalidad'],
+      ['contractTypeId', 'tipo de contrato'],
+      ['statusId', 'estado'],
+    ])('rechaza la vacante si falta el catálogo %s', async (key, label) => {
+      repository.findCatalogIds.mockResolvedValue({
+        modalityId: 'modality-1',
+        contractTypeId: 'contract-1',
+        statusId: 'status-1',
+        [key]: null,
+      });
+
+      await expect(service.create('company-1', REQUEST)).rejects.toEqual(
+        new JobOfferCatalogNotFoundException(label),
+      );
+      expect(repository.create).not.toHaveBeenCalled();
     });
   });
 
-  it('guarda el rango salarial con formato', async () => {
-    await service.create('c1', payload);
-    expect(prisma.jobOffer.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ salaryRange: 'Bs 6.500 - 8.000' }),
-      }),
-    );
+  it('lista las vacantes publicadas con la fecha actual', async () => {
+    const result = await service.listPublished();
+
+    expect(repository.findPublished).toHaveBeenCalledWith(expect.any(Date));
+    expect(result[0]).toMatchObject({ id: 'offer-1', company: { name: 'TechBolivia S.R.L.' } });
   });
 
-  it('guarda un salario fijo cuando no hay máximo', async () => {
-    await service.create('c1', {
-      ...payload,
-      salarioMin: 5000,
-      salarioMax: undefined,
-    });
-    expect(prisma.jobOffer.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ salaryRange: 'Bs 5.000' }),
-      }),
-    );
+  it('lista las vacantes de una empresa existente', async () => {
+    const result = await service.listByCompany('company-1');
+
+    expect(repository.findByCompany).toHaveBeenCalledWith('company-1');
+    expect(result).toHaveLength(1);
   });
 
-  it('falla si la empresa no existe', async () => {
-    prisma.company.findUnique.mockResolvedValue(null);
-    await expect(service.create('c1', payload)).rejects.toBeInstanceOf(
-      CompanyNotFoundException,
-    );
+  it('rechaza listar vacantes de una empresa que no existe', async () => {
+    repository.companyExists.mockResolvedValue(false);
+
+    await expect(service.listByCompany('missing')).rejects.toBeInstanceOf(CompanyNotFoundException);
+    expect(repository.findByCompany).not.toHaveBeenCalled();
   });
 
-  it('falla si el salario mínimo supera al máximo', async () => {
-    await expect(
-      service.create('c1', { ...payload, salarioMin: 9000, salarioMax: 8000 }),
-    ).rejects.toBeInstanceOf(SalaryRangeInvalidException);
-  });
-
-  it('propaga el error si las habilidades no son válidas', async () => {
-    skillsValidation.validateSkillIds.mockRejectedValue(new Error('habilidad'));
-    await expect(service.create('c1', payload)).rejects.toThrow('habilidad');
-    expect(prisma.jobOffer.create).not.toHaveBeenCalled();
-  });
-
-  it('falla si la modalidad no existe en el catálogo', async () => {
-    prisma.jobOfferModality.findUnique.mockResolvedValue(null);
-    await expect(service.create('c1', payload)).rejects.toBeInstanceOf(
-      JobOfferCatalogNotFoundException,
-    );
-  });
-
-  it('falla si el tipo de contrato no existe en el catálogo', async () => {
-    prisma.jobOfferContractType.findUnique.mockResolvedValue(null);
-    await expect(service.create('c1', payload)).rejects.toBeInstanceOf(
-      JobOfferCatalogNotFoundException,
-    );
-  });
-
-  it('falla si el estado no existe en el catálogo', async () => {
-    prisma.jobOfferStatus.findUnique.mockResolvedValue(null);
-    await expect(service.create('c1', payload)).rejects.toBeInstanceOf(
-      JobOfferCatalogNotFoundException,
-    );
+  it('devuelve el catálogo de tecnologías', async () => {
+    expect(await service.listSkillCatalog()).toEqual([{ id: 'skill-1', name: 'Docker' }]);
   });
 });

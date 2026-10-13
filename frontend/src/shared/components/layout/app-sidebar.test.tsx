@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { House } from "lucide-react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -39,11 +39,21 @@ describe("AppSidebar", () => {
     expect(document.querySelector('[data-slot="sidebar-footer"]')).toBeNull();
   });
 
-  it("renders the mentorship group with its two routes", () => {
+  it("renders the mentorship group with its routes", () => {
     renderSidebar();
 
     const navigation = screen.getByRole("navigation", { name: "Menú principal" });
     expect(within(navigation).getByText("Mentorías")).toBeDefined();
+  });
+
+  it("links Mi disponibilidad to the mentor availability page inside Mentorías", () => {
+    renderSidebar();
+
+    fireEvent.click(screen.getByRole("button", { name: "Mentorías" }));
+
+    expect(screen.getByRole("link", { name: "Mi disponibilidad" }).getAttribute("href")).toBe(
+      "/mentor/availability",
+    );
   });
 
   it("links Mi perfil to the profile page in the default navigation", () => {

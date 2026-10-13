@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DomainException } from '../../../common/exceptions/domain.exception.js';
-import { MAX_USER_SKILLS } from '../constants/skill.constants.js';
+import { MAX_USER_SKILLS, SKILL_NAME_MAX_LENGTH } from '../constants/skill.constants.js';
 import { DuplicateSkillException } from '../exceptions/duplicate-skill.exception.js';
 import { SkillNotFoundException } from '../exceptions/skill-not-found.exception.js';
 import { createCustomSkillSchema } from '../requests/create-custom-skill.request.js';
@@ -36,10 +36,27 @@ describe('createCustomSkillSchema', () => {
     expect(createCustomSkillSchema.parse({ name: '  Kubernetes ' })).toEqual({ name: 'Kubernetes' });
   });
 
+  it('removes extra spaces', () => {
+    expect(createCustomSkillSchema.parse({ name: '  spring    boot ' })).toEqual({ name: 'spring boot' });
+  });
+
+  it.each(['C++', 'C#', '.NET', 'Node.js', 'CI/CD', 'Diseño UX', 'R&D (Investigación)'])('accepts the real skill name %s', (name) => {
+    expect(createCustomSkillSchema.parse({ name })).toEqual({ name });
+  });
+
+  it('accepts a name with the maximum length', () => {
+    const name = 'Ab'.repeat(SKILL_NAME_MAX_LENGTH / 2);
+    expect(createCustomSkillSchema.parse({ name })).toEqual({ name });
+  });
+
   it.each([
     ['a missing name', {}],
     ['an empty name', { name: '   ' }],
-    ['a name that is too long', { name: 'a'.repeat(101) }],
+    ['a name that is too long', { name: 'a'.repeat(SKILL_NAME_MAX_LENGTH + 1) }],
+    ['a name with invalid characters', { name: 'SJCKENN;ONCM;SNV' }],
+    ['a name without letters', { name: '9999999' }],
+    ['a name repeating the same character', { name: 'SSSSSSSS' }],
+    ['a name repeating the same character ignoring case', { name: 'sSsS' }],
   ])('rejects %s', (_case, body) => {
     expect(createCustomSkillSchema.safeParse(body).success).toBe(false);
   });

@@ -7,12 +7,19 @@ function createPdf(): File {
   return new File([new Uint8Array(1258291)], "CV_Valeria_Quispe.pdf", { type: "application/pdf" });
 }
 
-function renderCard(selectedFile: File | null = null, isUploading = false, isBusy = false) {
+function renderCard(
+  selectedFile: File | null = null,
+  isUploading = false,
+  isBusy = false,
+  { hasSavedCv = false, isLoading = false } = {},
+) {
   const onSelectFile = vi.fn();
   const onConfirmUpload = vi.fn();
   render(
     <CvUploadCard
       selectedFile={selectedFile}
+      hasSavedCv={hasSavedCv}
+      isLoading={isLoading}
       isUploading={isUploading}
       isBusy={isBusy}
       onSelectFile={onSelectFile}
@@ -78,5 +85,24 @@ describe("CvUploadCard", () => {
     expect(confirmButton).toBeDisabled();
     expect(confirmButton.querySelector("svg")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Seleccionar PDF" })).toBeDisabled();
+  });
+
+  it("shows a loading placeholder without upload actions while the saved cv loads", () => {
+    renderCard(null, false, false, { isLoading: true });
+
+    expect(screen.getByText("Subir currículum")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Seleccionar PDF" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Confirmar carga" })).not.toBeInTheDocument();
+  });
+
+  it("replaces the upload actions with an informative message when a cv is saved", () => {
+    renderCard(null, false, false, { hasSavedCv: true });
+
+    expect(screen.getByText("Ya tienes un CV guardado")).toBeInTheDocument();
+    expect(
+      screen.getByText("Para cambiarlo, usa «Reemplazar CV» en «Archivo guardado»."),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Seleccionar PDF" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Confirmar carga" })).not.toBeInTheDocument();
   });
 });
