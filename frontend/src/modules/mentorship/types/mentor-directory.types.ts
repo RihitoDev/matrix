@@ -3,4 +3,8 @@ export interface MentorDirectoryItem {
   fullName: string;
   headline: string | null;
   technicalAreas: string[];
+  photoUrl: string | null;
+  education: { degree: string; institution: string } | null;
+  isAvailable: boolean;
+  orientationTypes: string[];
 }
