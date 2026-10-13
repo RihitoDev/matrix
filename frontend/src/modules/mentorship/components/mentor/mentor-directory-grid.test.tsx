@@ -9,12 +9,20 @@ const mentors: MentorDirectoryItem[] = [
     fullName: "Mentor Uno",
     headline: "Backend Developer",
     technicalAreas: ["Backend"],
+    photoUrl: null,
+    education: null,
+    isAvailable: false,
+    orientationTypes: [],
   },
   {
     id: "0fa5e6de-63a4-430e-87fb-22f5eb700ecd",
     fullName: "Mentor Dos",
     headline: "QA Engineer",
     technicalAreas: ["QA"],
+    photoUrl: null,
+    education: null,
+    isAvailable: false,
+    orientationTypes: [],
   },
 ];
 
@@ -22,10 +30,18 @@ afterEach(cleanup);
 
 describe("MentorDirectoryGrid", () => {
   it("renderiza varios mentores", () => {
-    render(<MentorDirectoryGrid mentors={mentors} />);
+    const { container } = render(<MentorDirectoryGrid mentors={mentors} />);
 
     expect(screen.getByText("Mentor Uno")).toBeDefined();
     expect(screen.getByText("Mentor Dos")).toBeDefined();
+    expect(screen.getByRole("region", { name: "Listado de mentores" })).toHaveClass(
+      "@container",
+      "w-full",
+    );
+    expect(container.querySelector("section > div")).toHaveClass(
+      "grid-cols-1",
+      "@min-[50rem]:grid-cols-2",
+    );
   });
 
   it("renderiza un solo mentor", () => {

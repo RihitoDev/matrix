@@ -27,6 +27,11 @@ import { CityCatalogService } from './services/city-catalog.service.js';
     ProfilePhotoMapper,
     FileValidationService,
   ],
-  exports: [ProfileRepository, ProfileService, CityCatalogService],
+  exports: [
+    ProfileRepository,
+    ProfileService,
+    CityCatalogService,
+    ProfilePhotoService,
+  ],
 })
 export class ProfileModule {}
