@@ -14,6 +14,8 @@ export const CONNECTION_ERROR_MESSAGE = "Error 503/504: Sin conexión con el ser
 export const RATE_LIMIT_MESSAGE = "Error 429: Demasiadas solicitudes, intenta nuevamente en unos segundos";
 export const INTERNAL_ERROR_MESSAGE = "Error 500: Ocurrió un error interno en el servidor";
 export const REPORT_ALERT_DURATION_MS = 7_000;
+export const REGISTERED_USERS_SLOW_TOAST_ID = "registered-users-slow-request";
+export const REGISTERED_USERS_CONNECTION_TOAST_ID = "registered-users-connection-error";
 export const REJECTED_USERS_LOAD_ERROR_MESSAGE = "No se pudo cargar el reporte de usuarios rechazados.";
 
 export const REGISTERED_USERS_CSV_FALLBACK_NAME = "usuarios-registrados.csv";

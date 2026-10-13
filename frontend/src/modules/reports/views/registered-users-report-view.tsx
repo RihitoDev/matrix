@@ -1,12 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { PageBreadcrumb } from "@/shared/components/layout";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import {
   CONNECTION_ERROR_MESSAGE,
   REGISTERED_USERS_BREADCRUMB,
+  REGISTERED_USERS_CONNECTION_TOAST_ID,
   REGISTERED_USERS_PAGE_SIZE,
+  REGISTERED_USERS_SLOW_TOAST_ID,
+  REPORT_ALERT_DURATION_MS,
   SEARCH_DEBOUNCE_MS,
   SLOW_REQUEST_MESSAGE,
 } from "../constants/reports.constants";
@@ -14,7 +18,6 @@ import { EmailSearchInput } from "../components/email-search-input";
 import { ExportSuccessToast } from "../components/export-success-toast";
 import { RegisteredUsersTable } from "../components/registered-users-table";
 import { ReportActions } from "../components/report-actions";
-import { ReportAlertToast } from "../components/report-alert-toast";
 import { ReportTableFooter } from "../components/report-table-footer";
 import { UserTypeFilter } from "../components/user-type-filter";
 import { useExportRegisteredUsersCsv } from "../hooks/use-export-registered-users-csv";
@@ -36,6 +39,32 @@ export function RegisteredUsersReportView() {
     errorMessage: exportErrorMessage,
     successMessage: exportSuccessMessage,
   } = useExportRegisteredUsersCsv(userType, period, search);
+
+  useEffect(() => {
+    if (isSlow) {
+      toast.warning(SLOW_REQUEST_MESSAGE, {
+        id: REGISTERED_USERS_SLOW_TOAST_ID,
+        duration: Infinity,
+        closeButton: true,
+        richColors: true,
+      });
+    } else {
+      toast.dismiss(REGISTERED_USERS_SLOW_TOAST_ID);
+    }
+  }, [isSlow]);
+
+  useEffect(() => {
+    if (hasConnectionError) {
+      toast.error(CONNECTION_ERROR_MESSAGE, {
+        id: REGISTERED_USERS_CONNECTION_TOAST_ID,
+        duration: REPORT_ALERT_DURATION_MS,
+        closeButton: true,
+        richColors: true,
+      });
+    } else {
+      toast.dismiss(REGISTERED_USERS_CONNECTION_TOAST_ID);
+    }
+  }, [hasConnectionError]);
 
   const handleUserTypeChange = (selectedUserType?: RoleTag) => {
     if (selectedUserType === userType) return;
@@ -91,8 +120,6 @@ export function RegisteredUsersReportView() {
       />
 
       <ExportSuccessToast message={exportSuccessMessage} />
-      <ReportAlertToast variant="warning" message={isSlow ? SLOW_REQUEST_MESSAGE : undefined} />
-      <ReportAlertToast variant="error" message={hasConnectionError ? CONNECTION_ERROR_MESSAGE : undefined} />
     </section>
   );
 }

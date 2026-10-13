@@ -2,11 +2,36 @@
 
 import { useCallback, useEffect } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { REJECTED_USERS_LOAD_ERROR_MESSAGE, REJECTED_USERS_PAGE_SIZE } from "../constants/reports.constants";
+import { AxiosError, isAxiosError } from "axios";
+import { toast } from "sonner";
+import { isConnectionError } from "@/shared/utils/is-connection-error";
+import {
+  CONNECTION_ERROR_MESSAGE,
+  INTERNAL_ERROR_MESSAGE,
+  RATE_LIMIT_MESSAGE,
+  REJECTED_USERS_LOAD_ERROR_MESSAGE,
+  REJECTED_USERS_PAGE_SIZE,
+  REPORT_ALERT_DURATION_MS,
+  SLOW_REQUEST_MESSAGE,
+} from "../constants/reports.constants";
 import { REPORTS_QUERY_KEYS } from "../constants/reports-query-keys.constants";
 import { reportsService } from "../services/reports.service";
-import { getReportErrorAlert } from "../utils/get-report-error-alert";
-import { showReportAlert } from "../utils/show-report-alert";
+
+function notifyRequestError(error: unknown, id: string) {
+  if (!isAxiosError(error)) return;
+
+  const options = { id, duration: REPORT_ALERT_DURATION_MS, closeButton: true, richColors: true };
+
+  if (error.code === AxiosError.ECONNABORTED || error.code === AxiosError.ETIMEDOUT) {
+    toast.warning(SLOW_REQUEST_MESSAGE, options);
+  } else if (error.response?.status === 429) {
+    toast.warning(RATE_LIMIT_MESSAGE, options);
+  } else if (error.response?.status === 500) {
+    toast.error(INTERNAL_ERROR_MESSAGE, options);
+  } else if (isConnectionError(error)) {
+    toast.error(CONNECTION_ERROR_MESSAGE, options);
+  }
+}
 
 export function useRejectedUsers(page: number, search = "") {
   const query = useQuery({
@@ -17,8 +42,7 @@ export function useRejectedUsers(page: number, search = "") {
   const { error, errorUpdatedAt, refetch } = query;
 
   useEffect(() => {
-    const alert = getReportErrorAlert(error);
-    if (alert) showReportAlert(alert, `rejected-users-${errorUpdatedAt}`);
+    if (error) notifyRequestError(error, `rejected-users-${errorUpdatedAt}`);
   }, [error, errorUpdatedAt]);
 
   const refresh = useCallback(() => {
