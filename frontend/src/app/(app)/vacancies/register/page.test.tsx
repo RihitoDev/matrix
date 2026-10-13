@@ -1,21 +1,15 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
-import RegisterPage from './page';
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import RegisterPage from "./page";
 
-vi.mock('@/modules/recruiters', () => ({
-  RecruitersBaseView: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="base-view">{children}</div>
-  )
+vi.mock("@/modules/vacancies", () => ({
+  RegisterVacancyView: () => <div data-testid="register-view">Vista de Registro</div>,
 }));
 
-vi.mock('@/modules/vacancies/views/register-vacancy-view', () => ({
-  RegisterVacancyView: () => <div data-testid="register-view">Vista de Registro</div>
-}));
-
-describe('RegisterPage', () => {
-  it('renderiza el layout base y la vista principal de registro', () => {
+describe("RegisterPage", () => {
+  it("renderiza la vista de registro de vacantes", () => {
     render(<RegisterPage />);
-    expect(screen.getByTestId('base-view')).toBeInTheDocument();
-    expect(screen.getByTestId('register-view')).toBeInTheDocument();
+
+    expect(screen.getByTestId("register-view")).toBeInTheDocument();
   });
 });

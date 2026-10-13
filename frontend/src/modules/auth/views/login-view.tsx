@@ -34,7 +34,9 @@ export function LoginView() {
     const result = await login({ email, password, roleTag });
     if (result) {
       saveAccessToken(result.accessToken);
-      router.push(getPostLoginPath(result.roleTag));
+      const destination = getPostLoginPath(result.roleTag);
+      const next = new URLSearchParams(window.location.search).get('next');
+      router.push(destination === '/' && next === '/events/my-passes' ? next : destination);
     }
   }
 

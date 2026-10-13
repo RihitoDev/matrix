@@ -1,8 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import type { SkillItem } from "@/modules/skills/types/skill-item.types";
+import type { Modality } from "../types/job-offer.types";
+import {
+    INFORMATION_FIELDS_ORDER,
+    isFieldEmpty,
+    validateInformation,
+    validateRequirements,
+} from "../utils/validate-vacancy";
 
-export type Modality = "Presencial" | "Remoto" | "Hibrido";
+export type { Modality } from "../types/job-offer.types";
 
 export interface VacancyConditions {
     title: string;
@@ -14,9 +22,9 @@ export interface VacancyConditions {
     salary: string;
     languages: string;
     description: string;
-    skills: string[]; 
+    /** Habilidades elegidas del catálogo (GET /skills): el id es el UUID que espera el backend. */
+    skills: SkillItem[];
 }
-
 
 export type VacancyErrors = Partial<Record<keyof VacancyConditions, string>>;
 
@@ -25,17 +33,7 @@ export type UpdateVacancyField = <Field extends keyof VacancyConditions>(
     value: VacancyConditions[Field],
 ) => void;
 
-const GOOGLE_MAPS_LINK_REGEX =/^https:\/\/(www\.)?(maps\.google\.com|google\.com\/maps|goo\.gl\/maps|maps\.app\.goo\.gl)/i;
-
-const REQUIRED_FIELDS: (keyof VacancyConditions)[] = [
-    "title",
-    "modality",
-    "mapsLink",
-    "contractType",
-    "category",
-    "vacancyCount",
-    "languages",
-];
+const REQUIREMENTS_FIELDS_ORDER: (keyof VacancyConditions)[] = ["description", "skills"];
 
 const INITIAL_CONDITIONS: VacancyConditions = {
     title: "",
@@ -50,66 +48,110 @@ const INITIAL_CONDITIONS: VacancyConditions = {
     skills: [],
 };
 
-function isFieldEmpty(field: keyof VacancyConditions, conditions: VacancyConditions) {
-    if (field === "modality") return conditions.modality === null;
-    const value = conditions[field] as string;
-    return value.trim() === "";
+function focusField(field: keyof VacancyConditions) {
+    const element = document.getElementById(field);
+    if (!element) return;
+    element.scrollIntoView({ behavior: "smooth", block: "center" });
+    element.focus();
 }
 
 export function useJobOfferForm() {
     const [currentStep, setCurrentStep] = useState(1);
     const [conditions, setConditions] = useState<VacancyConditions>(INITIAL_CONDITIONS);
     const [errors, setErrors] = useState<VacancyErrors>({});
+
+    function clearError(field: keyof VacancyConditions) {
+        setErrors((prev) => {
+            if (!prev[field]) return prev;
+            const next = { ...prev };
+            delete next[field];
+            return next;
+        });
+    }
+
     const updateField: UpdateVacancyField = (field, value) => {
         setConditions((prev) => ({ ...prev, [field]: value }));
-        setErrors((prev) => {
-         if (!prev[field]) return prev;
-         const next = { ...prev };
-         delete next[field];
-         return next;
-    });
-};
+        clearError(field);
+    };
 
     function selectModality(modality: Modality) {
-    setConditions((prev) => ({ ...prev, modality }));
-    setErrors((prev) => {
-        if (!prev.modality) return prev;
-        const next = { ...prev };
-        delete next.modality;
-        return next;
-    });
-}
+        updateField("modality", modality);
+    }
 
-    function validateMapsLink(){
-        if(conditions.mapsLink.trim() === "") return;
-        const isValid = GOOGLE_MAPS_LINK_REGEX.test(conditions.mapsLink.trim());
-        setErrors((prev) => ({...prev, mapsLink: isValid ? undefined: "Ingresa un enlace válido de Google Maps",}));
+    /** Valida un campo al perder el foco. Si está vacío no marca error: eso lo hace "Continuar". */
+    function validateField(field: keyof VacancyConditions) {
+        if (isFieldEmpty(field, conditions)) {
+            clearError(field);
+            return;
+        }
+        const message = validateInformation(conditions)[field];
+        if (message) {
+            setErrors((prev) => ({ ...prev, [field]: message }));
+        } else {
+            clearError(field);
+        }
+    }
+
+    function validateMapsLink() {
+        validateField("mapsLink");
+    }
+
+    function applyStepErrors(
+        fields: (keyof VacancyConditions)[],
+        found: VacancyErrors,
+    ): keyof VacancyConditions | undefined {
+        setErrors((prev) => {
+            const next = { ...prev };
+            fields.forEach((field) => delete next[field]);
+            return { ...next, ...found };
+        });
+        return fields.find((field) => found[field]);
     }
 
     function goNext() {
         setCurrentStep((step) => Math.min(step + 1, 3));
     }
-    
+
     function goBack() {
         setCurrentStep((step) => Math.max(step - 1, 1));
     }
 
-    function handleContinue(){
-        const firstEmptyField = REQUIRED_FIELDS.find((field) => isFieldEmpty(field, conditions));
-
-        if (firstEmptyField) {
-            setErrors((prev) => ({ ...prev, [firstEmptyField]: "Este campo es obligatorio" }));
-
-            const element = document.getElementById(firstEmptyField);
-            if (element) {
-                element.scrollIntoView({ behavior: "smooth", block: "center" });
-                element.focus();
-            
+    function handleContinue() {
+        const firstInvalid = applyStepErrors(INFORMATION_FIELDS_ORDER, validateInformation(conditions));
+        if (firstInvalid) {
+            focusField(firstInvalid);
+            return;
+        }
+        goNext();
     }
-    return;
-}
-goNext();
-    }
-    return { currentStep, conditions, errors, updateField, selectModality,validateMapsLink, handleContinue, goNext, goBack };
 
+    function handleRequirementsContinue() {
+        const firstInvalid = applyStepErrors(REQUIREMENTS_FIELDS_ORDER, validateRequirements(conditions));
+        if (firstInvalid) {
+            focusField(firstInvalid);
+            return;
+        }
+        goNext();
+    }
+
+    function reset() {
+        setConditions(INITIAL_CONDITIONS);
+        setErrors({});
+        setCurrentStep(1);
+    }
+
+    return {
+        currentStep,
+        conditions,
+        errors,
+        updateField,
+        selectModality,
+        validateField,
+        validateMapsLink,
+        handleContinue,
+        handleRequirementsContinue,
+        goNext,
+        goBack,
+        reset,
+    };
 }

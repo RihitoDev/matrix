@@ -8,6 +8,7 @@ import { SkillMapper } from './mappers/skill.mapper.js';
 import { SkillRepository } from './repositories/skill.repository.js';
 import { UserSkillRepository } from './repositories/user-skill.repository.js';
 import { SkillService } from './services/skill.service.js';
+import { SkillsService } from './services/skills.service.js';
 
 @Module({
   imports: [PrismaModule, JwtAuthModule, ProfileModule],
@@ -17,7 +18,8 @@ import { SkillService } from './services/skill.service.js';
     SkillRepository,
     UserSkillRepository,
     SkillMapper,
+    SkillsService,
   ],
-  exports: [SkillService],
+  exports: [SkillService, SkillsService],
 })
 export class SkillsModule {}

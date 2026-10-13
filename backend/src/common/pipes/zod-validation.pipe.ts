@@ -1,26 +1,21 @@
-import { BadRequestException, PipeTransform } from '@nestjs/common';
-import type { ZodSchema } from 'zod';
+import { PipeTransform } from '@nestjs/common';
+import type { ZodType } from 'zod';
+import { RequestValidationException } from '../exceptions/request-validation.exception.js';
 
 export class ZodValidationPipe implements PipeTransform {
-  constructor(private readonly schema: ZodSchema) {}
+  constructor(private readonly schema: ZodType) {}
 
   transform(value: unknown) {
     const result = this.schema.safeParse(value);
-
     if (!result.success) {
-      const detalles = result.error.issues.map((issue) => ({
-        campo: issue.path.map((p) => String(p)).join('.') || 'body',
-        codigo: String(issue.code),
-        mensaje: issue.message,
-      }));
-
-      // Se lanza BadRequestException y el HttpExceptionFilter la mapea a 422
-      throw new BadRequestException({
-        error: 'VALIDATION_ERROR',
-        detalles,
-      });
+      throw new RequestValidationException(
+        result.error.issues.map((issue) => ({
+          field: issue.path.join('.') || 'valor',
+          message: issue.message,
+        })),
+        
+      );
     }
-
     return result.data;
   }
 }

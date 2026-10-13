@@ -2,6 +2,7 @@ import { cleanup, render, screen, within } from "@testing-library/react";
 import { House } from "lucide-react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { SIDEBAR_NAVIGATION } from "@/shared/config/navigation.config";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import type { AppSidebarProps } from "@/shared/types/app-sidebar-props.types";
 import { AppSidebar } from "./app-sidebar";
@@ -56,6 +57,16 @@ describe("AppSidebar", () => {
 
     const navigation = screen.getByRole("navigation", { name: "Menú principal" });
     expect(within(navigation).queryByText("Empleos")).toBeNull();
+  });
+
+  it("renders one item per entry of the default navigation", () => {
+    renderSidebar();
+
+    const navigation = screen.getByRole("navigation", { name: "Menú principal" });
+    const topLevelItems = within(navigation)
+      .queryAllByRole("listitem")
+      .filter((item) => item.getAttribute("data-slot") === "sidebar-menu-item");
+    expect(topLevelItems).toHaveLength(SIDEBAR_NAVIGATION.length);
   });
 
   it("renders the items and user received by props", () => {

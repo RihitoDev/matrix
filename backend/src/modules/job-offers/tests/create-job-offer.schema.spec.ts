@@ -25,6 +25,28 @@ describe('createJobOfferSchema', () => {
     expect(parse({}).success).toBe(true);
   });
 
+  it('acepta una vacante sin ubicación en texto (el formulario solo envía el enlace de Maps)', () => {
+    expect(parse({ ubicacion: undefined }).success).toBe(true);
+  });
+
+  it('acepta el payload exacto que arma el frontend', () => {
+    const frontendPayload = {
+      tituloPuesto: 'DevOps Senior',
+      descripcion: 'Buscamos un DevOps con Docker y Kubernetes.',
+      modalidad: 'Híbrido',
+      tipoContrato: 'Pasantía',
+      categoria: 'Tecnología',
+      numeroVacantes: 2,
+      salarioMin: 6500,
+      salarioMax: 8000,
+      idiomas: 'Español, inglés intermedio',
+      enlaceGoogleMaps: 'https://goo.gl/maps/abc',
+      tecnologias: [randomUUID()],
+    };
+
+    expect(createJobOfferSchema.safeParse(frontendPayload).success).toBe(true);
+  });
+
   it('acepta un salario fijo sin máximo', () => {
     expect(parse({ salarioMax: undefined }).success).toBe(true);
   });

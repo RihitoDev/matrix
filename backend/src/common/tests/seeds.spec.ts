@@ -3,8 +3,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 const seedUsers = vi.fn();
 const seedAvailability = vi.fn();
 const seedAccessRequests = vi.fn();
+const seedEvents = vi.fn();
+const seedEventRegistrations = vi.fn();
 const seedTechnicalAreas = vi.fn();
 const seedOrientationTypes = vi.fn();
+const seedJobOffers = vi.fn();
 
 vi.mock('../../modules/users/seeds/users.seed.js', () => ({
   hashSeedPassword: vi.fn().mockResolvedValue('hash'),
@@ -16,11 +19,20 @@ vi.mock('../../modules/availability/seeds/availability.seed.js', () => ({
 vi.mock('../../modules/access-requests/seeds/access-requests.seed.js', () => ({
   seedAccessRequests: (...args: unknown[]) => seedAccessRequests(...args),
 }));
+vi.mock('../../modules/events/seeds/events.seed.js', () => ({
+  seedEvents: (...args: unknown[]) => seedEvents(...args),
+}));
+vi.mock('../../modules/event-registrations/seeds/event-registrations.seed.js', () => ({
+  seedEventRegistrations: (...args: unknown[]) => seedEventRegistrations(...args),
+}));
 vi.mock('../../modules/technical-areas/seeds/technical-areas.seed.js', () => ({
   seedTechnicalAreas: (...args: unknown[]) => seedTechnicalAreas(...args),
 }));
 vi.mock('../../modules/orientation-types/seeds/orientation-types.seed.js', () => ({
   seedOrientationTypes: (...args: unknown[]) => seedOrientationTypes(...args),
+}));
+vi.mock('../../modules/job-offers/seeds/job-offers.seed.js', () => ({
+  seedJobOffers: (...args: unknown[]) => seedJobOffers(...args),
 }));
 
 const { createSeedClient, loadSeedEnv, runSeed } = await import('../database/seeds.js');
@@ -30,9 +42,9 @@ const validEnv = { DB_USER: 'u', DB_PASSWORD: 'p', DB_NAME: 'n', DB_HOST: 'h', D
 function setupSeeds() {
   const user = (id: string) => ({ id });
   seedUsers.mockResolvedValue({
-    users: { mentorA: user('m1'), mentorB: user('m2'), graduate: user('g1'), student: user('s1') },
+    users: { eventGraduate: user('e1'), emptyGraduate: user('e2'), mentorA: user('m1'), mentorB: user('m2'), graduate: user('g1'), student: user('s1'), admin: user('a1') },
     roles: 5,
-    userRoles: 5,
+    userRoles: 7,
     legacyRoles: 0,
   });
   seedAvailability.mockResolvedValue({ weeks: {}, plan: {}, statuses: 2, blocks: 56, appointments: 2, warnings: ['aviso'] });
@@ -86,14 +98,17 @@ describe('runSeed', () => {
     expect(client.$transaction).toHaveBeenCalledOnce();
     expect(seedTechnicalAreas).toHaveBeenCalledWith(tx);
     expect(seedOrientationTypes).toHaveBeenCalledWith(tx);
+    expect(seedJobOffers).toHaveBeenCalledWith(tx);
     expect(seedUsers).toHaveBeenCalledWith(tx, 'hash');
+    expect(seedEvents).toHaveBeenCalledWith(tx, 'e1');
+    expect(seedEventRegistrations).toHaveBeenCalledWith(tx, 'e1');
     expect(seedAvailability).toHaveBeenCalledWith(tx, expect.objectContaining({ mentorId: 'm1', graduateId: 'g1' }), expect.any(Date));
     expect(seedAccessRequests).toHaveBeenCalledWith(tx);
     expect(summary).toMatchObject({
       roles: 5,
       statuses: 2,
-      users: 5,
-      userRoles: 5,
+      users: 7,
+      userRoles: 7,
       blocks: 56,
       appointments: 2,
       warnings: ['aviso'],

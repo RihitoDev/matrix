@@ -16,7 +16,10 @@ async function bootstrap(): Promise<void> {
     .map((origin) => origin.trim())
     .filter((origin) => origin.length > 0);
 
-  app.enableCors({ origin: corsOrigins });
+  app.enableCors({
+    origin: corsOrigins,
+    exposedHeaders: ['Content-Disposition'],
+  });
   app.setGlobalPrefix('api');
 
   const config = buildSwaggerConfig();

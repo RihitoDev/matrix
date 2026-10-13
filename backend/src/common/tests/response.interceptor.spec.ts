@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { StreamableFile } from '@nestjs/common';
 import type { CallHandler, ExecutionContext } from '@nestjs/common';
 import { firstValueFrom, of, throwError } from 'rxjs';
 import { ResponseInterceptor } from '../interceptors/index.js';
@@ -74,6 +75,15 @@ describe('ResponseInterceptor', () => {
       detail: 'Operación exitosa',
       ...paginated,
     });
+  });
+
+  it('devuelve los archivos sin envolverlos', async () => {
+    const file = new StreamableFile(Buffer.from('a,b'));
+    const result = await firstValueFrom(
+      interceptor.intercept(buildContext(), buildCallHandler(file)),
+    );
+
+    expect(result).toBe(file);
   });
 
   it('no vuelve a envolver respuestas ya formateadas', async () => {
