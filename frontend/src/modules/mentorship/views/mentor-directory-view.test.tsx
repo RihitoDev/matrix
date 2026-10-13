@@ -28,6 +28,10 @@ describe("MentorDirectoryView", () => {
         fullName: "María Fernanda Rodríguez",
         headline: "Desarrolladora Backend Senior",
         technicalAreas: ["Backend"],
+        photoUrl: null,
+        education: null,
+        isAvailable: false,
+        orientationTypes: [],
       },
     ]);
     render(<MentorDirectoryView />);

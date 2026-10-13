@@ -17,13 +17,21 @@ describe("MentorProfileView", () => {
       MENTOR_PROFILE_FIXTURE,
     );
 
-    render(<MentorProfileView mentorId={MENTOR_PROFILE_FIXTURE.id} />);
+    const { container } = render(
+      <MentorProfileView mentorId={MENTOR_PROFILE_FIXTURE.id} />,
+    );
 
     expect((await screen.findAllByText("Ana Rojas")).length).toBeGreaterThan(0);
     expect(screen.getByText("Arquitecta de Software")).toBeInTheDocument();
     expect(screen.getByText("Backend")).toBeInTheDocument();
     expect(screen.getByText("Arquitectura")).toBeInTheDocument();
     expect(screen.getByText("Orientación técnica")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Sobre mí" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Trayectoria actual" })).toBeInTheDocument();
+    expect(container.querySelector("main > div > div.grid")).toHaveClass(
+      "grid-cols-1",
+      "xl:grid-cols-12",
+    );
   });
 
   it("maneja campos opcionales nulos sin inventar contenido", async () => {
@@ -47,7 +55,7 @@ describe("MentorProfileView", () => {
       await screen.findByRole("heading", { name: "Ana Rojas" }),
     ).toBeInTheDocument();
     expect(screen.queryByText("Sobre mí")).not.toBeInTheDocument();
-    expect(screen.queryByText("Trayectoria profesional")).not.toBeInTheDocument();
+    expect(screen.queryByText("Trayectoria actual")).not.toBeInTheDocument();
     expect(
       screen.getByText("No hay áreas técnicas registradas."),
     ).toBeInTheDocument();
