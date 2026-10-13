@@ -4,11 +4,6 @@ import type {
   Vacancy,
 } from "../types/matching-types";
 
-/**
- * Los 6 ejes del Radar de Afinidad, en el orden mostrado en el mockup de Figma
- * (HU1 — perfil propio del egresado): Desarrollo, Cloud/DevOps, Data/AI, QA,
- * Ciberseguridad y Gobernanza TI.
- */
 export const AFFINITY_AXES: AffinityAxis[] = [
   { id: "desarrollo", label: "Desarrollo" },
   { id: "cloud-devops", label: "Cloud/DevOps" },
@@ -20,15 +15,6 @@ export const AFFINITY_AXES: AffinityAxis[] = [
 
 export const AXIS_MAX_SCORE = 10;
 
-/**
- * Pool de candidatos. Los mismos candidatos postulan a las 3 vacantes de ejemplo;
- * lo que cambia por vacante es el % de afinidad y las brechas, calculados en
- * matching.service.ts contra el perfil objetivo de cada vacante.
- *
- * Los puntajes de "Carlos Mendoza Ríos" son los mismos que aparecen en el mockup
- * de HU1 (perfil propio del egresado), para que ambas pantallas sean consistentes
- * cuando se integren.
- */
 export const CANDIDATES_POOL: Candidate[] = [
   {
     id: "cand-carlos-mendoza",
@@ -116,7 +102,6 @@ export const CANDIDATES_POOL: Candidate[] = [
   },
 ];
 
-/** 3 vacantes de ejemplo, cada una con un perfil objetivo distinto por eje. */
 export const VACANCIES: Vacancy[] = [
   {
     id: "vac-tech-lead",

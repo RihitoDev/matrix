@@ -22,8 +22,6 @@ export function useMatching() {
 
   const vacancy = getVacancyById(vacancyId);
 
-  // AC1/AC5/AC6/AC8: datos de ejemplo fijos, filtrados por búsqueda y ordenados
-  // por afinidad — todo en memoria, sin ninguna llamada de red.
   const candidates: CandidateWithMatch[] = useMemo(() => {
     return getCandidatesForVacancy(vacancyId, query).map(
       (candidate): CandidateWithMatch => ({
@@ -36,7 +34,6 @@ export function useMatching() {
   const selectedCandidate =
     candidates.find((c) => c.id === selectedCandidateId) ?? candidates[0] ?? null;
 
-  // AC14/AC15: cambiar de vacante actualiza el perfil objetivo y la lista de candidatos.
   function selectVacancy(id: string) {
     setVacancyId(id);
     setSelectedCandidateId(null);
@@ -44,13 +41,11 @@ export function useMatching() {
     setActionFeedback(null);
   }
 
-  // AC2/AC9/AC13: seleccionar un candidato actualiza el panel derecho.
   function selectCandidate(id: string) {
     setSelectedCandidateId(id);
     setActionFeedback(null);
   }
 
-  // AC18: pedir confirmación antes de descartar (paso 1 de 2).
   function requestDiscard(id: string) {
     setPendingDiscardId(id);
   }
@@ -59,8 +54,6 @@ export function useMatching() {
     setPendingDiscardId(null);
   }
 
-  // AC19: al confirmar, el candidato se marca como descartado en la interfaz
-  // (permanece en la lista, visualmente diferenciado) sin tocar el backend.
   function confirmDiscard() {
     if (!pendingDiscardId) return;
     const discardedCandidate = candidates.find((c) => c.id === pendingDiscardId);
