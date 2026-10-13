@@ -95,13 +95,13 @@ export function CandidateDetailPanel({
             {
               id: "candidate",
               name: candidate.name,
-              color: "#B3121B",
+              color: "var(--color-accent)",
               values: candidate.scores,
             },
             {
               id: "target",
               name: "Perfil objetivo",
-              color: "#6366F1",
+              color: "var(--color-ink-soft)",
               values: vacancy.targetProfile,
             },
           ]}
@@ -120,12 +120,6 @@ export function CandidateDetailPanel({
             <p className="rounded-md border border-border bg-muted px-3 py-2 text-center text-sm text-muted-foreground">
               Este perfil fue descartado.
             </p>
-          ) : isPendingDiscard ? (
-            <ConfirmDiscardDialog
-              candidateName={candidate.name}
-              onConfirm={onConfirmDiscard}
-              onCancel={onCancelDiscard}
-            />
           ) : (
             <>
               <Button
@@ -153,6 +147,13 @@ export function CandidateDetailPanel({
               </Button>
             </>
           )}
+
+          <ConfirmDiscardDialog
+            open={isPendingDiscard && !isDiscarded}
+            candidateName={candidate.name}
+            onConfirm={onConfirmDiscard}
+            onCancel={onCancelDiscard}
+          />
 
           {inlineAction === "contact" && !isDiscarded && (
             <div className="rounded-lg border border-border bg-muted/50 p-3 text-sm">
