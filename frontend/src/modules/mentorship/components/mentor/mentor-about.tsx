@@ -30,7 +30,7 @@ export function MentorAbout({ description }: MentorAboutProps) {
       </CardHeader>
 
       <CardContent className="px-6 pb-6 pt-4">
-        <p className="leading-7 text-text-secondary">{description}</p>
+        <p className="whitespace-pre-line [overflow-wrap:anywhere] leading-7 text-text-secondary">{description}</p>
       </CardContent>
     </Card>
   );

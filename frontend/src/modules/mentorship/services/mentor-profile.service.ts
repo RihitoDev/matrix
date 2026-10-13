@@ -2,6 +2,7 @@ import { isAxiosError } from "axios";
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 import type { MentorProfile } from "../types/mentor-profile.types";
+import { resolveMentorPhotoUrl } from "../utils/resolve-mentor-photo-url";
 
 export async function getMentorProfile(
   mentorId: string,
@@ -13,7 +14,11 @@ export async function getMentorProfile(
       { signal },
     );
 
-    return response.data.data;
+    const mentor = response.data.data;
+
+    return mentor?.photoUrl
+      ? { ...mentor, photoUrl: resolveMentorPhotoUrl(mentor.photoUrl) }
+      : mentor;
   } catch (error) {
     const status = isAxiosError(error) ? error.response?.status : undefined;
 
