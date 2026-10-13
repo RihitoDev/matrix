@@ -43,7 +43,7 @@ export class MatchingService {
   intersectRequirements(input: MatchingInput): MatchingResult {
     const careerMatch =
       !input.requiredCareer ||
-      input.userCareer.toLowerCase() === input.requiredCareer.toLowerCase();
+      input.userCareer.trim().toLowerCase() === input.requiredCareer.trim().toLowerCase();
 
     const experienceMatch =
       input.userExperienceYears >= input.minimumExperienceYears;

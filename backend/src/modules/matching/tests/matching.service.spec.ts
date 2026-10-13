@@ -20,7 +20,7 @@ describe('MatchingService', () => {
       classify: vi.fn().mockReturnValue([]),
     };
     nlpService = {
-      normalizeText: vi.fn((t) => t.toLowerCase()),
+      normalizeText: vi.fn((t) => (t ? t.toLowerCase() : '')),
       tokenizeAndFilter: vi.fn().mockReturnValue([]),
       generateNGrams: vi.fn().mockReturnValue([]),
     };
