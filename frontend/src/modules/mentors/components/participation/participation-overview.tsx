@@ -43,9 +43,10 @@ function ParticipationPreferencesCard({
           <Link
             href={editHref}
             className={buttonVariants({
-              className:
-                "h-auto gap-2 rounded-md bg-surface-soft px-3 py-2 text-xs font-semibold text-ink hover:bg-border active:translate-y-0",
-            })}
+               variant: "outline",
+               className:
+               "h-auto gap-2 rounded-md bg-surface-soft px-3 py-2 text-xs font-semibold text-ink hover:bg-border hover:text-ink active:translate-y-0",
+})}
           >
             <Pencil size={14} /> {editLabel}
           </Link>
