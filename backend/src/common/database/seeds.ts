@@ -9,6 +9,7 @@ import { seedEvents } from '../../modules/events/seeds/events.seed.js';
 import { seedEventRegistrations } from '../../modules/event-registrations/seeds/event-registrations.seed.js';
 import { seedAccessRequests } from '../../modules/access-requests/seeds/access-requests.seed.js';
 import { seedAvailability } from '../../modules/availability/seeds/availability.seed.js';
+import { seedJobOffers } from '../../modules/job-offers/seeds/job-offers.seed.js';
 import { seedOrientationTypes } from '../../modules/orientation-types/seeds/orientation-types.seed.js';
 import { seedTechnicalAreas } from '../../modules/technical-areas/seeds/technical-areas.seed.js';
 import { SEED_USERS } from '../../modules/users/constants/seed-users.constants.js';
@@ -53,6 +54,7 @@ export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
     return await prisma.$transaction(async (tx) => {
       await seedTechnicalAreas(tx);
       await seedOrientationTypes(tx);
+      await seedJobOffers(tx);
 
       const usersResult = await seedUsers(tx, password);
       const { users } = usersResult;
