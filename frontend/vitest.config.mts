@@ -1,4 +1,5 @@
 import path from 'path'
+import { availableParallelism } from 'node:os'
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
