@@ -44,9 +44,17 @@ describe('createAccessRequestSchema', () => {
     expect(messagesOf({ ...validPayload, firstName }).length).toBeGreaterThan(0);
   });
 
+  it.each(['Lionel Andrés', "D'Angelo", 'D’Angelo', 'Pérez-Gómez', 'María José Peña Núñez', 'de la Cruz', "O'Connor-Smith", 'Müller'])('acepta el apellido "%s"', (lastName) => {
+    expect(createAccessRequestSchema.safeParse({ ...validPayload, lastName }).success).toBe(true);
+  });
+
+  it.each(['--', "'", '-Pérez', 'Pérez-', "''", "Pérez--Gómez", "D''Angelo", 'José123', '<script>', String.fromCodePoint(0x1f600), ' ', "'Angelo", 'Juan  Pérez'])('rechaza el apellido "%s"', (lastName) => {
+    expect(createAccessRequestSchema.safeParse({ ...validPayload, lastName }).success).toBe(false);
+  });
+
   it('rechaza nombres demasiado largos y apellidos inválidos', () => {
     expect(messagesOf({ ...validPayload, firstName: 'a'.repeat(101) })).toContain('firstName: Los nombres no pueden superar los 100 caracteres');
-    expect(messagesOf({ ...validPayload, lastName: 'Pérez1' })).toContain('lastName: Los apellidos solo pueden contener letras y espacios');
+    expect(messagesOf({ ...validPayload, lastName: 'Pérez1' })).toContain('lastName: Los apellidos solo pueden contener letras, espacios, guiones y apóstrofes');
   });
 
   it.each(['12a45', '', '1'.repeat(21)])('rechaza el carnet "%s"', (idCardNumber) => {

@@ -576,4 +576,71 @@ describe("accessRequestService", () => {
       expect(await accessRequestService.getRequestStatus("SOL-2026-0001", "a@b.co")).toMatchObject({ ok: false, status: 0 });
     });
   });
+
+  describe("formato estándar de respuesta (interceptor global)", () => {
+    const wrap = (data: unknown, statusCode = 200) => ({ statusCode, ok: true, detail: "Operación exitosa", data });
+
+    it("createAccessRequest lee el id dentro de data", async () => {
+      reply(201, wrap({ id: "id-1" }, 201));
+
+      await expect(accessRequestService.createAccessRequest(payload)).resolves.toEqual({ ok: true, data: { id: "id-1" } });
+    });
+
+    it("uploadDocument lee documentFileId dentro de data", async () => {
+      reply(201, wrap({ id: "id-1", documentFileId: "file-1", documentType: "academic_diploma" }, 201));
+
+      const result = await accessRequestService.uploadDocument("id-1", new File(["x"], "a.pdf"), "academic_diploma");
+
+      expect(result).toEqual({ ok: true, data: { id: "id-1", documentFileId: "file-1", documentType: "academic_diploma" } });
+    });
+
+    it("submitAccessRequest lee el código y la fecha dentro de data", async () => {
+      reply(201, wrap({ id: "id-1", requestCode: "SOL-2026-0001", status: "pending", submittedAt: "2026-10-08T10:00:00.000Z" }, 201));
+
+      await expect(accessRequestService.submitAccessRequest("id-1")).resolves.toEqual({
+        ok: true,
+        data: { id: "id-1", requestCode: "SOL-2026-0001", status: "pending", submittedAt: "2026-10-08T10:00:00.000Z" },
+      });
+    });
+
+    it("getRequestStatus lee el estado dentro de data", async () => {
+      reply(200, wrap({ requestCode: "SOL-2026-0001", status: "approved", submittedAt: null }));
+
+      await expect(accessRequestService.getRequestStatus("SOL-2026-0001", "ana@umss.edu.bo")).resolves.toMatchObject({
+        ok: true,
+        data: { requestCode: "SOL-2026-0001", status: "approved" },
+      });
+    });
+
+    it("un 400 de validación con errors [{ field, message }] marca cada campo", async () => {
+      reply(400, {
+        statusCode: 400,
+        data: [],
+        detail: "firstName: Los nombres son obligatorios",
+        ok: false,
+        errors: [
+          { field: "firstName", message: "Los nombres son obligatorios" },
+          { field: "sisCode", message: "El código SIS es obligatorio" },
+        ],
+      });
+
+      const result = await accessRequestService.createAccessRequest(payload);
+
+      expect(result).toMatchObject({
+        ok: false,
+        status: 400,
+        fieldErrors: { firstName: "Los nombres son obligatorios", sisCode: "El código SIS es obligatorio" },
+      });
+    });
+
+    it("un 409 de dominio con formato estándar marca el campo repetido", async () => {
+      reply(409, { statusCode: 409, data: null, detail: "El correo ya está registrado", ok: false });
+
+      await expect(accessRequestService.createAccessRequest(payload)).resolves.toMatchObject({
+        ok: false,
+        status: 409,
+        fieldErrors: { email: "El correo ya está registrado" },
+      });
+    });
+  });
 });

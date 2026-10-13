@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { SELECT_ITEM_CONTRAST_CLASS } from "@/shared/constants/select.constants";
 import { accessRequestService } from "../services/access-request.service";
 import { stubObjectUrls } from "../components/document/document-step-test-utils";
 import { RequestAccessView } from "./request-access-view";
@@ -43,7 +44,6 @@ async function fillAndContinue() {
   await screen.findByRole("heading", { name: "Documento de respaldo" });
 }
 
-// El encabezado usa useRouter, que necesita el App Router montado
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
 describe("RequestAccessView", () => {
@@ -54,6 +54,18 @@ describe("RequestAccessView", () => {
   afterEach(() => {
     cleanup();
     vi.unstubAllGlobals();
+  });
+
+  it.each([
+    ["Carrera", "Licenciatura en Ingeniería de Sistemas"],
+    ["Expedido", "LP"],
+  ])("las opciones de %s fijan texto tinta al resaltarse", async (name, optionName) => {
+    render(<RequestAccessView />);
+
+    await userEvent.setup().click(screen.getByRole("combobox", { name }));
+    const option = await screen.findByRole("option", { name: optionName });
+
+    for (const token of SELECT_ITEM_CONTRAST_CLASS.split(" ")) expect(option.className).toContain(token);
   });
 
   it("renderiza la barra de pasos y el formulario del paso 1", () => {

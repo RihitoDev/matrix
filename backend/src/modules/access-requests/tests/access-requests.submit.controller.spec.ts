@@ -42,10 +42,10 @@ describe('AccessRequestsController: envío y consulta de estado', () => {
     expect(res.body).toEqual({ id: ID, requestCode: 'SOL-2026-0001', status: 'pending', submittedAt: '2026-10-05T15:00:00.000Z' });
   });
 
-  it('POST /:id/submit con un UUID inválido responde 400 con el mensaje existente', async () => {
+  it('POST /:id/submit con un id inválido responde 400 con el formato de errores de la API', async () => {
     const res = await request(app.getHttpServer()).post('/access-requests/no-es-uuid/submit').expect(400);
 
-    expect(res.body.message).toBe('El identificador de la solicitud no es válido');
+    expect(res.body.errors).toEqual([{ field: 'id', message: 'El identificador de la solicitud no es válido' }]);
     expect(service.submit).not.toHaveBeenCalled();
   });
 
