@@ -1,4 +1,5 @@
 import path from 'path'
+import { availableParallelism } from 'node:os'
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 
@@ -10,7 +11,8 @@ export default defineConfig({
     },
   },
   test: {
-setupFiles: ['./vitest.setup.ts'],
+    maxWorkers: Math.min(4, availableParallelism()),
+    setupFiles: ['./vitest.setup.ts'],
     environment: 'jsdom',
     coverage: {
       provider: 'v8',
