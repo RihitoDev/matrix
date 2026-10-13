@@ -4,6 +4,7 @@ import {
   fireEvent,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
@@ -86,6 +87,14 @@ function advanceToConfirmation() {
     screen.getByRole("button", { name: /Orientación profesional/i }),
   );
   fireEvent.click(nextButton);
+}
+
+async function openActivationDialog() {
+  fireEvent.click(
+    screen.getByRole("button", { name: "Activar participación" }),
+  );
+
+  return screen.findByRole("alertdialog");
 }
 
 describe("MentorshipView", () => {
@@ -526,6 +535,35 @@ describe("MentorshipView", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("shows the confirmation dialog without activating when pressing Activar participación", async () => {
+    renderWithQuery(<MentorshipView />);
+    advanceToConfirmation();
+
+    const dialog = await openActivationDialog();
+
+    expect(
+      within(dialog).getByText(
+        "¿Está seguro de que desea activar su participación como mentor?",
+      ),
+    ).toBeInTheDocument();
+    expect(integrationMocks.activateMentor).not.toHaveBeenCalled();
+  });
+
+  it("closes the dialog on cancel without calling the service and keeps the selections", async () => {
+    renderWithQuery(<MentorshipView />);
+    advanceToConfirmation();
+
+    const dialog = await openActivationDialog();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Cancelar" }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    });
+    expect(integrationMocks.activateMentor).not.toHaveBeenCalled();
+    expect(screen.getByText("Backend")).toBeInTheDocument();
+    expect(screen.getByText("Orientación profesional")).toBeInTheDocument();
+  });
+
   it("shows success only after one activation resolves and clears the draft", async () => {
     let resolveActivation!: (value: { id: string }) => void;
     integrationMocks.activateMentor.mockReturnValue(
@@ -542,17 +580,19 @@ describe("MentorshipView", () => {
       ).not.toBeNull();
     });
 
-    const activateButton = screen.getByRole("button", {
-      name: "Activar participación",
+    const dialog = await openActivationDialog();
+    const confirmButton = within(dialog).getByRole("button", {
+      name: "Aceptar",
     });
-    fireEvent.click(activateButton);
-    fireEvent.click(activateButton);
+    fireEvent.click(confirmButton);
+    fireEvent.click(confirmButton);
 
     expect(integrationMocks.activateMentor).toHaveBeenCalledTimes(1);
     expect(integrationMocks.activateMentor).toHaveBeenCalledWith({
       technicalAreaIds: ["550e8400-e29b-41d4-a716-446655440001"],
       orientationTypeIds: ["550e8400-e29b-41d4-a716-446655440003"],
     });
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
     expect(
       screen.queryByRole("heading", {
         name: "Tu participación como mentor está activa",
@@ -590,13 +630,13 @@ describe("MentorshipView", () => {
       ).not.toBeNull();
     });
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Activar participación" }),
-    );
+    const dialog = await openActivationDialog();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Aceptar" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Tu participación como mentor ya está activa.",
     );
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     expect(screen.getByText("Backend")).toBeInTheDocument();
     expect(screen.getByText("Orientación profesional")).toBeInTheDocument();
     expect(
