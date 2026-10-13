@@ -1,0 +1,3 @@
+export const FIRST_ACADEMIC_YEAR = 2020;
+export const FIRST_SEMESTER_LAST_MONTH = 6;
+export const ALL_ACADEMIC_PERIODS_VALUE = "ALL";

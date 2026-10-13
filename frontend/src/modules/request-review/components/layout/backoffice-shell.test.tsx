@@ -44,7 +44,7 @@ describe("BackofficeShell", () => {
       </BackofficeShell>,
     );
 
-    await waitFor(() => expect(replace).toHaveBeenCalledWith("/login"));
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/login?next=%2Fbackoffice%2Fsolicitudes"));
     expect(screen.queryByText("Contenido del backoffice")).toBeNull();
   });
 

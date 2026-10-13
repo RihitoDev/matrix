@@ -1,8 +1,7 @@
-
 import type { NavigationItem } from "@/shared/types/navigation-item.types";
 import {
+  CalendarClock,
   CalendarDays,
-  ChartColumn,
   House,
   ListChecks,
   MessageCircle,
@@ -29,15 +28,11 @@ export const SIDEBAR_NAVIGATION: NavigationItem[] = [
         href: "/mentors/participation",
         icon: UserRound,
       },
-    ],
-  },
-  {
-    label: "Reportes Analíticos",
-    icon: ChartColumn,
-    children: [
-      { label: "Reporte de usuarios registrados", href: "/reports/registered-users" },
-      { label: "Reporte de usuarios rechazados", href: "/reports/rejected-users" },
-      { label: "Historial de reportes generados", href: "/reports/history" },
+      {
+        label: "Mi disponibilidad",
+        href: "/mentor/availability",
+        icon: CalendarClock,
+      },
     ],
   },
 ];

@@ -55,12 +55,12 @@ export function MentorProfileView({ mentorId }: MentorProfileViewProps) {
 
   return (
     <main className="min-h-screen bg-surface-soft p-4 sm:p-6 md:p-8">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto w-full min-w-0 max-w-7xl">
         <MentorProfileNavigation mentorName={mentor.fullName} />
         <MentorProfileHeader mentor={mentor} />
 
-        <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12">
-          <div className="flex flex-col gap-8 lg:col-span-8">
+        <div className="mt-8 grid min-w-0 grid-cols-1 gap-8 xl:grid-cols-12">
+          <div className="flex min-w-0 flex-col gap-8 xl:col-span-8">
             {mentor.aboutMe && <MentorAbout description={mentor.aboutMe} />}
 
             <MentorGuidanceTypes
@@ -69,7 +69,7 @@ export function MentorProfileView({ mentorId }: MentorProfileViewProps) {
             />
           </div>
 
-          <div className="flex flex-col gap-8 lg:col-span-4">
+          <div className="flex min-w-0 flex-col gap-8 xl:col-span-4">
             <MentorCareer mentor={mentor} />
 
             <MentorTechnicalAreas areas={mentor.technicalAreas} />

@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import type { PersonalInfoErrors } from "../types/personal-info-errors.types";
 import type { PersonalInfoFormProps } from "../types/personal-info-form-props.types";
 import type { PersonalInfoValues } from "../types/personal-info-values.types";
-import { getFieldErrorProps } from "../utils/get-field-error-props";
+import { PHONE_HINT, PHONE_HINT_ID } from "../constants/profile-validation.constants";
+import { getFieldErrorId, getFieldErrorProps } from "../utils/get-field-error-props";
+import { limitPhoneDigits } from "../utils/limit-phone-digits";
 import { trimFormValues } from "../utils/trim-form-values";
 import { validatePersonalInfo } from "../utils/validate-personal-info";
 import { FormField } from "./form-field";
@@ -35,7 +37,9 @@ export function PersonalInfoForm({
   };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    updateField(event.target.name as keyof PersonalInfoValues, event.target.value);
+    const field = event.target.name as keyof PersonalInfoValues;
+    const value = field === "phone" ? limitPhoneDigits(event.target.value) : event.target.value;
+    updateField(field, value);
   };
 
   const handleCityChange = (cityId: string | null) => {
@@ -133,7 +137,13 @@ export function PersonalInfoForm({
               onChange={handleChange}
               className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
               {...getFieldErrorProps("phone", errors.phone)}
+              aria-describedby={[PHONE_HINT_ID, errors.phone ? getFieldErrorId("phone") : null]
+                .filter(Boolean)
+                .join(" ")}
             />
+            <p id={PHONE_HINT_ID} className="text-[13px] text-text-secondary">
+              {PHONE_HINT}
+            </p>
           </FormField>
           <FormField
             id="personalEmail"
