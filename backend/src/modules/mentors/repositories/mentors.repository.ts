@@ -109,8 +109,6 @@ export class MentorsRepository {
       ],
     });
 
-    // One metadata lookup for the whole directory, without transferring photo bytes.
-    // Epic 2 writes User.updatedAt whenever it saves or removes a photo.
     const photos = mentors.length
       ? await this.prisma.user.findMany({
           where: {

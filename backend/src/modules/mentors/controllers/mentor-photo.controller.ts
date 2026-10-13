@@ -14,7 +14,6 @@ import { MentorPhotoService } from '../services/mentor-photo.service.js';
 export class MentorPhotoController {
   constructor(private readonly mentorPhotoService: MentorPhotoService) {}
 
-  // Public like the mentor profile; eligibility is checked on every request.
   @Get(':userId/photo')
   @Header('Cache-Control', 'no-store')
   @ApiProduces('image/png', 'image/jpeg')

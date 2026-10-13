@@ -23,7 +23,6 @@ const jpeg = Buffer.concat([
   Buffer.from([0xff, 0xd9]),
 ]);
 
-// Real modules, HTTP pipeline and photo services; only persistence is isolated.
 describe('Mentor photo HTTP integration', () => {
   let app: INestApplication;
   let photoService: ProfilePhotoService;
