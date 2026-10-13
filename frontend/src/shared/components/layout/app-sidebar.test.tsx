@@ -33,6 +33,7 @@ describe("AppSidebar", () => {
     renderSidebar();
 
     expect(screen.getByText("UMSSY")).toBeDefined();
+    expect(document.querySelector('img[src="/icons/icon-192x192.png"]')).toBeInTheDocument();
     expect(screen.getByText("Universidad para el futuro")).toBeDefined();
     expect(screen.queryByText("Alejandro Vargas")).toBeNull();
     expect(screen.queryByText("Administrador")).toBeNull();

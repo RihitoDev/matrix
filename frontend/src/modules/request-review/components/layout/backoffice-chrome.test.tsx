@@ -7,11 +7,12 @@ import { BackofficeUserFooter } from "./backoffice-user-footer";
 describe("marca, cabeceras y pie del backoffice", () => {
   afterEach(() => cleanup());
 
-  it("la marca es el texto UMSSY con el subtítulo, sin escudo ni lema", () => {
+  it("la marca muestra el icono de UMSSY con el subtítulo del backoffice", () => {
     const { container } = render(<BackofficeBrand />);
 
     expect(screen.getByText("UMSSY")).toBeInTheDocument();
     expect(screen.getByText("Backoffice de verificación")).toBeInTheDocument();
+    expect(container.querySelector('img[src="/icons/icon-192x192.png"]')).toBeInTheDocument();
     expect(container.querySelector("svg")).toBeNull();
     expect(document.body.textContent).not.toContain("Universidad para el futuro");
   });
