@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useHome } from "../hooks/use-home";
 import { Button } from "@/components/ui/button";
 import { MissingRequirements } from "@/modules/matching/components/missing-requirements";
-import { MatchScoreBar } from "@/modules/matching/components/match-score-bar.js";
+import { MatchScoreBar } from "@/modules/matching/components/match-score-bar";
 import {
   Card,
   CardHeader,

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { MatchScoreProps } from '@/modules/matching/types/match-score.types';
+import { MatchScoreProps } from '../types/match-score.types';
 
 export const MatchScoreBar: React.FC<MatchScoreProps> = ({
   score,
@@ -20,20 +20,20 @@ export const MatchScoreBar: React.FC<MatchScoreProps> = ({
   return (
     <div className={`w-full flex flex-col gap-1.5 ${className}`}>
       {showLabel && (
-        <div className="flex justify-between items-center text-sm font-medium">
-          <span className="text-[#0B1F2E]">Compatibilidad</span>
-          <span className="font-semibold text-[#0B1F2E]">{normalizedScore}%</span>
+        <div className="flex justify-between items-center text-sm font-medium text-slate-800">
+          <span>Compatibilidad</span>
+          <span className="font-semibold text-slate-900">{normalizedScore}%</span>
         </div>
       )}
       <div
-        className={`w-full bg-gray-200 rounded-full overflow-hidden ${sizeClasses[size]}`}
+        className={`w-full bg-slate-200 rounded-full overflow-hidden ${sizeClasses[size]}`}
         role="progressbar"
         aria-valuenow={normalizedScore}
         aria-valuemin={0}
         aria-valuemax={100}
       >
         <div
-          className="bg-[#0B1F2E] h-full transition-all duration-500 ease-out rounded-full"
+          className="bg-red-700 h-full transition-all duration-500 ease-out rounded-full"
           style={{ width: `${normalizedScore}%` }}
         />
       </div>
