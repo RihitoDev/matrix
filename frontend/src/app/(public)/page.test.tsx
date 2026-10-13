@@ -1,37 +1,38 @@
-import { render, screen, waitFor, cleanup } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { apiClient } from '@/shared/services/api-client'
 import Home from './page'
 
 describe('Home Page', () => {
   afterEach(() => {
-
-    cleanup()
     vi.restoreAllMocks()
   })
 
-  it('renderiza la nueva interfaz de inicio con la tarjeta de habilidades', async () => {
-    vi.spyOn(apiClient, 'get').mockResolvedValue({
-      data: { data: 'Mock response' },
+  it('renderiza el título principal y muestra la respuesta GET del backend via Axios', async () => {
+    vi.spyOn(apiClient, 'get').mockResolvedValueOnce({
+      data: {
+        statusCode: 200,
+        data: 'Hello World!',
+        detail: 'Solicitud procesada correctamente',
+        ok: true,
+      },
     })
 
     render(<Home />)
-
     expect(screen.getByText('UMSSY')).toBeDefined()
-    expect(screen.getByText('Habilidades detectadas automáticamente')).toBeDefined()
-    expect(screen.getByText('Python')).toBeDefined()
-    expect(screen.getByText('Django')).toBeDefined()
+
+    await waitFor(() => {
+      expect(screen.getByText('Hello World!')).toBeDefined()
+    })
   })
 
-  it('renderiza la vista correctamente incluso si la petición de fondo falla', async () => {
-    vi.spyOn(apiClient, 'get').mockRejectedValue(new Error('Network error'))
+  it('muestra mensaje de error si falla la petición con Axios', async () => {
+    vi.spyOn(apiClient, 'get').mockRejectedValueOnce(new Error('Network error'))
 
     render(<Home />)
 
-
     await waitFor(() => {
-      expect(screen.getByText('UMSSY')).toBeDefined()
-      expect(screen.getByText('Habilidades detectadas automáticamente')).toBeDefined()
+      expect(screen.getByText('Error connecting to backend')).toBeDefined()
     })
   })
 })

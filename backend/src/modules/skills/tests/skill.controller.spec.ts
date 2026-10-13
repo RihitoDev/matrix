@@ -74,9 +74,11 @@ describe('SkillController', () => {
     expect(service.listCatalog).not.toHaveBeenCalled();
   });
 
-  it('rejects a request without a token for custom skills', async () => {
+  it('rejects a request without a token', async () => {
+    await request(app.getHttpServer()).get('/skills').expect(401);
     await request(app.getHttpServer()).post('/skills/custom').send({ name: 'Python' }).expect(401);
 
+    expect(service.listCatalog).not.toHaveBeenCalled();
     expect(service.createCustomSkill).not.toHaveBeenCalled();
   });
 

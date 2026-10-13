@@ -11,7 +11,6 @@ import { seedAvailability } from '../../modules/availability/seeds/availability.
 import { seedAccessRequests } from '../../modules/access-requests/seeds/access-requests.seed.js';
 import { seedTechnicalAreas } from '../../modules/technical-areas/seeds/technical-areas.seed.js';
 import { seedOrientationTypes } from '../../modules/orientation-types/seeds/orientation-types.seed.js';
-import { seedJobOffers } from '../../modules/job-offers/seeds/job-offers.seed.js';
 
 vi.mock('../../modules/users/seeds/users.seed.js', () => ({
   hashSeedPassword: vi.fn(),
@@ -30,6 +29,7 @@ vi.mock('../../modules/availability/seeds/availability.seed.js', () => ({
 vi.mock('../../modules/access-requests/seeds/access-requests.seed.js', () => ({
   seedAccessRequests: vi.fn(),
 }));
+
 vi.mock('../../modules/technical-areas/seeds/technical-areas.seed.js', () => ({
   seedTechnicalAreas: vi.fn(),
 }));
@@ -69,13 +69,10 @@ beforeEach(() => {
     documentTypes: 2,
     careers: 2,
   });
-  vi.mocked(seedJobOffers).mockResolvedValue({} as any);
 });
 
 function buildClient() {
-  const tx = {
-    jobOfferModality: { upsert: vi.fn() },
-  };
+  const tx = {};
   const client = {
     $transaction: vi.fn().mockImplementation((callback) => callback(tx)),
     $disconnect: vi.fn(),

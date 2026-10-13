@@ -1,43 +1,52 @@
-import { describe, it, expect, vi } from 'vitest';
-import { BadRequestException } from '@nestjs/common';
-import { JobOffersController } from '../job-offers.controller.js';
-import { JobOffersValidationPipe } from '../job-offers-validation.pipe.js';
-import { createJobOfferSchema } from '../create-job-offer.schema.js';
-import type { JobOffersService } from '../job-offers.service.js';
-import type { CreateJobOfferPayload } from '../create-job-offer.schema.js';
+import { describe, expect, it, vi } from 'vitest';
+import { RequestValidationException } from '../../../common/exceptions/request-validation.exception.js';
+import { JobOffersController } from '../controllers/job-offers.controller.js';
+import type { CreateJobOfferRequest } from '../requests/create-job-offer.request.js';
+import type { JobOffersService } from '../services/job-offers.service.js';
+
+function createController() {
+  const service = {
+    create: vi.fn().mockResolvedValue({ id: 'offer-1', createdAt: '2026-10-12T00:00:00.000Z' }),
+    listPublished: vi.fn().mockResolvedValue([]),
+    listByCompany: vi.fn().mockResolvedValue([]),
+    listSkillCatalog: vi.fn().mockResolvedValue([{ id: 'skill-1', name: 'Docker' }]),
+  };
+  return { controller: new JobOffersController(service as unknown as JobOffersService), service };
+}
 
 describe('JobOffersController', () => {
-  it('delega la creación en el servicio con la empresa y el payload', async () => {
-    const created = { id: 'j1', mensaje: 'Oferta publicada correctamente' };
-    const service = { create: vi.fn().mockResolvedValue(created) };
-    const controller = new JobOffersController(
-      service as unknown as JobOffersService,
-    );
-    const payload = { tituloPuesto: 'Dev' } as CreateJobOfferPayload;
+  it('delega la creación en el servicio', async () => {
+    const { controller, service } = createController();
+    const request = { title: 'DevOps' } as CreateJobOfferRequest;
 
-    const result = await controller.create('empresa-1', payload);
-
-    expect(service.create).toHaveBeenCalledWith('empresa-1', payload);
-    expect(result).toBe(created);
+    await expect(controller.create('company-1', request)).resolves.toEqual({
+      id: 'offer-1',
+      createdAt: '2026-10-12T00:00:00.000Z',
+    });
+    expect(service.create).toHaveBeenCalledWith('company-1', request);
   });
-});
 
-describe('JobOffersValidationPipe', () => {
-  const pipe = new JobOffersValidationPipe(createJobOfferSchema);
+  it('delega los listados y el catálogo en el servicio', async () => {
+    const { controller, service } = createController();
 
-  it('lanza un error con el detalle por campo si el cuerpo es inválido', () => {
-    expect(() => pipe.transform({})).toThrow(BadRequestException);
+    await controller.listPublished();
+    await controller.listByCompany('company-1');
+    await expect(controller.listSkillCatalog()).resolves.toEqual([{ id: 'skill-1', name: 'Docker' }]);
 
-    try {
-      pipe.transform({});
-    } catch (error) {
-      const response = (error as BadRequestException).getResponse() as {
-        error: string;
-        detalles: { campo: string; mensaje: string }[];
-      };
-      expect(response.error).toBe('VALIDATION_ERROR');
-      expect(response.detalles.length).toBeGreaterThan(0);
-      expect(response.detalles[0]).toHaveProperty('campo');
-    }
+    expect(service.listPublished).toHaveBeenCalledOnce();
+    expect(service.listByCompany).toHaveBeenCalledWith('company-1');
+  });
+
+  it('rechaza un id de empresa que no es UUID con el formato estándar de validación', async () => {
+    const paramTypes = Reflect.getMetadata(
+      '__routeArguments__',
+      JobOffersController,
+      'listByCompany',
+    ) as Record<string, { pipes: { transform: (value: string, metadata: object) => Promise<string> }[] }>;
+    const [pipe] = Object.values(paramTypes)[0].pipes;
+
+    await expect(pipe.transform('no-es-uuid', { type: 'param', data: 'companyId' })).rejects.toBeInstanceOf(
+      RequestValidationException,
+    );
   });
 });

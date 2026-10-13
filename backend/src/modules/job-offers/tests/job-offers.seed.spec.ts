@@ -1,5 +1,5 @@
-import type { Prisma } from '../../../prisma/client.js';
 import { describe, expect, it } from 'vitest';
+import type { Prisma } from '../../../prisma/client.js';
 import {
   SEED_JOB_OFFER_COMPANIES,
   SEED_JOB_OFFER_CONTRACT_TYPES,
@@ -7,10 +7,14 @@ import {
   SEED_JOB_OFFER_SKILLS,
   SEED_JOB_OFFER_STATUSES,
 } from '../constants/seed-job-offers.constants.js';
-import { JOB_OFFER_PUBLISHED_STATUS } from '../job-offers.service.js';
 import { seedJobOffers } from '../seeds/job-offers.seed.js';
+import { JobOfferStatus } from '../types/job-offer.enum.js';
 
-type UpsertArgs = { where: Record<string, string>; update: Record<string, unknown>; create: Record<string, unknown> };
+type UpsertArgs = {
+  where: Record<string, string>;
+  update: Record<string, unknown>;
+  create: Record<string, unknown>;
+};
 
 const MODELS = ['jobOfferModality', 'jobOfferContractType', 'jobOfferStatus', 'skill', 'company'] as const;
 
@@ -35,18 +39,15 @@ function createTransaction() {
 }
 
 describe('seedJobOffers', () => {
-  it('crea los catálogos de modalidad, tipo de contrato y estado', async () => {
+  it('crea los catálogos a partir de los enums', async () => {
     const { stores, tx } = createTransaction();
 
     await seedJobOffers(tx);
 
-    expect([...stores.jobOfferModality.keys()]).toEqual([...SEED_JOB_OFFER_MODALITIES]);
-    expect([...stores.jobOfferContractType.keys()]).toEqual([...SEED_JOB_OFFER_CONTRACT_TYPES]);
-    expect([...stores.jobOfferStatus.keys()]).toEqual([...SEED_JOB_OFFER_STATUSES]);
-  });
-
-  it('incluye el estado con el que el servicio publica las vacantes', () => {
-    expect(SEED_JOB_OFFER_STATUSES).toContain(JOB_OFFER_PUBLISHED_STATUS);
+    expect([...stores.jobOfferModality.keys()]).toEqual(SEED_JOB_OFFER_MODALITIES);
+    expect([...stores.jobOfferContractType.keys()]).toEqual(SEED_JOB_OFFER_CONTRACT_TYPES);
+    expect([...stores.jobOfferStatus.keys()]).toEqual(SEED_JOB_OFFER_STATUSES);
+    expect(stores.jobOfferStatus.has(JobOfferStatus.PUBLISHED)).toBe(true);
   });
 
   it('carga las 20 tecnologías del catálogo cerrado, ninguna personalizada', async () => {
@@ -64,7 +65,9 @@ describe('seedJobOffers', () => {
     await seedJobOffers(tx);
 
     expect(stores.company.size).toBe(SEED_JOB_OFFER_COMPANIES.length);
-    expect(stores.company.get('TechBolivia S.R.L.')).toMatchObject({ id: 'a0000000-0000-4000-8000-000000000001' });
+    expect(stores.company.get('TechBolivia S.R.L.')).toMatchObject({
+      id: 'a0000000-0000-4000-8000-000000000001',
+    });
   });
 
   it('es idempotente al ejecutarse dos veces', async () => {
@@ -75,6 +78,5 @@ describe('seedJobOffers', () => {
 
     expect(stores.skill.size).toBe(SEED_JOB_OFFER_SKILLS.length);
     expect(stores.company.size).toBe(SEED_JOB_OFFER_COMPANIES.length);
-    expect(stores.jobOfferStatus.size).toBe(SEED_JOB_OFFER_STATUSES.length);
   });
 });

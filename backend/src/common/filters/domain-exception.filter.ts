@@ -8,7 +8,6 @@ export class DomainExceptionFilter implements ExceptionFilter {
   catch(exception: DomainException, host: ArgumentsHost): void {
     const response = host.switchToHttp().getResponse<Response>();
 
-
     response.status(exception.statusCode).json({
       statusCode: exception.statusCode,
       data: exception.data,
@@ -20,5 +19,3 @@ export class DomainExceptionFilter implements ExceptionFilter {
     });
   }
 }
-
-
