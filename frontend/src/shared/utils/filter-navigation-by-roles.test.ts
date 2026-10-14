@@ -27,7 +27,11 @@ describe("Role navigation", () => {
 
   it("exposes recruiter functions only to company accounts", () => {
     const paths = getPaths(["empresa"]);
+    expect(paths).not.toContain("/chat");
     expect(paths).toContain("/recruiters/job-offers/new");
+    expect(paths).toContain("/matching");
+    expect(paths).toContain("/profile");
+    expect(paths).not.toContain("/profile/radar");
     expect(paths).not.toContain("/mentor/availability");
     expect(paths).not.toContain("/backoffice/solicitudes");
   });
@@ -41,7 +45,10 @@ describe("Role navigation", () => {
   });
 
   it("hides chat from accounts with only the administrative role", () => {
-    expect(getPaths(["administrativo"])).not.toContain("/chat");
+    const paths = getPaths(["administrativo"]);
+    expect(paths).not.toContain("/chat");
+    expect(paths).not.toContain("/profile");
+    expect(paths).toContain("/affinity-radar/review-queue");
   });
 
   it("hides empty groups from students and users without roles", () => {
@@ -49,6 +56,8 @@ describe("Role navigation", () => {
     expect(paths).toContain("/mentorship/mentors");
     expect(paths).not.toContain("/mentors/participation");
     expect(paths).not.toContain("/mentor/availability");
+    expect(paths).not.toContain("/chat");
+    expect(paths).not.toContain("/events");
     expect(filterNavigationByRoles(SIDEBAR_NAVIGATION, [])).toEqual([]);
   });
 });

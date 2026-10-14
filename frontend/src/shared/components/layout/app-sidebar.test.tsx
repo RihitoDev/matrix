@@ -71,10 +71,32 @@ describe("AppSidebar", () => {
     );
   });
 
-  it("links Mi perfil to the profile page in the default navigation", () => {
+  it("groups the profile and radar routes under Mi perfil", () => {
     renderSidebar();
+    fireEvent.click(screen.getByRole("button", { name: "Mi perfil" }));
 
-    expect(screen.getByRole("link", { name: "Mi perfil" }).getAttribute("href")).toBe("/profile");
+    expect(screen.getByRole("link", { name: "Resumen del perfil" }).getAttribute("href")).toBe("/profile");
+    expect(screen.getByRole("link", { name: "Radar de afinidad" })).toHaveAttribute("href", "/profile/radar");
+    expect(screen.queryByText("Mi radar")).toBeNull();
+  });
+
+  it("opens Mi perfil and highlights only its radar route", () => {
+    route.pathname = "/profile/radar";
+    renderSidebar();
+    expect(screen.getByRole("button", { name: "Mi perfil" })).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("link", { name: "Radar de afinidad" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Resumen del perfil" })).not.toHaveAttribute("aria-current");
+  });
+
+  it.each([
+    ["/mentors/example-id/availability", "Mentorías", "Directorio de mentorías"],
+    ["/mentorship", "Mentorías", "Mi participación"],
+    ["/area-detail-preview", "Reclutadores", "Buscar candidatos"],
+  ])("keeps %s inside its parent navigation flow", (pathname, group, link) => {
+    route.pathname = pathname;
+    renderSidebar();
+    expect(screen.getByRole("button", { name: group })).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("link", { name: link })).toHaveAttribute("aria-current", "page");
   });
 
   it("opens the workshops group with links to existing views", () => {
@@ -93,7 +115,7 @@ describe("AppSidebar", () => {
     expect(screen.getByRole("button", { name: "Talleres" })).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByRole("link", { name: active })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("link", { name: inactive })).not.toHaveAttribute("aria-current");
-    expect(screen.getByRole("link", { name: "Mi perfil" })).toHaveAttribute("href", "/profile");
+    expect(screen.getByRole("button", { name: "Mi perfil" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Mentorías" })).toBeInTheDocument();
   });
 

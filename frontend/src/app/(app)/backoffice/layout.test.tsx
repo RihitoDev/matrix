@@ -38,6 +38,6 @@ describe("BackofficeLayout inside AppLayout", () => {
     expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
     expect(screen.getByRole("link", { name: /Solicitudes/ })).toHaveAttribute("href", "/backoffice/solicitudes");
     expect(screen.getByText("Contenido administrativo")).toBeDefined();
-    expect(screen.getByRole("link", { name: "Mi perfil" })).toBeDefined();
+    expect(screen.getByRole("link", { name: "Revisión de radares" })).toBeDefined();
   });
 });

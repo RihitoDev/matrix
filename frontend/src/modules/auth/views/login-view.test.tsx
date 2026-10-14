@@ -80,7 +80,7 @@ describe("LoginView", () => {
   });
 
   it.each([
-    ['/login?next=%2Freports%2Fhistory%3Fx%3D1', '/reports/history?x=1'],
+    ['/login?next=%2Freports%2Fhistory%3Fx%3D1', '/profile'],
     ['/login?next=/profile/documents', '/profile/documents'],
     ['/login?next=/backoffice/solicitudes', '/profile'],
     ['/login?next=/%5Cevil.com', '/profile'],
@@ -115,10 +115,10 @@ describe("LoginView", () => {
     await waitFor(() => expect(push).toHaveBeenCalledWith('/backoffice/solicitudes'));
   });
 
-  it.each(["titulado", "estudiante", "mentor", "empresa", "", "desconocido"])("el rol %j va a la ruta actual", async (roleTag) => {
+  it.each(["titulado", "estudiante", "mentor", "empresa", "", "desconocido"])("el rol %j va a su portal", async (roleTag) => {
     await submitLogin(vi.fn().mockResolvedValue({ accessToken: "t", roleTag }));
 
-    await waitFor(() => expect(push).toHaveBeenCalledWith("/profile"));
+    await waitFor(() => expect(push).toHaveBeenCalledWith(roleTag === "empresa" ? "/recruiters" : "/profile"));
     expect(push).toHaveBeenCalledTimes(1);
   });
 

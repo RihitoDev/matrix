@@ -48,7 +48,7 @@ describe("Vacancy routes", () => {
     const page = await VacancyDetailPage({ params: Promise.resolve({ id: "missing" }) });
     render(<AppLayout>{page}</AppLayout>);
 
-    expect(within(screen.getByRole("navigation", { name: "Menú principal" })).getByRole("link", { name: "Mi perfil" })).toBeDefined();
+    expect(within(screen.getByRole("navigation", { name: "Menú principal" })).getByRole("button", { name: "Mi perfil" })).toBeDefined();
     expect(screen.getByRole("heading", { name: "Vacante no encontrada" })).toBeDefined();
     expect(screen.getByRole("link", { name: /Volver a vacantes/ })).toHaveAttribute("href", "/vacancies");
   });

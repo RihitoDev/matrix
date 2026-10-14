@@ -27,7 +27,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("AreaDetailInteractionPreviewPage", () => {
-  beforeEach(() => sessionStorage.setItem("accessToken", "token-de-prueba"));
+  beforeEach(() => sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: "empresa" }))}.s`));
   afterEach(() => {
     cleanup();
     sessionStorage.clear();

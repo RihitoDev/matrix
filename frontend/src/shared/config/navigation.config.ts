@@ -1,6 +1,6 @@
 import type { NavigationItem } from "@/shared/types/navigation-item.types";
 import { RECRUITERS_ROUTES } from "@/modules/recruiters";
-import { ROLE_TAGS } from "@/shared/constants/roles.constants";
+import { getRouteRoles } from "@/shared/utils/get-route-roles";
 import { REPORTS_NAVIGATION_ITEM } from "@/modules/reports";
 import {
   CalendarClock,
@@ -15,11 +15,20 @@ import {
   Building2,
   Inbox,
   SquarePlus,
+  Radar,
+  Search,
 } from "lucide-react";
 
 export const SIDEBAR_NAVIGATION: NavigationItem[] = [
-  { label: "Mi perfil", icon: User, href: "/profile", roles: ROLE_TAGS },
-  { label: "Chat", icon: MessageCircle, href: "/chat", roles: ["titulado", "estudiante", "mentor", "empresa"] },
+  {
+    label: "Mi perfil",
+    icon: User,
+    children: [
+      { label: "Resumen del perfil", icon: User, href: "/profile", roles: getRouteRoles("/profile") },
+      { label: "Radar de afinidad", icon: Radar, href: "/profile/radar", roles: getRouteRoles("/profile/radar") },
+    ],
+  },
+  { label: "Chat", icon: MessageCircle, href: "/chat", roles: getRouteRoles("/chat") },
   {
     label: "Mentorías",
     icon: CalendarDays,
@@ -28,27 +37,28 @@ export const SIDEBAR_NAVIGATION: NavigationItem[] = [
         label: "Directorio de mentorías",
         href: "/mentorship/mentors",
         icon: ListChecks,
-        roles: ["titulado", "estudiante", "mentor"],
-        activePathPatterns: [/^\/mentors\/(?!participation(?:\/|$))[^/]+\/?$/],
+        roles: getRouteRoles("/mentorship/mentors"),
+        activePathPatterns: [/^\/mentors\/(?!participation(?:\/|$)|register(?:\/|$))[^/]+(?:\/availability)?\/?$/],
       },
       {
         label: "Mi participación",
         href: "/mentors/participation",
         icon: UserRound,
-        roles: ["titulado", "mentor"],
+        roles: getRouteRoles("/mentors/participation"),
+        activePathPatterns: [/^\/mentorship(?:\/orientation)?\/?$/, /^\/mentors\/register\/technical-areas\/?$/],
       },
       {
         label: "Mi disponibilidad",
         href: "/mentor/availability",
         icon: CalendarClock,
-        roles: ["mentor"],
+        roles: getRouteRoles("/mentor/availability"),
       },
     ],
   },
   {
     label: "Talleres",
     icon: CalendarDays,
-    roles: ["titulado", "estudiante", "mentor"],
+    roles: getRouteRoles("/events"),
     children: [
       { label: "Talleres disponibles", href: "/events", icon: ListChecks },
       { label: "Mis inscripciones", href: "/events/my-passes", icon: Ticket },
@@ -58,13 +68,14 @@ export const SIDEBAR_NAVIGATION: NavigationItem[] = [
     label: "Vacantes",
     icon: BriefcaseBusiness,
     href: "/vacancies",
-    roles: ["titulado", "estudiante", "mentor"],
+    roles: getRouteRoles("/vacancies"),
   },
   {
     label: "Reclutadores",
     icon: Building2,
-    roles: ["empresa"],
+    roles: getRouteRoles("/recruiters"),
     children: [
+      { label: "Buscar candidatos", icon: Search, href: "/matching", activePathPatterns: [/^\/area-detail(?:-interaction)?-preview\/?$/] },
       { label: "Portal de empresa", icon: House, href: RECRUITERS_ROUTES.home },
       {
         label: "Registrar nueva vacante",
@@ -77,7 +88,8 @@ export const SIDEBAR_NAVIGATION: NavigationItem[] = [
     label: "Solicitudes",
     icon: Inbox,
     href: "/backoffice/solicitudes",
-    roles: ["administrativo"],
+    roles: getRouteRoles("/backoffice"),
   },
-  { ...REPORTS_NAVIGATION_ITEM, roles: ["administrativo"] },
+  { label: "Revisión de radares", icon: Radar, href: "/affinity-radar/review-queue", roles: getRouteRoles("/affinity-radar/review-queue") },
+  { ...REPORTS_NAVIGATION_ITEM, roles: getRouteRoles("/backoffice") },
 ];

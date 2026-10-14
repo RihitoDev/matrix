@@ -7,7 +7,7 @@ import { RadarProfileView } from "./radar-profile-view";
 import AppLayout from "@/app/(app)/layout";
 
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/perfil/radar",
+  usePathname: () => "/profile/radar",
   useRouter: () => ({ replace: vi.fn() }),
 }));
 
@@ -58,7 +58,7 @@ describe("RadarProfileView", () => {
     render(<AppLayout><RadarProfileView /></AppLayout>);
 
     expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
-    expect(screen.getByRole("link", { name: "Mi perfil" })).toHaveAttribute("href", "/profile");
+    expect(screen.getByRole("link", { name: "Resumen del perfil" })).toHaveAttribute("href", "/profile");
     expect(screen.getByRole("navigation", { name: "Ruta de navegación" }).textContent).toContain(
       "Radar de afinidad",
     );

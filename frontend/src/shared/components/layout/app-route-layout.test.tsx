@@ -19,7 +19,7 @@ vi.mock("./app-shell", () => ({
 }));
 
 describe("AppRouteLayout", () => {
-  beforeEach(() => sessionStorage.setItem("accessToken", "token-de-prueba"));
+  beforeEach(() => sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: "titulado", roles: ["titulado", "mentor", "empresa", "administrativo", "estudiante"] }))}.s`));
   afterEach(() => {
     cleanup();
     sessionStorage.clear();
@@ -91,8 +91,10 @@ describe("AppRouteLayout", () => {
 
   it.each([
     [["administrativo"], false],
+    [["empresa"], false],
+    [["empresa", "titulado"], true],
     [["administrativo", "mentor"], true],
-    [["estudiante"], true],
+    [["estudiante"], false],
   ])("checks chat permissions for roles %s", (roles, isAllowed) => {
     sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: roles[0], roles }))}.s`);
     route.pathname = "/chat";
@@ -103,6 +105,28 @@ describe("AppRouteLayout", () => {
       expect(screen.queryByText("chat-content")).toBeNull();
       expect(screen.getByRole("alert")).toHaveTextContent("No tienes permisos");
     }
+  });
+
+  it.each([
+    ["/vacancies/example-id", ["administrativo"], false],
+    ["/vacancies/example-id", ["estudiante"], true],
+    ["/affinity-radar/review-queue", ["administrativo"], true],
+    ["/affinity-radar/review-queue", ["titulado"], false],
+    ["/matching", ["empresa"], true],
+    ["/matching", ["mentor"], false],
+    ["/mentors/example-id/availability", ["estudiante"], true],
+    ["/mentorship", ["estudiante"], false],
+    ["/mentor/availability", ["titulado"], false],
+    ["/mentor/availability", ["titulado", "mentor"], true],
+    ["/profile", ["empresa"], true],
+    ["/profile/personal-info", ["empresa"], true],
+    ["/profile/radar", ["empresa"], false],
+  ])("checks direct access to %s for roles %s", (pathname, roles, isAllowed) => {
+    sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: roles[0], roles }))}.s`);
+    route.pathname = pathname;
+    render(<AppLayout><p>restricted-content</p></AppLayout>);
+    if (isAllowed) expect(screen.getByText("restricted-content")).toBeInTheDocument();
+    else expect(screen.queryByText("restricted-content")).toBeNull();
   });
 
   it("does not treat a backoffice prefix as an administrative route", () => {
