@@ -15,7 +15,6 @@ const PROFILE_WITH_EMPTY_FIELDS = {
   phone: null,
   personalEmail: null,
   aboutMe: null,
-  interestedOpportunities: null,
 } as unknown as ProfileSummary;
 
 describe("profile components with missing data", () => {
@@ -39,7 +38,9 @@ describe("profile components with missing data", () => {
   it("renders the presentation summary when the profile fields are null", () => {
     render(<PresentationSummaryCard profile={PROFILE_WITH_EMPTY_FIELDS} />);
 
-    expect(screen.getByText("Cuenta quién eres y en qué te especializas.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Cuenta quién eres, en qué te especializas y qué oportunidades laborales te interesan."),
+    ).toBeInTheDocument();
   });
 
   it("renders the preview card when the values are null", () => {
@@ -49,7 +50,6 @@ describe("profile components with missing data", () => {
         presentation={{
           headline: null as unknown as string,
           aboutMe: null as unknown as string,
-          interestedOpportunities: null as unknown as string,
         }}
       />,
     );
