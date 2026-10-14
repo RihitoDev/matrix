@@ -7,6 +7,8 @@ import { SIDEBAR_STYLE } from "@/shared/constants/sidebar.constants";
 import type { AppShellProps } from "@/shared/types/app-shell-props.types";
 import type { NavigationItem } from "@/shared/types/navigation-item.types";
 import { AppSidebar } from "./app-sidebar";
+import { SessionUserCard } from "@/modules/auth";
+import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { SidebarToggleButton } from "./sidebar-toggle-button";
 
 // Props opcionales: sin ellas el render es idéntico al anterior
@@ -40,7 +42,7 @@ export function AppShell({
         items={items as NavigationItem[] | undefined}
         user={user}
         brand={brand}
-        footer={sidebarFooter}
+        footer={sidebarFooter ?? (!user && getAccessToken() ? <SessionUserCard /> : undefined)}
         itemClassName={sidebarItemClassName}
         itemBadges={sidebarItemBadges}
       />

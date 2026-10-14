@@ -1,7 +1,7 @@
 import type { SidebarUserCardProps } from "@/shared/types/sidebar-user-card-props.types";
 import { getInitials } from "@/shared/utils/get-initials";
 
-export function SidebarUserCard({ user }: SidebarUserCardProps) {
+export function SidebarUserCard({ user, action }: SidebarUserCardProps) {
   return (
     <div className="flex w-full items-center gap-3 rounded-md bg-surface/5 p-3">
       <span
@@ -14,6 +14,7 @@ export function SidebarUserCard({ user }: SidebarUserCardProps) {
         <span className="truncate text-sm text-surface">{user.fullName}</span>
         <span className="truncate text-xs text-surface/70">{user.role}</span>
       </div>
+      {action}
     </div>
   );
 }
