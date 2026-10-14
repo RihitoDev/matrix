@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Prisma } from '../../../prisma/client.js';
 import { ROLE_NAMES } from '../../../common/enums/roles.enum.js';
+import { SEED_USERS } from '../constants/seed-users.constants.js';
 import { seedUsers } from './users.seed.js';
 function buildTransaction(hasRoles: boolean) {
   return {
@@ -24,10 +25,10 @@ function buildTransaction(hasRoles: boolean) {
         ),
     },
     userRole: {
-      findFirst: vi
-        .fn()
-        .mockResolvedValue(hasRoles ? { id: 'existing-role' } : null),
-      create: vi.fn(),
+      findMany: vi.fn().mockResolvedValue(hasRoles ? SEED_USERS.flatMap((user) =>
+        user.roles.map((role) => ({ userId: user.email, roleId: role })),
+      ) : []),
+      createMany: vi.fn().mockImplementation(async ({ data }) => ({ count: data.length })),
     },
   };
 }
@@ -42,9 +43,10 @@ describe('seedUsers', () => {
     expect(users.users.emptyGraduate.id).toBe('sinpases@umss.edu.bo');
     expect(users.users.mentorA.id).toBe('mentor.a@umssy.test');
     expect(users.users.company.id).toBe('empresa@umssy.test');
-    expect(tx.userRole.create).toHaveBeenCalledTimes(15);
-    expect(tx.userRole.create).toHaveBeenCalledWith({
-      data: { userId: 'empresa@umssy.test', roleId: 'empresa' },
+    expect(tx.userRole.createMany).toHaveBeenCalledOnce();
+    expect(users.userRoles).toBe(15);
+    expect(tx.userRole.createMany).toHaveBeenCalledWith({
+      data: expect.arrayContaining([{ userId: 'empresa@umssy.test', roleId: 'empresa' }]),
     });
     expect(tx.user.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -58,7 +60,7 @@ describe('seedUsers', () => {
       tx as unknown as Prisma.TransactionClient,
       'hashed-password',
     );
-    expect(tx.userRole.create).not.toHaveBeenCalled();
+    expect(tx.userRole.createMany).not.toHaveBeenCalled();
   });
   it('propagates database errors to roll back the coordinator transaction', async () => {
     const tx = buildTransaction(false);
@@ -66,6 +68,6 @@ describe('seedUsers', () => {
     await expect(
       seedUsers(tx as unknown as Prisma.TransactionClient, 'hashed-password'),
     ).rejects.toThrow('Database unavailable');
-    expect(tx.userRole.create).not.toHaveBeenCalled();
+    expect(tx.userRole.createMany).not.toHaveBeenCalled();
   });
 });
