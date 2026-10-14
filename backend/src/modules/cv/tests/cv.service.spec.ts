@@ -21,8 +21,9 @@ const buildRecord = (
 ): CvMetadataRecord => ({
   firstName: 'Test',
   lastName: 'User',
+  fileName: 'resume.pdf',
   sizeBytes: pdfContent.length,
-  updatedAt: new Date('2026-10-03T12:00:00.000Z'),
+  uploadedAt: new Date('2026-10-03T12:00:00.000Z'),
   ...overrides,
 });
 
@@ -62,7 +63,7 @@ describe('CvService', () => {
       repository.findByUserId.mockResolvedValue(buildRecord());
 
       await expect(service.getMetadata(userId)).resolves.toEqual({
-        fileName: 'CV-Test-User.pdf',
+        fileName: 'resume.pdf',
         fileType: 'application/pdf',
         sizeInBytes: pdfContent.length,
         updatedAt: '2026-10-03T12:00:00.000Z',
@@ -92,7 +93,7 @@ describe('CvService', () => {
 
       await expect(service.getFile(userId)).resolves.toEqual({
         content: pdfContent,
-        fileName: 'CV-Test-User.pdf',
+        fileName: 'resume.pdf',
         mimeType: 'application/pdf',
       });
       expect(storage.read).toHaveBeenCalledWith(userId);
@@ -123,8 +124,8 @@ describe('CvService', () => {
 
       const result = await service.upload(userId, buildMulterFile(pdfContent));
 
-      expect(storage.save).toHaveBeenCalledWith(userId, pdfContent);
-      expect(result?.fileName).toBe('CV-Test-User.pdf');
+      expect(storage.save).toHaveBeenCalledWith(userId, pdfContent, 'resume.pdf');
+      expect(result?.fileName).toBe('resume.pdf');
       expect(result?.sizeInBytes).toBe(pdfContent.length);
     });
 
@@ -135,13 +136,13 @@ describe('CvService', () => {
         .mockResolvedValueOnce(
           buildRecord({
             sizeBytes: newContent.length,
-            updatedAt: new Date('2026-10-04T08:00:00.000Z'),
+            uploadedAt: new Date('2026-10-04T08:00:00.000Z'),
           }),
         );
 
       const result = await service.upload(userId, buildMulterFile(newContent));
 
-      expect(storage.save).toHaveBeenCalledWith(userId, newContent);
+      expect(storage.save).toHaveBeenCalledWith(userId, newContent, 'resume.pdf');
       expect(result?.sizeInBytes).toBe(newContent.length);
       expect(result?.updatedAt).toBe('2026-10-04T08:00:00.000Z');
     });
