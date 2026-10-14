@@ -8,7 +8,7 @@ import {
 
 export function toGeneratedReport(record: AdminExportHistory): GeneratedReport {
   return {
-    id: `${record.userId}_${record.createdAt.getTime()}`,
+    id: record.id,
     fileName: record.reportName,
     reportType: record.reportType as ReportType,
     generatedAt: record.createdAt.toISOString(),
