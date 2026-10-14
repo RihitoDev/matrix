@@ -124,7 +124,14 @@ Required environment variables in `.env`:
 
 - `JWT_SECRET` — secret used to sign tokens. You can generate with `openssl rand -base64 32` and paste in `JWT_SECRET` in `.env`.
 
-<!-- TODO: modificar readme para cumplir con la configuracion y runs de los seeds -->
+## Seed
+
+After applying migrations, run `pnpm run seed`.
+
+Seeds are idempotent and run in dependency order, with one transaction per module. A failure rolls back that module and stops execution; earlier modules remain committed.
+
+`SEED_TRANSACTION_TIMEOUT_MS` sets the timeout per module (default: `120000` ms; range: `1–600000`).
+
    ## Resources
 - [NestJS Documentation](https://docs.nestjs.com?utm_source=gemini) — Learn more about the framework.
 - [NestJS Courses](https://courses.nestjs.com/?utm_source=gemini) — Official video courses for hands-on experience.

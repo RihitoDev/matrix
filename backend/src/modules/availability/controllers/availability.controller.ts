@@ -14,7 +14,7 @@ import { ZodValidationPipe } from 'nestjs-zod';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
 import { Roles } from '../../../common/decorators/roles.decorator.js';
 import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
-import { ProvisionalSessionGuard } from '../../../common/guards/provisional.guard.js';
+import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import {
   DELETE_BLOCK_DOCS,
@@ -35,7 +35,7 @@ export class AvailabilityController {
   constructor(private readonly availabilityService: AvailabilityService) {}
 
   @Post()
-  @UseGuards(ProvisionalSessionGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('mentor')
   @ApiOperation({ summary: 'Crea un bloque de disponibilidad del mentor en sesión y lo devuelve como libre (201, guardado en UTC)' })
   create(
@@ -46,7 +46,7 @@ export class AvailabilityController {
   }
 
   @Get()
-  @UseGuards(ProvisionalSessionGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('mentor')
   @ApiOperation({ summary: FIND_MY_BLOCKS_DOCS.summary })
   @ApiQuery({ name: 'from', description: FIND_MY_BLOCKS_DOCS.fromDescription })
@@ -59,7 +59,7 @@ export class AvailabilityController {
   }
 
   @Patch(':id')
-  @UseGuards(ProvisionalSessionGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('mentor')
   @ApiOperation({ summary: UPDATE_BLOCK_DOCS.summary })
   @ApiParam({ name: 'id', description: UPDATE_BLOCK_DOCS.idDescription })
@@ -72,7 +72,7 @@ export class AvailabilityController {
   }
 
   @Delete(':id')
-  @UseGuards(ProvisionalSessionGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('mentor')
   @ApiOperation({ summary: DELETE_BLOCK_DOCS.summary, description: DELETE_BLOCK_DOCS.description })
   @ApiParam({ name: 'id', description: DELETE_BLOCK_DOCS.idDescription })
