@@ -128,6 +128,12 @@ export function OrientationConfigView() {
     }
   };
 
+  const handleOpenConfirmModal = () => {
+    if (selectedIds.length === 0 || isSaving || hasLoadError) return;
+
+    setIsConfirmModalOpen(true);
+  };
+
   if (isLoading) {
     return (
       <main className="min-h-full bg-background px-4 py-8 sm:px-8">
@@ -293,7 +299,7 @@ export function OrientationConfigView() {
               </Link>
               <Button
                 type="button"
-                onClick={() => setIsConfirmModalOpen(true)}
+                onClick={handleOpenConfirmModal}
                 disabled={selectedIds.length === 0 || isSaving || hasLoadError}
                 className="h-10 rounded-lg bg-red-600 px-6 text-sm font-semibold text-white shadow-sm hover:bg-red-700 active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
               >
