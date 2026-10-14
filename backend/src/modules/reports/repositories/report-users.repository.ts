@@ -66,13 +66,17 @@ export class ReportUsersRepository {
       }),
     ]);
 
-    const approvedByEmail = new Map(
-      requests
-        .filter(({ status }) => status.title === ACCESS_REQUEST_STATUS.APPROVED)
-        .map((request) => [request.email.toLowerCase(), request]),
+    const userEmails = new Set(users.map((user) => user.email.toLowerCase()));
+
+    const approvedRequests = requests.filter(
+      ({ status }) => status.title === ACCESS_REQUEST_STATUS.APPROVED,
     );
 
-    const registered = users.map((user): ReportUser => {
+    const approvedByEmail = new Map(
+      approvedRequests.map((request) => [request.email.toLowerCase(), request]),
+    );
+
+    const registeredUsers = users.map((user): ReportUser => {
       const request = approvedByEmail.get(user.email.toLowerCase());
 
       return {
@@ -89,6 +93,33 @@ export class ReportUsersRepository {
         rejectionReason: null,
       };
     });
+
+    const seenApprovedEmails = new Set(userEmails);
+    const approvedRequestsNotInUsers: ReportUser[] = [];
+
+    for (const request of approvedRequests) {
+      const email = request.email.toLowerCase();
+      if (!seenApprovedEmails.has(email)) {
+        seenApprovedEmails.add(email);
+        approvedRequestsNotInUsers.push({
+          id: request.id,
+          fullName: toFullName(request.firstName, request.lastName),
+          email: request.email,
+          userType: DEFAULT_USER_TYPE,
+          identifier: request.idCardNumber,
+          documentType:
+            (request.documentType?.title as ReportDocumentType | undefined) ??
+            null,
+          registeredAt: (
+            request.submittedAt ?? request.createdAt
+          ).toISOString(),
+          registrationStatus: 'APPROVED',
+          rejectionReason: null,
+        });
+      }
+    }
+
+    const registered = [...registeredUsers, ...approvedRequestsNotInUsers];
 
     const rejected = requests
       .filter(({ status }) => status.title === ACCESS_REQUEST_STATUS.REJECTED)
