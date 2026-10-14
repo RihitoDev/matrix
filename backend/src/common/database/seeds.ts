@@ -12,6 +12,7 @@ import { seedAvailability } from '../../modules/availability/seeds/availability.
 import { seedJobOffers } from '../../modules/job-offers/seeds/job-offers.seed.js';
 import { seedOrientationTypes } from '../../modules/orientation-types/seeds/orientation-types.seed.js';
 import { seedTechnicalAreas } from '../../modules/technical-areas/seeds/technical-areas.seed.js';
+import { seedChat } from '../../modules/chat/seeds/chat.seed.js';
 import { SEED_USERS } from '../../modules/users/constants/seed-users.constants.js';
 import {
   hashSeedPassword,
@@ -70,6 +71,7 @@ export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
       );
 
       const accessRequestsResult = await seedAccessRequests(tx);
+      await seedChat(tx);
 
       return {
         weeks: availabilityResult.weeks,

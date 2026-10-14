@@ -12,7 +12,7 @@ import {
 } from '@tanstack/react-query';
 
 import { ChatView } from '../views/chat-view';
-import ChatPage from '../../../app/chat/page';
+import ChatPage from '../../../app/(app)/chat/page';
 import * as chatApi from '../services/chat-api';
 
 afterEach(() => {
@@ -90,7 +90,7 @@ describe('ChatView & ChatPage', () => {
     fireEvent.click(newChatButtons[0]);
 
     expect(
-      await screen.findByText('Nueva conversación'),
+      await screen.findByText(/Nueva conversaci\u00f3n/i),
     ).toBeDefined();
 
     const conversationItem = screen.getByText('Maria Fernandez');
@@ -154,7 +154,7 @@ describe('ChatView & ChatPage', () => {
     fireEvent.click(newBtn);
 
     expect(
-      await screen.findByText('Nueva conversación'),
+      await screen.findByText(/Nueva conversaci\u00f3n/i),
     ).toBeDefined();
   });
 
