@@ -5,25 +5,28 @@ import type { AccessRequestsSeedResult } from '../types/access-requests-seed-res
 
 async function seedStatuses(tx: Prisma.TransactionClient): Promise<number> {
   const titles = Object.values(ACCESS_REQUEST_STATUS);
-  for (const title of titles) {
-    await tx.accessRequestStatus.upsert({ where: { title }, create: { title }, update: {} });
-  }
+  await tx.accessRequestStatus.createMany({
+    data: titles.map((title) => ({ title })),
+    skipDuplicates: true,
+  });
   return titles.length;
 }
 
 async function seedDocumentTypes(tx: Prisma.TransactionClient): Promise<number> {
   const titles = Object.values(ACCESS_REQUEST_DOCUMENT_TYPE);
-  for (const title of titles) {
-    await tx.accessRequestDocumentType.upsert({ where: { title }, create: { title }, update: {} });
-  }
+  await tx.accessRequestDocumentType.createMany({
+    data: titles.map((title) => ({ title })),
+    skipDuplicates: true,
+  });
   return titles.length;
 }
 
 async function seedCareers(tx: Prisma.TransactionClient): Promise<number> {
   const titles = Object.values(CAREER);
-  for (const title of titles) {
-    await tx.career.upsert({ where: { title }, create: { title }, update: {} });
-  }
+  await tx.career.createMany({
+    data: titles.map((title) => ({ title })),
+    skipDuplicates: true,
+  });
   return titles.length;
 }
 
