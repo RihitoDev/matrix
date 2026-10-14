@@ -9,6 +9,29 @@ permissions:
   contents: read
 
 jobs:
+  commit-messages:
+    name: Conventional Commits
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Test commit message validator
+        run: node --test --experimental-test-coverage --test-coverage-lines=80 --test-coverage-functions=80 --test-coverage-branches=80 backend/scripts/commit-message.test.ts
+
+      - name: Validate all PR commit messages
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: node backend/scripts/check-commit-messages.ts "$BASE_SHA" "$HEAD_SHA"
+
   branch-rules:
     name: Git standard revision
     runs-on: ubuntu-latest
@@ -71,7 +94,7 @@ jobs:
             exit 0
           fi
 
-          changed=$(git diff --name-only "$BASE_SHA...$HEAD_SHA" -- .github/ scripts/ '*vitest*' '*eslint*' '*prettier*' '*tsconfig*')
+          changed=$(git diff --name-only "$BASE_SHA...$HEAD_SHA" -- .github/ .husky/ scripts/ backend/scripts/ '*vitest*' '*eslint*' '*prettier*' '*tsconfig*')
           if [[ -n "$changed" ]]; then
             echo "::error::Only DevOps branches can modify CI and scripts."
             echo "$changed"
