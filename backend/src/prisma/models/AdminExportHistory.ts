@@ -25,6 +25,7 @@ export type AggregateAdminExportHistory = {
 }
 
 export type AdminExportHistoryMinAggregateOutputType = {
+  id: string | null
   userId: string | null
   createdAt: Date | null
   reportName: string | null
@@ -32,6 +33,7 @@ export type AdminExportHistoryMinAggregateOutputType = {
 }
 
 export type AdminExportHistoryMaxAggregateOutputType = {
+  id: string | null
   userId: string | null
   createdAt: Date | null
   reportName: string | null
@@ -39,6 +41,7 @@ export type AdminExportHistoryMaxAggregateOutputType = {
 }
 
 export type AdminExportHistoryCountAggregateOutputType = {
+  id: number
   userId: number
   createdAt: number
   reportName: number
@@ -48,6 +51,7 @@ export type AdminExportHistoryCountAggregateOutputType = {
 
 
 export type AdminExportHistoryMinAggregateInputType = {
+  id?: true
   userId?: true
   createdAt?: true
   reportName?: true
@@ -55,6 +59,7 @@ export type AdminExportHistoryMinAggregateInputType = {
 }
 
 export type AdminExportHistoryMaxAggregateInputType = {
+  id?: true
   userId?: true
   createdAt?: true
   reportName?: true
@@ -62,6 +67,7 @@ export type AdminExportHistoryMaxAggregateInputType = {
 }
 
 export type AdminExportHistoryCountAggregateInputType = {
+  id?: true
   userId?: true
   createdAt?: true
   reportName?: true
@@ -142,6 +148,7 @@ export type AdminExportHistoryGroupByArgs<ExtArgs extends runtime.Types.Extensio
 }
 
 export type AdminExportHistoryGroupByOutputType = {
+  id: string
   userId: string
   createdAt: Date
   reportName: string
@@ -170,6 +177,7 @@ export type AdminExportHistoryWhereInput = {
   AND?: Prisma.AdminExportHistoryWhereInput | Prisma.AdminExportHistoryWhereInput[]
   OR?: Prisma.AdminExportHistoryWhereInput[]
   NOT?: Prisma.AdminExportHistoryWhereInput | Prisma.AdminExportHistoryWhereInput[]
+  id?: Prisma.UuidFilter<"AdminExportHistory"> | string
   userId?: Prisma.UuidFilter<"AdminExportHistory"> | string
   createdAt?: Prisma.DateTimeFilter<"AdminExportHistory"> | Date | string
   reportName?: Prisma.StringFilter<"AdminExportHistory"> | string
@@ -178,6 +186,7 @@ export type AdminExportHistoryWhereInput = {
 }
 
 export type AdminExportHistoryOrderByWithRelationInput = {
+  id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   reportName?: Prisma.SortOrder
@@ -186,6 +195,7 @@ export type AdminExportHistoryOrderByWithRelationInput = {
 }
 
 export type AdminExportHistoryWhereUniqueInput = Prisma.AtLeast<{
+  id?: string
   userId_createdAt?: Prisma.AdminExportHistoryUserIdCreatedAtCompoundUniqueInput
   AND?: Prisma.AdminExportHistoryWhereInput | Prisma.AdminExportHistoryWhereInput[]
   OR?: Prisma.AdminExportHistoryWhereInput[]
@@ -195,9 +205,10 @@ export type AdminExportHistoryWhereUniqueInput = Prisma.AtLeast<{
   reportName?: Prisma.StringFilter<"AdminExportHistory"> | string
   reportType?: Prisma.StringFilter<"AdminExportHistory"> | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-}, "userId_createdAt">
+}, "id" | "userId_createdAt">
 
 export type AdminExportHistoryOrderByWithAggregationInput = {
+  id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   reportName?: Prisma.SortOrder
@@ -211,6 +222,7 @@ export type AdminExportHistoryScalarWhereWithAggregatesInput = {
   AND?: Prisma.AdminExportHistoryScalarWhereWithAggregatesInput | Prisma.AdminExportHistoryScalarWhereWithAggregatesInput[]
   OR?: Prisma.AdminExportHistoryScalarWhereWithAggregatesInput[]
   NOT?: Prisma.AdminExportHistoryScalarWhereWithAggregatesInput | Prisma.AdminExportHistoryScalarWhereWithAggregatesInput[]
+  id?: Prisma.UuidWithAggregatesFilter<"AdminExportHistory"> | string
   userId?: Prisma.UuidWithAggregatesFilter<"AdminExportHistory"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AdminExportHistory"> | Date | string
   reportName?: Prisma.StringWithAggregatesFilter<"AdminExportHistory"> | string
@@ -218,6 +230,7 @@ export type AdminExportHistoryScalarWhereWithAggregatesInput = {
 }
 
 export type AdminExportHistoryCreateInput = {
+  id?: string
   createdAt?: Date | string
   reportName: string
   reportType: string
@@ -225,6 +238,7 @@ export type AdminExportHistoryCreateInput = {
 }
 
 export type AdminExportHistoryUncheckedCreateInput = {
+  id?: string
   userId: string
   createdAt?: Date | string
   reportName: string
@@ -232,6 +246,7 @@ export type AdminExportHistoryUncheckedCreateInput = {
 }
 
 export type AdminExportHistoryUpdateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reportName?: Prisma.StringFieldUpdateOperationsInput | string
   reportType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -239,6 +254,7 @@ export type AdminExportHistoryUpdateInput = {
 }
 
 export type AdminExportHistoryUncheckedUpdateInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reportName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -246,6 +262,7 @@ export type AdminExportHistoryUncheckedUpdateInput = {
 }
 
 export type AdminExportHistoryCreateManyInput = {
+  id?: string
   userId: string
   createdAt?: Date | string
   reportName: string
@@ -253,12 +270,14 @@ export type AdminExportHistoryCreateManyInput = {
 }
 
 export type AdminExportHistoryUpdateManyMutationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reportName?: Prisma.StringFieldUpdateOperationsInput | string
   reportType?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type AdminExportHistoryUncheckedUpdateManyInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reportName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -281,6 +300,7 @@ export type AdminExportHistoryUserIdCreatedAtCompoundUniqueInput = {
 }
 
 export type AdminExportHistoryCountOrderByAggregateInput = {
+  id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   reportName?: Prisma.SortOrder
@@ -288,6 +308,7 @@ export type AdminExportHistoryCountOrderByAggregateInput = {
 }
 
 export type AdminExportHistoryMaxOrderByAggregateInput = {
+  id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   reportName?: Prisma.SortOrder
@@ -295,6 +316,7 @@ export type AdminExportHistoryMaxOrderByAggregateInput = {
 }
 
 export type AdminExportHistoryMinOrderByAggregateInput = {
+  id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   reportName?: Prisma.SortOrder
@@ -344,12 +366,14 @@ export type AdminExportHistoryUncheckedUpdateManyWithoutUserNestedInput = {
 }
 
 export type AdminExportHistoryCreateWithoutUserInput = {
+  id?: string
   createdAt?: Date | string
   reportName: string
   reportType: string
 }
 
 export type AdminExportHistoryUncheckedCreateWithoutUserInput = {
+  id?: string
   createdAt?: Date | string
   reportName: string
   reportType: string
@@ -385,6 +409,7 @@ export type AdminExportHistoryScalarWhereInput = {
   AND?: Prisma.AdminExportHistoryScalarWhereInput | Prisma.AdminExportHistoryScalarWhereInput[]
   OR?: Prisma.AdminExportHistoryScalarWhereInput[]
   NOT?: Prisma.AdminExportHistoryScalarWhereInput | Prisma.AdminExportHistoryScalarWhereInput[]
+  id?: Prisma.UuidFilter<"AdminExportHistory"> | string
   userId?: Prisma.UuidFilter<"AdminExportHistory"> | string
   createdAt?: Prisma.DateTimeFilter<"AdminExportHistory"> | Date | string
   reportName?: Prisma.StringFilter<"AdminExportHistory"> | string
@@ -392,24 +417,28 @@ export type AdminExportHistoryScalarWhereInput = {
 }
 
 export type AdminExportHistoryCreateManyUserInput = {
+  id?: string
   createdAt?: Date | string
   reportName: string
   reportType: string
 }
 
 export type AdminExportHistoryUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reportName?: Prisma.StringFieldUpdateOperationsInput | string
   reportType?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type AdminExportHistoryUncheckedUpdateWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reportName?: Prisma.StringFieldUpdateOperationsInput | string
   reportType?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type AdminExportHistoryUncheckedUpdateManyWithoutUserInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reportName?: Prisma.StringFieldUpdateOperationsInput | string
   reportType?: Prisma.StringFieldUpdateOperationsInput | string
@@ -418,6 +447,7 @@ export type AdminExportHistoryUncheckedUpdateManyWithoutUserInput = {
 
 
 export type AdminExportHistorySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
   userId?: boolean
   createdAt?: boolean
   reportName?: boolean
@@ -426,6 +456,7 @@ export type AdminExportHistorySelect<ExtArgs extends runtime.Types.Extensions.In
 }, ExtArgs["result"]["adminExportHistory"]>
 
 export type AdminExportHistorySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
   userId?: boolean
   createdAt?: boolean
   reportName?: boolean
@@ -434,6 +465,7 @@ export type AdminExportHistorySelectCreateManyAndReturn<ExtArgs extends runtime.
 }, ExtArgs["result"]["adminExportHistory"]>
 
 export type AdminExportHistorySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  id?: boolean
   userId?: boolean
   createdAt?: boolean
   reportName?: boolean
@@ -442,13 +474,14 @@ export type AdminExportHistorySelectUpdateManyAndReturn<ExtArgs extends runtime.
 }, ExtArgs["result"]["adminExportHistory"]>
 
 export type AdminExportHistorySelectScalar = {
+  id?: boolean
   userId?: boolean
   createdAt?: boolean
   reportName?: boolean
   reportType?: boolean
 }
 
-export type AdminExportHistoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"userId" | "createdAt" | "reportName" | "reportType", ExtArgs["result"]["adminExportHistory"]>
+export type AdminExportHistoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "createdAt" | "reportName" | "reportType", ExtArgs["result"]["adminExportHistory"]>
 export type AdminExportHistoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -465,6 +498,7 @@ export type $AdminExportHistoryPayload<ExtArgs extends runtime.Types.Extensions.
     user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
+    id: string
     userId: string
     createdAt: Date
     reportName: string
@@ -552,8 +586,8 @@ export interface AdminExportHistoryDelegate<ExtArgs extends runtime.Types.Extens
    * // Get first 10 AdminExportHistories
    * const adminExportHistories = await prisma.adminExportHistory.findMany({ take: 10 })
    * 
-   * // Only select the `userId`
-   * const adminExportHistoryWithUserIdOnly = await prisma.adminExportHistory.findMany({ select: { userId: true } })
+   * // Only select the `id`
+   * const adminExportHistoryWithIdOnly = await prisma.adminExportHistory.findMany({ select: { id: true } })
    * 
    */
   findMany<T extends AdminExportHistoryFindManyArgs>(args?: Prisma.SelectSubset<T, AdminExportHistoryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AdminExportHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -597,9 +631,9 @@ export interface AdminExportHistoryDelegate<ExtArgs extends runtime.Types.Extens
    *   ]
    * })
    * 
-   * // Create many AdminExportHistories and only return the `userId`
-   * const adminExportHistoryWithUserIdOnly = await prisma.adminExportHistory.createManyAndReturn({
-   *   select: { userId: true },
+   * // Create many AdminExportHistories and only return the `id`
+   * const adminExportHistoryWithIdOnly = await prisma.adminExportHistory.createManyAndReturn({
+   *   select: { id: true },
    *   data: [
    *     // ... provide data here
    *   ]
@@ -688,9 +722,9 @@ export interface AdminExportHistoryDelegate<ExtArgs extends runtime.Types.Extens
    *   ]
    * })
    * 
-   * // Update zero or more AdminExportHistories and only return the `userId`
-   * const adminExportHistoryWithUserIdOnly = await prisma.adminExportHistory.updateManyAndReturn({
-   *   select: { userId: true },
+   * // Update zero or more AdminExportHistories and only return the `id`
+   * const adminExportHistoryWithIdOnly = await prisma.adminExportHistory.updateManyAndReturn({
+   *   select: { id: true },
    *   where: {
    *     // ... provide filter here
    *   },
@@ -893,6 +927,7 @@ export interface Prisma__AdminExportHistoryClient<T, Null = never, ExtArgs exten
  * Fields of the AdminExportHistory model
  */
 export interface AdminExportHistoryFieldRefs {
+  readonly id: Prisma.FieldRef<"AdminExportHistory", 'String'>
   readonly userId: Prisma.FieldRef<"AdminExportHistory", 'String'>
   readonly createdAt: Prisma.FieldRef<"AdminExportHistory", 'DateTime'>
   readonly reportName: Prisma.FieldRef<"AdminExportHistory", 'String'>
