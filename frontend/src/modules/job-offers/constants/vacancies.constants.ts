@@ -79,4 +79,6 @@ export const JOB_OFFERS_QUERY_KEYS = {
   skillCatalog: ["job-offers", "skill-catalog"] as const,
 };
 
+export const DEFAULT_COMPANY_ID = "a0000000-0000-4000-8000-000000000001";
 export const DEFAULT_COMPANY_NAME = "TechBolivia S.R.L.";
+export const COMPANY_ROLE_TAG = "empresa";
