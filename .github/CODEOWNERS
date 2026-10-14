@@ -4,6 +4,8 @@ README.md @umssy/DevOps
 .husky/ @umssy/DevOps
 scripts/ @umssy/DevOps
 backend/scripts/ @umssy/DevOps
+/backend/package.json @umssy/DevOps
+/frontend/package.json @umssy/DevOps
 vitest.config.* @umssy/DevOps
 eslint.config.* @umssy/DevOps
 vitest.setup.* @umssy/DevOps
