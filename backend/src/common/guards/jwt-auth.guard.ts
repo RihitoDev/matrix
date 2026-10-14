@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from '../prisma/prisma.service.js';
+import { SessionService } from '../services/session.service.js';
 import { ROLE_NAMES } from '../enums/roles.enum.js';
 import { BEARER_PREFIX } from '../constants/auth.constants.js';
 import { MissingUserException } from '../exceptions/missing-user.exception.js';
@@ -12,7 +12,7 @@ import type { LoginJwtPayload } from '../types/login-jwt-payload.types.js';
 export class JwtAuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly prisma: PrismaService,
+    private readonly sessionService: SessionService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -52,34 +52,7 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedSessionException();
     }
 
-    const user = await this.prisma.user.findFirst({
-      where: { id: payload.sub, isActive: true },
-      select: {
-        id: true,
-        email: true,
-        roles: {
-          where: {
-            deletedAt: null,
-            startAt: { lte: new Date() },
-          },
-          select: { role: { select: { name: true } } },
-        },
-      },
-    });
-
-    if (!user) {
-      throw new UnauthorizedSessionException('Usuario no encontrado o inactivo');
-    }
-
-    if (user.roles.length === 0) {
-      throw new UnauthorizedSessionException('El rol de la sesión ya no está vigente');
-    }
-
-    request.user = {
-      id: user.id,
-      email: user.email,
-      roles: [...new Set(user.roles.map(({ role }) => role.name))],
-    };
+    request.user = await this.sessionService.getAuthenticatedUser(payload.sub);
 
     return true;
   }

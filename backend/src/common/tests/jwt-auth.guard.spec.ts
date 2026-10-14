@@ -3,6 +3,8 @@ import type { JwtService } from '@nestjs/jwt';
 import type { PrismaService } from '../prisma/prisma.service.js';
 import { describe, expect, it, vi } from 'vitest';
 import { UnauthorizedSessionException } from '../exceptions/unauthorized-session.exception.js';
+import { SessionService } from '../services/session.service.js';
+import { SessionRepository } from '../repositories/session.repository.js';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard.js';
 import type { AuthenticatedRequest } from '../types/authenticated-request.types.js';
 import type { LoginJwtPayload } from '../types/login-jwt-payload.types.js';
@@ -34,7 +36,7 @@ function createGuard() {
   const prisma = { user: { findFirst } } as unknown as PrismaService;
 
   return {
-    guard: new JwtAuthGuard(jwtService, prisma),
+    guard: new JwtAuthGuard(jwtService, new SessionService(new SessionRepository(prisma))),
     verifyAsync,
     findFirst,
   };

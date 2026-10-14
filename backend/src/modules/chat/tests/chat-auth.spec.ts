@@ -9,6 +9,7 @@ import { DomainExceptionFilter } from '../../../common/filters/domain-exception.
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { ROLES_KEY } from '../../../common/constants/roles.constants.js';
+import { SessionModule } from '../../../common/session/session.module.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { ChatController } from '../controllers/chat.controller.js';
 import { ConversationController } from '../controllers/conversation.controller.js';
@@ -26,14 +27,16 @@ describe('Chat access', () => {
     findFirst.mockReset();
     findAllForUser.mockClear();
     const moduleRef = await Test.createTestingModule({
-      imports: [JwtModule.register({ secret: 'chat-role-test-secret' })],
+      imports: [SessionModule, JwtModule.register({ secret: 'chat-role-test-secret' })],
       controllers: [ConversationController],
       providers: [
-        { provide: PrismaService, useValue: { user: { findFirst } } },
         { provide: ConversationService, useValue: { findAllForUser } },
         { provide: APP_FILTER, useClass: DomainExceptionFilter },
       ],
-    }).compile();
+    })
+      .overrideProvider(PrismaService)
+      .useValue({ user: { findFirst } })
+      .compile();
     app = moduleRef.createNestApplication();
     await app.init();
     token = moduleRef.get(JwtService).sign({
