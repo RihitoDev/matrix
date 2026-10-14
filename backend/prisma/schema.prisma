@@ -380,7 +380,7 @@ model Appointment {
   message           String?   @db.VarChar(300)
   rejectionReason   String?   @map("rejection_reason") @db.VarChar(300)
   meetingUrl        String?   @map("meeting_url") @db.VarChar(255)
-  cancelledById     String?   @map("cancelled_by") @db.Uuid
+  cancelledById     String?   @map("cancelled_by_id") @db.Uuid
   requestedAt       DateTime  @default(now()) @map("requested_at") @db.Timestamptz(6)
   respondedAt       DateTime? @map("responded_at") @db.Timestamptz(6)
   createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -472,9 +472,9 @@ model Event {
   statusId         String    @map("status_id") @db.Uuid
   supportThreshold Int?      @map("support_threshold")
   votingDeadline   DateTime? @map("voting_deadline") @db.Timestamptz(6)
-  moderatedById    String?   @map("moderated_by") @db.Uuid
+  moderatedById    String?   @map("moderated_by_id") @db.Uuid
   moderationReason String?   @map("moderation_reason")
-  createdById      String    @map("created_by") @db.Uuid
+  createdById      String    @map("created_by_id") @db.Uuid
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -521,7 +521,7 @@ model EventAttendance {
   id               String    @id @default(uuid()) @db.Uuid
   registrationId   String    @unique @map("registration_id") @db.Uuid
   checkedInAt      DateTime  @map("checked_in_at") @db.Timestamptz(6)
-  checkedInById    String?   @map("checked_in_by") @db.Uuid
+  checkedInById    String?   @map("checked_in_by_id") @db.Uuid
   checkedInOffline Boolean   @default(false) @map("checked_in_offline")
   syncedAt         DateTime? @map("synced_at") @db.Timestamptz(6)
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
