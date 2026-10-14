@@ -3,7 +3,6 @@
 import { useId } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ALL_USER_TYPES_VALUE as ALL_FILTER_VALUE } from "../constants/registered-users.constants";
-import { REPORT_FILTER_ITEM_CLASSES } from "../constants/report-filter-select.constants";
 import type { ReportFilterSelectProps } from "../types/report-filter-select-props.types";
 
 export function ReportFilterSelect<TValue extends string>({
@@ -40,7 +39,8 @@ export function ReportFilterSelect<TValue extends string>({
             <SelectItem
               key={option.value}
               value={option.value}
-              className={REPORT_FILTER_ITEM_CLASSES}
+              variant="subtle"
+              className="rounded-none px-3 py-2 text-ink-soft data-selected:font-semibold"
             >
               {option.label}
             </SelectItem>
