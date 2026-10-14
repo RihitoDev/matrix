@@ -1,19 +1,20 @@
-import { OTHER_REJECTION_REASON, REJECTION_MAX_LENGTH } from "../constants/request-review.constants";
+import { OTHER_REJECTION_REASON, REJECTION_MAX_LENGTH, REJECTION_REASON_SEPARATOR } from "../constants/request-review.constants";
 import type { RejectionReasonResult } from "../types/rejection-reason-result.types";
 
-// El servidor recibe UNA cadena: el motivo elegido y, si hay indicación, ". " y la indicación.
-// "Otro motivo" exige una indicación no vacía.
 export function buildRejectionReason(choice: string | null, hint: string): RejectionReasonResult {
   const cleanHint = (hint ?? "").trim();
-  const reason = choice ? (cleanHint ? `${choice}. ${cleanHint}` : choice) : "";
-  const length = reason.length;
+  const reason = choice ? (cleanHint ? `${choice}${REJECTION_REASON_SEPARATOR}${cleanHint}` : choice) : "";
+  const reservedLength = choice ? choice.length + REJECTION_REASON_SEPARATOR.length : 0;
+  const hintMaxLength = REJECTION_MAX_LENGTH - reservedLength;
+  const hintLength = cleanHint.length;
+  const base = { reason, hintLength, hintMaxLength, reservedLength };
 
-  if (!choice) return { reason, length, isValid: false, error: null };
-  if (choice === OTHER_REJECTION_REASON && cleanHint.length === 0) {
-    return { reason, length, isValid: false, error: "Escribe la indicación para el solicitante" };
+  if (!choice) return { ...base, isValid: false, error: null };
+  if (choice === OTHER_REJECTION_REASON && hintLength === 0) {
+    return { ...base, isValid: false, error: "Escribe la indicación para el solicitante" };
   }
-  if (length > REJECTION_MAX_LENGTH) {
-    return { reason, length, isValid: false, error: `El motivo no puede superar los ${REJECTION_MAX_LENGTH} caracteres` };
+  if (hintLength > hintMaxLength) {
+    return { ...base, isValid: false, error: `La indicación no puede superar los ${hintMaxLength} caracteres` };
   }
-  return { reason, length, isValid: true, error: null };
+  return { ...base, isValid: true, error: null };
 }
