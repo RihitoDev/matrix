@@ -6,6 +6,7 @@ import {
   RECRUITERS_HOME_PATH,
 } from "../constants/login-redirect.constants";
 
+
 export function getPostLoginPath(roleTag: string | null | undefined): string {
   if (roleTag === ADMINISTRATIVE_ROLE_TAG) return BACKOFFICE_HOME_PATH;
   if (roleTag === COMPANY_ROLE_TAG) return RECRUITERS_HOME_PATH;
