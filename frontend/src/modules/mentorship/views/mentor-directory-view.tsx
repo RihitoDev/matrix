@@ -3,9 +3,11 @@
 import { MentorDirectoryGrid } from "../components/mentor/mentor-directory-grid";
 import { MentorQueryFeedback } from "../components/mentor/mentor-query-feedback";
 import { MentorQuerySkeleton } from "../components/mentor/mentor-query-skeleton";
+import { useCurrentUserId } from "../hooks/use-current-user-id";
 import { useMentorDirectory } from "../hooks/use-mentor-directory";
 
 export function MentorDirectoryView() {
+  const { currentUserId } = useCurrentUserId();
   const { data: mentors, isPending, isError, isFetching, refetch } =
     useMentorDirectory();
 
@@ -39,7 +41,7 @@ export function MentorDirectoryView() {
             description="Por el momento no hay mentores activos para mostrar. Vuelve a consultar más adelante."
           />
         ) : (
-          <MentorDirectoryGrid mentors={mentors} />
+          <MentorDirectoryGrid mentors={mentors} currentUserId={currentUserId} />
         )}
       </div>
     </main>
