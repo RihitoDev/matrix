@@ -8,16 +8,14 @@ import {
   SendMessageResponse,
   StandardApiResponse,
 } from '../types/conversation.types';
-import { MOCK_CONVERSATIONS } from '../mocks/mock-conversations';
+//import { MOCK_CONVERSATIONS } from '../mocks/mock-conversations';
 import { User } from '../types/user.types';
 import {
   CURRENT_USER_ID
 } from '../mocks/mock-users';
 import {
   getMessagesByConversation,
-  getStoredMessages,
   saveStoredMessage,
-  getStoredConversationReadState,
   markStoredConversationAsRead,
 } from './message-storage';
 import { apiClient } from '@/shared/services/api-client';
@@ -84,66 +82,31 @@ interface ChatUserResponse {
   role: string;
   isOnline: boolean;
 }
+
 export async function getConversations(): Promise<Conversation[]> {
-  try {
-    const response = await apiClient.get<Conversation[] | { data: Conversation[] }>(
-      '/chat/conversations',
-    );
+  const response = await apiClient.get<
+    Conversation[] | { data: Conversation[] }
+  >('/chat/conversations');
 
-    const body = response.data;
-    const items = Array.isArray(body)
-      ? body
-      : Array.isArray((body as { data?: Conversation[] })?.data)
-        ? (body as { data: Conversation[] }).data
-        : [];
+  const body = response.data;
 
-    return items.sort((a, b) => {
-      const dateA = new Date(a.lastMessage?.createdAt || a.updatedAt).getTime();
-      const dateB = new Date(b.lastMessage?.createdAt || b.updatedAt).getTime();
-      return dateB - dateA;
-    });
-  } catch {
-    const readState = getStoredConversationReadState();
-    const storedMessages = getStoredMessages();
+  const items = Array.isArray(body)
+    ? body
+    : Array.isArray(body?.data)
+      ? body.data
+      : [];
 
-    const conversations = MOCK_CONVERSATIONS.map((conv) => {
-      const unread = conv.id in readState ? readState[conv.id] : conv.unreadCount;
+  return items.sort((a, b) => {
+    const dateA = new Date(
+      a.lastMessage?.createdAt || a.updatedAt,
+    ).getTime();
 
-      const convMessages = Array.isArray(storedMessages)
-        ? storedMessages.filter((m) => m && m.conversationId === conv.id)
-        : [];
+    const dateB = new Date(
+      b.lastMessage?.createdAt || b.updatedAt,
+    ).getTime();
 
-      if (convMessages.length === 0) {
-        return {
-          ...conv,
-          unreadCount: unread,
-        };
-      }
-
-      const lastMsg = convMessages[convMessages.length - 1];
-      const lastDate = lastMsg.timestamp || lastMsg.createdAt || conv.updatedAt;
-
-      return {
-        ...conv,
-        unreadCount: unread,
-        updatedAt: lastDate,
-        lastMessage: {
-          id: lastMsg.id,
-          senderId: lastMsg.senderId,
-          content: lastMsg.content,
-          isAttachment: Boolean(lastMsg.isAttachment),
-          attachmentType: lastMsg.attachmentType,
-          createdAt: lastDate,
-        },
-      };
-    });
-
-    return conversations.sort((a, b) => {
-      const dateA = new Date(a.lastMessage?.createdAt || a.updatedAt).getTime();
-      const dateB = new Date(b.lastMessage?.createdAt || b.updatedAt).getTime();
-      return dateB - dateA;
-    });
-  }
+    return dateB - dateA;
+  });
 }
 
 

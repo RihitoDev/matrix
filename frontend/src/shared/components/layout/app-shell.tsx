@@ -46,7 +46,10 @@ export function AppShell({
         itemClassName={sidebarItemClassName}
         itemBadges={sidebarItemBadges}
       />
-      <SidebarInset className="bg-surface-soft">
+      <SidebarInset className={cn("bg-surface-soft",
+    contentClassName && "h-dvh min-h-0 overflow-hidden"
+  )}
+>
         {header ?? (
           <header className={fullBleed ? "absolute left-4 top-3 z-10 flex items-center" : "flex items-center px-4 py-3"}>
             <SidebarToggleButton />
