@@ -39,14 +39,17 @@ export async function seedEvents(
     await tx.event.upsert({
       where: { id: e.id },
       update: {
+        instructorName: e.instructorName,
+        description: e.description,
+        location: e.location,
         capacity: e.capacity,
         categoryId: categories[e.categoryIndex].id,
       },
       create: {
         id: e.id,
         title: e.title,
-        description: 'Evento de prueba',
-        instructorName: 'Instructor Demo',
+        description: e.description,
+        instructorName: e.instructorName,
         eventDate: new Date(e.date),
         startTime: new Date('1970-01-01T09:00:00.000Z'),
         endTime: new Date('1970-01-01T12:00:00.000Z'),
