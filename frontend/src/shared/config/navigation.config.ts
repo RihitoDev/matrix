@@ -1,5 +1,5 @@
 import type { NavigationItem } from "@/shared/types/navigation-item.types";
-import { Briefcase, CalendarClock, CalendarDays, House, ListChecks, User, UserRound } from "lucide-react";
+import { Briefcase, CalendarClock, CalendarDays, House, ListChecks, Ticket, User, UserRound } from "lucide-react";
 
 export const SIDEBAR_NAVIGATION: NavigationItem[] = [
   { label: "Inicio", icon: House, href: "/" },
@@ -25,6 +25,14 @@ export const SIDEBAR_NAVIGATION: NavigationItem[] = [
         href: "/mentor/availability",
         icon: CalendarClock,
       },
+    ],
+  },
+  {
+    label: "Talleres",
+    icon: CalendarDays,
+    children: [
+      { label: "Talleres disponibles", href: "/events", icon: ListChecks },
+      { label: "Mis inscripciones", href: "/events/my-passes", icon: Ticket }, 
     ],
   },
 ];
