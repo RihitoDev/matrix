@@ -1,10 +1,9 @@
 import { AxiosError } from "axios";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { createQueryWrapper } from "@/shared/testing/create-query-wrapper";
 import { jobOffersService } from "../services/job-offers.service";
-import { buildSessionToken, COMPANY_ID, EMPTY_CONDITIONS, VALID_CONDITIONS } from "../testing/vacancy-fixtures";
+import { COMPANY_ID, EMPTY_CONDITIONS, VALID_CONDITIONS } from "../testing/vacancy-fixtures";
 import { toJobOfferPayload } from "../utils/to-job-offer-payload";
 import { usePublishJobOffer } from "./use-publish-job-offer";
 
@@ -19,14 +18,12 @@ function renderPublishHook() {
 describe("usePublishJobOffer", () => {
   beforeEach(() => {
     vi.stubEnv("NEXT_PUBLIC_DEMO_COMPANY_ID", COMPANY_ID);
-    saveAccessToken(buildSessionToken("empresa"));
   });
 
   afterEach(() => {
     cleanup();
     vi.clearAllMocks();
     vi.unstubAllEnvs();
-    clearAccessToken();
   });
 
   it("publica con la empresa configurada y el payload del backend", async () => {
@@ -82,7 +79,7 @@ describe("usePublishJobOffer", () => {
   });
 
   it("no llama al backend si no hay empresa asociada a la sesión", async () => {
-    saveAccessToken(buildSessionToken("titulado"));
+    vi.stubEnv("NEXT_PUBLIC_DEMO_COMPANY_ID", "");
     const { result } = renderPublishHook();
 
     await act(() => result.current.submit(VALID_CONDITIONS));
