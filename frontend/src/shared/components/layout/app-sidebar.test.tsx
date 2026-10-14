@@ -7,8 +7,9 @@ import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import type { AppSidebarProps } from "@/shared/types/app-sidebar-props.types";
 import { AppSidebar } from "./app-sidebar";
 
+const { route } = vi.hoisted(() => ({ route: { pathname: "/home" } }));
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/home",
+  usePathname: () => route.pathname,
 }));
 
 function renderSidebar(props: AppSidebarProps = {}) {
@@ -21,6 +22,7 @@ function renderSidebar(props: AppSidebarProps = {}) {
 
 describe("AppSidebar", () => {
   beforeEach(() => {
+    route.pathname = "/home";
     stubMatchMedia();
   });
 
@@ -30,9 +32,13 @@ describe("AppSidebar", () => {
   });
 
   it("shows the brand without an identity footer when no user is provided", () => {
-    renderSidebar();
+    const { container } = renderSidebar();
 
     expect(screen.getByText("UMSSY")).toBeDefined();
+    const icon = container.querySelector('[data-slot="sidebar-header"] img');
+    expect(icon).toBeInTheDocument();
+    const iconUrl = new URL(icon?.getAttribute("src") ?? "", "http://localhost");
+    expect(iconUrl.searchParams.get("url") ?? iconUrl.pathname).toBe("/icons/icon-192x192.png");
     expect(screen.getByText("Universidad para el futuro")).toBeDefined();
     expect(screen.queryByText("Alejandro Vargas")).toBeNull();
     expect(screen.queryByText("Administrador")).toBeNull();
@@ -60,6 +66,26 @@ describe("AppSidebar", () => {
     renderSidebar();
 
     expect(screen.getByRole("link", { name: "Mi perfil" }).getAttribute("href")).toBe("/profile");
+  });
+
+  it("opens the workshops group with links to existing views", () => {
+    renderSidebar();
+    fireEvent.click(screen.getByRole("button", { name: "Talleres" }));
+    expect(screen.getByRole("link", { name: "Talleres disponibles" })).toHaveAttribute("href", "/events");
+    expect(screen.getByRole("link", { name: "Mis inscripciones" })).toHaveAttribute("href", "/events/my-passes");
+  });
+
+  it.each([
+    ["/events", "Talleres disponibles", "Mis inscripciones"],
+    ["/events/my-passes", "Mis inscripciones", "Talleres disponibles"],
+  ])("expands workshops and marks only the selected route on %s", (pathname, active, inactive) => {
+    route.pathname = pathname;
+    renderSidebar();
+    expect(screen.getByRole("button", { name: "Talleres" })).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("link", { name: active })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: inactive })).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("link", { name: "Mi perfil" })).toHaveAttribute("href", "/profile");
+    expect(screen.getByRole("button", { name: "Mentorías" })).toBeInTheDocument();
   });
 
   it("does not render routes that are not implemented", () => {

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { CAREER } from '../types/career.enum.js';
 import { ID_CARD_ISSUED_IN } from '../types/id-card-issued-in.enum.js';
-import { MIN_AGE, NAME_REGEX, DIGITS_REGEX, ISO_DATE_REGEX } from '../constants/access-request-fields.constants.js';
+import { MIN_AGE } from '../constants/access-request-fields.constants.js';
 
 function isRealIsoDate(value: string): boolean {
   const date = new Date(`${value}T00:00:00.000Z`);
@@ -31,7 +31,7 @@ const nameField = (label: string) =>
     .trim()
     .min(1, `${label} son obligatorios`)
     .max(100, `${label} no pueden superar los 100 caracteres`)
-    .regex(NAME_REGEX, `${label} solo pueden contener letras, espacios, guiones y apóstrofes`);
+    .regex(/^\p{L}[\p{L}\p{M}]*(?:[ '’-]\p{L}[\p{L}\p{M}]*)*$/u, `${label} solo pueden contener letras, espacios, guiones y apóstrofes`);
 
 const digitsField = (label: string) =>
   z
@@ -39,7 +39,7 @@ const digitsField = (label: string) =>
     .trim()
     .min(1, `${label} es obligatorio`)
     .max(20, `${label} no puede superar los 20 dígitos`)
-    .regex(DIGITS_REGEX, `${label} solo puede contener dígitos`);
+    .regex(/^\d+$/, `${label} solo puede contener dígitos`);
 
 export const accessRequestFields = {
   firstName: nameField('Los nombres'),
@@ -60,7 +60,7 @@ export const accessRequestFields = {
     .optional(),
   birthDate: z
     .string({ error: 'La fecha de nacimiento es obligatoria' })
-    .regex(ISO_DATE_REGEX, 'La fecha de nacimiento debe tener el formato AAAA-MM-DD')
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'La fecha de nacimiento debe tener el formato AAAA-MM-DD')
     .refine(isRealIsoDate, 'La fecha de nacimiento no es válida')
     .transform((value) => new Date(`${value}T00:00:00.000Z`))
     .refine((value) => Number.isNaN(value.getTime()) || isAdult(value), `Debes ser mayor de ${MIN_AGE} años`),

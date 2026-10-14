@@ -21,7 +21,7 @@ export function MyPassesView() {
       <div className="min-w-0 flex-1 p-8 pt-4 lg:p-12 lg:pt-6">
         <div className="mb-8">
           <h1 className="text-3xl font-extrabold text-ink mb-1">
-            Mis Inscripciones
+            Mis inscripciones
           </h1>
           <p className="text-text-secondary text-sm">
             {registrations.length}{' '}
