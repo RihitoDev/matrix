@@ -1,6 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable, Optional } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { ROLE_NAMES } from '../enums/roles.enum.js';
 import { BEARER_PREFIX } from '../constants/auth.constants.js';
 import { MissingUserException } from '../exceptions/missing-user.exception.js';
 import { UnauthorizedSessionException } from '../exceptions/unauthorized-session.exception.js';
@@ -42,7 +43,11 @@ export class JwtAuthGuard implements CanActivate {
       typeof payload.sub !== 'string' ||
       !payload.sub.trim() ||
       typeof payload.roleTag !== 'string' ||
-      !payload.roleTag.trim()
+      !payload.roleTag.trim() ||
+      (payload.roles !== undefined &&
+        (!Array.isArray(payload.roles) ||
+          payload.roles.length === 0 ||
+          payload.roles.some((role) => !ROLE_NAMES.some((knownRole) => knownRole === role))))
     ) {
       throw new UnauthorizedSessionException();
     }
@@ -50,7 +55,7 @@ export class JwtAuthGuard implements CanActivate {
     let user = {
       id: payload.sub,
       email: '',
-      roles: [{ role: { name: payload.roleTag } }],
+      roles: (payload.roles ?? [payload.roleTag]).map((name) => ({ role: { name } })),
     };
 
     if (this.prisma && typeof this.prisma.user?.findFirst === 'function') {
@@ -63,7 +68,6 @@ export class JwtAuthGuard implements CanActivate {
             where: {
               deletedAt: null,
               startAt: { lte: new Date() },
-              role: { name: payload.roleTag },
             },
             select: { role: { select: { name: true } } },
           },
@@ -88,7 +92,7 @@ export class JwtAuthGuard implements CanActivate {
     request.user = {
       id: user.id,
       email: user.email,
-      roles: user.roles.map(({ role }) => role.name),
+      roles: [...new Set(user.roles.map(({ role }) => role.name))],
     };
 
     return true;

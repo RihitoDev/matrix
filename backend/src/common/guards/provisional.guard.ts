@@ -32,13 +32,17 @@ export class ProvisionalSessionGuard implements CanActivate {
       throw new UnauthorizedSessionException('Token inválido o expirado');
     }
 
+    if (!payload || typeof payload.sub !== 'string' || !payload.sub.trim() || typeof payload.roleTag !== 'string' || !payload.roleTag.trim()) {
+      throw new UnauthorizedSessionException('Token inválido o expirado');
+    }
+
     const user = await this.prisma.user.findFirst({
       where: { id: payload.sub, isActive: true },
       select: {
         id: true,
         email: true,
         roles: {
-          where: { deletedAt: null, startAt: { lte: new Date() }, role: { name: payload.roleTag } },
+          where: { deletedAt: null, startAt: { lte: new Date() } },
           select: { role: { select: { name: true } } },
         },
       },
@@ -55,7 +59,7 @@ export class ProvisionalSessionGuard implements CanActivate {
     const authenticated: AuthenticatedUser = {
       id: user.id,
       email: user.email,
-      roles: [payload.roleTag],
+      roles: [...new Set(user.roles.map(({ role }) => role.name))],
     };
     request.user = authenticated;
 

@@ -18,7 +18,7 @@ export class AuthRepository {
       where: { email },
       include: {
         roles: {
-          where: { deletedAt: null },
+          where: { deletedAt: null, startAt: { lte: new Date() } },
           include: { role: true },
         },
       },

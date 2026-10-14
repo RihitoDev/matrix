@@ -3,6 +3,10 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { AuthRepository } from '../repositories/auth.repository.js';
 import { InvalidCredentialsException, RoleNotAssignedException } from '../exceptions/index.js';
+import { LOGIN_ROLE_PRIORITY } from '../constants/login-role-priority.constants.js';
+import type { SessionResponse } from '../types/session-response.types.js';
+import type { LoginResponse } from '../types/login-response.types.js';
+import type { AuthenticatedUser } from '../../../common/types/authenticated-user.types.js';
 import type { LoginDto } from '../requests/login.schema.js';
 
 @Injectable()
@@ -16,10 +20,14 @@ export class AuthService {
     return this.authRepository.existsByEmail(email);
   }
 
-  async login(dto: LoginDto) {
+  getSession(user: AuthenticatedUser): SessionResponse {
+    return { id: user.id, email: user.email, roles: user.roles };
+  }
+
+  async login(dto: LoginDto): Promise<LoginResponse> {
     const user = await this.authRepository.findUserByEmailWithRoles(dto.email);
 
-    if (!user || !user.password) {
+    if (!user || !user.password || user.isActive === false) {
       throw new InvalidCredentialsException();
     }
 
@@ -28,12 +36,14 @@ export class AuthService {
       throw new InvalidCredentialsException();
     }
 
-    const hasRole = user.roles.some((userRole) => userRole.role.name === dto.roleTag);
-    if (!hasRole) {
-      throw new RoleNotAssignedException();
+    const assignedRoles = new Set(user.roles.map(({ role }) => role.name));
+    const roles = LOGIN_ROLE_PRIORITY.filter((role) => assignedRoles.has(role));
+    const roleTag = dto.roleTag ?? roles[0];
+    if (!roleTag || !roles.includes(roleTag)) {
+      throw new RoleNotAssignedException(dto.roleTag ? undefined : "El usuario no tiene roles habilitados");
     }
 
-    const accessToken = this.jwtService.sign({ sub: user.id, roleTag: dto.roleTag });
-    return { accessToken, roleTag: dto.roleTag };
+    const accessToken = this.jwtService.sign({ sub: user.id, roleTag, roles });
+    return { accessToken, roleTag, roles };
   }
 }

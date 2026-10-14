@@ -111,7 +111,6 @@ describe('JwtAuthGuard', () => {
           where: {
             deletedAt: null,
             startAt: { lte: expect.any(Date) },
-            role: { name: 'mentor' },
           },
           select: { role: { select: { name: true } } },
         },
@@ -191,7 +190,7 @@ describe('JwtAuthGuard', () => {
       expect.objectContaining({
         select: expect.objectContaining({
           roles: expect.objectContaining({
-            where: expect.objectContaining({ role: { name: 'titulado' } }),
+            where: expect.objectContaining({ deletedAt: null, startAt: { lte: expect.any(Date) } }),
           }),
         }),
       }),
@@ -202,4 +201,14 @@ describe('JwtAuthGuard', () => {
       roles: ['titulado'],
     });
   });
+  it('uses all current database roles and excludes roles only claimed by the JWT', async () => {
+    const { guard, verifyAsync, findFirst } = createGuard();
+    verifyAsync.mockResolvedValue({ sub: USER_ID, roleTag: 'titulado', roles: ['titulado', 'mentor', 'administrativo'] });
+    findFirst.mockResolvedValue({ id: USER_ID, email: 'user@test.com', roles: [{ role: { name: 'titulado' } }, { role: { name: 'mentor' } }] });
+    const request = createRequest(`Bearer ${VALID_TOKEN}`);
+    await expect(guard.canActivate(createContext(request))).resolves.toBe(true);
+    expect(request.user?.roles).toEqual(['titulado', 'mentor']);
+    expect(request.user?.roles).not.toContain('administrativo');
+  });
+
 });

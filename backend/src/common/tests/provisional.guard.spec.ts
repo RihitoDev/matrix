@@ -30,7 +30,6 @@ function createGuard(dbUser: unknown, payload: unknown = { sub: VALID_ID, roleTa
         })
       : vi.fn().mockReturnValue(payload);
   const jwtService = { verify };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const guard = new ProvisionalSessionGuard(jwtService as any, prisma as any);
   return { guard, findFirst, verify };
 }
@@ -70,7 +69,7 @@ describe('ProvisionalSessionGuard', () => {
     expect(findFirst).toHaveBeenCalledOnce();
   });
 
-  it('busca en BD solo el rol vigente del roleTag del token', async () => {
+  it('busca todos los roles vigentes del usuario', async () => {
     const { guard, findFirst } = createGuard(null, { sub: VALID_ID, roleTag: 'mentor' });
     const ctx = createContext({ headers: { authorization: `Bearer ${VALID_TOKEN}` } });
 
@@ -78,7 +77,7 @@ describe('ProvisionalSessionGuard', () => {
 
     const args = findFirst.mock.calls[0][0];
     expect(args.where).toEqual({ id: VALID_ID, isActive: true });
-    expect(args.select.roles.where).toMatchObject({ deletedAt: null, role: { name: 'mentor' } });
+    expect(args.select.roles.where).toEqual({ deletedAt: null, startAt: { lte: expect.any(Date) } });
   });
 
   it('responde 401 si el rol del token ya no está vigente', async () => {
@@ -109,4 +108,11 @@ describe('ProvisionalSessionGuard', () => {
       roles: ['titulado'],
     });
   });
+  it('allows both mentor and graduate permissions in the same session', async () => {
+    const { guard } = createGuard({ id: VALID_ID, email: 'user@test.com', roles: [{ role: { name: 'titulado' } }, { role: { name: 'mentor' } }] });
+    const request: FakeRequest = { headers: { authorization: `Bearer ${VALID_TOKEN}` } };
+    await expect(guard.canActivate(createContext(request))).resolves.toBe(true);
+    expect(request.user).toMatchObject({ roles: ['titulado', 'mentor'] });
+  });
+
 });
