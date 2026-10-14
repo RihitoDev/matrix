@@ -4,8 +4,6 @@ export const ISSUING_ORGANIZATION_MAX_LENGTH = 150;
 
 export const CERTIFICATION_MIN_ISSUE_DATE = '1950-01-01';
 
-export const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-
 export const CERTIFICATION_VALIDATION_MESSAGES = {
   required: 'Este campo es obligatorio.',
   nameTooLong: `Usa como máximo ${CERTIFICATION_NAME_MAX_LENGTH} caracteres.`,
