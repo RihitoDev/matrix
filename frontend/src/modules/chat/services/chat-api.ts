@@ -288,7 +288,8 @@ export async function getPaginatedMessages({
         };
       }
     }
-  } catch {
+  } catch (error){
+    throw error;
   }
 
   const messages = getMessagesByConversation(conversationId);
