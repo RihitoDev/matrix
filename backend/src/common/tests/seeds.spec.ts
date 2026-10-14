@@ -107,7 +107,7 @@ describe('runSeed', () => {
     expect(summary).toMatchObject({
       roles: 5,
       statuses: 2,
-      users: 8,
+      users: 9,
       userRoles: 7,
       blocks: 56,
       appointments: 2,
