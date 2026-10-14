@@ -3,6 +3,7 @@ README.md @umssy/DevOps
 .github/ @umssy/DevOps
 .husky/ @umssy/DevOps
 scripts/ @umssy/DevOps
+backend/scripts/ @umssy/DevOps
 vitest.config.* @umssy/DevOps
 eslint.config.* @umssy/DevOps
 vitest.setup.* @umssy/DevOps
