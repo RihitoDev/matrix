@@ -4,6 +4,7 @@ import { FileNotFoundException } from '../../files/exceptions/index.js';
 import { AuthService } from '../../auth/services/auth.service.js';
 import { AccessRequestsRepository } from '../repositories/access-requests.repository.js';
 import { ActivationOtpService } from './activation-otp.service.js';
+import { decodeUploadFileName } from '../helpers/decode-upload-file-name.js';
 import { RejectionNotificationService } from './rejection-notification.service.js';
 import {
   AccessRequestNotEditableException,
@@ -112,7 +113,7 @@ export class AccessRequestsService {
       throw new InvalidDocumentTypeException();
     }
 
-    const created = await this.filesService.create({ name: file.originalname, content: file.buffer });
+    const created = await this.filesService.create({ name: decodeUploadFileName(file.originalname), content: file.buffer });
 
     let previousFileId: string | null;
     try {
