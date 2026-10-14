@@ -6,7 +6,11 @@ describe("getPostLoginPath", () => {
     expect(getPostLoginPath("administrativo")).toBe("/backoffice/solicitudes");
   });
 
-  it.each(["titulado", "estudiante", "mentor", "empresa", "", "inventado", null, undefined])(
+  it("el rol empresa va al módulo de reclutadores", () => {
+    expect(getPostLoginPath("empresa")).toBe("/recruiters");
+  });
+
+  it.each(["titulado", "estudiante", "mentor", "", "inventado", null, undefined])(
     "el rol %j va al perfil",
     (role) => {
       expect(getPostLoginPath(role as string | null | undefined)).toBe("/profile");
