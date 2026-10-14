@@ -1,23 +1,33 @@
 import type { ReactNode } from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import AreaDetailPreviewPage from "./page";
+import AppLayout from "../../layout";
 
-vi.mock("@/modules/radar-chart/components/epic3-shell", () => ({
-  Epic3Shell: ({ children }: { children: ReactNode }) => children,
+vi.mock("@/shared/components/layout/app-shell", () => ({
+  AppShell: ({ children }: { children: ReactNode }) => <div data-testid="app-shell">{children}</div>,
 }));
 
 function getTab(name: RegExp) {
   return screen.getByRole("tab", { name });
 }
 
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/area-detail-preview",
+  useRouter: () => ({ replace: vi.fn() }),
+}));
+
 describe("AreaDetailPreviewPage", () => {
+  beforeEach(() => sessionStorage.setItem("accessToken", "token-de-prueba"));
   afterEach(() => {
     cleanup();
+    sessionStorage.clear();
   });
 
   it("shows the page title, the breadcrumb and the candidate card", () => {
-    render(<AreaDetailPreviewPage />);
+    render(<AppLayout><AreaDetailPreviewPage /></AppLayout>);
+
+    expect(screen.getByTestId("app-shell")).toContainElement(screen.getByRole("main"));
 
     expect(screen.getByRole("heading", { level: 1, name: "Detalle por área" })).toBeDefined();
     expect(screen.getByRole("navigation", { name: "Ruta de navegación" }).textContent).toBe(
@@ -30,7 +40,7 @@ describe("AreaDetailPreviewPage", () => {
   });
 
   it("shows the Desarrollo detail inside the tab panel by default", () => {
-    render(<AreaDetailPreviewPage />);
+    render(<AppLayout><AreaDetailPreviewPage /></AppLayout>);
 
     const tab = getTab(/Desarrollo/);
     const tabPanel = screen.getByRole("tabpanel");
@@ -42,7 +52,7 @@ describe("AreaDetailPreviewPage", () => {
   });
 
   it("renders one numbered tab per area in the radar order with its score", () => {
-    render(<AreaDetailPreviewPage />);
+    render(<AppLayout><AreaDetailPreviewPage /></AppLayout>);
 
     const tabs = screen.getAllByRole("tab");
 
@@ -58,7 +68,7 @@ describe("AreaDetailPreviewPage", () => {
   });
 
   it("changes the detail when another area is selected", () => {
-    render(<AreaDetailPreviewPage />);
+    render(<AppLayout><AreaDetailPreviewPage /></AppLayout>);
 
     fireEvent.click(getTab(/QA/));
 
@@ -69,7 +79,7 @@ describe("AreaDetailPreviewPage", () => {
   });
 
   it("keeps only the selected tab in the tab order", () => {
-    render(<AreaDetailPreviewPage />);
+    render(<AppLayout><AreaDetailPreviewPage /></AppLayout>);
 
     fireEvent.click(getTab(/QA/));
 
@@ -84,7 +94,7 @@ describe("AreaDetailPreviewPage", () => {
   });
 
   it("moves between areas with the left and right arrow keys", () => {
-    render(<AreaDetailPreviewPage />);
+    render(<AppLayout><AreaDetailPreviewPage /></AppLayout>);
 
     fireEvent.keyDown(getTab(/Desarrollo/), { key: "ArrowRight" });
 
@@ -99,7 +109,7 @@ describe("AreaDetailPreviewPage", () => {
   });
 
   it("wraps around at both ends and supports Home and End", () => {
-    render(<AreaDetailPreviewPage />);
+    render(<AppLayout><AreaDetailPreviewPage /></AppLayout>);
 
     fireEvent.keyDown(getTab(/Desarrollo/), { key: "ArrowLeft" });
     expect(getTab(/Gobernanza TI/).getAttribute("aria-selected")).toBe("true");
@@ -115,7 +125,7 @@ describe("AreaDetailPreviewPage", () => {
   });
 
   it("ignores other keys", () => {
-    render(<AreaDetailPreviewPage />);
+    render(<AppLayout><AreaDetailPreviewPage /></AppLayout>);
 
     fireEvent.keyDown(getTab(/Desarrollo/), { key: "a" });
 
@@ -123,7 +133,7 @@ describe("AreaDetailPreviewPage", () => {
   });
 
   it("hides the panel and shows the hint when the detail is closed", () => {
-    render(<AreaDetailPreviewPage />);
+    render(<AppLayout><AreaDetailPreviewPage /></AppLayout>);
 
     fireEvent.click(screen.getByRole("button", { name: "Cerrar detalle del área" }));
 
@@ -137,7 +147,7 @@ describe("AreaDetailPreviewPage", () => {
   });
 
   it("opens the panel again when a tab is selected after closing", () => {
-    render(<AreaDetailPreviewPage />);
+    render(<AppLayout><AreaDetailPreviewPage /></AppLayout>);
 
     fireEvent.click(screen.getByRole("button", { name: "Cerrar detalle del área" }));
     fireEvent.click(getTab(/Data\/AI/));
@@ -146,7 +156,7 @@ describe("AreaDetailPreviewPage", () => {
   });
 
   it("shows a focus ring on the tabs only for keyboard focus", () => {
-    render(<AreaDetailPreviewPage />);
+    render(<AppLayout><AreaDetailPreviewPage /></AppLayout>);
 
     screen.getAllByRole("tab").forEach((tab) => {
       const classes = tab.className.split(" ");

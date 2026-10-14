@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
 
-export interface RecruitersAppShellProps {
+export interface AppRouteLayoutProps {
   children: ReactNode;
 }

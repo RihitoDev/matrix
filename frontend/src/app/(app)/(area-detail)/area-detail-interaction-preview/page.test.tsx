@@ -7,6 +7,7 @@ import {
 } from "@testing-library/react";
 import {
   afterEach,
+  beforeEach,
   describe,
   expect,
   it,
@@ -14,18 +15,28 @@ import {
 } from "vitest";
 
 import AreaDetailInteractionPreviewPage from "./page";
+import AppLayout from "../../layout";
 
-vi.mock("@/modules/radar-chart/components/epic3-shell", () => ({
-  Epic3Shell: ({ children }: { children: ReactNode }) => children,
+vi.mock("@/shared/components/layout/app-shell", () => ({
+  AppShell: ({ children }: { children: ReactNode }) => <div data-testid="app-shell">{children}</div>,
+}));
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/area-detail-interaction-preview",
+  useRouter: () => ({ replace: vi.fn() }),
 }));
 
 describe("AreaDetailInteractionPreviewPage", () => {
+  beforeEach(() => sessionStorage.setItem("accessToken", "token-de-prueba"));
   afterEach(() => {
     cleanup();
+    sessionStorage.clear();
   });
 
   it("renderiza la vista de prueba de interacción", () => {
-    render(<AreaDetailInteractionPreviewPage />);
+    render(<AppLayout><AreaDetailInteractionPreviewPage /></AppLayout>);
+
+    expect(screen.getByTestId("app-shell")).toContainElement(screen.getByRole("main"));
 
     expect(
       screen.getByRole("heading", {
@@ -36,7 +47,7 @@ describe("AreaDetailInteractionPreviewPage", () => {
   });
 
   it("muestra Desarrollo inicialmente", () => {
-    render(<AreaDetailInteractionPreviewPage />);
+    render(<AppLayout><AreaDetailInteractionPreviewPage /></AppLayout>);
 
     expect(
       screen.getByRole("heading", {
@@ -47,7 +58,7 @@ describe("AreaDetailInteractionPreviewPage", () => {
   });
 
   it("permite seleccionar otra área", () => {
-    render(<AreaDetailInteractionPreviewPage />);
+    render(<AppLayout><AreaDetailInteractionPreviewPage /></AppLayout>);
 
     fireEvent.click(
       screen.getByRole("button", {
@@ -71,7 +82,7 @@ describe("AreaDetailInteractionPreviewPage", () => {
   });
 
   it("permite cerrar el detalle seleccionado", () => {
-    render(<AreaDetailInteractionPreviewPage />);
+    render(<AppLayout><AreaDetailInteractionPreviewPage /></AppLayout>);
 
     fireEvent.click(
       screen.getByRole("button", {
