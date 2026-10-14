@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
 import { nextRequestCode, randomRetryDelayMs, requestCodePrefix, sleep } from '../helpers/request-code.js';
-import { REQUEST_CODE_REGEX } from '../constants/request-code.constants.js';
 
 describe('nextRequestCode', () => {
   it('el primer código del año es el 0001', () => {
@@ -21,7 +20,7 @@ describe('nextRequestCode', () => {
 
   it('expone el prefijo y un patrón que acepta los códigos generados', () => {
     expect(requestCodePrefix(2026)).toBe('SOL-2026-');
-    expect(REQUEST_CODE_REGEX.test(nextRequestCode(2026, 'SOL-2026-0009'))).toBe(true);
+    expect(/^SOL-\d{4}-\d{4,}$/.test(nextRequestCode(2026, 'SOL-2026-0009'))).toBe(true);
   });
 });
 

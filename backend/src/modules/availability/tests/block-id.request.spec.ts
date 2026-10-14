@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { BLOCK_ID_MESSAGES as MSG } from '../constants/block-id.constants.js';
 import { blockIdSchema } from '../requests/block-id.request.js';
 
 const messagesOf = (input: unknown): string[] => {
@@ -13,10 +12,10 @@ describe('blockIdSchema', () => {
   });
 
   it('rechaza un id que no es uuid', () => {
-    expect(messagesOf('no-es-uuid')).toEqual([MSG.invalidId]);
+    expect(messagesOf('no-es-uuid')).toEqual(['El id del bloque no es válido']);
   });
 
   it('rechaza un id vacío', () => {
-    expect(messagesOf('')).toEqual([MSG.invalidId]);
+    expect(messagesOf('')).toEqual(['El id del bloque no es válido']);
   });
 });
