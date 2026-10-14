@@ -5,6 +5,7 @@ vi.mock('@/shared/services/api-client', () => ({
   apiClient: {
     get: vi.fn(),
     post: vi.fn(),
+    patch: vi.fn(),
   },
 }));
 
@@ -495,6 +496,33 @@ describe('chat-api — sendMessage (HU-03 Tarea 2)', () => {
   beforeEach(() => {
     window.localStorage.clear();
     clearStoredMessages();
+    vi.restoreAllMocks();
+    apiClientMock.post.mockImplementation(async (url: string, data: unknown) => {
+      if (url === '/chat/messages') {
+        const payload = data as { conversationId: string; content: string };
+        const now = new Date().toISOString();
+        return {
+          data: {
+            statusCode: 201,
+            ok: true,
+            detail: 'Mensaje enviado exitosamente',
+            data: {
+              id: `msg-${Date.now()}`,
+              conversationId: payload.conversationId,
+              senderId: 'current-user',
+              content: payload.content,
+              timestamp: now,
+              createdAt: now,
+              status: 'sent',
+              isAttachment: false,
+              attachmentType: null,
+            },
+          },
+        } as never;
+      }
+      return { data: {} } as never;
+    });
+    apiClientMock.patch.mockResolvedValue({ data: {} } as never);
   });
 
   it('debe responder dentro del umbral esperado (< 2 segundos)', async () => {
@@ -731,12 +759,52 @@ describe('chat-api — sendMessage (HU-03 Tarea 2)', () => {
     expect(response.data.id).toBe('msg-created-backend');
     expect(response.data.content).toBe('Mensaje en tiempo real');
   });
+
+  it('debe propagar el error cuando el backend falla al enviar el mensaje', async () => {
+    apiClientMock.post.mockRejectedValueOnce(
+      new Error('Error del servidor al procesar el mensaje'),
+    );
+
+    await expect(
+      sendMessage({
+        conversationId: 'conv-1',
+        content: 'Mensaje que fallara en backend',
+      }),
+    ).rejects.toThrow('Error del servidor al procesar el mensaje');
+  });
 });
 
 describe('chat-api — persistencia de estado leido y no redisparo de alertas tras recarga', () => {
   beforeEach(() => {
     window.localStorage.clear();
     clearStoredMessages();
+    vi.restoreAllMocks();
+    apiClientMock.post.mockImplementation(async (url: string, data: unknown) => {
+      if (url === '/chat/messages') {
+        const payload = data as { conversationId: string; content: string };
+        const now = new Date().toISOString();
+        return {
+          data: {
+            statusCode: 201,
+            ok: true,
+            detail: 'Mensaje enviado exitosamente',
+            data: {
+              id: `msg-${Date.now()}`,
+              conversationId: payload.conversationId,
+              senderId: 'current-user',
+              content: payload.content,
+              timestamp: now,
+              createdAt: now,
+              status: 'sent',
+              isAttachment: false,
+              attachmentType: null,
+            },
+          },
+        } as never;
+      }
+      return { data: {} } as never;
+    });
+    apiClientMock.patch.mockResolvedValue({ data: {} } as never);
   });
 
   it('debe mantener guardado el estado leido (unreadCount: 0) al simular recarga de pagina tras marcar conversacion como leida', async () => {
@@ -758,6 +826,11 @@ describe('chat-api — persistencia de estado leido y no redisparo de alertas tr
     // Otras conversaciones que no han sido leidas mantienen su conteo
     const conv3Reloaded = reloadedList.find((c) => c.id === 'conv-3');
     expect(conv3Reloaded?.unreadCount).toBe(1);
+  });
+
+  it('debe llamar a PATCH /chat/messages/:conversationId/read al marcar conversacion como leida', async () => {
+    await markConversationAsRead('conv-1');
+    expect(apiClientMock.patch).toHaveBeenCalledWith('/chat/messages/conv-1/read');
   });
 
   it('debe marcar la conversacion como leida de forma persistente al enviar un mensaje y conservarlo tras recargar', async () => {

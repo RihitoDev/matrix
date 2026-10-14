@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -52,5 +54,14 @@ export class MessageController {
       cursor: query.cursor ?? null,
       limit: query.limit,
     });
+  }
+
+  @Patch(':conversationId/read')
+  async markRead(
+    @Param('conversationId') conversationId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    await this.messageService.markRead(conversationId, user.id);
+    return { conversationId, readAt: new Date().toISOString() };
   }
 }
