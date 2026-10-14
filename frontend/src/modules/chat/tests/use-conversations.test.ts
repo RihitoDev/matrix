@@ -62,6 +62,7 @@ describe('useConversations Hook', () => {
 
   it('debe resetear los no leidos al seleccionar una conversacion y permitir limpiar seleccion', async () => {
     vi.spyOn(chatApi, 'getConversations').mockResolvedValue(mockList);
+    const markSpy = vi.spyOn(chatApi, 'markConversationAsRead');
 
     const { result } = renderHook(() => useConversations());
 
@@ -74,6 +75,7 @@ describe('useConversations Hook', () => {
     });
 
     expect(result.current.selectedId).toBe('c1');
+    expect(markSpy).toHaveBeenCalledWith('c1');
     const selectedItem = result.current.conversations.find((c) => c.id === 'c1');
     expect(selectedItem?.unreadCount).toBe(0);
 
