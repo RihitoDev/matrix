@@ -41,12 +41,12 @@ describe("AppLayout", () => {
   it.each([
     ["/events", "true"],
     ["/events/my-passes", "false"],
-  ])("uses the events navigation on %s", (pathname, fullBleed) => {
+  ])("keeps the main navigation on workshop pages %s", (pathname, fullBleed) => {
     route.pathname = pathname;
     render(<AppLayout><p>event-content</p></AppLayout>);
 
     expect(screen.getByTestId("app-shell")).toContainElement(screen.getByText("event-content"));
-    expect(screen.getByTestId("app-shell")).toHaveAttribute("data-navigation", "Talleres,Mis pases");
+    expect(screen.getByTestId("app-shell")).toHaveAttribute("data-navigation", "general");
     expect(screen.getByTestId("app-shell")).toHaveAttribute("data-full-bleed", fullBleed);
   });
 
