@@ -9,6 +9,7 @@ import {
 } from 'react';
 
 import type { KeyboardEvent } from 'react';
+import Image from 'next/image';
 
 import { Conversation, Message } from '../types/conversation.types';
 import { MessageInputBar } from './message-input-bar';
@@ -299,9 +300,12 @@ function ChatRoomContent({
 
           <div className="relative shrink-0">
             {conversation.contact.avatarUrl ? (
-              <img
+              <Image
                 src={conversation.contact.avatarUrl}
                 alt={conversation.contact.fullName}
+                width={40}
+                height={40}
+                unoptimized
                 className="w-10 h-10 rounded-full object-cover border border-[#E3E7EC]"
               />
             ) : (
