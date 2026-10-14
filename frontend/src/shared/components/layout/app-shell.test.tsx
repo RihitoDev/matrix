@@ -30,6 +30,15 @@ describe("AppShell", () => {
     expect(screen.queryByText("Alejandro Vargas")).toBeNull();
   });
 
+  it("keeps both Radar and Matching in the same general sidebar", () => {
+    render(<AppShell><p>Contenido</p></AppShell>);
+
+    expect(screen.getByRole("link", { name: "Radar de afinidad" }).getAttribute("href")).toBe("/perfil/radar");
+    expect(screen.getByRole("link", { name: "Matching" }).getAttribute("href")).toBe("/matching");
+    expect(screen.getByRole("button", { name: /Mentorías/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Talleres/ })).toBeInTheDocument();
+  });
+
   it("passes a provided user to the sidebar", () => {
     render(
       <AppShell user={{ fullName: "María Pérez", role: "Egresada" }}>

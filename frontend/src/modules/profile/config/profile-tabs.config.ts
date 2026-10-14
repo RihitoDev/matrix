@@ -25,4 +25,10 @@ export const PROFILE_TABS: ProfileTab[] = [
     href: "/profile/documents",
     isAvailable: true,
   },
+  {
+    id: "radar",
+    label: "Radar de afinidad",
+    href: "/perfil/radar",
+    isAvailable: true,
+  },
 ];

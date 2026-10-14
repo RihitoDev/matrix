@@ -1,1 +1,1 @@
-export type ProfileTabId = "personal-info" | "presentation" | "trajectory" | "documents";
+export type ProfileTabId = "personal-info" | "presentation" | "trajectory" | "documents" | "radar";
