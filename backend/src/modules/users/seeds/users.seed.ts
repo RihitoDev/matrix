@@ -9,7 +9,7 @@ import {
   SEED_USERS,
 } from '../constants/seed-users.constants.js';
 import type { SeedUserDefinition } from '../types/seed-user-definition.types.js';
-import type { SeedUserAssignmentResponse } from '../types/seed-user-assignment-response.types.js';
+import type { SeedUserResponse } from '../types/seed-user-response.types.js';
 import type { SeedUsers } from '../types/seed-users.types.js';
 import type { UsersSeedResult } from '../types/users-seed-result.types.js';
 
@@ -57,15 +57,14 @@ async function removeLegacyRoles(
   return count;
 }
 
-async function ensureUserWithRoles(
+async function upsertSeedUser(
   tx: Prisma.TransactionClient,
   definition: SeedUserDefinition,
   password: string,
-  roleIds: readonly string[],
-): Promise<SeedUserAssignmentResponse> {
+): Promise<SeedUserResponse> {
   const { firstName, lastName, email } = definition;
   const isAvailableForMentoring = definition.roles.includes('mentor');
-  const user = await tx.user.upsert({
+  return tx.user.upsert({
     where: { email },
     update: { firstName, lastName, password, isAvailableForMentoring },
     create: {
@@ -75,20 +74,8 @@ async function ensureUserWithRoles(
       password,
       isAvailableForMentoring,
     },
+    select: { id: true, email: true },
   });
-
-  let assignedRoles = 0;
-  for (const roleId of new Set(roleIds)) {
-    const assigned = await tx.userRole.findFirst({
-      where: { userId: user.id, roleId, deletedAt: null },
-    });
-    if (assigned) continue;
-
-    await tx.userRole.create({ data: { userId: user.id, roleId } });
-    assignedRoles += 1;
-  }
-
-  return { user, assignedRoles };
 }
 
 export async function seedUsers(
@@ -106,17 +93,29 @@ export async function seedUsers(
     return id;
   };
 
-  let userRoles = 0;
+  const assignments: Prisma.UserRoleCreateManyInput[] = [];
   const users: Partial<SeedUsers> = {};
   for (const definition of SEED_USERS) {
-    const result = await ensureUserWithRoles(
-      tx,
-      definition,
-      password,
-      definition.roles.map(roleIdOf),
-    );
-    users[definition.key] = result.user;
-    userRoles += result.assignedRoles;
+    const assignedRoleIds = [...new Set(definition.roles.map(roleIdOf))];
+    const user = await upsertSeedUser(tx, definition, password);
+    users[definition.key] = user;
+    assignments.push(...assignedRoleIds.map((roleId) => ({ userId: user.id, roleId })));
+  }
+
+  const existing = await tx.userRole.findMany({
+    where: {
+      userId: { in: Object.values(users).map((user) => user.id) },
+      roleId: { in: [...roleIds.values()] },
+      deletedAt: null,
+    },
+    select: { userId: true, roleId: true },
+  });
+  const activeAssignments = new Set(existing.map(({ userId, roleId }) => `${userId}:${roleId}`));
+  const missing = assignments.filter(({ userId, roleId }) => !activeAssignments.has(`${userId}:${roleId}`));
+  let userRoles = 0;
+  if (missing.length > 0) {
+    const result = await tx.userRole.createMany({ data: missing });
+    userRoles = result.count;
   }
 
   return {
