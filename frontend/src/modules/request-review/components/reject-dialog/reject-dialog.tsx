@@ -34,11 +34,12 @@ export function RejectDialog({ detail, open, onOpenChange, onRejected }: RejectD
     setIsRejecting(true);
     setRejectError(null);
     const result = await requestReviewService.rejectRequest(detail.id, rejection.reason);
-    setIsRejecting(false);
     if (result.ok) {
+      await onRejected(result.data.notificationSent);
+      setIsRejecting(false);
       onOpenChange(false);
-      onRejected(result.data.notificationSent);
     } else {
+      setIsRejecting(false);
       setRejectError(result.message);
     }
   }

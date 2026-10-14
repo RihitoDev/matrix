@@ -1,4 +1,5 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
+import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import { BackofficeShell } from "./backoffice-shell";
@@ -26,7 +27,7 @@ describe("BackofficeShell: nunca pinta el shell por defecto", () => {
     "con la sesión en estado %s muestra el shell del backoffice con un esqueleto y sin contenido",
     (state) => {
       session.state = state;
-      render(
+      renderWithQuery(
         <BackofficeShell>
           <p>Contenido protegido</p>
         </BackofficeShell>,
@@ -43,7 +44,7 @@ describe("BackofficeShell: nunca pinta el shell por defecto", () => {
 
   it("con sesión de administrativo muestra el contenido y tampoco el shell por defecto", () => {
     session.state = "allowed";
-    render(
+    renderWithQuery(
       <BackofficeShell>
         <p>Contenido protegido</p>
       </BackofficeShell>,
