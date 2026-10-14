@@ -5,7 +5,7 @@ import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import RadarProfilePage from "./page";
 
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/perfil/radar",
+  usePathname: () => "/profile/radar",
 }));
 
 vi.mock("recharts", async (importOriginal) => {
