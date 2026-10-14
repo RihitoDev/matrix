@@ -2,9 +2,8 @@ import { AxiosError, type AxiosResponse } from "axios";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/shared/services/api-client";
-import { clearAccessToken, saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
-import { buildSessionToken, COMPANY_ID, DOCKER, KUBERNETES, PYTHON } from "../testing/vacancy-fixtures";
+import { COMPANY_ID, DOCKER, KUBERNETES, PYTHON } from "../testing/vacancy-fixtures";
 import { RegisterVacancyView } from "./register-vacancy-view";
 
 const push = vi.fn();
@@ -79,7 +78,6 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
     Element.prototype.scrollIntoView = vi.fn();
     window.history.pushState({}, "", "/vacancies/register");
     vi.stubEnv("NEXT_PUBLIC_DEMO_COMPANY_ID", COMPANY_ID);
-    saveAccessToken(buildSessionToken("empresa"));
     vi.mocked(apiClient.get).mockResolvedValue({
       data: { statusCode: 200, ok: true, detail: "", data: [PYTHON, DOCKER, KUBERNETES] },
     });
@@ -90,7 +88,6 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
     document.body.innerHTML = "";
     vi.clearAllMocks();
     vi.unstubAllEnvs();
-    clearAccessToken();
   });
 
   it("publica la vacante con el contrato exacto y luego limpia el formulario", async () => {
@@ -169,8 +166,8 @@ describe("Registrar vacante: wizard completo conectado al backend", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("No se pudo completar la publicación. Inténtalo más tarde.");
   });
 
-  it("no llama al backend si la sesión no es de empresa", async () => {
-    saveAccessToken(buildSessionToken("titulado"));
+  it("no llama al backend si no hay empresa configurada", async () => {
+    vi.stubEnv("NEXT_PUBLIC_DEMO_COMPANY_ID", "");
     renderWithQuery(<RegisterVacancyView />);
     await goToPreview();
 

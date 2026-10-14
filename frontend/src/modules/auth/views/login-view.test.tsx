@@ -118,14 +118,7 @@ describe("LoginView", () => {
     await waitFor(() => expect(push).toHaveBeenCalledWith('/backoffice/solicitudes'));
   });
 
-  it("el rol empresa va al módulo de reclutadores", async () => {
-    await submitLogin(vi.fn().mockResolvedValue({ accessToken: "t", roleTag: "empresa" }));
-
-    await waitFor(() => expect(push).toHaveBeenCalledWith("/recruiters"));
-    expect(push).toHaveBeenCalledTimes(1);
-  });
-
-  it.each(["titulado", "estudiante", "mentor", "", "desconocido"])("el rol %j va a la ruta actual", async (roleTag) => {
+  it.each(["titulado", "estudiante", "mentor", "empresa", "", "desconocido"])("el rol %j va a la ruta actual", async (roleTag) => {
     await submitLogin(vi.fn().mockResolvedValue({ accessToken: "t", roleTag }));
 
     await waitFor(() => expect(push).toHaveBeenCalledWith("/profile"));

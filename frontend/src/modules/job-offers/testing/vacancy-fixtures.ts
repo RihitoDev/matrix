@@ -6,10 +6,6 @@ export const KUBERNETES = { id: "33333333-3333-4333-8333-333333333333", name: "K
 
 export const COMPANY_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
-export function buildSessionToken(roleTag: string): string {
-  return `header.${btoa(JSON.stringify({ sub: "user-id", roleTag }))}.signature`;
-}
-
 export const EMPTY_CONDITIONS: VacancyConditions = {
   title: "",
   modality: null,
