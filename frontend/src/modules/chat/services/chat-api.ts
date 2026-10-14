@@ -6,6 +6,7 @@ import {
   SendMessagePayload,
   SendMessageOptions,
   SendMessageResponse,
+  StandardApiResponse,
 } from '../types/conversation.types';
 import { MOCK_CONVERSATIONS } from '../mocks/mock-conversations';
 import { User } from '../types/user.types';
