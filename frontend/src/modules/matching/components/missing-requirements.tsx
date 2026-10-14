@@ -1,49 +1,46 @@
-import { Check, Circle } from "lucide-react";
-import { JOB_MATCHING_MESSAGES } from "../constants/job-matching.constants";
-import type { JobRequirement } from "../types/job-matching.types";
+import { CheckCircle2, Clock } from "lucide-react";
 
-interface MissingRequirementsProps {
-  requirements: JobRequirement[];
-  title?: string;
+
+interface Requirement {
+  id: string;
+  name: string;
+  status: "cumple" | "pendiente";
 }
 
-export function MissingRequirements({
-  requirements,
-  title = JOB_MATCHING_MESSAGES.requirementsTitle,
-}: MissingRequirementsProps) {
-  const hasPending = requirements.some(({ status }) => status === "Pendiente");
+interface MissingRequirementsProps {
+  requirements: Requirement[];
+}
 
+export function MissingRequirements({ requirements }: MissingRequirementsProps) {
   return (
-    <section className="flex flex-col gap-2">
-      <h3 className="text-sm font-semibold text-ink">{title}</h3>
-      {!hasPending && (
-        <p role="status" className="text-sm text-ink-soft">
-          {JOB_MATCHING_MESSAGES.noPendingRequirements}
-        </p>
-      )}
-      {requirements.length > 0 && (
-        <ul className="flex flex-col">
-          {requirements.map(({ name, status }) => (
-            <li
-              key={name}
-              className="flex items-center justify-between gap-3 border-b border-border py-2 text-sm last:border-b-0"
-            >
-              <span className="text-ink">{name}</span>
-              {status === "Cumple" ? (
-                <span className="flex items-center gap-1.5 font-semibold text-ink">
-                  <Check className="size-4" aria-hidden="true" />
-                  Cumple
-                </span>
-              ) : (
-                <span className="flex items-center gap-1.5 text-text-secondary">
-                  <Circle className="size-4" aria-hidden="true" />
-                  Pendiente
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
+    <div className="flex flex-col gap-4 p-4 border rounded-lg bg-white">
+      <h3 className="text-lg font-semibold text-gray-900">
+        Habilidades y requisitos faltantes
+      </h3>
+      
+      <ul className="space-y-3">
+        {requirements.map((req) => (
+          <li key={req.id} className="flex items-center gap-3">
+          
+            {req.status === "cumple" ? (
+              <CheckCircle2 className="w-5 h-5 text-green-500" />
+            ) : (
+              <Clock className="w-5 h-5 text-amber-500" />
+            )}
+            
+            <span className={`text-sm ${req.status === "cumple" ? "text-gray-700" : "text-gray-900 font-medium"}`}>
+              {req.name}
+            </span>
+            
+           
+            <span className={`ml-auto text-xs px-2 py-1 rounded-full ${
+              req.status === "cumple" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
+            }`}>
+              {req.status === "cumple" ? "Cumple" : "Pendiente"}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

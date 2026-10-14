@@ -1,38 +1,42 @@
-"use client";
+'use client';
 
-import { cn } from "@/lib/utils";
-import type { MatchScoreProps } from "../types/match-score.types";
+import React from 'react';
+import { MatchScoreProps } from '../types/match-score.types';
 
-const SIZE_CLASSES = {
-  sm: "h-2",
-  md: "h-3",
-  lg: "h-4",
-} as const;
+export const MatchScoreBar: React.FC<MatchScoreProps> = ({
+  score,
+  showLabel = true,
+  size = 'md',
+  className = '',
+}) => {
+  const normalizedScore = Math.min(Math.max(score, 0), 100);
 
-export function MatchScoreBar({ score, showLabel = true, size = "md", className }: MatchScoreProps) {
-  const normalizedScore = Math.round(Math.min(Math.max(score, 0), 100));
+  const sizeClasses = {
+    sm: 'h-2 text-xs',
+    md: 'h-3 text-sm',
+    lg: 'h-4 text-base',
+  };
 
   return (
-    <div className={cn("flex w-full flex-col gap-1.5", className)}>
+    <div className={`w-full flex flex-col gap-1.5 ${className}`}>
       {showLabel && (
-        <div className="flex items-center justify-between text-sm font-medium text-ink">
+        <div className="flex justify-between items-center text-sm font-medium text-slate-800">
           <span>Compatibilidad</span>
-          <span className="font-semibold">{normalizedScore}%</span>
+          <span className="font-semibold text-slate-900">{normalizedScore}%</span>
         </div>
       )}
       <div
+        className={`w-full bg-slate-200 rounded-full overflow-hidden ${sizeClasses[size]}`}
         role="progressbar"
-        aria-label="Compatibilidad"
         aria-valuenow={normalizedScore}
         aria-valuemin={0}
         aria-valuemax={100}
-        className={cn("w-full overflow-hidden rounded-full bg-border", SIZE_CLASSES[size])}
       >
         <div
-          className="h-full rounded-full bg-accent transition-all duration-500 ease-out"
+          className="bg-red-700 h-full transition-all duration-500 ease-out rounded-full"
           style={{ width: `${normalizedScore}%` }}
         />
       </div>
     </div>
   );
-}
+};
