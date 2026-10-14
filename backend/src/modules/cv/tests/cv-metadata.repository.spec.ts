@@ -26,8 +26,9 @@ describe('CvMetadataRepository', () => {
     ];
     const sql = strings.join('?');
     expect(values).toEqual([userId]);
-    expect(sql).toContain('octet_length(cv_pdf_url)');
-    expect(sql.match(/cv_pdf_url/g)).toHaveLength(1);
+    expect(sql).toContain('user_cv_file');
+    expect(sql).toContain("octet_length(decode(c.cv_pdf_data, 'base64'))");
+    expect(sql.match(/cv_pdf_data/g)).toHaveLength(1);
     expect(sql).not.toContain('password');
   });
 
@@ -35,8 +36,9 @@ describe('CvMetadataRepository', () => {
     const record = {
       firstName: 'Test',
       lastName: 'User',
+      fileName: 'resume.pdf',
       sizeBytes: 1024,
-      updatedAt: new Date('2026-10-03T12:00:00.000Z'),
+      uploadedAt: new Date('2026-10-03T12:00:00.000Z'),
     };
     queryRaw.mockResolvedValue([record]);
 
