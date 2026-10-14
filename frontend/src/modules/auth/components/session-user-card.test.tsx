@@ -6,7 +6,7 @@ import { clearAccessToken, getAccessToken } from "@/shared/services/storage/acce
 import { SessionUserCard } from "./session-user-card";
 
 vi.mock("@/modules/profile", () => ({ profileService: { getProfile: vi.fn() } }));
-vi.mock("@/shared/services/storage/access-token-storage", () => ({ getAccessToken: vi.fn(), clearAccessToken: vi.fn() }));
+vi.mock("@/shared/services/storage/access-token-storage", () => ({ getAccessToken: vi.fn(), clearAccessToken: vi.fn(), subscribeAccessToken: () => () => {} }));
 const { replace } = vi.hoisted(() => ({ replace: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace }) }));
 

@@ -4,7 +4,6 @@ export const EDUCATION_UI_TEXTS = {
   listTitle: "Formación registrada",
   listDescription: "Puedes agregar varias entradas y actualizar cada una.",
   listFooter: "Los nuevos estudios aparecerán aquí después de guardar.",
-  addButton: "Agregar información",
   editButton: "Editar",
   deleteButton: "Eliminar",
   deletingButton: "Eliminando...",

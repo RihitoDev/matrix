@@ -120,7 +120,10 @@ model User {
   personalEmail           String?  @map("personal_email")
   headline                String?
   aboutMe                 String?  @map("about_me")
+<<<<<<< HEAD
   cvPdfUrl                Bytes?   @map("cv_pdf_url")
+=======
+>>>>>>> origin/develop
   createdAt               DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt               DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -131,6 +134,7 @@ model User {
   workExperiences WorkExperience[]
   userSkills      UserSkill[]
   certifications  Certification[]
+  cvFile          UserCvFile?
 
   mentorTechnicalAreas   MentorTechnicalArea[]
   mentorOrientationTypes MentorOrientationType[]
@@ -283,6 +287,18 @@ model Certification {
 
   @@index([userId])
   @@map("certifications")
+}
+
+model UserCvFile {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String    @unique @map("user_id") @db.Uuid
+  cvFileName   String?   @map("cv_file_name") @db.VarChar
+  cvUploadedAt DateTime? @map("cv_uploaded_at") @db.Timestamptz(6)
+  cvPdfData    String?   @map("cv_pdf_data")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_cv_file")
 }
 
 model TechnicalArea {
