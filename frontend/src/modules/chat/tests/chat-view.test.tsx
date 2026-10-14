@@ -12,12 +12,23 @@ import {
 } from '@tanstack/react-query';
 
 import { ChatView } from '../views/chat-view';
-import ChatPage from '../../../app/chat/page';
+import ChatPage from '@/app/(app)/chat/page';
+import AppLayout from '@/app/(app)/layout';
+import { stubMatchMedia } from '@/shared/testing/stub-match-media';
 import * as chatApi from '../services/chat-api';
 
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  sessionStorage.clear();
+  vi.unstubAllGlobals();
+});
+
+vi.mock('next/navigation', () => ({ usePathname: () => '/chat', useRouter: () => ({ replace: vi.fn() }) }));
+
+vi.mock('@/modules/auth', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/modules/auth')>();
+  return { ...actual, SessionUserCard: () => null };
 });
 
 const mockList = [
@@ -158,11 +169,15 @@ describe('ChatView & ChatPage', () => {
     ).toBeDefined();
   });
 
-  it('debe renderizar ChatPage montando ChatView', async () => {
+  it('renders the chat page inside one app navigation', async () => {
+    stubMatchMedia();
+    sessionStorage.setItem("accessToken", "token-de-prueba");
     vi.spyOn(chatApi, 'getConversations').mockResolvedValue(mockList);
 
-    renderWithQueryClient(<ChatPage />);
+    renderWithQueryClient(<AppLayout><ChatPage /></AppLayout>);
 
     expect(screen.getByText('Chats')).toBeDefined();
+    expect(screen.getAllByRole('navigation', { name: 'Menú principal' })).toHaveLength(1);
+    expect(await screen.findByText('Maria Fernandez')).toBeDefined();
   });
 });

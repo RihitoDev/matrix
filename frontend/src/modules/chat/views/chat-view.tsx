@@ -90,7 +90,7 @@ export function ChatView() {
   };
 
   return (
-    <div className="flex h-screen h-[100dvh] w-full max-w-full bg-slate-50 overflow-hidden font-sans">
+    <div className="flex h-full min-h-0 w-full max-w-full flex-1 bg-surface-soft overflow-hidden font-sans">
       <aside
         className={`w-full md:w-80 lg:w-96 h-full shrink-0 overflow-hidden ${
           selectedId ? 'hidden md:block' : 'block'
