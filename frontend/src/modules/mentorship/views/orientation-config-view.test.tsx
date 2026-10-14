@@ -39,7 +39,7 @@ const catalog = [
 
 const selectedOrientations = [catalog[0], catalog[2]];
 const checkbox = (name: RegExp | string) =>
-  screen.getByRole("checkbox", { name });
+  screen.getByRole("checkbox", { name, hidden: true });
 const expectOrientationStyle = (
   name: string,
   state: "saved" | "new" | "unselected",
@@ -157,6 +157,14 @@ describe("OrientationConfigView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
 
     expect(
+      screen.getByRole("heading", { name: "¿Guardar cambios?" }),
+    ).toBeInTheDocument();
+    expect(updateMentorOrientationTypes).not.toHaveBeenCalled();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sí, guardar cambios" }),
+    );
+
+    expect(
       await screen.findByText(
         "Tipos de orientación actualizados correctamente",
       ),
@@ -182,6 +190,9 @@ describe("OrientationConfigView", () => {
 
     fireEvent.click(checkbox("Orientación profesional"));
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sí, guardar cambios" }),
+    );
 
     expect(screen.getByRole("button", { name: "Guardando..." })).toBeDisabled();
     expect(checkbox("Orientación profesional")).toHaveAttribute(
@@ -202,6 +213,9 @@ describe("OrientationConfigView", () => {
     await screen.findByRole("checkbox", { name: "Orientación profesional" });
     fireEvent.click(checkbox("Orientación profesional"));
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sí, guardar cambios" }),
+    );
     await screen.findByText("Tipos de orientación actualizados correctamente");
 
     unmount();
@@ -223,6 +237,9 @@ describe("OrientationConfigView", () => {
     fireEvent.click(checkbox("Orientación profesional"));
     fireEvent.click(checkbox("Orientación técnica"));
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sí, guardar cambios" }),
+    );
 
     expect(
       await screen.findByText(
@@ -237,6 +254,9 @@ describe("OrientationConfigView", () => {
     ).toBeEnabled();
 
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sí, guardar cambios" }),
+    );
     await screen.findByText("Tipos de orientación actualizados correctamente");
     expect(updateMentorOrientationTypes).toHaveBeenNthCalledWith(2, [
       catalog[0].id,
@@ -293,6 +313,9 @@ describe("OrientationConfigView", () => {
     render(<OrientationConfigView />);
     await screen.findByRole("checkbox", { name: "Orientación técnica" });
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sí, guardar cambios" }),
+    );
 
     await screen.findByText("Tipos de orientación actualizados correctamente");
     expect(readStorage).not.toHaveBeenCalled();

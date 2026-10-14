@@ -4,11 +4,14 @@ import { Conversation, ConversationFilter } from '../types/conversation.types';
 import { ConversationItem } from './conversation-item';
 import { ConversationSkeleton } from './conversation-skeleton';
 import { EmptyChatState } from './empty-chat-state';
+import { ChatErrorState } from './chat-error-state';
 
 interface ConversationListProps {
   conversations: Conversation[];
   selectedId?: string | null;
   isLoading: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
   hasMore: boolean;
   activeFilter: ConversationFilter;
   searchQuery: string;
@@ -23,6 +26,8 @@ export function ConversationList({
   conversations,
   selectedId,
   isLoading,
+  isError = false,
+  onRetry,
   hasMore,
   activeFilter,
   searchQuery,
@@ -111,7 +116,15 @@ export function ConversationList({
 
       <div className="flex-1 overflow-y-auto">
         {isLoading ? (
-          <ConversationSkeleton />
+          <div role="status" aria-label="Cargando conversaciones">
+            <span className="sr-only">Cargando conversaciones...</span>
+            <ConversationSkeleton />
+          </div>
+        ) : isError ? (
+          <ChatErrorState
+            message="No pudimos cargar tus conversaciones. Inténtalo de nuevo."
+            onRetry={onRetry}
+          />
         ) : conversations.length === 0 ? (
           <EmptyChatState
             description={getEmptyMessage()}

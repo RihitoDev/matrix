@@ -101,7 +101,7 @@ describe('ChatView & ChatPage', () => {
     fireEvent.click(newChatButtons[0]);
 
     expect(
-      await screen.findByText('Nueva conversación'),
+      await screen.findByText(/Nueva conversaci\u00f3n/i),
     ).toBeDefined();
 
     const conversationItem = screen.getByText('Maria Fernandez');
@@ -165,7 +165,7 @@ describe('ChatView & ChatPage', () => {
     fireEvent.click(newBtn);
 
     expect(
-      await screen.findByText('Nueva conversación'),
+      await screen.findByText(/Nueva conversaci\u00f3n/i),
     ).toBeDefined();
   });
 

@@ -39,6 +39,14 @@ vi.mock('../../modules/orientation-types/seeds/orientation-types.seed.js', () =>
 vi.mock('../../modules/job-offers/seeds/job-offers.seed.js', () => ({
   seedJobOffers: vi.fn(),
 }));
+vi.mock('../../modules/chat/seeds/chat.seed.js', () => ({
+  seedChat: vi.fn().mockResolvedValue({
+    messageStatuses: 4,
+    userPresences: 6,
+    conversations: 5,
+    messages: 11,
+  }),
+}));
 
 const users = {
   mentorA: { id: 'mentor' },

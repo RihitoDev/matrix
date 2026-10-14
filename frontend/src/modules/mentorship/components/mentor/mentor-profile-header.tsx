@@ -14,6 +14,7 @@ import type { MentorProfile } from "../../types/mentor-profile.types";
 
 type MentorProfileHeaderProps = {
   mentor: MentorProfile;
+  showRequestAction?: boolean;
 };
 
 function getInitials(name: string) {
@@ -25,7 +26,10 @@ function getInitials(name: string) {
     .toUpperCase();
 }
 
-export function MentorProfileHeader({ mentor }: MentorProfileHeaderProps) {
+export function MentorProfileHeader({
+  mentor,
+  showRequestAction = true,
+}: MentorProfileHeaderProps) {
   const primaryEducation = mentor.educations[0];
 
   return (
@@ -83,7 +87,7 @@ export function MentorProfileHeader({ mentor }: MentorProfileHeaderProps) {
           </div>
         </div>
 
-        {mentor.isAvailable ? (
+        {!showRequestAction ? null : mentor.isAvailable ? (
           <Link
             href={`/mentors/${mentor.id}/availability`}
             className={cn(
