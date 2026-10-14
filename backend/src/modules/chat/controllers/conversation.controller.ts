@@ -7,6 +7,8 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ZodValidationPipe } from 'nestjs-zod';
+import { Roles } from '../../../common/decorators/roles.decorator.js';
+import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
 import { ResponseInterceptor } from '../../../common/interceptors/index.js';
@@ -19,7 +21,8 @@ import {
 import type { ConversationResponse } from '../responses/conversation.response.js';
 
 @Controller('chat/conversations')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('titulado', 'mentor')
 @UseInterceptors(ResponseInterceptor)
 export class ConversationController {
   constructor(private readonly conversationService: ConversationService) {}

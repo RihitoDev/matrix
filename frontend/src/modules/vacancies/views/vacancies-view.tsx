@@ -10,13 +10,13 @@ export function VacanciesView() {
   } = useVacancies();
 
   return (
-    <main className="min-h-screen bg-surface-soft p-6">
+    <main className="min-h-full bg-surface-soft p-6">
       <div className="mx-auto w-full max-w-6xl">
         <h1 className="text-3xl font-bold">
           Vacantes
         </h1>
 
-        <p className="mt-2 text-gray-600">
+        <p className="mt-2 text-text-secondary">
           Encuentra oportunidades laborales para egresados.
         </p>
 
@@ -26,12 +26,12 @@ export function VacanciesView() {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Buscar por cargo, empresa, requisito..."
-            className="w-full rounded-md border border-gray-300 bg-white px-4 py-3 outline-none focus:ring-2"
+            className="w-full rounded-md border border-border bg-surface px-4 py-3 outline-none focus:ring-2"
           />
         </div>
 
         <div className="mt-6">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-text-secondary">
             {filteredVacancies.length}{" "}
             {filteredVacancies.length === 1
               ? "vacante encontrada"
@@ -40,8 +40,8 @@ export function VacanciesView() {
         </div>
 
         {filteredVacancies.length === 0 ? (
-          <div className="mt-6 rounded-lg bg-white p-6 text-center shadow">
-            <p className="text-gray-600">
+          <div className="mt-6 rounded-lg bg-surface p-6 text-center shadow-sm">
+            <p className="text-text-secondary">
               No se encontraron vacantes.
             </p>
           </div>
@@ -50,7 +50,7 @@ export function VacanciesView() {
             {filteredVacancies.map((vacancy) => (
               <article
                 key={vacancy.id}
-                className="rounded-lg bg-white p-6 shadow"
+                className="rounded-lg bg-surface p-6 shadow-sm"
               >
                 <h2 className="text-xl font-bold">
                   {vacancy.cargo}
@@ -60,7 +60,7 @@ export function VacanciesView() {
                   {vacancy.empresa}
                 </p>
 
-                <p className="mt-4 text-gray-600">
+                <p className="mt-4 text-text-secondary">
                   {vacancy.descripcion}
                 </p>
 
@@ -91,7 +91,7 @@ export function VacanciesView() {
                     Requisitos:
                   </h3>
 
-                  <ul className="mt-2 list-disc pl-5 text-gray-600">
+                  <ul className="mt-2 list-disc pl-5 text-text-secondary">
                     {vacancy.requisitos.map(
                       (requisito, index) => (
                         <li key={index}>
@@ -101,8 +101,8 @@ export function VacanciesView() {
                     )}
                   </ul>
 			<Link
-			  href={`/vacantes/${vacancy.id}`}
-			  className="mt-6 inline-block rounded-md bg-black px-4 py-2 text-white"
+			  href={`/vacancies/${vacancy.id}`}
+			  className="mt-6 inline-block rounded-md bg-ink px-4 py-2 text-surface"
 			>
 			  Ver detalles
 			</Link>
@@ -114,7 +114,7 @@ export function VacanciesView() {
 
         <Link
           href="/"
-          className="mt-8 inline-block rounded-md bg-black px-4 py-2 text-white"
+          className="mt-8 inline-block rounded-md bg-ink px-4 py-2 text-surface"
         >
           ← Volver al inicio
         </Link>

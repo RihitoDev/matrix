@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-import { Epic3Shell } from "../components/epic3-shell";
 import { ReviewProfileDetail } from "../components/review-profile-detail";
 import { ReviewProfileList } from "../components/review-profile-list";
 import { ReviewQueueFilters } from "../components/review-queue-filters";
@@ -13,7 +12,7 @@ import type {
   ReviewQueueFilter,
 } from "../types/review-queue.types";
 
-function ReviewQueueContent() {
+export function ReviewQueueView() {
   const [activeFilter, setActiveFilter] =
     useState<ReviewQueueFilter>("Todos");
 
@@ -49,7 +48,7 @@ function ReviewQueueContent() {
   }
 
   return (
-    <main className="min-h-screen bg-background p-6">
+    <main className="bg-background">
       <div className="mx-auto w-full max-w-7xl">
         <div className="mb-6">
           <h1 className="text-2xl font-semibold tracking-tight text-ink">
@@ -93,13 +92,5 @@ function ReviewQueueContent() {
         </div>
       </div>
     </main>
-  );
-}
-
-export function ReviewQueueView() {
-  return (
-    <Epic3Shell>
-      <ReviewQueueContent />
-    </Epic3Shell>
   );
 }

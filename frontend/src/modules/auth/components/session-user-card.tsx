@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button";
 import { profileService } from "@/modules/profile";
 import { SidebarUserCard } from "@/shared/components/layout/sidebar-user-card";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
-import { getSessionRoleLabel } from "../utils/get-session-role-label";
+import { useAuth } from "@/shared/contexts/auth-context";
+import { getRolesLabel } from "../utils/get-session-role-label";
 import { endSession } from "../utils/session";
 
 export function SessionUserCard() {
   const router = useRouter();
+  const { roles } = useAuth();
   const queryClient = useQueryClient();
   const accessToken = getAccessToken();
   const { data: profile, isPending } = useQuery({
@@ -38,7 +40,7 @@ export function SessionUserCard() {
     <SidebarUserCard
       user={{
         fullName: fullName || (isPending ? "Cargando usuario…" : "Usuario"),
-        role: getSessionRoleLabel(accessToken),
+        role: getRolesLabel(roles),
       }}
       action={(
         <Button

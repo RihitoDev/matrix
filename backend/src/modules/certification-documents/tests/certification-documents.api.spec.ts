@@ -51,7 +51,13 @@ describe('Certification documents API', () => {
       providers: [{ provide: APP_FILTER, useClass: DomainExceptionFilter }],
     })
       .overrideProvider(PrismaService)
-      .useValue({})
+      .useValue({ user: {
+          findFirst: ({ where }: { where: { id: string } }) => Promise.resolve({
+            id: where.id,
+            email: 'user@test.com',
+            roles: [{ role: { name: 'titulado' } }],
+          }),
+        } })
       .overrideProvider(JwtService)
       .useValue(jwt)
       .overrideProvider(CertificationsRepository)
