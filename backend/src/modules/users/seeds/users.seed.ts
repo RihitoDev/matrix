@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { ROLE_NAMES } from '../../../common/enums/roles.enum.js';
 import type { RoleName } from '../../../common/enums/roles.enum.js';
-import type { Prisma, User } from '../../../prisma/client.js';
+import type { Prisma } from '../../../prisma/client.js';
 import {
   BCRYPT_ROUNDS,
   LEGACY_ROLES,
@@ -9,6 +9,7 @@ import {
   SEED_USERS,
 } from '../constants/seed-users.constants.js';
 import type { SeedUserDefinition } from '../types/seed-user-definition.types.js';
+import type { SeedUserAssignmentResponse } from '../types/seed-user-assignment-response.types.js';
 import type { SeedUsers } from '../types/seed-users.types.js';
 import type { UsersSeedResult } from '../types/users-seed-result.types.js';
 
@@ -61,7 +62,7 @@ async function ensureUserWithRoles(
   definition: SeedUserDefinition,
   password: string,
   roleIds: readonly string[],
-): Promise<{ user: User; assignedRoles: number }> {
+): Promise<SeedUserAssignmentResponse> {
   const { firstName, lastName, email } = definition;
   const isAvailableForMentoring = definition.roles.includes('mentor');
   const user = await tx.user.upsert({
