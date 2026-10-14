@@ -1,10 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable, Optional } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service.js';
-import {
-  AUTHORIZATION_HEADER,
-  BEARER_PREFIX,
-} from '../constants/auth.constants.js';
+import { BEARER_PREFIX } from '../constants/auth.constants.js';
 import { MissingUserException } from '../exceptions/missing-user.exception.js';
 import { UnauthorizedSessionException } from '../exceptions/unauthorized-session.exception.js';
 import type { AuthenticatedRequest } from '../types/authenticated-request.types.js';
@@ -19,9 +16,7 @@ export class JwtAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const authorization =
-      request.headers?.[AUTHORIZATION_HEADER] ??
-      request.headers?.authorization;
+    const authorization = request.headers?.authorization;
 
     if (
       typeof authorization !== 'string' ||
