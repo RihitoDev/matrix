@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { Prisma } from '../../../prisma/client.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
-import { EDUCATION_SERIALIZATION_ERROR_CODE, EDUCATION_TRANSACTION_ATTEMPTS } from '../constants/education-conflict.constants.js';
+import { EDUCATION_TRANSACTION_ATTEMPTS } from '../constants/education-conflict.constants.js';
 import { DuplicateEducationException } from '../exceptions/duplicate-education.exception.js';
 import { EducationWriteConflictException } from '../exceptions/education-write-conflict.exception.js';
 import { normalizeEducationText } from '../utils/normalize-education-text.js';
@@ -95,7 +95,7 @@ export class EducationsRepository {
         return await this.prisma.$transaction(operation, { isolationLevel: 'Serializable' });
       } catch (error: unknown) {
         if (typeof error !== 'object' || error === null || !('code' in error)
-          || error.code !== EDUCATION_SERIALIZATION_ERROR_CODE) throw error;
+          || error.code !== 'P2034') throw error;
       }
     }
     throw new EducationWriteConflictException();

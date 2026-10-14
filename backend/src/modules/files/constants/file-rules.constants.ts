@@ -1,7 +1,5 @@
 export const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
-export const DEFAULT_FILE_NAME = 'documento';
-
 export const MAX_FILE_NAME_LENGTH = 200;
 
 // El tipo se decide por los primeros bytes del contenido, nunca por el nombre ni el MIME declarado
