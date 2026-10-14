@@ -10,6 +10,5 @@ export function toProfileSummary(profile: ProfileResponse): ProfileSummary {
     phone: profile.phone ?? "",
     personalEmail: profile.personalEmail ?? "",
     aboutMe: profile.aboutMe ?? "",
-    interestedOpportunities: "",
   };
 }

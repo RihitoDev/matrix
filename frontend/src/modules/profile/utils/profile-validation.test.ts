@@ -91,15 +91,12 @@ describe("validatePresentation", () => {
       validatePresentation({
         headline: "Desarrolladora web junior",
         aboutMe: "Graduate from UMSS.",
-        interestedOpportunities: "",
       }),
     ).toEqual({});
   });
 
   it("requires the headline and the about me text", () => {
-    expect(
-      validatePresentation({ headline: "", aboutMe: "", interestedOpportunities: "Remote work" }),
-    ).toEqual({
+    expect(validatePresentation({ headline: "", aboutMe: "" })).toEqual({
       headline: PROFILE_VALIDATION_MESSAGES.required,
       aboutMe: PROFILE_VALIDATION_MESSAGES.required,
     });
