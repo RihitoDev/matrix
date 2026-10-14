@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import type { Prisma } from '../../../prisma/client.js';
 import { ROLE_NAMES } from '../../../common/enums/roles.enum.js';
 import { SEED_USERS } from '../constants/seed-users.constants.js';
 import { hashSeedPassword, seedUsers } from '../seeds/users.seed.js';
@@ -43,7 +44,7 @@ describe('seedUsers', () => {
     expect(tx.role.createMany).toHaveBeenCalledWith({ data: ROLE_NAMES.map((name) => ({ name })), skipDuplicates: true });
     expect(tx.user.upsert).toHaveBeenCalledTimes(SEED_USERS.length);
     expect(tx.user.upsert).toHaveBeenCalledWith(expect.objectContaining({ where: { email: 'prueba@umss.edu.bo' } }));
-    expect(result).toMatchObject({ roles: ROLE_NAMES.length, userRoles: SEED_USERS.length, legacyRoles: 0 });
+    expect(result).toMatchObject({ roles: ROLE_NAMES.length, userRoles: 15, legacyRoles: 0 });
     expect(Object.keys(result.users)).toHaveLength(SEED_USERS.length);
     expect(result.users.eventGraduate.email).toBe('prueba@umss.edu.bo');
   });
@@ -53,7 +54,7 @@ describe('seedUsers', () => {
 
     const result = await seedUsers(tx as any, 'hash-compartido');
 
-    expect(SEED_USERS).toHaveLength(9);
+    expect(SEED_USERS).toHaveLength(11);
     expect(result.users.admin.email).toBe('admin.1@umssy.test');
     expect(tx.user.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -85,6 +86,48 @@ describe('seedUsers', () => {
     expect(tx.userRole.create).toHaveBeenCalledWith({
       data: { userId: 'user-empresa@umssy.test', roleId: 'role-empresa' },
     });
+  });
+
+  it.each([
+    ['adminGraduate', 'admin.titulado@umssy.test', ['administrativo', 'titulado'], false],
+    ['multiRole', 'multi.role@umssy.test', ['administrativo', 'empresa', 'mentor', 'titulado'], true],
+  ] as const)('siembra %s con todos sus roles y la contraseña compartida', async (key, email, roles, isAvailableForMentoring) => {
+    const tx = buildTx();
+    const result = await seedUsers(tx as unknown as Prisma.TransactionClient, 'hash-compartido');
+
+    expect(result.users[key].email).toBe(email);
+    expect(tx.user.upsert).toHaveBeenCalledWith(expect.objectContaining({
+      where: { email },
+      create: expect.objectContaining({ password: 'hash-compartido', isAvailableForMentoring }),
+      update: expect.objectContaining({ password: 'hash-compartido', isAvailableForMentoring }),
+    }));
+    const assignments = tx.userRole.create.mock.calls
+      .map(([input]) => input.data)
+      .filter(({ userId }) => userId === `user-${email}`);
+    expect(assignments.map(({ roleId }) => roleId)).toEqual(roles.map((role) => `role-${role}`));
+  });
+
+  it('repite la siembra sin duplicar usuarios ni sus asignaciones de roles', async () => {
+    const tx = buildTx();
+    const assignments = new Set<string>();
+    tx.role.findMany.mockImplementation(({ where }: { where: { name: { in: readonly string[] } } }) =>
+      Promise.resolve(ROLE_NAMES.filter((name) => where.name.in.includes(name)).map((name) => ({ id: `role-${name}`, name }))),
+    );
+    tx.userRole.findFirst.mockImplementation(({ where }: { where: { userId: string; roleId: string } }) =>
+      Promise.resolve(assignments.has(`${where.userId}:${where.roleId}`) ? { id: 'existing' } : null),
+    );
+    tx.userRole.create.mockImplementation(({ data }: { data: { userId: string; roleId: string } }) => {
+      assignments.add(`${data.userId}:${data.roleId}`);
+      return Promise.resolve({});
+    });
+
+    const first = await seedUsers(tx as unknown as Prisma.TransactionClient, 'hash');
+    const second = await seedUsers(tx as unknown as Prisma.TransactionClient, 'hash');
+
+    expect(first.userRoles).toBe(15);
+    expect(second.userRoles).toBe(0);
+    expect(assignments.size).toBe(15);
+    expect(tx.userRole.create).toHaveBeenCalledTimes(15);
   });
 
   it('no repite la asignación de rol si ya existe', async () => {

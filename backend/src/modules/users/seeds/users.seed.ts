@@ -56,14 +56,14 @@ async function removeLegacyRoles(
   return count;
 }
 
-async function ensureUserWithRole(
+async function ensureUserWithRoles(
   tx: Prisma.TransactionClient,
   definition: SeedUserDefinition,
   password: string,
-  roleId: string,
-): Promise<{ user: User; roleAssigned: boolean }> {
+  roleIds: readonly string[],
+): Promise<{ user: User; assignedRoles: number }> {
   const { firstName, lastName, email } = definition;
-  const isAvailableForMentoring = definition.role === 'mentor';
+  const isAvailableForMentoring = definition.roles.includes('mentor');
   const user = await tx.user.upsert({
     where: { email },
     update: { firstName, lastName, password, isAvailableForMentoring },
@@ -76,15 +76,18 @@ async function ensureUserWithRole(
     },
   });
 
-  const assigned = await tx.userRole.findFirst({
-    where: { userId: user.id, roleId, deletedAt: null },
-  });
-  if (assigned) {
-    return { user, roleAssigned: false };
+  let assignedRoles = 0;
+  for (const roleId of new Set(roleIds)) {
+    const assigned = await tx.userRole.findFirst({
+      where: { userId: user.id, roleId, deletedAt: null },
+    });
+    if (assigned) continue;
+
+    await tx.userRole.create({ data: { userId: user.id, roleId } });
+    assignedRoles += 1;
   }
 
-  await tx.userRole.create({ data: { userId: user.id, roleId } });
-  return { user, roleAssigned: true };
+  return { user, assignedRoles };
 }
 
 export async function seedUsers(
@@ -105,16 +108,14 @@ export async function seedUsers(
   let userRoles = 0;
   const users: Partial<SeedUsers> = {};
   for (const definition of SEED_USERS) {
-    const result = await ensureUserWithRole(
+    const result = await ensureUserWithRoles(
       tx,
       definition,
       password,
-      roleIdOf(definition.role),
+      definition.roles.map(roleIdOf),
     );
     users[definition.key] = result.user;
-    if (result.roleAssigned) {
-      userRoles += 1;
-    }
+    userRoles += result.assignedRoles;
   }
 
   return {

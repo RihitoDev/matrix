@@ -4,5 +4,5 @@ export interface SeedUserDefinition {
   firstName: string;
   lastName: string;
   email: string;
-  role: RoleName;
+  roles: readonly RoleName[];
 }
