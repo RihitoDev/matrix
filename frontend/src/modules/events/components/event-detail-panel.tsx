@@ -1,5 +1,5 @@
 import { Card } from '@/components/ui/card';
-import { CalendarDays, Clock3, MapPin, UserRound } from 'lucide-react';
+import { CalendarDays, Clock3, MapPin, UserRound, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   calculateEventCapacityStatus,
@@ -11,7 +11,7 @@ import { hasValidEventCapacity } from '../utils/has-valid-event-capacity';
 
 import type { EventDetailPanelProps } from '../types/event-detail-panel-props.types';
 
-export function EventDetailPanel({ event }: EventDetailPanelProps) {
+export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
   const hasValidCapacity = hasValidEventCapacity(event);
   const { enrolledCount, capacity, progressPercentage, isFull } =
     calculateEventCapacityStatus(event);
@@ -24,6 +24,13 @@ export function EventDetailPanel({ event }: EventDetailPanelProps) {
     >
       <Card className="gap-0 rounded-none border-0 shadow-none bg-transparent space-y-5 px-6 py-7 lg:px-7">
         <header className="space-y-3">
+          {onClose && (
+            <div className="flex justify-end">
+              <Button variant="ghost" size="icon" aria-label="Cerrar detalle del taller" onClick={onClose}>
+                <X aria-hidden="true" />
+              </Button>
+            </div>
+          )}
           <span className="inline-flex w-fit rounded-full bg-muted px-3 py-1 text-xs font-medium text-text-secondary">
             {event.category.name}
           </span>

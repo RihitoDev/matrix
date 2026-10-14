@@ -74,6 +74,10 @@ export function SidebarNavItem({
               pathname,
               child.href,
               child.activePathPatterns,
+            ) && !item.children?.some((other) =>
+              other.href !== child.href &&
+              other.href.startsWith(`${child.href}/`) &&
+              isRouteActive(pathname, other.href, other.activePathPatterns),
             );
             const ChildIcon = child.icon;
 
