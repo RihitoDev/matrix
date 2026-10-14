@@ -428,7 +428,7 @@ model AppointmentHistory {
   appointmentId    String   @map("appointment_id") @db.Uuid
   previousStatusId String?  @map("previous_status_id") @db.Uuid
   newStatusId      String   @map("new_status_id") @db.Uuid
-  changedById      String?  @map("changed_by") @db.Uuid
+  changedById      String?  @map("changed_by_id") @db.Uuid
   changedAt        DateTime @default(now()) @map("changed_at") @db.Timestamptz(6)
   note             String?  @db.VarChar(300)
   createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -596,6 +596,7 @@ model JobOfferStatus {
   @@map("job_offer_statuses")
 }
 model AdminExportHistory {
+  id         String   @id @default(uuid()) @db.Uuid
   userId     String   @map("user_id") @db.Uuid
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   reportName String   @map("report_name") @db.VarChar(255)
@@ -603,7 +604,7 @@ model AdminExportHistory {
 
   user User @relation("AdminExportHistories", fields: [userId], references: [id], onDelete: Cascade)
 
-  @@id([userId, createdAt])
+  @@unique([userId, createdAt])
   @@map("admin_export_histories")
 }
 
