@@ -414,6 +414,7 @@ export const ModelName = {
   JobOfferSkill: 'JobOfferSkill',
   UserSkill: 'UserSkill',
   Certification: 'Certification',
+  UserCvFile: 'UserCvFile',
   TechnicalArea: 'TechnicalArea',
   OrientationType: 'OrientationType',
   MentorTechnicalArea: 'MentorTechnicalArea',
@@ -458,7 +459,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "activationOtp" | "messageStatus" | "conversation" | "conversationParticipant" | "message" | "userPresence"
+    modelProps: "appointmentStatus" | "proposalStatus" | "eventModality" | "eventOrigin" | "eventStatus" | "registrationStatus" | "city" | "company" | "user" | "role" | "userRole" | "education" | "workExperience" | "skill" | "jobOfferSkill" | "userSkill" | "certification" | "userCvFile" | "technicalArea" | "orientationType" | "mentorTechnicalArea" | "mentorOrientationType" | "availabilityBlock" | "blockedDate" | "appointment" | "timeProposal" | "appointmentHistory" | "eventCategory" | "event" | "eventRegistration" | "eventAttendance" | "jobOffer" | "jobOfferModality" | "jobOfferContractType" | "jobOfferStatus" | "adminExportHistory" | "accessRequestStatus" | "accessRequestDocumentType" | "file" | "career" | "accessRequest" | "activationOtp" | "messageStatus" | "conversation" | "conversationParticipant" | "message" | "userPresence"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1717,6 +1718,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.CertificationCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.CertificationCountAggregateOutputType> | number
+        }
+      }
+    }
+    UserCvFile: {
+      payload: Prisma.$UserCvFilePayload<ExtArgs>
+      fields: Prisma.UserCvFileFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserCvFileFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserCvFilePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserCvFileFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserCvFilePayload>
+        }
+        findFirst: {
+          args: Prisma.UserCvFileFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserCvFilePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserCvFileFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserCvFilePayload>
+        }
+        findMany: {
+          args: Prisma.UserCvFileFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserCvFilePayload>[]
+        }
+        create: {
+          args: Prisma.UserCvFileCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserCvFilePayload>
+        }
+        createMany: {
+          args: Prisma.UserCvFileCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserCvFileCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserCvFilePayload>[]
+        }
+        delete: {
+          args: Prisma.UserCvFileDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserCvFilePayload>
+        }
+        update: {
+          args: Prisma.UserCvFileUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserCvFilePayload>
+        }
+        deleteMany: {
+          args: Prisma.UserCvFileDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserCvFileUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserCvFileUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserCvFilePayload>[]
+        }
+        upsert: {
+          args: Prisma.UserCvFileUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserCvFilePayload>
+        }
+        aggregate: {
+          args: Prisma.UserCvFileAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserCvFile>
+        }
+        groupBy: {
+          args: Prisma.UserCvFileGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserCvFileGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserCvFileCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserCvFileCountAggregateOutputType> | number
         }
       }
     }
@@ -4007,7 +4082,6 @@ export const UserScalarFieldEnum = {
   personalEmail: 'personalEmail',
   headline: 'headline',
   aboutMe: 'aboutMe',
-  cvPdfUrl: 'cvPdfUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -4114,6 +4188,17 @@ export const CertificationScalarFieldEnum = {
 } as const
 
 export type CertificationScalarFieldEnum = (typeof CertificationScalarFieldEnum)[keyof typeof CertificationScalarFieldEnum]
+
+
+export const UserCvFileScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  cvFileName: 'cvFileName',
+  cvUploadedAt: 'cvUploadedAt',
+  cvPdfData: 'cvPdfData'
+} as const
+
+export type UserCvFileScalarFieldEnum = (typeof UserCvFileScalarFieldEnum)[keyof typeof UserCvFileScalarFieldEnum]
 
 
 export const TechnicalAreaScalarFieldEnum = {
@@ -4790,6 +4875,7 @@ export type GlobalOmitConfig = {
   jobOfferSkill?: Prisma.JobOfferSkillOmit
   userSkill?: Prisma.UserSkillOmit
   certification?: Prisma.CertificationOmit
+  userCvFile?: Prisma.UserCvFileOmit
   technicalArea?: Prisma.TechnicalAreaOmit
   orientationType?: Prisma.OrientationTypeOmit
   mentorTechnicalArea?: Prisma.MentorTechnicalAreaOmit

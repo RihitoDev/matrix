@@ -103,6 +103,11 @@ export type UserSkill = Prisma.UserSkillModel
  */
 export type Certification = Prisma.CertificationModel
 /**
+ * Model UserCvFile
+ * 
+ */
+export type UserCvFile = Prisma.UserCvFileModel
+/**
  * Model TechnicalArea
  * 
  */
