@@ -5,6 +5,7 @@ import { REPORT_TYPES } from '../types/generated-report.types.js';
 const CREATED_AT = new Date('2026-05-01T10:00:00.000Z');
 
 const RECORD = {
+  id: 'e6caa1ce-1c64-4d6c-9fd1-9ee3d5b90d61',
   userId: 'admin-1',
   createdAt: CREATED_AT,
   reportName: 'usuarios-rechazados-2026-05-01.csv',
@@ -52,7 +53,7 @@ describe('GeneratedReportsRepository', () => {
       expect(page).toEqual({
         reports: [
           {
-            id: `admin-1_${CREATED_AT.getTime()}`,
+            id: RECORD.id,
             fileName: RECORD.reportName,
             reportType: 'REJECTED_USERS',
             generatedAt: CREATED_AT.toISOString(),
@@ -67,10 +68,12 @@ describe('GeneratedReportsRepository', () => {
     it('guarda el reporte en la BD a nombre del usuario autenticado', async () => {
       const { repository, adminExportHistory } = buildRepository();
 
-      await repository.create('admin-1', {
+      const report = await repository.create('admin-1', {
         fileName: RECORD.reportName,
         reportType: 'REJECTED_USERS',
       });
+
+      expect(report.id).toBe(RECORD.id);
 
       expect(adminExportHistory.create).toHaveBeenCalledWith({
         data: {
