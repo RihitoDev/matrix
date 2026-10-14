@@ -36,6 +36,17 @@ describe("DataContrastPanel", () => {
     expect(screen.getByText("6 por verificar")).toBeInTheDocument();
   });
 
+  it("la etiqueta de cada dato puede partirse en varias líneas para no montarse sobre el valor declarado", () => {
+    render(<DataContrastPanel detail={{ ...detail, idCardNumber: "123456" }} />);
+
+    for (const label of ["Carnet de identidad", "Año de titulación"]) {
+      const cell = screen.getByText(label).closest("td");
+      expect(cell).toHaveClass("whitespace-normal");
+      expect(screen.getByText(label)).toHaveClass("leading-snug", "break-words");
+    }
+    expect(screen.getByText("123456").closest("td")).toHaveClass("whitespace-normal");
+  });
+
   it("marca Coincide cuando el valor del documento coincide y actualiza el resumen", () => {
     render(<DataContrastPanel detail={detail} />);
 
