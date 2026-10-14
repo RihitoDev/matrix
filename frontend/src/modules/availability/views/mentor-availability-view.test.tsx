@@ -114,12 +114,16 @@ describe("MentorAvailabilityView", () => {
     expect(within(grid).getByRole("button", { name: "libre, 10:00 a 11:00" })).toBeInTheDocument()
   })
 
-  it("muestra el estado vacío sin bloques esta semana", async () => {
+  it("muestra la grilla con sus fechas y el aviso cuando la semana no tiene bloques", async () => {
     vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
 
     renderWithQuery(<MentorAvailabilityView />)
 
     expect(await screen.findByText("Aún no registraste bloques esta semana")).toBeInTheDocument()
+    const grid = screen.getByRole("region", { name: "Disponibilidad semanal" })
+    expect(within(grid).getByRole("heading", { name: "LUN 5" })).toBeInTheDocument()
+    expect(within(grid).getByRole("heading", { name: "DOM 11" })).toBeInTheDocument()
+    expect(within(grid).getAllByText("Sin bloques")).toHaveLength(7)
   })
 
   it("muestra el error si falla la consulta", async () => {
