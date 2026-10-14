@@ -27,6 +27,7 @@ function row(index: number): ReviewListItem {
     fullName: `Persona ${index}`,
     email: `p${index}@umss.test`,
     sisCode: `20180${index}`,
+    career: "Licenciatura en Ingeniería de Sistemas",
     documentType: "academic_diploma",
     submittedAt: new Date().toISOString(),
     status: "pending",

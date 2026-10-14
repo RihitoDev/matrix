@@ -85,6 +85,7 @@ export class AccessRequestsRepository {
           sisCode: true,
           submittedAt: true,
           status: { select: { title: true } },
+          career: { select: { title: true } },
           documentType: { select: { title: true } },
         } satisfies Prisma.AccessRequestSelect,
       }),

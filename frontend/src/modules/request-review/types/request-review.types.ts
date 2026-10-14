@@ -6,6 +6,7 @@ export interface ReviewListItem {
   fullName: string;
   email: string;
   sisCode: string;
+  career: string;
   documentType: string | null;
   submittedAt: string | null;
   status: ReviewStatus;
