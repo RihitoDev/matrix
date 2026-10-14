@@ -1,12 +1,57 @@
-## Getting Started
+## Local Environment Setup
 
-First, run the development server:
+Node.js 22 and pnpm 12.4.2 are required. From the repository root, install
+dependencies and prepare the environment file before starting the application,
+adding components, or running the build:
+
+```bash
+cd frontend
+pnpm install --frozen-lockfile
+cp .env.example .env.local
+```
+
+If `.env.local` already exists, review its values without overwriting your configuration.
+In PowerShell, the equivalent command to copy the example is
+`Copy-Item .env.example .env.local`.
+
+To use the local backend, `.env.local` must contain:
+
+```dotenv
+NEXT_PUBLIC_APP_ENV=local
+NEXT_PUBLIC_API_URL_LOCAL=http://localhost:8080/api
+```
+
+`NEXT_PUBLIC_APP_ENV` selects the environment (`local`, `dev`, or `prod`) and
+defaults to `local` when omitted. The URL for the selected environment is
+required both to start the application and to build it:
+
+| Environment | Required Variable |
+| --- | --- |
+| `local` | `NEXT_PUBLIC_API_URL_LOCAL` |
+| `dev` | `NEXT_PUBLIC_API_URL_DEV` |
+| `prod` | `NEXT_PUBLIC_API_URL_PROD` |
+
+The `dev` and `prod` URLs are empty in `.env.example`. Set the corresponding
+backend URL if you select either environment. URLs for environments you are
+not using can remain empty.
+`.env.local` is ignored by Git; do not add it to the repository.
+
+## Running and Building
+
+After configuring `.env.local`, run the following commands from `frontend/`.
+To start the development server:
 
 ```bash
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser. To lint
+the code and build the application:
+
+```bash
+pnpm lint
+pnpm build
+```
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
