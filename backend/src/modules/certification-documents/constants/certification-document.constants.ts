@@ -9,13 +9,6 @@ export const CERTIFICATION_DOCUMENT_VALIDATION_RULES: FileValidationRules = {
   maxSizeBytes: 5 * 1024 * 1024,
 };
 
-export const CERTIFICATION_DOCUMENT_FILE_NAME_PREFIX = 'certification';
-
-export const CERTIFICATION_DOCUMENT_DEFAULT_MIME_TYPE =
-  'application/octet-stream';
-
-export const CERTIFICATION_DOCUMENT_DEFAULT_EXTENSION = 'bin';
-
 export const CERTIFICATION_DOCUMENT_EXTENSION_BY_MIME_TYPE: Record<
   string,
   string
