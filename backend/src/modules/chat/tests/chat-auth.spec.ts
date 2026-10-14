@@ -49,9 +49,10 @@ describe('Chat access', () => {
     [['administrativo'], 403],
     [['administrativo', 'mentor'], 200],
     [['titulado'], 200],
-    [['estudiante'], 200],
+    [['estudiante'], 403],
     [['mentor'], 200],
-    [['empresa'], 200],
+    [['empresa'], 403],
+    [['empresa', 'titulado'], 200],
   ])('uses current database roles %s to allow or deny direct requests', async (roles, statusCode) => {
     findFirst.mockResolvedValue({
       id: 'user-1', email: 'user@test.com', roles: roles.map((name) => ({ role: { name } })),
@@ -65,7 +66,7 @@ describe('Chat access', () => {
   it.each([ChatController, ConversationController, MessageController, UserSearchController])(
     'protects all endpoints of %p with the same chat roles', (controller) => {
       expect(Reflect.getMetadata(GUARDS_METADATA, controller)).toEqual([JwtAuthGuard, RolesGuard]);
-      expect(Reflect.getMetadata(ROLES_KEY, controller)).toEqual(['titulado', 'estudiante', 'mentor', 'empresa']);
+      expect(Reflect.getMetadata(ROLES_KEY, controller)).toEqual(['titulado', 'mentor']);
     },
   );
 });

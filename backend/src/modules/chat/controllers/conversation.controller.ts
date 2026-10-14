@@ -22,7 +22,7 @@ import type { ConversationResponse } from '../responses/conversation.response.js
 
 @Controller('chat/conversations')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('titulado', 'estudiante', 'mentor', 'empresa')
+@Roles('titulado', 'mentor')
 @UseInterceptors(ResponseInterceptor)
 export class ConversationController {
   constructor(private readonly conversationService: ConversationService) {}

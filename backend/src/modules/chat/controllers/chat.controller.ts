@@ -20,7 +20,7 @@ import { ChatService } from '../services/chat.service.js';
 @ApiTags('Chat')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('titulado', 'estudiante', 'mentor', 'empresa')
+@Roles('titulado', 'mentor')
 @Controller('conversations')
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
