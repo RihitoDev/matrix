@@ -162,7 +162,7 @@ describe("PresentationView", () => {
     expect(screen.getByText("Valeria Quispe")).toBeInTheDocument();
   });
 
-  it("saves only the stored fields and shows a confirmation", async () => {
+  it("saves the headline and about me and shows a confirmation", async () => {
     const user = userEvent.setup();
     vi.mocked(profileService.updatePresentation).mockResolvedValue({
       ...SAVED_PROFILE,
@@ -173,7 +173,6 @@ describe("PresentationView", () => {
     const headlineInput = await screen.findByLabelText(/Titular profesional/);
     await user.clear(headlineInput);
     await user.type(headlineInput, "Desarrolladora frontend");
-    await user.type(screen.getByLabelText(/Oportunidades que me interesan/), "Remote work");
     await user.click(screen.getByRole("button", { name: "Guardar presentación" }));
 
     expect(profileService.updatePresentation).toHaveBeenCalledWith({
@@ -181,7 +180,7 @@ describe("PresentationView", () => {
       aboutMe: "Systems engineering graduate from UMSS.",
     });
     expect(await screen.findByText("Tu presentación se guardó correctamente.")).toBeInTheDocument();
-    expect(screen.getByLabelText(/Oportunidades que me interesan/)).toHaveValue("Remote work");
+    expect(screen.queryByLabelText(/Oportunidades que me interesan/)).not.toBeInTheDocument();
   });
 
   it("shows the server field errors in Spanish next to each field", async () => {
