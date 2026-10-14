@@ -14,7 +14,7 @@ describe('file exceptions', () => {
     [new InvalidFileTypeException(), 415, 'File type is not allowed'],
     [
       new CorruptedFileException(),
-      422,
+      400,
       'File content is incomplete or corrupted',
     ],
   ])(
@@ -25,6 +25,31 @@ describe('file exceptions', () => {
       expect(exception.message).toBe(message);
     },
   );
+
+  it('exposes a stable error code for corrupted files', () => {
+    expect(new CorruptedFileException().data).toEqual({
+      code: 'CORRUPTED_FILE',
+    });
+    expect(new EmptyFileException().data).toBeNull();
+  });
+
+  it('formats a corrupted file with status 400 and its error code', () => {
+    const json = vi.fn();
+    const status = vi.fn().mockReturnValue({ json });
+    const host = {
+      switchToHttp: () => ({ getResponse: () => ({ status }) }),
+    } as unknown as ArgumentsHost;
+
+    new DomainExceptionFilter().catch(new CorruptedFileException(), host);
+
+    expect(status).toHaveBeenCalledWith(400);
+    expect(json).toHaveBeenCalledWith({
+      statusCode: 400,
+      data: { code: 'CORRUPTED_FILE' },
+      detail: 'File content is incomplete or corrupted',
+      ok: false,
+    });
+  });
 
   it('is formatted by the global filter as the standard error response', () => {
     const json = vi.fn();

@@ -69,7 +69,7 @@ export function OrientationStep({
                 "flex w-full flex-col items-start gap-3 rounded-lg border p-4 text-left transition-colors",
                 isSelected
                   ? "border-red-600 bg-red-50"
-                  : "border-border bg-slate-100 hover:border-slate-300",
+                  : "border-border bg-surface hover:border-slate-300",
               ].join(" ")}
               aria-pressed={isSelected}
             >

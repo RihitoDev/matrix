@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
 import {
+  CERTIFICATION_MIN_ISSUE_DATE,
   CERTIFICATION_NAME_MAX_LENGTH,
   CERTIFICATION_VALIDATION_MESSAGES,
-  ISO_DATE_PATTERN,
   ISSUING_ORGANIZATION_MAX_LENGTH,
 } from '../constants/certification.constants.js';
 
@@ -19,7 +19,7 @@ const requiredText = () =>
     });
 
 function isCalendarDate(value: string): boolean {
-  if (!ISO_DATE_PATTERN.test(value)) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     return false;
   }
   const date = new Date(`${value}T00:00:00.000Z`);
@@ -50,6 +50,10 @@ export const issueDateSchema = z
   .min(1, { error: CERTIFICATION_VALIDATION_MESSAGES.required, abort: true })
   .refine(isCalendarDate, {
     error: CERTIFICATION_VALIDATION_MESSAGES.invalidDate,
+    abort: true,
+  })
+  .refine((value) => value >= CERTIFICATION_MIN_ISSUE_DATE, {
+    error: CERTIFICATION_VALIDATION_MESSAGES.minDate,
     abort: true,
   })
   .transform((value) => new Date(`${value}T00:00:00.000Z`))

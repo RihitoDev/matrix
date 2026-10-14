@@ -40,7 +40,6 @@ export class MentorMapper {
       headline: mentor.headline,
       aboutMe: mentor.aboutMe,
       isAvailable: mentor.isAvailableForMentoring,
-      // API-relative; a content version reloads the avatar after a profile refetch.
       photoUrl: this.toPhotoUrl(
         mentor.id,
         mentor.photoUrl?.length

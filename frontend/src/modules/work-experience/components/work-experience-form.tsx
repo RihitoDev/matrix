@@ -8,10 +8,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { EMPTY_WORK_EXPERIENCE_FORM_VALUES } from "../config/work-experience-form-defaults.config";
+import {
+  WORK_EXPERIENCE_COMPANY_NAME_MAX_LENGTH,
+  WORK_EXPERIENCE_DESCRIPTION_MAX_LENGTH,
+  WORK_EXPERIENCE_MIN_DATE,
+  WORK_EXPERIENCE_POSITION_MAX_LENGTH,
+} from "../constants/work-experience-validation.constants";
 import type { WorkExperienceErrors } from "../types/work-experience-errors.types";
 import type { WorkExperienceFormProps } from "../types/work-experience-form-props.types";
 import type { WorkExperienceFormValues } from "../types/work-experience-form-values.types";
 import { getFieldErrorProps } from "@/modules/profile/utils/get-field-error-props";
+import { getTodayIsoDate } from "../utils/get-today-iso-date";
 import { validateWorkExperience } from "../utils/validate-work-experience";
 import { FeedbackMessage } from "@/modules/profile/components/feedback-message";
 import { FormField } from "@/modules/profile/components/form-field";
@@ -30,6 +37,7 @@ export function WorkExperienceForm({
   const [errors, setErrors] = useState<WorkExperienceErrors>({});
   const isEditing = Boolean(initialValues);
   const title = isEditing ? "Editar experiencia" : "Agregar experiencia";
+  const today = getTodayIsoDate();
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target;
@@ -66,6 +74,7 @@ export function WorkExperienceForm({
             name="companyName"
             type="text"
             placeholder="Nombre de la empresa"
+            maxLength={WORK_EXPERIENCE_COMPANY_NAME_MAX_LENGTH}
             value={values.companyName}
             disabled={isPending}
             onChange={handleChange}
@@ -79,11 +88,15 @@ export function WorkExperienceForm({
             name="position"
             type="text"
             placeholder="Ej. Desarrollador frontend"
+            maxLength={WORK_EXPERIENCE_POSITION_MAX_LENGTH}
             value={values.position}
             disabled={isPending}
             onChange={handleChange}
             className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
           />
+          <p className="mt-1 text-right text-[12px] text-text-secondary">
+            {values.position.length}/{WORK_EXPERIENCE_POSITION_MAX_LENGTH}
+          </p>
         </FormField>
         <div className="grid grid-cols-2 gap-5">
           <FormField id="work-experience-startDate" error={errors.startDate} label="Desde" isRequired>
@@ -92,6 +105,8 @@ export function WorkExperienceForm({
               {...getFieldErrorProps("work-experience-startDate", errors.startDate)}
               name="startDate"
               type="date"
+              min={WORK_EXPERIENCE_MIN_DATE}
+              max={today}
               value={values.startDate}
               disabled={isPending}
               onChange={handleChange}
@@ -104,6 +119,8 @@ export function WorkExperienceForm({
               {...getFieldErrorProps("work-experience-endDate", errors.endDate)}
               name="endDate"
               type="date"
+              min={WORK_EXPERIENCE_MIN_DATE}
+              max={today}
               value={values.endDate}
               disabled={isPending || values.isCurrent}
               onChange={handleChange}
@@ -122,10 +139,16 @@ export function WorkExperienceForm({
           />
           Trabajo actualmente aquí
         </label>
-        <FormField id="work-experience-description" label="Descripción de funciones (opcional)">
+        <FormField
+          id="work-experience-description"
+          error={errors.description}
+          label="Descripción de funciones (opcional)"
+        >
           <Textarea
             id="work-experience-description"
+            {...getFieldErrorProps("work-experience-description", errors.description)}
             name="description"
+            maxLength={WORK_EXPERIENCE_DESCRIPTION_MAX_LENGTH}
             rows={4}
             placeholder="Describe las funciones que desempeñaste en este cargo"
             value={values.description}
@@ -133,6 +156,9 @@ export function WorkExperienceForm({
             onChange={handleChange}
             className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 resize-y py-3 field-sizing-fixed min-h-0 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
           />
+          <p className="mt-1 text-right text-[12px] text-text-secondary">
+            {values.description.length}/{WORK_EXPERIENCE_DESCRIPTION_MAX_LENGTH}
+          </p>
         </FormField>
 
         <FeedbackMessage feedback={feedback} />

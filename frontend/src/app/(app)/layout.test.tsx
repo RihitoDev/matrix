@@ -41,13 +41,31 @@ describe("AppLayout", () => {
   it.each([
     ["/events", "true"],
     ["/events/my-passes", "false"],
-  ])("uses the events navigation on %s", (pathname, fullBleed) => {
+  ])("keeps the main navigation on workshop pages %s", (pathname, fullBleed) => {
     route.pathname = pathname;
     render(<AppLayout><p>event-content</p></AppLayout>);
 
     expect(screen.getByTestId("app-shell")).toContainElement(screen.getByText("event-content"));
-    expect(screen.getByTestId("app-shell")).toHaveAttribute("data-navigation", "Talleres,Mis pases");
+    expect(screen.getByTestId("app-shell")).toHaveAttribute("data-navigation", "general");
     expect(screen.getByTestId("app-shell")).toHaveAttribute("data-full-bleed", fullBleed);
+  });
+
+  it.each(["/recruiters", "/recruiters/job-offers/new"])("uses the recruiters navigation on %s", (pathname) => {
+    route.pathname = pathname;
+    render(<AppLayout><p>recruiters-content</p></AppLayout>);
+
+    expect(screen.getByTestId("app-shell")).toContainElement(screen.getByText("recruiters-content"));
+    expect(screen.getByTestId("app-shell")).toHaveAttribute(
+      "data-navigation",
+      "Inicio,Mis vacantes,Registrar nueva vacante,Perfil de empresa",
+    );
+  });
+
+  it("does not treat paths that only start with the same letters as recruiters", () => {
+    route.pathname = "/recruitersx";
+    render(<AppLayout><p>page-content</p></AppLayout>);
+
+    expect(screen.getByTestId("app-shell")).toHaveAttribute("data-navigation", "general");
   });
 
   it("sin sesión no muestra la página privada y lleva al login con la ruta pedida", () => {

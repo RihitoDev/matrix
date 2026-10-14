@@ -1,4 +1,10 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   getMentorOrientationTypes,
@@ -34,6 +40,32 @@ const catalog = [
 const selectedOrientations = [catalog[0], catalog[2]];
 const checkbox = (name: RegExp | string) =>
   screen.getByRole("checkbox", { name });
+const expectOrientationStyle = (
+  name: string,
+  state: "saved" | "new" | "unselected",
+) => {
+  const input = checkbox(name);
+  const card = input.closest("label");
+
+  expect(card).not.toBeNull();
+  if (state === "unselected") {
+    expect(input).not.toBeChecked();
+    expect(card).toHaveClass("border-transparent", "bg-gray-50/50");
+    expect(input).toHaveClass("bg-gray-200");
+    expect(input).not.toHaveClass("data-checked:bg-green-600");
+    expect(input).not.toHaveClass("data-checked:bg-red-600");
+    return;
+  }
+
+  expect(input).toBeChecked();
+  if (state === "saved") {
+    expect(card).toHaveClass("border-green-200", "bg-green-50/50");
+    expect(input).toHaveClass("data-checked:bg-green-600");
+  } else {
+    expect(card).toHaveClass("border-red-200", "bg-red-50/50");
+    expect(input).toHaveClass("data-checked:bg-red-600");
+  }
+};
 
 describe("OrientationConfigView", () => {
   beforeEach(() => {
@@ -68,6 +100,9 @@ describe("OrientationConfigView", () => {
     expect(checkbox("Búsqueda de empleo")).toBeChecked();
     expect(checkbox("Orientación técnica")).toBeChecked();
     expect(checkbox("Orientación profesional")).not.toBeChecked();
+    expectOrientationStyle("Búsqueda de empleo", "saved");
+    expectOrientationStyle("Orientación técnica", "saved");
+    expectOrientationStyle("Orientación profesional", "unselected");
     expect(getOrientationTypes).toHaveBeenCalledTimes(1);
     expect(getMentorOrientationTypes).toHaveBeenCalledTimes(1);
   });
@@ -82,6 +117,22 @@ describe("OrientationConfigView", () => {
     expect(checkbox("Orientación profesional")).toBeChecked();
     expect(checkbox("Orientación técnica")).not.toBeChecked();
     expect(checkbox("Búsqueda de empleo")).toBeChecked();
+    expectOrientationStyle("Orientación profesional", "new");
+    expectOrientationStyle("Orientación técnica", "unselected");
+    expectOrientationStyle("Búsqueda de empleo", "saved");
+    expect(updateMentorOrientationTypes).not.toHaveBeenCalled();
+  });
+
+  it("recupera el verde al volver a seleccionar una orientación guardada", async () => {
+    render(<OrientationConfigView />);
+    await screen.findByRole("checkbox", { name: "Orientación técnica" });
+
+    fireEvent.click(checkbox("Orientación técnica"));
+    expectOrientationStyle("Orientación técnica", "unselected");
+
+    fireEvent.click(checkbox("Orientación técnica"));
+    expectOrientationStyle("Orientación técnica", "saved");
+    expect(updateMentorOrientationTypes).not.toHaveBeenCalled();
   });
 
   it("exige al menos una orientacion", async () => {
@@ -122,6 +173,52 @@ describe("OrientationConfigView", () => {
       catalog[0].id,
       catalog[1].id,
     ]);
+    expectOrientationStyle("Búsqueda de empleo", "saved");
+    expectOrientationStyle("Orientación profesional", "saved");
+    expectOrientationStyle("Orientación técnica", "unselected");
+  });
+
+  it("mantiene la selección bloqueada mientras el backend confirma el guardado", async () => {
+    let resolveSave!: () => void;
+    vi.mocked(updateMentorOrientationTypes).mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        resolveSave = resolve;
+      }),
+    );
+    render(<OrientationConfigView />);
+    await screen.findByRole("checkbox", { name: "Orientación profesional" });
+
+    fireEvent.click(checkbox("Orientación profesional"));
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+
+    expect(screen.getByRole("button", { name: "Guardando..." })).toBeDisabled();
+    expect(checkbox("Orientación profesional")).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+    fireEvent.click(checkbox("Orientación profesional"));
+    expectOrientationStyle("Orientación profesional", "new");
+
+    resolveSave();
+    await waitFor(() =>
+      expectOrientationStyle("Orientación profesional", "saved"),
+    );
+  });
+
+  it("muestra en verde las orientaciones persistidas tras recargar", async () => {
+    const { unmount } = render(<OrientationConfigView />);
+    await screen.findByRole("checkbox", { name: "Orientación profesional" });
+    fireEvent.click(checkbox("Orientación profesional"));
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    await screen.findByText("Tipos de orientación actualizados correctamente");
+
+    unmount();
+    vi.mocked(getMentorOrientationTypes).mockResolvedValueOnce(catalog);
+    render(<OrientationConfigView />);
+    await screen.findByRole("checkbox", { name: "Orientación profesional" });
+
+    expectOrientationStyle("Orientación profesional", "saved");
+    expect(getMentorOrientationTypes).toHaveBeenCalledTimes(2);
   });
 
   it("conserva la seleccion si falla el guardado", async () => {
@@ -132,6 +229,7 @@ describe("OrientationConfigView", () => {
     await screen.findByRole("checkbox", { name: "Orientación profesional" });
 
     fireEvent.click(checkbox("Orientación profesional"));
+    fireEvent.click(checkbox("Orientación técnica"));
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
     fireEvent.click(
       screen.getByRole("button", { name: "Sí, guardar cambios" }),
@@ -142,9 +240,20 @@ describe("OrientationConfigView", () => {
         "No se pudieron guardar los cambios. Intente nuevamente.",
       ),
     ).toBeInTheDocument();
-    expect(checkbox("Orientación profesional")).toBeChecked();
-    expect(checkbox("Búsqueda de empleo")).toBeChecked();
-    expect(checkbox("Orientación técnica")).toBeChecked();
+    expectOrientationStyle("Orientación profesional", "new");
+    expectOrientationStyle("Búsqueda de empleo", "saved");
+    expectOrientationStyle("Orientación técnica", "unselected");
+    expect(
+      screen.getByRole("button", { name: "Guardar cambios" }),
+    ).toBeEnabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    await screen.findByText("Tipos de orientación actualizados correctamente");
+    expect(updateMentorOrientationTypes).toHaveBeenNthCalledWith(2, [
+      catalog[0].id,
+      catalog[1].id,
+    ]);
+    expectOrientationStyle("Orientación profesional", "saved");
   });
 
   it("muestra error de carga y reintenta ambas consultas", async () => {

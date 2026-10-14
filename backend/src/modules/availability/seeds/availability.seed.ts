@@ -3,14 +3,10 @@ import type { AppointmentStatus, Prisma } from '../../../prisma/client.js';
 import {
   BUSY_WEEK_BLOCKS,
   BUSY_WEEK_BLOCKS_PER_DAY,
-  CONFIRMED_APPOINTMENT_MESSAGE,
-  EARLY_MONDAY_WARNING,
   FALLBACK_TRIO_HOUR,
   MS_PER_DAY,
   MS_PER_MINUTE,
-  PENDING_APPOINTMENT_MESSAGE,
   STEP_MS,
-  TRIO_NEXT_WEEK_WARNING,
 } from '../constants/seed-availability.constants.js';
 import { AppointmentStatusTitle } from '../enums/appointment-status-title.enum.js';
 import { BLOCK_MAX_HOUR, BLOCK_MIN_HOUR, BLOCK_STEP_MINUTES } from '../constants/create-block.constants.js';
@@ -119,10 +115,10 @@ export function buildBlockPlan(weeks: SeedWeeks, now: Date = new Date()): SeedBl
 
   const past = pastBlockRange(weeks.current, now);
   if (past === null) {
-    warnings.push(EARLY_MONDAY_WARNING);
+    warnings.push('Ejecución muy temprana en lunes: no se pudo crear el bloque pasado dentro de la ventana 07:00-22:00 de la semana actual.');
   }
   if (position.week !== weeks.current) {
-    warnings.push(TRIO_NEXT_WEEK_WARNING);
+    warnings.push('La semana actual ya no tiene horario disponible: los bloques de prueba (libre, pendiente y confirmada) se crearon en la semana siguiente.');
   }
 
   return {
@@ -198,8 +194,8 @@ async function seedAppointments(
 
   const { count } = await tx.appointment.createMany({
     data: [
-      buildAppointment(plan.pending, pendingBlock, statuses.pending.id, PENDING_APPOINTMENT_MESSAGE),
-      buildAppointment(plan.confirmed, confirmedBlock, statuses.confirmed.id, CONFIRMED_APPOINTMENT_MESSAGE),
+      buildAppointment(plan.pending, pendingBlock, statuses.pending.id, 'Cita de prueba pendiente (seed de desarrollo)'),
+      buildAppointment(plan.confirmed, confirmedBlock, statuses.confirmed.id, 'Cita de prueba confirmada (seed de desarrollo)'),
     ],
   });
   return count;

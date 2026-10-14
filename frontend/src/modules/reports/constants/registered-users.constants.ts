@@ -14,7 +14,7 @@ export const EMPTY_DOCUMENT_LABEL = "-";
 
 export const ALL_USER_TYPES_VALUE = "ALL";
 
-export const USER_TYPE_SELECT_OPTIONS = [
-  { value: ALL_USER_TYPES_VALUE, label: "Todos" },
-  ...USER_TYPE_FILTER_OPTIONS.map((userType) => ({ value: userType, label: USER_TYPE_LABELS[userType] })),
-];
+export const USER_TYPE_SELECT_OPTIONS = USER_TYPE_FILTER_OPTIONS.map((userType) => ({
+  value: userType,
+  label: USER_TYPE_LABELS[userType],
+}));

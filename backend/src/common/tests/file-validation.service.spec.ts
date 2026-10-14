@@ -87,6 +87,25 @@ describe('FileValidationService', () => {
       expect(result.detectedMimeType).toBe('application/pdf');
     });
 
+    it.each([
+      ['a line feed', '\n'],
+      ['a carriage return and line feed', '\r\n'],
+      ['spaces and line breaks', '  \n\n \r\n'],
+    ])('accepts a pdf whose %%EOF marker is followed by %s', (_name, suffix) => {
+      const buffer = Buffer.concat([
+        Buffer.from('%PDF-1.4\n'),
+        Buffer.alloc(60, 0x20),
+        Buffer.from(`\n%%EOF${suffix}`),
+      ]);
+
+      const result = service.validate(
+        buildFileFromBuffer(buffer, { mimeType: 'application/pdf' }),
+        cvRules,
+      );
+
+      expect(result.detectedType).toBe('pdf');
+    });
+
     it('accepts a structurally complete png', () => {
       const file = buildFileFromBuffer(makeMinimalPng(), {
         originalName: 'photo.png',

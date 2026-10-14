@@ -39,6 +39,24 @@ describe("educationsService", () => {
     });
   });
 
+  it('loads the real catalogue using the current login token', async () => {
+    const catalogue = [{ name: 'Universidad Mayor de San Simón (UMSS)', aliases: ['UMSS'] }];
+    vi.mocked(apiClient.get).mockResolvedValue({ data: { data: catalogue } });
+    await expect(educationsService.getInstitutions()).resolves.toEqual(catalogue);
+    expect(apiClient.get).toHaveBeenCalledWith('/educations/institutions', { headers: { Authorization: 'Bearer test-access-token' } });
+  });
+
+  it.each([null, undefined, [], [null], [{ name: null, aliases: [] }], [{ name: 'UMSS', aliases: [null] }]])('rejects a malformed or empty catalogue: %j', async (data) => {
+    vi.mocked(apiClient.get).mockResolvedValue({ data: { data } });
+    await expect(educationsService.getInstitutions()).rejects.toThrow('No se pudo cargar la lista de universidades.');
+  });
+
+  it('propagates catalogue HTTP errors without substituting a local list', async () => {
+    const error = { response: { status: 401 } };
+    vi.mocked(apiClient.get).mockRejectedValue(error);
+    await expect(educationsService.getInstitutions()).rejects.toBe(error);
+  });
+
   it("returns an empty list when the user has no records", async () => {
     vi.mocked(apiClient.get).mockResolvedValue({ data: { data: [] } });
 

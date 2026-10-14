@@ -37,6 +37,7 @@ export function OrientationConfigView() {
   const [orientationTypes, setOrientationTypes] = useState<
     OrientationTypeResponse[]
   >([]);
+  const [savedIds, setSavedIds] = useState<string[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -78,6 +79,7 @@ export function OrientationConfigView() {
           (orientation) => orientation.id,
         );
         setOrientationTypes(catalogResult.value);
+        setSavedIds(ids);
         setSelectedIds(ids);
         setIsMentorActive(true);
       })
@@ -110,8 +112,10 @@ export function OrientationConfigView() {
 
     setIsSaving(true);
     setShowToast(false);
+    const idsToSave = [...selectedIds];
     try {
-      await updateMentorOrientationTypes(selectedIds);
+      await updateMentorOrientationTypes(idsToSave);
+      setSavedIds(idsToSave);
       setErrorMessage(null);
       setShowToast(true);
     } catch {
@@ -226,14 +230,17 @@ export function OrientationConfigView() {
                 <div className="flex flex-col gap-3">
                   {orientationTypes.map((option) => {
                     const isSelected = selectedIds.includes(option.id);
+                    const isSaved = savedIds.includes(option.id);
 
                     return (
                       <label
                         key={option.id}
                         className={`group flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-4 transition-colors ${
-                          isSelected
-                            ? "border-red-200 bg-red-50/50"
-                            : "border-transparent bg-gray-50/50 hover:bg-gray-50"
+                          !isSelected
+                            ? "border-transparent bg-gray-50/50 hover:bg-gray-50"
+                            : isSaved
+                              ? "border-green-200 bg-green-50/50"
+                              : "border-red-200 bg-red-50/50"
                         }`}
                       >
                         <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -259,7 +266,13 @@ export function OrientationConfigView() {
                               handleCheckboxChange(option.id)
                             }
                             aria-labelledby={`orientation-label-${option.id}`}
-                            className="size-5 border-0 bg-gray-200 text-transparent data-checked:bg-red-600 data-checked:text-white [&_[data-slot=checkbox-indicator]>svg]:size-4"
+                            className={`size-5 border-0 bg-gray-200 text-transparent data-checked:text-white [&_[data-slot=checkbox-indicator]>svg]:size-4 ${
+                              !isSelected
+                                ? ""
+                                : isSaved
+                                  ? "data-checked:bg-green-600"
+                                  : "data-checked:bg-red-600"
+                            }`}
                           />
                         </div>
                       </label>

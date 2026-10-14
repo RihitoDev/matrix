@@ -6,6 +6,4 @@ export interface CertificationDocumentItemProps {
   info?: UploadedDocumentInfo;
   isBusy?: boolean;
   onView: (certification: Certification) => void;
-  onReplace: (certification: Certification) => void;
-  onRemove: (certification: Certification) => void;
 }

@@ -5,6 +5,8 @@ export const EDUCATION_FEEDBACK_MESSAGES = {
   missingEndDate: "Fecha de fin no registrada",
   createSuccess: "Formación académica agregada correctamente.",
   createError: "No se pudo agregar la formación académica. Inténtalo de nuevo.",
+  duplicate: "Ya registraste esta formación académica con la misma universidad, título y fechas.",
+  writeConflict: "No se pudo guardar por cambios simultáneos. Vuelve a intentarlo.",
   updateSuccess: "Formación académica actualizada correctamente.",
   updateError: "No se pudo actualizar la formación académica. Inténtalo de nuevo.",
   updateConflict: "Las fechas de esta formación cambiaron mientras guardabas. Tus cambios no se guardaron. Recarga la página y vuelve a editar el registro.",

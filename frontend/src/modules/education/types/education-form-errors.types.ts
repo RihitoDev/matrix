@@ -3,4 +3,5 @@ export interface EducationFormErrors {
   degree?: string;
   startDate?: string;
   endDate?: string;
+  description?: string;
 }

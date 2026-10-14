@@ -131,12 +131,7 @@ export class ReportsService {
           filters.period === undefined ||
           getAcademicPeriod(user.registeredAt) === filters.period,
       )
-      .filter((user) =>
-        containsSearch(
-          [user.fullName, user.email, user.identifier],
-          filters.search,
-        ),
-      );
+      .filter((user) => containsSearch([user.email], filters.search));
 
     return sortByNewest(users).map(toRegisteredUserResponse);
   }
