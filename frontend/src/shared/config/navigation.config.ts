@@ -19,7 +19,7 @@ import {
 
 export const SIDEBAR_NAVIGATION: NavigationItem[] = [
   { label: "Mi perfil", icon: User, href: "/profile", roles: ROLE_TAGS },
-  { label: "Chat", icon: MessageCircle, href: "/chat", roles: ROLE_TAGS },
+  { label: "Chat", icon: MessageCircle, href: "/chat", roles: ["titulado", "estudiante", "mentor", "empresa"] },
   {
     label: "Mentorías",
     icon: CalendarDays,

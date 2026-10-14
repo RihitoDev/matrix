@@ -3,6 +3,7 @@
 import type { AppRouteLayoutProps } from "@/shared/types/app-route-layout-props.types";
 import { usePathname } from "next/navigation";
 import { SessionGate } from "@/modules/auth";
+import { RoleGate } from "./role-gate";
 import { AppShell } from "./app-shell";
 
 export function AppRouteLayout({ children }: AppRouteLayoutProps) {
@@ -10,7 +11,6 @@ export function AppRouteLayout({ children }: AppRouteLayoutProps) {
   const isBackoffice = pathname === "/backoffice" || pathname?.startsWith("/backoffice/");
   const isChat = pathname === "/chat" || pathname?.startsWith("/chat/");
 
-  // El layout administrativo ya incluye AppShell y valida el rol de la sesión.
   if (isBackoffice) return children;
 
   return (
@@ -19,7 +19,7 @@ export function AppRouteLayout({ children }: AppRouteLayoutProps) {
         fullBleed={pathname === "/events"}
         contentClassName={isChat ? "flex h-[calc(100dvh-4rem)] min-h-0 flex-col" : undefined}
       >
-        {children}
+        {isChat ? <RoleGate allowedRoles={["titulado", "estudiante", "mentor", "empresa"]}>{children}</RoleGate> : children}
       </AppShell>
     </SessionGate>
   );

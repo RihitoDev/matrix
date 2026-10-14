@@ -12,12 +12,15 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CurrentUserId } from '../../../common/decorators/current-user-id.decorator.js';
+import { Roles } from '../../../common/decorators/roles.decorator.js';
+import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { ChatService } from '../services/chat.service.js';
 
 @ApiTags('Chat')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('titulado', 'estudiante', 'mentor', 'empresa')
 @Controller('conversations')
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}

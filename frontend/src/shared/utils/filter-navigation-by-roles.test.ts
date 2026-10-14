@@ -37,6 +37,11 @@ describe("Role navigation", () => {
     expect(paths).toContain("/backoffice/solicitudes");
     expect(paths).toContain("/backoffice/reports/history");
     expect(paths).toContain("/mentor/availability");
+    expect(paths).toContain("/chat");
+  });
+
+  it("hides chat from accounts with only the administrative role", () => {
+    expect(getPaths(["administrativo"])).not.toContain("/chat");
   });
 
   it("hides empty groups from students and users without roles", () => {

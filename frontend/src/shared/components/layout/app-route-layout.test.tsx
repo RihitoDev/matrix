@@ -89,6 +89,22 @@ describe("AppRouteLayout", () => {
     expect(replace).toHaveBeenCalledWith(`/login?next=${encodeURIComponent(pathname)}`);
   });
 
+  it.each([
+    [["administrativo"], false],
+    [["administrativo", "mentor"], true],
+    [["estudiante"], true],
+  ])("checks chat permissions for roles %s", (roles, isAllowed) => {
+    sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: roles[0], roles }))}.s`);
+    route.pathname = "/chat";
+    render(<AppLayout><p>chat-content</p></AppLayout>);
+
+    if (isAllowed) expect(screen.getByText("chat-content")).toBeInTheDocument();
+    else {
+      expect(screen.queryByText("chat-content")).toBeNull();
+      expect(screen.getByRole("alert")).toHaveTextContent("No tienes permisos");
+    }
+  });
+
   it("does not treat a backoffice prefix as an administrative route", () => {
     route.pathname = "/backofficex";
     render(<AppLayout><p>page-content</p></AppLayout>);

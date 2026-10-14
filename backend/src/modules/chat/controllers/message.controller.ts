@@ -8,6 +8,8 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ZodValidationPipe } from 'nestjs-zod';
+import { Roles } from '../../../common/decorators/roles.decorator.js';
+import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator.js';
 import { ResponseInterceptor } from '../../../common/interceptors/index.js';
@@ -23,7 +25,8 @@ import {
 } from '../requests/get-messages.schema.js';
 
 @Controller('chat/messages')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('titulado', 'estudiante', 'mentor', 'empresa')
 @UseInterceptors(ResponseInterceptor)
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}
