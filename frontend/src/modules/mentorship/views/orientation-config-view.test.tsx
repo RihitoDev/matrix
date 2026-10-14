@@ -39,7 +39,7 @@ const catalog = [
 
 const selectedOrientations = [catalog[0], catalog[2]];
 const checkbox = (name: RegExp | string) =>
-  screen.getByRole("checkbox", { name });
+  screen.getByRole("checkbox", { name, hidden: true });
 const expectOrientationStyle = (
   name: string,
   state: "saved" | "new" | "unselected",
