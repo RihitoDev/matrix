@@ -3,10 +3,12 @@ import type { MentorDirectoryItem } from "../../types/mentor-directory.types";
 
 type MentorDirectoryGridProps = {
   mentors: MentorDirectoryItem[];
+  currentUserId?: string | null;
 };
 
 export function MentorDirectoryGrid({
   mentors,
+  currentUserId,
 }: MentorDirectoryGridProps) {
   return (
     <section
@@ -15,7 +17,11 @@ export function MentorDirectoryGrid({
     >
       <div className="grid grid-cols-1 gap-5 @min-[50rem]:grid-cols-2">
         {mentors.map((mentor) => (
-          <MentorCard key={mentor.id} mentor={mentor} />
+          <MentorCard
+            key={mentor.id}
+            mentor={mentor}
+            isOwnProfile={currentUserId === mentor.id}
+          />
         ))}
       </div>
     </section>
