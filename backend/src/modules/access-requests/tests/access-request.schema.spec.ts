@@ -57,12 +57,30 @@ describe('createAccessRequestSchema', () => {
     expect(messagesOf({ ...validPayload, lastName: 'Pérez1' })).toContain('lastName: Los apellidos solo pueden contener letras, espacios, guiones y apóstrofes');
   });
 
-  it.each(['12a45', '', '1'.repeat(21)])('rechaza el carnet "%s"', (idCardNumber) => {
+  it.each(['12a45', '', '12345', '1'.repeat(11), '1'.repeat(21)])('rechaza el carnet "%s"', (idCardNumber) => {
     expect(messagesOf({ ...validPayload, idCardNumber }).some((m) => m.startsWith('idCardNumber'))).toBe(true);
+  });
+
+  it.each(['123456', '1234567890'])('acepta el carnet de %s dígitos en los extremos', (idCardNumber) => {
+    expect(messagesOf({ ...validPayload, idCardNumber })).toEqual([]);
+  });
+
+  it('informa el rango del carnet de identidad', () => {
+    expect(messagesOf({ ...validPayload, idCardNumber: '1'.repeat(11) })).toContain(
+      'idCardNumber: El carnet de identidad debe tener entre 6 y 10 dígitos',
+    );
   });
 
   it('rechaza un SIS con letras', () => {
     expect(messagesOf({ ...validPayload, sisCode: '2020AB' })).toContain('sisCode: El código SIS solo puede contener dígitos');
+  });
+
+  it.each(['20201234', '2020123456', '1'.repeat(20)])('rechaza el SIS "%s" que no tiene 9 dígitos', (sisCode) => {
+    expect(messagesOf({ ...validPayload, sisCode })).toContain('sisCode: El código SIS debe tener exactamente 9 dígitos');
+  });
+
+  it.each(['code0156@gma.c', 'code0156@gma.c1', 'code0156@gma', 'code0156@gma.123'])('rechaza el correo "%s" sin dominio de letras', (email) => {
+    expect(messagesOf({ ...validPayload, email })).toContain('email: El correo no tiene un formato válido');
   });
 
   it('rechaza un departamento de expedición desconocido', () => {

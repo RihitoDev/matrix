@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Mail } from "lucide-react";
 import { useAccessRequestForm } from "../../contexts/access-request-context";
+import { SIS_CODE_LENGTH } from "../../constants/personal-data-rules.constants";
 import { usePersonalDataBind } from "../../hooks/use-personal-data-bind";
 import type { PersonalDataFieldName } from "../../types/access-request.types";
 import { CareerSelect } from "./career-select";
@@ -12,7 +13,6 @@ import { PersonalDataField } from "./personal-data-field";
 import { PersonalDataFormActions } from "./personal-data-form-actions";
 import { PersonalDataIntro } from "./personal-data-intro";
 
-// Orden visual del formulario: el primer campo con error es el que recibe el foco
 const FIELD_ORDER: readonly PersonalDataFieldName[] = [
   "firstName",
   "lastName",
@@ -29,7 +29,6 @@ const FIELD_ORDER: readonly PersonalDataFieldName[] = [
 export function PersonalDataForm() {
   const { fieldErrors, submit } = useAccessRequestForm();
   const bind = usePersonalDataBind();
-  // Cada envío terminado incrementa el contador; el efecto enfoca el primer error solo cuando cambia
   const [submitCount, setSubmitCount] = useState(0);
   const handledCount = useRef(0);
 
@@ -37,7 +36,6 @@ export function PersonalDataForm() {
     if (submitCount === handledCount.current) return;
     handledCount.current = submitCount;
     const firstWithError = FIELD_ORDER.find((field) => fieldErrors[field]);
-    // Los ids de los controles (inputs y disparadores de los selects) son los nombres de los campos
     if (firstWithError) document.getElementById(firstWithError)?.focus();
   }, [submitCount, fieldErrors]);
 
@@ -83,7 +81,7 @@ export function PersonalDataForm() {
           isRequired
           help="Figura en tu carnet universitario o en tu kárdex."
           inputMode="numeric"
-          maxLength={20}
+          maxLength={SIS_CODE_LENGTH}
           placeholder="Ej. 201904512"
         />
 
