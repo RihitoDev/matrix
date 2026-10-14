@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Prisma } from '../../../prisma/client.js';
 import { ROLE_NAMES } from '../../../common/enums/roles.enum.js';
-import { SEED_USERS } from '../constants/seed-users.constants.js';
 import { seedUsers } from './users.seed.js';
 function buildTransaction(hasRoles: boolean) {
   return {
@@ -43,7 +42,7 @@ describe('seedUsers', () => {
     expect(users.users.emptyGraduate.id).toBe('sinpases@umss.edu.bo');
     expect(users.users.mentorA.id).toBe('mentor.a@umssy.test');
     expect(users.users.company.id).toBe('empresa@umssy.test');
-    expect(tx.userRole.create).toHaveBeenCalledTimes(SEED_USERS.length);
+    expect(tx.userRole.create).toHaveBeenCalledTimes(15);
     expect(tx.userRole.create).toHaveBeenCalledWith({
       data: { userId: 'empresa@umssy.test', roleId: 'empresa' },
     });

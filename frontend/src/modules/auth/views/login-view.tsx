@@ -8,29 +8,17 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SELECT_ITEM_CONTRAST_CLASS } from "@/shared/constants/select.constants";
 import { useLogin } from "../hooks/use-login";
-import type { RoleTag } from "../types/auth-types";
 import { NEXT_PARAM } from "../constants/session.constants";
 import { resolvePostLoginPath } from "../utils/resolve-post-login-path";
 import { startSession } from "../utils/session";
 import { validateLoginFields, type LoginFieldErrors } from "../utils/validate-login-fields";
-
-const ROLE_OPTIONS: { value: RoleTag; label: string }[] = [
-  { value: "titulado", label: "Titulado" },
-  { value: "estudiante", label: "Estudiante" },
-  { value: "mentor", label: "Mentor" },
-  { value: "empresa", label: "Empresa" },
-  { value: "administrativo", label: "Administrativo" },
-];
 
 export function LoginView() {
   const router = useRouter();
   const { login, isLoading, error } = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [roleTag, setRoleTag] = useState<RoleTag>("titulado");
   const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
 
   async function handleSubmit(event: FormEvent) {
@@ -38,11 +26,11 @@ export function LoginView() {
     const errors = validateLoginFields(email, password);
     setFieldErrors(errors);
     if (errors.email || errors.password) return;
-    const result = await login({ email, password, roleTag });
+    const result = await login({ email, password });
     if (result) {
       startSession(result.accessToken);
       const next = new URLSearchParams(window.location.search).get(NEXT_PARAM);
-      router.push(resolvePostLoginPath(result.roleTag, next));
+      router.push(resolvePostLoginPath(result.roles ?? result.roleTag, next));
     }
   }
 
@@ -63,36 +51,6 @@ export function LoginView() {
         <p className="mb-6 mt-1 text-[15px] text-text-secondary">
           Comunidad verificada de la UMSS
         </p>
-
-        <div className="mb-4">
-          <Label htmlFor="login-role" className="mb-1.5 text-[12.5px] font-semibold text-ink">
-            Rol
-          </Label>
-          <Select
-            name="roleTag"
-            items={ROLE_OPTIONS}
-            value={roleTag}
-            onValueChange={(value) => setRoleTag((value ?? "titulado") as RoleTag)}
-          >
-            <SelectTrigger
-              id="login-role"
-              className="w-full rounded-lg border-border bg-surface px-3 text-[15px] text-ink focus-visible:border-accent focus-visible:ring-interaction data-[size=default]:h-[42px]"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {ROLE_OPTIONS.map((option) => (
-                <SelectItem
-                  key={option.value}
-                  value={option.value}
-                  className={SELECT_ITEM_CONTRAST_CLASS}
-                >
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
 
         <div className="mb-4">
           <Label htmlFor="login-email" className="mb-1.5 text-[12.5px] font-semibold text-ink">

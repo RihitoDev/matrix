@@ -18,12 +18,12 @@ describe('MentorAvailabilityController', () => {
     expect(result).toBe(blocks);
   });
 
-  it('exige el rol titulado en findMentorFreeBlocks', () => {
+  it('permite a titulados, estudiantes y mentores consultar horarios libres', () => {
     const handler = Object.getOwnPropertyDescriptor(
       MentorAvailabilityController.prototype,
       'findMentorFreeBlocks',
     )?.value;
     const roles = new Reflector().get<string[]>(ROLES_KEY, handler);
-    expect(roles).toEqual(['titulado']);
+    expect(roles).toEqual(['titulado', 'estudiante', 'mentor']);
   });
 });
