@@ -1,12 +1,10 @@
 import { z } from 'zod';
 import {
-  GOOGLE_MAPS_LINK_REGEX,
   JOB_OFFER_DESCRIPTION_MAX_LENGTH,
   JOB_OFFER_LANGUAGES_MAX_LENGTH,
   JOB_OFFER_MAX_POSITIONS,
   JOB_OFFER_MAX_SKILLS,
   JOB_OFFER_TITLE_MAX_LENGTH,
-  JOB_OFFER_TITLE_REGEX,
   JOB_OFFER_VALIDATION_MESSAGES as MESSAGES,
 } from '../constants/job-offer.constants.js';
 import { JobOfferContractType, JobOfferModality } from '../types/job-offer.enum.js';
@@ -20,7 +18,7 @@ export const createJobOfferSchema = z
       .trim()
       .min(1, MESSAGES.REQUIRED_FIELD)
       .max(JOB_OFFER_TITLE_MAX_LENGTH, MESSAGES.TITLE_TOO_LONG)
-      .regex(JOB_OFFER_TITLE_REGEX, MESSAGES.TITLE_INVALID_CHARACTERS),
+      .regex(/^[a-zA-Z0-9\sÁÉÍÓÚÜÑáéíóúüñ]+$/, MESSAGES.TITLE_INVALID_CHARACTERS),
     description: z
       .string()
       .trim()
@@ -45,7 +43,7 @@ export const createJobOfferSchema = z
       .string()
       .trim()
       .min(1, MESSAGES.REQUIRED_FIELD)
-      .regex(GOOGLE_MAPS_LINK_REGEX, MESSAGES.INVALID_LOCATION_URL),
+      .regex(/^https:\/\/(maps\.google\.com\/|www\.google\.com\/maps|goo\.gl\/maps\/|maps\.app\.goo\.gl\/)/, MESSAGES.INVALID_LOCATION_URL),
     skillIds: z
       .array(z.uuid(MESSAGES.INVALID_SKILL_ID))
       .min(1, MESSAGES.SKILLS_REQUIRED)
