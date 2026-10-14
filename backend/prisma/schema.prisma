@@ -107,22 +107,22 @@ model Company {
 }
 
 model User {
-  id            String   @id @default(uuid()) @db.Uuid
-  firstName     String   @map("first_name") @db.VarChar(100)
-  lastName      String   @map("last_name") @db.VarChar(100)
-  email         String   @unique @db.VarChar(150)
-  password      String?  @db.VarChar(255)
-  isActive      Boolean  @default(true) @map("is_active")
-  isAvailableForMentoring  Boolean  @default(false) @map("is_available_for_mentoring")
-  photoUrl      Bytes?   @map("photo_url")
-  cityId        String?  @map("city_id") @db.Uuid
-  phone         String?
-  personalEmail String?  @map("personal_email")
-  headline      String?
-  aboutMe       String?  @map("about_me")
-  cvPdfUrl      Bytes?   @map("cv_pdf_url")
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id                      String   @id @default(uuid()) @db.Uuid
+  firstName               String   @map("first_name") @db.VarChar(100)
+  lastName                String   @map("last_name") @db.VarChar(100)
+  email                   String   @unique @db.VarChar(150)
+  password                String?  @db.VarChar(255)
+  isActive                Boolean  @default(true) @map("is_active")
+  isAvailableForMentoring Boolean  @default(false) @map("is_available_for_mentoring")
+  photoUrl                Bytes?   @map("photo_url")
+  cityId                  String?  @map("city_id") @db.Uuid
+  phone                   String?
+  personalEmail           String?  @map("personal_email")
+  headline                String?
+  aboutMe                 String?  @map("about_me")
+  cvPdfUrl                Bytes?   @map("cv_pdf_url")
+  createdAt               DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt               DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   city City? @relation(fields: [cityId], references: [id], onDelete: SetNull)
 
@@ -149,6 +149,12 @@ model User {
 
   exportHistories        AdminExportHistory[] @relation("AdminExportHistories")
   reviewedAccessRequests AccessRequest[]      @relation("AccessRequestReviewedBy")
+
+  conversationsAsUserA Conversation[]            @relation("UserAConversations")
+  conversationsAsUserB Conversation[]            @relation("UserBConversations")
+  chatMessages         Message[]
+  chatParticipants     ConversationParticipant[]
+  presence             UserPresence?
 
   @@index([cityId])
   @@map("users")
@@ -713,3 +719,86 @@ model ActivationOtp {
   @@index([accessRequestId])
   @@map("activation_otps")
 }
+
+model MessageStatus {
+  id          String   @id @default(uuid()) @db.Uuid
+  title       String   @unique @db.VarChar(30)
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  messages Message[]
+
+  @@map("message_statuses")
+}
+
+model Conversation {
+  id            String    @id @default(uuid()) @db.Uuid
+  userAId       String    @map("user_a_id") @db.Uuid
+  userBId       String    @map("user_b_id") @db.Uuid
+  lastMessageId String?   @map("last_message_id") @db.Uuid
+  lastMessageAt DateTime? @map("last_message_at") @db.Timestamptz(6)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  userA User @relation("UserAConversations", fields: [userAId], references: [id], onDelete: Cascade)
+  userB User @relation("UserBConversations", fields: [userBId], references: [id], onDelete: Cascade)
+
+  participants ConversationParticipant[]
+  messages     Message[]                 @relation("ConversationMessages")
+
+  @@unique([userAId, userBId])
+  @@index([userAId, lastMessageAt(sort: Desc)])
+  @@index([userBId, lastMessageAt(sort: Desc)])
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  id             String   @id @default(uuid()) @db.Uuid
+  conversationId String   @map("conversation_id") @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  lastReadAt     DateTime @map("last_read_at") @db.Timestamptz(6)
+  isMuted        Boolean  @default(false) @map("is_muted")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id             String    @id @default(uuid()) @db.Uuid
+  conversationId String    @map("conversation_id") @db.Uuid
+  senderId       String    @map("sender_id") @db.Uuid
+  content        String    @db.VarChar(500)
+  statusId       String    @map("status_id") @db.Uuid
+  sentAt         DateTime  @default(now()) @map("sent_at") @db.Timestamptz(6)
+  deliveredAt    DateTime? @map("delivered_at") @db.Timestamptz(6)
+  readAt         DateTime? @map("read_at") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  conversation Conversation  @relation("ConversationMessages", fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User          @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  status       MessageStatus @relation(fields: [statusId], references: [id], onDelete: Restrict)
+
+  @@index([conversationId, sentAt(sort: Desc)])
+  @@index([senderId])
+  @@index([statusId])
+  @@map("messages")
+}
+
+model UserPresence {
+  userId     String   @id @map("user_id") @db.Uuid
+  isOnline   Boolean  @default(false) @map("is_online")
+  lastSeenAt DateTime @default(now()) @map("last_seen_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_presences")
+}
+

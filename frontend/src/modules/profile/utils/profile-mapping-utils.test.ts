@@ -53,7 +53,6 @@ describe("toPresentationValues", () => {
     expect(toPresentationValues(COMPLETE_PROFILE)).toEqual({
       headline: "Junior developer",
       aboutMe: "Graduate.",
-      interestedOpportunities: "",
     });
   });
 
@@ -61,7 +60,6 @@ describe("toPresentationValues", () => {
     expect(toPresentationValues(EMPTY_PROFILE)).toEqual({
       headline: "",
       aboutMe: "",
-      interestedOpportunities: "",
     });
   });
 });
@@ -75,7 +73,6 @@ describe("toProfileSummary", () => {
       phone: "+591 70000000",
       personalEmail: "valeria@correo.com",
       aboutMe: "Graduate.",
-      interestedOpportunities: "",
     });
   });
 

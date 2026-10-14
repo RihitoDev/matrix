@@ -2,9 +2,11 @@ import { Message, MessageStatus } from '../types/conversation.types';
 import { MOCK_MESSAGES } from '../mocks/mock-messages';
 
 export const CHAT_MESSAGES_STORAGE_KEY = 'umssy_chat_messages_v1';
+export const CHAT_READ_STATUS_STORAGE_KEY = 'umssy_chat_read_status_v1';
 
 // Memoria cache en caso de entorno SSR o indisponibilidad de localStorage
 let memoryMessageCache: Message[] | null = null;
+let memoryConversationReadStateCache: Record<string, number> | null = null;
 
 /**
  * Determina si el entorno actual dispone de la API de localStorage
@@ -155,11 +157,12 @@ export function rehydrateStoredMessages(): Message[] {
 }
 
 /**
- * Restablece el almacenamiento local a los datos mock base.
+ * Restablece el almacenamiento local a los datos mock base y limpia el estado de lectura.
  */
 export function clearStoredMessages(): void {
   const initialMessages = cloneMessages(MOCK_MESSAGES);
   memoryMessageCache = initialMessages;
+  clearStoredConversationReadState();
 
   if (isLocalStorageAvailable()) {
     try {
@@ -172,4 +175,76 @@ export function clearStoredMessages(): void {
     }
   }
 }
+
+/**
+ * Obtiene el mapa de estados de lectura persistidos por conversacion.
+ * Devuelve un diccionario donde la clave es conversationId y el valor es unreadCount.
+ */
+export function getStoredConversationReadState(): Record<string, number> {
+  if (!isLocalStorageAvailable()) {
+    return memoryConversationReadStateCache ? { ...memoryConversationReadStateCache } : {};
+  }
+
+  try {
+    const serialized = window.localStorage.getItem(CHAT_READ_STATUS_STORAGE_KEY);
+    if (!serialized) {
+      return memoryConversationReadStateCache ? { ...memoryConversationReadStateCache } : {};
+    }
+    const parsed = JSON.parse(serialized);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      memoryConversationReadStateCache = parsed;
+      return { ...parsed };
+    }
+    return {};
+  } catch {
+    return memoryConversationReadStateCache ? { ...memoryConversationReadStateCache } : {};
+  }
+}
+
+/**
+ * Guarda el numero de mensajes no leidos para una conversacion en el almacenamiento persistente.
+ */
+export function setStoredConversationUnreadCount(
+  conversationId: string,
+  unreadCount: number
+): void {
+  const currentState = getStoredConversationReadState();
+  currentState[conversationId] = Math.max(0, unreadCount);
+  memoryConversationReadStateCache = currentState;
+
+  if (isLocalStorageAvailable()) {
+    try {
+      window.localStorage.setItem(
+        CHAT_READ_STATUS_STORAGE_KEY,
+        JSON.stringify(currentState)
+      );
+    } catch {
+      // Manejo silencioso ante cuota excedida o almacenamiento bloqueado
+    }
+  }
+}
+
+/**
+ * Marca una conversacion como leida (unreadCount = 0) de forma persistente,
+ * garantizando que al recargar la pagina (F5) no se vuelva a disparar la alerta
+ * visual ni el badge de "nuevo mensaje".
+ */
+export function markStoredConversationAsRead(conversationId: string): void {
+  setStoredConversationUnreadCount(conversationId, 0);
+}
+
+/**
+ * Restablece el almacenamiento persistente del estado de lectura de conversaciones.
+ */
+export function clearStoredConversationReadState(): void {
+  memoryConversationReadStateCache = null;
+  if (isLocalStorageAvailable()) {
+    try {
+      window.localStorage.removeItem(CHAT_READ_STATUS_STORAGE_KEY);
+    } catch {
+      // Manejo silencioso
+    }
+  }
+}
+
 

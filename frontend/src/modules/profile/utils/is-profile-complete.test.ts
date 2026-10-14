@@ -9,7 +9,6 @@ const COMPLETE_PROFILE = {
   phone: "+591 70000000",
   personalEmail: "valeria@correo.com",
   aboutMe: "Systems engineering graduate from UMSS.",
-  interestedOpportunities: "",
 };
 
 describe("isProfileComplete", () => {
