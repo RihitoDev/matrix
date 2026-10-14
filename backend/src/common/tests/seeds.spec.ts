@@ -8,6 +8,7 @@ const seedEventRegistrations = vi.fn();
 const seedTechnicalAreas = vi.fn();
 const seedOrientationTypes = vi.fn();
 const seedJobOffers = vi.fn();
+const seedChat = vi.fn();
 
 vi.mock('../../modules/users/seeds/users.seed.js', () => ({
   hashSeedPassword: vi.fn().mockResolvedValue('hash'),
@@ -34,6 +35,9 @@ vi.mock('../../modules/orientation-types/seeds/orientation-types.seed.js', () =>
 vi.mock('../../modules/job-offers/seeds/job-offers.seed.js', () => ({
   seedJobOffers: (...args: unknown[]) => seedJobOffers(...args),
 }));
+vi.mock('../../modules/chat/seeds/chat.seed.js', () => ({
+  seedChat: (...args: unknown[]) => seedChat(...args),
+}));
 
 const { createSeedClient, loadSeedEnv, runSeed } = await import('../database/seeds.js');
 
@@ -49,6 +53,7 @@ function setupSeeds() {
   });
   seedAvailability.mockResolvedValue({ weeks: {}, plan: {}, statuses: 2, blocks: 56, appointments: 2, warnings: ['aviso'] });
   seedAccessRequests.mockResolvedValue({ statuses: 5, documentTypes: 2, careers: 2 });
+  seedChat.mockResolvedValue({ messageStatuses: 4, userPresences: 6, conversations: 5, messages: 11 });
 }
 
 describe('loadSeedEnv', () => {
@@ -104,6 +109,7 @@ describe('runSeed', () => {
     expect(seedEventRegistrations).toHaveBeenCalledWith(tx, 'e1');
     expect(seedAvailability).toHaveBeenCalledWith(tx, expect.objectContaining({ mentorId: 'm1', graduateId: 'g1' }), expect.any(Date));
     expect(seedAccessRequests).toHaveBeenCalledWith(tx);
+    expect(seedChat).toHaveBeenCalledWith(tx);
     expect(summary).toMatchObject({
       roles: 5,
       statuses: 2,
