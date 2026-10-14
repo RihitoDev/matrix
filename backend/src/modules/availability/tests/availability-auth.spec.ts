@@ -53,6 +53,16 @@ describe('Availability authentication', () => {
     expect(new RolesGuard(new Reflector()).canActivate(context)).toBe(true);
 
     findFirst.mockResolvedValue({
+      id: 'user-1', email: 'user@test.com', roles: [{ role: { name: 'estudiante' } }],
+    });
+    await expect(moduleRef.get(JwtAuthGuard).canActivate(context)).resolves.toBe(true);
+    if (controller === MentorAvailabilityController) {
+      expect(new RolesGuard(new Reflector()).canActivate(context)).toBe(true);
+    } else {
+      expect(() => new RolesGuard(new Reflector()).canActivate(context)).toThrow();
+    }
+
+    findFirst.mockResolvedValue({
       id: 'user-1', email: 'user@test.com',
       roles: [{ role: { name: 'administrativo' } }],
     });

@@ -15,7 +15,7 @@ export class MentorAvailabilityController {
 
   @Get(':id/free-blocks')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('titulado')
+  @Roles('titulado', 'estudiante', 'mentor')
   @ApiOperation({ summary: FIND_MENTOR_FREE_BLOCKS_DOCS.summary })
   @ApiParam({ name: 'id', description: FIND_MENTOR_FREE_BLOCKS_DOCS.idDescription })
   @ApiQuery({ name: 'from', description: FIND_MENTOR_FREE_BLOCKS_DOCS.fromDescription })
