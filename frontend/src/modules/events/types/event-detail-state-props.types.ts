@@ -4,4 +4,5 @@ export interface EventDetailStateProps {
   error: string | null;
   notFound: boolean;
   retry: () => void;
+  onClose?: () => void;
 }
