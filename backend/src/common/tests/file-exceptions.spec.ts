@@ -1,6 +1,5 @@
 import type { ArgumentsHost } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
-import { CORRUPTED_FILE_ERROR_CODE } from '../constants/file-error-codes.constants.js';
 import { CorruptedFileException } from '../exceptions/corrupted-file.exception.js';
 import { DomainException } from '../exceptions/domain.exception.js';
 import { EmptyFileException } from '../exceptions/empty-file.exception.js';
@@ -29,7 +28,7 @@ describe('file exceptions', () => {
 
   it('exposes a stable error code for corrupted files', () => {
     expect(new CorruptedFileException().data).toEqual({
-      code: CORRUPTED_FILE_ERROR_CODE,
+      code: 'CORRUPTED_FILE',
     });
     expect(new EmptyFileException().data).toBeNull();
   });
@@ -46,7 +45,7 @@ describe('file exceptions', () => {
     expect(status).toHaveBeenCalledWith(400);
     expect(json).toHaveBeenCalledWith({
       statusCode: 400,
-      data: { code: CORRUPTED_FILE_ERROR_CODE },
+      data: { code: 'CORRUPTED_FILE' },
       detail: 'File content is incomplete or corrupted',
       ok: false,
     });
