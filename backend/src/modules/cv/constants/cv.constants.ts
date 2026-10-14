@@ -10,3 +10,5 @@ export const CV_VALIDATION_RULES: FileValidationRules = {
 };
 
 export const CV_MIME_TYPE = 'application/pdf';
+
+export const CV_FILE_NAME_MAX_LENGTH = 255;

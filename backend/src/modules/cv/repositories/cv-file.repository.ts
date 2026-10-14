@@ -4,40 +4,43 @@ import { mapRecordNotFound } from '../../../common/utils/map-record-not-found.js
 import { ProfileNotFoundException } from '../../profile/exceptions/profile-not-found.exception.js';
 import type { FileStorage } from '../../../common/types/file-storage.type.js';
 
-const cvContentSelect = { cvPdfUrl: true } as const;
+const cvContentSelect = { cvPdfData: true } as const;
 
-const userIdSelect = { id: true } as const;
+const cvIdSelect = { id: true } as const;
 
 @Injectable()
 export class CvFileRepository implements FileStorage {
   constructor(private readonly prisma: PrismaService) {}
 
-  async save(ownerId: string, content: Buffer): Promise<void> {
-    await mapRecordNotFound(
-      this.prisma.user.update({
-        where: { id: ownerId },
-        data: { cvPdfUrl: new Uint8Array(content) },
-        select: userIdSelect,
-      }),
-      () => new ProfileNotFoundException(),
-    );
+  async save(ownerId: string, content: Buffer, fileName?: string): Promise<void> {
+    const data = {
+      cvFileName: fileName ?? null,
+      cvUploadedAt: new Date(),
+      cvPdfData: content.toString('base64'),
+    };
+
+    await this.prisma.userCvFile.upsert({
+      where: { userId: ownerId },
+      create: { userId: ownerId, ...data },
+      update: data,
+      select: cvIdSelect,
+    });
   }
 
   async read(ownerId: string): Promise<Buffer | null> {
-    const user = await this.prisma.user.findUnique({
-      where: { id: ownerId },
+    const cv = await this.prisma.userCvFile.findUnique({
+      where: { userId: ownerId },
       select: cvContentSelect,
     });
 
-    return user?.cvPdfUrl ? Buffer.from(user.cvPdfUrl) : null;
+    return cv?.cvPdfData ? Buffer.from(cv.cvPdfData, 'base64') : null;
   }
 
   async remove(ownerId: string): Promise<void> {
     await mapRecordNotFound(
-      this.prisma.user.update({
-        where: { id: ownerId },
-        data: { cvPdfUrl: null },
-        select: userIdSelect,
+      this.prisma.userCvFile.delete({
+        where: { userId: ownerId },
+        select: cvIdSelect,
       }),
       () => new ProfileNotFoundException(),
     );
