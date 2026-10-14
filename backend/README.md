@@ -21,30 +21,45 @@ cp .env.example .env
 
 ## Compile and Run the Project
 
-1. **Start the required services using Docker:**
-To spin up all services—including the NestJS API and PostgreSQL database (API runs in **development mode** by default) and runs migrations too:
+### Run the API and Database with Docker
+
+Run these commands after preparing `.env` as described above.
+To start both services:
+
 ```bash
-docker compose up -d
+docker compose up -d --build
 ```
 
+The API container runs with `NODE_ENV=production`. Its startup command applies
+existing migrations with `prisma migrate deploy`, then runs the compiled API
+with `node dist/main.js`. Compose does not mount the API source code or enable
+watch mode. After changing API code, rebuild the image with
+`docker compose up -d --build api`.
 
-If you only need to run the PostgreSQL database (you need to run migrations after), run:
-```bash
-docker compose up postgres -d
-```
+### Run the API Locally in Development Mode
 
-2. **Start the application in development mode:**
-Run the server in **watch mode** to enable auto-reloading whenever code changes are saved:
+Start only PostgreSQL, apply the migrations and generate Prisma Client, then run
+NestJS locally in **watch mode**:
+
 ```bash
+docker compose up -d postgres
+pnpm migrate:apply
 pnpm run start:dev
 ```
 
-you can visit the Swagger documentation in:
+Use this option for automatic reloading when source files change. Keep the API
+container stopped to avoid a port conflict; if you previously started all
+services, run `docker compose stop api` before starting the local API.
+For this setup, use `DB_HOST=localhost` and the published `DB_PORT` from `.env`.
+
+You can visit the Swagger documentation at:
+
 ```
 http://localhost:8080/docs
 ```
 
-and the server runs in:
+The API is available at:
+
 ```
 http://localhost:8080/api
 ```
