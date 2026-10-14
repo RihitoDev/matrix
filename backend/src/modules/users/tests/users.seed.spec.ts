@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ROLE_NAMES } from '../../../common/enums/roles.enum.js';
-import { EPIC_1_TEST_USER, SEED_USERS } from '../constants/seed-users.constants.js';
+import { SEED_USERS } from '../constants/seed-users.constants.js';
 import { hashSeedPassword, seedUsers } from '../seeds/users.seed.js';
 
 function buildTx(options: { legacy?: Array<{ id: string }>; references?: number; assigned?: boolean } = {}) {
@@ -35,16 +35,17 @@ describe('hashSeedPassword', () => {
 });
 
 describe('seedUsers', () => {
-  it('siembra los roles, el usuario de la Epic 1 y los usuarios de prueba', async () => {
+  it('siembra los roles y todos los usuarios desde SEED_USERS', async () => {
     const tx = buildTx();
 
     const result = await seedUsers(tx as any, 'hash');
 
     expect(tx.role.createMany).toHaveBeenCalledWith({ data: ROLE_NAMES.map((name) => ({ name })), skipDuplicates: true });
-    expect(tx.user.upsert).toHaveBeenCalledTimes(1 + SEED_USERS.length);
-    expect(tx.user.upsert).toHaveBeenCalledWith(expect.objectContaining({ where: { email: EPIC_1_TEST_USER.email } }));
-    expect(result).toMatchObject({ roles: ROLE_NAMES.length, userRoles: 1 + SEED_USERS.length, legacyRoles: 0 });
-    expect(Object.keys(result.users)).toHaveLength(1 + SEED_USERS.length);
+    expect(tx.user.upsert).toHaveBeenCalledTimes(SEED_USERS.length);
+    expect(tx.user.upsert).toHaveBeenCalledWith(expect.objectContaining({ where: { email: 'prueba@umss.edu.bo' } }));
+    expect(result).toMatchObject({ roles: ROLE_NAMES.length, userRoles: SEED_USERS.length, legacyRoles: 0 });
+    expect(Object.keys(result.users)).toHaveLength(SEED_USERS.length);
+    expect(result.users.eventGraduate.email).toBe('prueba@umss.edu.bo');
   });
 
   it('siembra un usuario administrativo con la misma contraseña de siembra', async () => {
@@ -52,7 +53,7 @@ describe('seedUsers', () => {
 
     const result = await seedUsers(tx as any, 'hash-compartido');
 
-    expect(SEED_USERS).toHaveLength(7);
+    expect(SEED_USERS).toHaveLength(9);
     expect(result.users.admin.email).toBe('admin.1@umssy.test');
     expect(tx.user.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -61,6 +62,29 @@ describe('seedUsers', () => {
       }),
     );
     expect(tx.userRole.create).toHaveBeenCalledWith({ data: { userId: 'user-admin.1@umssy.test', roleId: 'role-administrativo' } });
+  });
+
+  it('siembra un usuario de empresa con la misma contraseña de siembra', async () => {
+    const tx = buildTx();
+
+    const result = await seedUsers(tx as any, 'hash-compartido');
+
+    expect(result.users.company.email).toBe('empresa@umssy.test');
+    expect(tx.user.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { email: 'empresa@umssy.test' },
+        create: {
+          firstName: 'Carlos',
+          lastName: 'Rojas',
+          email: 'empresa@umssy.test',
+          password: 'hash-compartido',
+          isAvailableForMentoring: false,
+        },
+      }),
+    );
+    expect(tx.userRole.create).toHaveBeenCalledWith({
+      data: { userId: 'user-empresa@umssy.test', roleId: 'role-empresa' },
+    });
   });
 
   it('no repite la asignación de rol si ya existe', async () => {

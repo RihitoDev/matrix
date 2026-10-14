@@ -3980,6 +3980,7 @@ export type JobOfferStatusScalarFieldEnum = (typeof JobOfferStatusScalarFieldEnu
 
 
 export const AdminExportHistoryScalarFieldEnum = {
+  id: 'id',
   userId: 'userId',
   createdAt: 'createdAt',
   reportName: 'reportName',

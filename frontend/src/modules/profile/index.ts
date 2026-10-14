@@ -16,3 +16,4 @@ export { TrajectorySteps } from "./components/trajectory-steps";
 
 export type { Feedback } from "./types/feedback.types";
 export type { FeedbackType } from "./types/feedback-type.types";
+export { profileService } from "./services/profile.service";

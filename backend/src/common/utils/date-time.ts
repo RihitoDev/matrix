@@ -1,10 +1,4 @@
-import {
-  BOLIVIA_OFFSET_MS,
-  DATE_PATTERN,
-  DAY_MS,
-  TIME_PATTERN,
-  WEEK_MS,
-} from '../constants/date-time.constants.js';
+import { BOLIVIA_OFFSET_MS, DAY_MS, WEEK_MS } from '../constants/date-time.constants.js';
 import type { BoliviaDateTime } from '../types/bolivia-date-time.types.js';
 import type { DateInput } from '../types/date-input.types.js';
 import type { WeekRange } from '../types/week-range.types.js';
@@ -44,8 +38,8 @@ export const toBoliviaTime = (value: DateInput): BoliviaDateTime => {
 
 // Recibe fecha (YYYY-MM-DD) y hora (HH:mm) de Bolivia y devuelve el instante en ISO UTC.
 export const toUtcIso = (boliviaDate: string, boliviaTime: string): string => {
-  const dateMatch = DATE_PATTERN.exec(boliviaDate);
-  const timeMatch = TIME_PATTERN.exec(boliviaTime);
+  const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(boliviaDate);
+  const timeMatch = /^(\d{2}):(\d{2})$/.exec(boliviaTime);
   if (!dateMatch || !timeMatch) {
     throw new RangeError(
       `Fecha u hora inválida: ${boliviaDate} ${boliviaTime}`,
