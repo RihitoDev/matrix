@@ -68,6 +68,7 @@ export const ModelName = {
   JobOfferSkill: 'JobOfferSkill',
   UserSkill: 'UserSkill',
   Certification: 'Certification',
+  UserCvFile: 'UserCvFile',
   TechnicalArea: 'TechnicalArea',
   OrientationType: 'OrientationType',
   MentorTechnicalArea: 'MentorTechnicalArea',
@@ -217,7 +218,6 @@ export const UserScalarFieldEnum = {
   personalEmail: 'personalEmail',
   headline: 'headline',
   aboutMe: 'aboutMe',
-  cvPdfUrl: 'cvPdfUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -324,6 +324,17 @@ export const CertificationScalarFieldEnum = {
 } as const
 
 export type CertificationScalarFieldEnum = (typeof CertificationScalarFieldEnum)[keyof typeof CertificationScalarFieldEnum]
+
+
+export const UserCvFileScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  cvFileName: 'cvFileName',
+  cvUploadedAt: 'cvUploadedAt',
+  cvPdfData: 'cvPdfData'
+} as const
+
+export type UserCvFileScalarFieldEnum = (typeof UserCvFileScalarFieldEnum)[keyof typeof UserCvFileScalarFieldEnum]
 
 
 export const TechnicalAreaScalarFieldEnum = {
