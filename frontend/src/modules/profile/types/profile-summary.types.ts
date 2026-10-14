@@ -5,5 +5,4 @@ export interface ProfileSummary {
   phone: string;
   personalEmail: string;
   aboutMe: string;
-  interestedOpportunities: string;
 }
