@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Prisma } from '../../../prisma/client.js';
 import { ROLE_NAMES } from '../../../common/enums/roles.enum.js';
+import { SEED_USERS } from '../constants/seed-users.constants.js';
 import { seedUsers } from './users.seed.js';
 function buildTransaction(hasRoles: boolean) {
   return {
@@ -32,7 +33,7 @@ function buildTransaction(hasRoles: boolean) {
   };
 }
 describe('seedUsers', () => {
-  it('creates both QA users and assigns their role when absent', async () => {
+  it('creates all seed users and assigns their role when absent', async () => {
     const tx = buildTransaction(false);
     const users = await seedUsers(
       tx as unknown as Prisma.TransactionClient,
@@ -41,7 +42,11 @@ describe('seedUsers', () => {
     expect(users.users.eventGraduate.id).toBe('prueba@umss.edu.bo');
     expect(users.users.emptyGraduate.id).toBe('sinpases@umss.edu.bo');
     expect(users.users.mentorA.id).toBe('mentor.a@umssy.test');
-    expect(tx.userRole.create).toHaveBeenCalledTimes(7);
+    expect(users.users.company.id).toBe('empresa@umssy.test');
+    expect(tx.userRole.create).toHaveBeenCalledTimes(SEED_USERS.length);
+    expect(tx.userRole.create).toHaveBeenCalledWith({
+      data: { userId: 'empresa@umssy.test', roleId: 'empresa' },
+    });
     expect(tx.user.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
         update: expect.objectContaining({ password: 'hashed-password' }),

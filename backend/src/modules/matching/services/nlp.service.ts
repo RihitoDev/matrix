@@ -33,6 +33,18 @@ export class NlpService {
       .replace(/\s+/g, ' ')
       .trim();
   }
+
+  generateNGrams(tokens: string[]): string[] {
+    const ngrams: string[] = [];
+
+    for (let i = 0; i < tokens.length - 1; i++) {
+      ngrams.push(`${tokens[i]}_${tokens[i + 1]}`);
+    }
+
+    for (let i = 0; i < tokens.length - 2; i++) {
+      ngrams.push(`${tokens[i]}_${tokens[i + 1]}_${tokens[i + 2]}`);
+    }
+
+    return ngrams;
+  }
 }
-
-

@@ -28,10 +28,10 @@ describe("REPORTS_NAVIGATION_ITEM", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Reportes Analíticos" }));
 
-    expect(screen.getByRole("link", { name: "Reporte de usuarios registrados" }).getAttribute("href")).toBe(
+    expect(screen.getByRole("link", { name: "Reporte de usuarios registrados aceptados" }).getAttribute("href")).toBe(
       "/backoffice/reports/registered-users",
     );
-    expect(screen.getByRole("link", { name: "Reporte de usuarios rechazados" }).getAttribute("href")).toBe(
+    expect(screen.getByRole("link", { name: "Reporte de usuarios registrados rechazados" }).getAttribute("href")).toBe(
       "/backoffice/reports/rejected-users",
     );
     expect(screen.getByRole("link", { name: "Historial de reportes generados" }).getAttribute("href")).toBe(

@@ -65,6 +65,7 @@ export const ModelName = {
   Education: 'Education',
   WorkExperience: 'WorkExperience',
   Skill: 'Skill',
+  JobOfferSkill: 'JobOfferSkill',
   UserSkill: 'UserSkill',
   Certification: 'Certification',
   TechnicalArea: 'TechnicalArea',
@@ -80,6 +81,10 @@ export const ModelName = {
   Event: 'Event',
   EventRegistration: 'EventRegistration',
   EventAttendance: 'EventAttendance',
+  JobOffer: 'JobOffer',
+  JobOfferModality: 'JobOfferModality',
+  JobOfferContractType: 'JobOfferContractType',
+  JobOfferStatus: 'JobOfferStatus',
   AdminExportHistory: 'AdminExportHistory',
   AccessRequestStatus: 'AccessRequestStatus',
   AccessRequestDocumentType: 'AccessRequestDocumentType',
@@ -278,6 +283,17 @@ export const SkillScalarFieldEnum = {
 } as const
 
 export type SkillScalarFieldEnum = (typeof SkillScalarFieldEnum)[keyof typeof SkillScalarFieldEnum]
+
+
+export const JobOfferSkillScalarFieldEnum = {
+  id: 'id',
+  jobOfferId: 'jobOfferId',
+  skillId: 'skillId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobOfferSkillScalarFieldEnum = (typeof JobOfferSkillScalarFieldEnum)[keyof typeof JobOfferSkillScalarFieldEnum]
 
 
 export const UserSkillScalarFieldEnum = {
@@ -492,7 +508,59 @@ export const EventAttendanceScalarFieldEnum = {
 export type EventAttendanceScalarFieldEnum = (typeof EventAttendanceScalarFieldEnum)[keyof typeof EventAttendanceScalarFieldEnum]
 
 
+export const JobOfferScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  companyId: 'companyId',
+  modalityId: 'modalityId',
+  contractTypeId: 'contractTypeId',
+  statusId: 'statusId',
+  category: 'category',
+  positionsAvailable: 'positionsAvailable',
+  salaryRange: 'salaryRange',
+  languages: 'languages',
+  locationUrl: 'locationUrl',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobOfferScalarFieldEnum = (typeof JobOfferScalarFieldEnum)[keyof typeof JobOfferScalarFieldEnum]
+
+
+export const JobOfferModalityScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobOfferModalityScalarFieldEnum = (typeof JobOfferModalityScalarFieldEnum)[keyof typeof JobOfferModalityScalarFieldEnum]
+
+
+export const JobOfferContractTypeScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobOfferContractTypeScalarFieldEnum = (typeof JobOfferContractTypeScalarFieldEnum)[keyof typeof JobOfferContractTypeScalarFieldEnum]
+
+
+export const JobOfferStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type JobOfferStatusScalarFieldEnum = (typeof JobOfferStatusScalarFieldEnum)[keyof typeof JobOfferStatusScalarFieldEnum]
+
+
 export const AdminExportHistoryScalarFieldEnum = {
+  id: 'id',
   userId: 'userId',
   createdAt: 'createdAt',
   reportName: 'reportName',

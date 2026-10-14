@@ -36,6 +36,9 @@ vi.mock('../../modules/technical-areas/seeds/technical-areas.seed.js', () => ({
 vi.mock('../../modules/orientation-types/seeds/orientation-types.seed.js', () => ({
   seedOrientationTypes: vi.fn(),
 }));
+vi.mock('../../modules/job-offers/seeds/job-offers.seed.js', () => ({
+  seedJobOffers: vi.fn(),
+}));
 
 const users = {
   mentorA: { id: 'mentor' },

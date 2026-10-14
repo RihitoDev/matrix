@@ -24,6 +24,10 @@ describe("MentorDirectoryPage", () => {
       fullName: "Ana Rojas",
       headline: "Desarrolladora Backend",
       technicalAreas: ["Backend"],
+      photoUrl: null,
+      education: null,
+      isAvailable: false,
+      orientationTypes: [],
     };
     vi.mocked(getMentorDirectory).mockResolvedValue([mentor]);
     queryClient = render(<MentorDirectoryPage />).client;

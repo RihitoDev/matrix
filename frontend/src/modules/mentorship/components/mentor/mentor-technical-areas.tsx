@@ -36,7 +36,7 @@ export function MentorTechnicalAreas({ areas }: MentorTechnicalAreasProps) {
             {areas.map((area) => (
               <span
                 key={area.id}
-                className="max-w-full break-words rounded-lg border border-border bg-surface-soft px-4 py-2 text-sm font-medium text-ink"
+                className="min-w-0 max-w-full [overflow-wrap:anywhere] rounded-lg border border-border bg-surface-soft px-4 py-2 text-sm font-medium text-ink"
               >
                 {area.name}
               </span>

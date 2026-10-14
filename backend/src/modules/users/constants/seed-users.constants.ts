@@ -4,16 +4,16 @@ import type { SeedUserKey } from '../types/seed-user-key.types.js';
 export const SEED_PASSWORD = 'Prueba123';
 export const BCRYPT_ROUNDS = 10;
 
-export const EPIC_1_TEST_USER: SeedUserDefinition = {
-  firstName: 'Usuario',
-  lastName: 'De Prueba',
-  email: 'prueba@umss.edu.bo',
-  role: 'titulado',
-};
-
 export const SEED_USERS: ReadonlyArray<
   SeedUserDefinition & { key: SeedUserKey }
 > = [
+  {
+    key: 'eventGraduate',
+    firstName: 'Usuario',
+    lastName: 'De Prueba',
+    email: 'prueba@umss.edu.bo',
+    role: 'titulado',
+  },
   {
     key: 'emptyGraduate',
     firstName: 'Usuario',
@@ -55,6 +55,20 @@ export const SEED_USERS: ReadonlyArray<
     lastName: 'Uno',
     email: 'admin.1@umssy.test',
     role: 'administrativo',
+  },
+  {
+    key: 'admin2',
+    firstName: 'Admin',
+    lastName: 'Dos',
+    email: 'admin.2@umssy.test',
+    role: 'administrativo',
+  },
+  {
+    key: 'company',
+    firstName: 'Carlos',
+    lastName: 'Rojas',
+    email: 'empresa@umssy.test',
+    role: 'empresa',
   },
 ];
 

@@ -13,12 +13,20 @@ const mentors = [
     fullName: "María Fernanda Rodríguez",
     headline: "Desarrolladora Backend Senior",
     technicalAreas: ["Backend", "APIs"],
+    photoUrl: null,
+    education: null,
+    isAvailable: false,
+    orientationTypes: [],
   },
   {
     id: "0fa5e6de-63a4-430e-87fb-22f5eb700ecd",
     fullName: "Carlos Andrés Vargas",
     headline: null,
     technicalAreas: [],
+    photoUrl: null,
+    education: null,
+    isAvailable: false,
+    orientationTypes: [],
   },
 ];
 

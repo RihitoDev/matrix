@@ -13,6 +13,7 @@ import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { ResponseInterceptor } from '../../../common/interceptors/index.js';
 import { ZodValidationPipe } from '../../../common/pipes/zod-validation.pipe.js';
+import { toRegisteredUsersReportType } from '../mappers/generated-report.mapper.js';
 import {
   registeredUsersFiltersSchema,
   registeredUsersQuerySchema,
@@ -68,7 +69,7 @@ export class ReportsController {
     const file = await this.reportsService.exportRegisteredUsersCsv(filters);
     await this.reportHistoryService.registerGeneratedReport(userId, {
       fileName: file.fileName,
-      reportType: 'REGISTERED_USERS',
+      reportType: toRegisteredUsersReportType(filters.userType),
     });
     return toCsvFile(file);
   }

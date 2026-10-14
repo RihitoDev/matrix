@@ -24,7 +24,7 @@ describe("MentorProfilePage", () => {
     expect((await screen.findAllByText("Ana Rojas")).length).toBeGreaterThan(0);
     expect(screen.getByText("Arquitecta de Software")).toBeInTheDocument();
     expect(screen.getByText("Sobre mí")).toBeInTheDocument();
-    expect(screen.getByText("Trayectoria profesional")).toBeInTheDocument();
+    expect(screen.getByText("Trayectoria actual")).toBeInTheDocument();
     expect(screen.getByText("Áreas técnicas")).toBeInTheDocument();
     expect(screen.getByText("Tipos de orientación")).toBeInTheDocument();
     expect(request).toHaveBeenCalledWith(

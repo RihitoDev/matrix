@@ -9,6 +9,7 @@ import { seedEvents } from '../../modules/events/seeds/events.seed.js';
 import { seedEventRegistrations } from '../../modules/event-registrations/seeds/event-registrations.seed.js';
 import { seedAccessRequests } from '../../modules/access-requests/seeds/access-requests.seed.js';
 import { seedAvailability } from '../../modules/availability/seeds/availability.seed.js';
+import { seedJobOffers } from '../../modules/job-offers/seeds/job-offers.seed.js';
 import { seedOrientationTypes } from '../../modules/orientation-types/seeds/orientation-types.seed.js';
 import { seedTechnicalAreas } from '../../modules/technical-areas/seeds/technical-areas.seed.js';
 import { SEED_USERS } from '../../modules/users/constants/seed-users.constants.js';
@@ -17,7 +18,6 @@ import {
   seedUsers,
 } from '../../modules/users/seeds/users.seed.js';
 import { PrismaClient } from '../../prisma/client.js';
-import { SEED_TRANSACTION_OPTIONS } from '../constants/seed.constants.js';
 import { buildDatabaseConnectionString } from '../prisma/build-connection-string.js';
 import type { SeedEnv } from '../types/seed-env.types.js';
 import type { SeedSummary } from '../types/seed-summary.types.js';
@@ -53,6 +53,7 @@ export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
     return await prisma.$transaction(async (tx) => {
       await seedTechnicalAreas(tx);
       await seedOrientationTypes(tx);
+      await seedJobOffers(tx);
 
       const usersResult = await seedUsers(tx, password);
       const { users } = usersResult;
@@ -75,7 +76,7 @@ export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
         plan: availabilityResult.plan,
         roles: usersResult.roles,
         statuses: availabilityResult.statuses,
-        users: SEED_USERS.length + 1,
+        users: SEED_USERS.length,
         userRoles: usersResult.userRoles,
         blocks: availabilityResult.blocks,
         appointments: availabilityResult.appointments,
@@ -83,7 +84,7 @@ export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
         warnings: availabilityResult.warnings,
         accessRequests: accessRequestsResult,
       };
-    }, SEED_TRANSACTION_OPTIONS);
+    }, { maxWait: 5_000, timeout: 30_000 });
   } finally {
     if (ownsClient) {
       await prisma.$disconnect();
