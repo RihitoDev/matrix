@@ -66,4 +66,28 @@ export class ConversationRepository {
       data: { lastMessageId, lastMessageAt },
     });
   }
+
+  async findUserConversations(userId: string) {
+    return this.prisma.conversation.findMany({
+      where: {
+        OR: [
+          { userAId: userId },
+          { userBId: userId },
+        ],
+      },
+      include: {
+        userA: { select: { id: true, firstName: true, lastName: true } },
+        userB: { select: { id: true, firstName: true, lastName: true } },
+        messages: {
+          orderBy: { sentAt: 'desc' },
+          take: 1,
+          include: { status: { select: { title: true } } },
+        },
+      },
+      orderBy: [
+        { lastMessageAt: { sort: 'desc', nulls: 'last' } },
+        { updatedAt: 'desc' },
+      ],
+    });
+  }
 }

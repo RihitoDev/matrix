@@ -44,6 +44,34 @@ describe('chat-api', () => {
       expect(dateCurrent).toBeGreaterThanOrEqual(dateNext);
     }
   });
+
+  it('debe llamar a GET /chat/conversations y retornar las conversaciones ordenadas', async () => {
+    apiClientMock.get.mockResolvedValueOnce({
+      data: [
+        {
+          id: 'conv-older',
+          contact: { id: 'user-1', fullName: 'User 1', avatarUrl: null, isOnline: false },
+          lastMessage: { id: 'm1', senderId: 'user-1', content: 'hola', isAttachment: false, attachmentType: null, createdAt: '2026-01-01T10:00:00.000Z' },
+          unreadCount: 0,
+          updatedAt: '2026-01-01T10:00:00.000Z',
+        },
+        {
+          id: 'conv-newer',
+          contact: { id: 'user-2', fullName: 'User 2', avatarUrl: null, isOnline: true },
+          lastMessage: { id: 'm2', senderId: 'user-2', content: 'mundo', isAttachment: false, attachmentType: null, createdAt: '2026-01-02T10:00:00.000Z' },
+          unreadCount: 1,
+          updatedAt: '2026-01-02T10:00:00.000Z',
+        },
+      ],
+    } as never);
+
+    const result = await getConversations();
+
+    expect(apiClientMock.get).toHaveBeenCalledWith('/chat/conversations');
+    expect(result).toHaveLength(2);
+    expect(result[0].id).toBe('conv-newer');
+    expect(result[1].id).toBe('conv-older');
+  });
 });
 
 describe('chat-api — searchUsers (HU-2, backend integration)', () => {
@@ -342,6 +370,59 @@ describe('chat-api — getPaginatedMessages', () => {
       'Cursor de mensajes no valido',
     );
   });
+
+  it('debe llamar a GET /conversations/:conversationId/messages y retornar mensajes paginados mapeados', async () => {
+    apiClientMock.get.mockResolvedValueOnce({
+      data: {
+        statusCode: 200,
+        ok: true,
+        detail: 'Operación exitosa',
+        data: {
+          data: [
+            {
+              id: 'msg-backend-1',
+              conversationId: 'conv-real-uuid',
+              senderId: 'user-sender',
+              content: 'Hola desde backend',
+              createdAt: '2026-10-14T03:00:00.000Z',
+            },
+            {
+              id: 'msg-backend-2',
+              conversationId: 'conv-real-uuid',
+              senderId: 'user-sender',
+              content: '[Archivo] Archivo adjunto',
+              createdAt: '2026-10-14T03:05:00.000Z',
+            },
+          ],
+          nextCursor: null,
+          hasMore: false,
+        },
+      },
+    } as never);
+
+    const result = await getPaginatedMessages({
+      conversationId: 'conv-real-uuid',
+      limit: 10,
+    });
+
+    expect(apiClientMock.get).toHaveBeenCalledWith(
+      '/conversations/conv-real-uuid/messages',
+      {
+        params: {
+          cursor: undefined,
+          limit: 10,
+        },
+      },
+    );
+    expect(result.data).toHaveLength(2);
+    expect(result.data[0].id).toBe('msg-backend-1');
+    expect(result.data[0].content).toBe('Hola desde backend');
+    expect(result.data[0].status).toBe('sent');
+    expect(result.data[1].isAttachment).toBe(true);
+    expect(result.data[1].attachmentType).toBe('file');
+    expect(result.hasMore).toBe(false);
+    expect(result.nextCursor).toBeNull();
+  });
 });
 
 describe('chat-api — getOrCreateConversation ', () => {
@@ -615,6 +696,40 @@ describe('chat-api — sendMessage (HU-03 Tarea 2)', () => {
     ).rejects.toThrow(
       'El identificador de conversacion es requerido',
     );
+  });
+
+  it('debe llamar a POST /chat/messages y retornar mensaje creado cuando el backend responde', async () => {
+    apiClientMock.post.mockResolvedValueOnce({
+      data: {
+        statusCode: 201,
+        ok: true,
+        detail: 'Mensaje enviado exitosamente',
+        data: {
+          id: 'msg-created-backend',
+          conversationId: 'conv-real-uuid',
+          senderId: 'user-current',
+          content: 'Mensaje en tiempo real',
+          createdAt: '2026-10-14T03:10:00.000Z',
+          timestamp: '2026-10-14T03:10:00.000Z',
+          status: 'sent',
+          isAttachment: false,
+          attachmentType: null,
+        },
+      },
+    } as never);
+
+    const response = await sendMessage({
+      conversationId: 'conv-real-uuid',
+      content: 'Mensaje en tiempo real',
+      senderId: 'user-current',
+    });
+
+    expect(apiClientMock.post).toHaveBeenCalledWith('/chat/messages', {
+      conversationId: 'conv-real-uuid',
+      content: 'Mensaje en tiempo real',
+    });
+    expect(response.data.id).toBe('msg-created-backend');
+    expect(response.data.content).toBe('Mensaje en tiempo real');
   });
 });
 
