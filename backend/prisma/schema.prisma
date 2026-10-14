@@ -120,10 +120,6 @@ model User {
   personalEmail           String?  @map("personal_email")
   headline                String?
   aboutMe                 String?  @map("about_me")
-<<<<<<< HEAD
-  cvPdfUrl                Bytes?   @map("cv_pdf_url")
-=======
->>>>>>> origin/develop
   createdAt               DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt               DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
