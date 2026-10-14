@@ -185,9 +185,15 @@ export async function searchUsers(rawQuery: string): Promise<User[]> {
 export async function getMessages(
   conversationId: string,
 ): Promise<Message[]> {
-  await new Promise((resolve) => setTimeout(resolve, 200));
-
-  return getMessagesByConversation(conversationId);
+  try {
+    const res = await getPaginatedMessages({
+      conversationId,
+      limit: 100,
+    });
+    return res.data;
+  } catch {
+    return getMessagesByConversation(conversationId);
+  }
 }
 
 
@@ -390,89 +396,63 @@ export async function sendMessage(
     });
 
     const body = response?.data;
-    if (body) {
-      const msg =
-        typeof body === 'object' &&
-        body !== null &&
-        'data' in body &&
-        body.data !== null &&
-        typeof body.data === 'object' &&
-        'id' in body.data
-          ? (body.data as Message)
-          : (body as Message);
+    const msg =
+      typeof body === 'object' &&
+      body !== null &&
+      'data' in body &&
+      body.data !== null &&
+      typeof body.data === 'object' &&
+      'id' in body.data
+        ? (body.data as Message)
+        : (body as Message);
 
-      if (msg && msg.id) {
-        const createdMessage: Message = {
-          id: msg.id,
-          conversationId: msg.conversationId,
-          senderId:
-            msg.senderId || payload.senderId || getCurrentSessionUserId(),
-          content: msg.content,
-          timestamp:
-            msg.timestamp || msg.createdAt || new Date().toISOString(),
-          status: 'sent',
-          createdAt:
-            msg.createdAt || msg.timestamp || new Date().toISOString(),
-          isAttachment: Boolean(msg.isAttachment),
-          attachmentType: msg.attachmentType || null,
-        };
-
-        saveStoredMessage(createdMessage);
-        markStoredConversationAsRead(payload.conversationId);
-
-        return {
-          statusCode: 201,
-          ok: true,
-          detail: 'Mensaje enviado exitosamente',
-          data: createdMessage,
-        };
-      }
+    if (!msg || !msg.id) {
+      throw new Error(
+        'Error del servidor: No se pudo procesar el envio del mensaje',
+      );
     }
-  } catch {
+
+    const createdMessage: Message = {
+      id: msg.id,
+      conversationId: msg.conversationId || payload.conversationId,
+      senderId:
+        msg.senderId || payload.senderId || getCurrentSessionUserId(),
+      content: msg.content || trimmedContent,
+      timestamp:
+        msg.timestamp || msg.createdAt || new Date().toISOString(),
+      status: (msg.status as MessageStatus) || 'sent',
+      createdAt:
+        msg.createdAt || msg.timestamp || new Date().toISOString(),
+      isAttachment: Boolean(msg.isAttachment),
+      attachmentType: msg.attachmentType || null,
+    };
+
+    saveStoredMessage(createdMessage);
+    markStoredConversationAsRead(payload.conversationId);
+
+    return {
+      statusCode: 201,
+      ok: true,
+      detail: 'Mensaje enviado exitosamente',
+      data: createdMessage,
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(
+      'Error del servidor: No se pudo procesar el envio del mensaje',
+    );
   }
-
-  const minLatency = 300;
-  const maxLatency = 600;
-
-  const latency =
-    options?.latencyMs ??
-    Math.floor(
-      Math.random() * (maxLatency - minLatency + 1),
-    ) +
-      minLatency;
-
-  await new Promise((resolve) =>
-    setTimeout(resolve, latency),
-  );
-
-  const nowIso = new Date().toISOString();
-
-  const createdMessage: Message = {
-    id: `msg-${Date.now()}-${Math.random()
-      .toString(36)
-      .substring(2, 9)}`,
-    conversationId: payload.conversationId,
-    senderId: payload.senderId || getCurrentSessionUserId(),
-    content: payload.content,
-    timestamp: nowIso,
-    status: 'sent',
-    createdAt: nowIso,
-    isAttachment: false,
-  };
-
-  saveStoredMessage(createdMessage);
-  markStoredConversationAsRead(payload.conversationId);
-
-  return {
-    statusCode: 201,
-    ok: true,
-    detail: 'Mensaje enviado exitosamente',
-    data: createdMessage,
-  };
 }
 
 export async function markConversationAsRead(
   conversationId: string,
 ): Promise<void> {
   markStoredConversationAsRead(conversationId);
+  try {
+    await apiClient.patch(`/chat/messages/${conversationId}/read`);
+  } catch {
+    // Graceful fallback
+  }
 }
