@@ -1,3 +1,4 @@
+
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -33,11 +34,11 @@ describe('Estados del chat', () => {
     renderChat();
     expect(screen.getByRole('status', { name: 'Cargando conversaciones' })).toBeDefined();
     await act(async () => { rejectLoad(new Error('network')); });
-    expect(await screen.findByRole('alert')).toHaveTextContent('No pudimos cargar tus conversaciones');
+    expect(await screen.findByRole('alertdialog')).toHaveTextContent('No pudimos cargar tus conversaciones');
     expect(screen.queryByText('Aun no tienes ninguna conversacion registrada.')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
     expect(await screen.findByText('Ana Pérez')).toBeDefined();
-    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.queryByRole('alertdialog')).toBeNull();
   });
 
   it('distingue carga y error del historial vacío y recupera la conversación al reintentar', async () => {

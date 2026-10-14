@@ -1,4 +1,4 @@
-
+﻿
 'use client';
 
 import { useState } from 'react';
@@ -90,7 +90,7 @@ export function ChatView() {
   const handleSendMessage = async (content: string): Promise<void> => {
     if (!selectedId || isSending) {
       throw new Error(
-        'No hay una conversación seleccionada o ya se está enviando un mensaje.',
+        'No hay una conversaciÃ³n seleccionada o ya se estÃ¡ enviando un mensaje.',
       );
     }
 
@@ -141,8 +141,7 @@ export function ChatView() {
           conversations={conversations}
           selectedId={selectedId}
           isLoading={isLoading}
-          isError={false}
-          onRetry={retryConversations}
+          isError={isError}
           hasMore={hasMore}
           activeFilter={activeFilter}
           searchQuery={searchQuery}
@@ -203,3 +202,4 @@ export function ChatView() {
     </div>
   );
 }
+
