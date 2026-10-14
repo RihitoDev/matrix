@@ -1,7 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { describe, expect, it, beforeEach } from 'vitest';
 import { NlpService } from '../services/nlp.service.js';
 
-// Límite de tiempo de los criterios AC-01.1 y AC-01.6 (2 segundos)
 const MAX_PROCESSING_MS = 2000;
 
 const SAMPLE_TEXT =
@@ -12,12 +11,8 @@ const SAMPLE_TEXT =
 describe('NlpService', () => {
   let nlpService: NlpService;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [NlpService],
-    }).compile();
-
-    nlpService = module.get<NlpService>(NlpService);
+  beforeEach(() => {
+    nlpService = new NlpService();
   });
 
   describe('normalizeText', () => {
@@ -59,7 +54,6 @@ describe('NlpService', () => {
     const longText = Array(200).fill(SAMPLE_TEXT).join(' ');
 
     it('procesa un texto extenso en menos de 2 segundos (AC-01.1, AC-01.6)', () => {
-      // Ejecución de calentamiento para no medir la compilación inicial
       nlpService.normalizeText(longText);
 
       const start = performance.now();
