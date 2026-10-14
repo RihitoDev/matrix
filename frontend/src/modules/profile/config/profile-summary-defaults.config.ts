@@ -7,5 +7,4 @@ export const EMPTY_PROFILE_SUMMARY: ProfileSummary = {
   phone: "",
   personalEmail: "",
   aboutMe: "",
-  interestedOpportunities: "",
 };
