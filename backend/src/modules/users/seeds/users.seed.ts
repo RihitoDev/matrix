@@ -4,7 +4,6 @@ import type { RoleName } from '../../../common/enums/roles.enum.js';
 import type { Prisma, User } from '../../../prisma/client.js';
 import {
   BCRYPT_ROUNDS,
-  EPIC_1_TEST_USER,
   LEGACY_ROLES,
   SEED_PASSWORD,
   SEED_USERS,
@@ -41,9 +40,7 @@ async function removeLegacyRoles(
   }
 
   const ids = legacy.map((role) => role.id);
-  const seedEmails = [EPIC_1_TEST_USER, ...SEED_USERS].map(
-    (user) => user.email,
-  );
+  const seedEmails = SEED_USERS.map((user) => user.email);
   await tx.userRole.deleteMany({
     where: { roleId: { in: ids }, user: { email: { in: seedEmails } } },
   });
@@ -106,17 +103,7 @@ export async function seedUsers(
   };
 
   let userRoles = 0;
-  const testUser = await ensureUserWithRole(
-    tx,
-    EPIC_1_TEST_USER,
-    password,
-    roleIdOf(EPIC_1_TEST_USER.role),
-  );
-  if (testUser.roleAssigned) {
-    userRoles += 1;
-  }
-
-  const users: Partial<SeedUsers> = { eventGraduate: testUser.user };
+  const users: Partial<SeedUsers> = {};
   for (const definition of SEED_USERS) {
     const result = await ensureUserWithRole(
       tx,

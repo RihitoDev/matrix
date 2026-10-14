@@ -10,13 +10,3 @@ export const CV_VALIDATION_RULES: FileValidationRules = {
 };
 
 export const CV_MIME_TYPE = 'application/pdf';
-
-export const CV_FILE_NAME_PREFIX = 'CV';
-
-export const CV_FILE_EXTENSION = '.pdf';
-
-export const DIACRITIC_MARKS_PATTERN = /[̀-ͯ]/g;
-
-export const NON_ALPHANUMERIC_PATTERN = /[^A-Za-z0-9]+/g;
-
-export const EDGE_HYPHENS_PATTERN = /^-+|-+$/g;

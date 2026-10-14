@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
 import { BLOCK_STEP_MINUTES } from '../constants/create-block.constants.js';
-import { EARLY_MONDAY_WARNING, TRIO_NEXT_WEEK_WARNING } from '../constants/seed-availability.constants.js';
 import { AppointmentStatusTitle } from '../enums/appointment-status-title.enum.js';
 import { buildBlockPlan, getWeeks, pastBlockRange, seedAvailability } from '../seeds/availability.seed.js';
 
@@ -64,12 +63,12 @@ describe('buildBlockPlan', () => {
   it('avisa si es lunes muy temprano y no hay bloque pasado', () => {
     const plan = buildBlockPlan(getWeeks(EARLY_MONDAY), EARLY_MONDAY);
     expect(plan.past).toBeNull();
-    expect(plan.warnings).toContain(EARLY_MONDAY_WARNING);
+    expect(plan.warnings).toContain('Ejecución muy temprana en lunes: no se pudo crear el bloque pasado dentro de la ventana 07:00-22:00 de la semana actual.');
   });
 
   it('avisa si el trío pasa a la semana siguiente', () => {
     const plan = buildBlockPlan(getWeeks(SUNDAY_NIGHT), SUNDAY_NIGHT);
-    expect(plan.warnings).toContain(TRIO_NEXT_WEEK_WARNING);
+    expect(plan.warnings).toContain('La semana actual ya no tiene horario disponible: los bloques de prueba (libre, pendiente y confirmada) se crearon en la semana siguiente.');
     expect(plan.trioWeek.start.getTime()).toBeGreaterThan(getWeeks(SUNDAY_NIGHT).current.start.getTime());
   });
 
