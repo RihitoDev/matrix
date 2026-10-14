@@ -13,10 +13,10 @@ import { ChatRoom } from '../components/chat-room';
 
 import { Conversation } from '../types/conversation.types';
 import { User } from '../types/user.types';
-import { sendMessage } from '../services/chat-api';
-import { CURRENT_USER_ID } from '../mocks/mock-users';
+import { sendMessage, getCurrentSessionUserId } from '../services/chat-api';
 
 export function ChatView() {
+  const currentUserId = getCurrentSessionUserId();
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
@@ -90,10 +90,10 @@ export function ChatView() {
       await sendMessage({
         conversationId,
         content,
-        senderId: CURRENT_USER_ID,
+        senderId: currentUserId,
       });
 
-      updateConversationLastMessage(conversationId, content, CURRENT_USER_ID);
+      updateConversationLastMessage(conversationId, content, currentUserId);
 
       await queryClient.invalidateQueries({
         queryKey: messagesQueryKey(conversationId),
@@ -139,7 +139,7 @@ export function ChatView() {
             key={selectedConversation.id}
             conversation={selectedConversation}
             messages={messages}
-            currentUserId={CURRENT_USER_ID}
+            currentUserId={currentUserId}
             onBack={handleBackToList}
             onSendMessage={handleSendMessage}
             isLoadingMessages={isLoadingMessages}

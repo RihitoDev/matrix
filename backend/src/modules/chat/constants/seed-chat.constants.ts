@@ -14,44 +14,66 @@ export const SEED_MESSAGE_STATUSES: SeedMessageStatusDefinition[] = [
 
 export const SEED_USER_PRESENCES: SeedUserPresenceDefinition[] = [
   { email: 'mentor.a@umssy.test',     isOnline: true },
-  { email: 'titulado.1@umssy.test',   isOnline: false, minutesAgo: 1440 },
-  { email: 'estudiante.1@umssy.test', isOnline: false },
+  { email: 'empresa@umssy.test',      isOnline: true },
+  { email: 'titulado.1@umssy.test',   isOnline: true },
+  { email: 'prueba@umss.edu.bo',      isOnline: false, minutesAgo: 180 },
+  { email: 'mentor.b@umssy.test',     isOnline: false, minutesAgo: 2880 },
+  { email: 'estudiante.1@umssy.test', isOnline: false, minutesAgo: 20160 },
 ];
 
 export const SEED_CONVERSATIONS: SeedConversationDefinition[] = [
   {
-    key: 'conv-with-unread',
-    userAEmail: 'prueba@umss.edu.bo',
+    key: 'conv-titulado-mentor-a',
+    userAEmail: 'titulado.1@umssy.test',
     userBEmail: 'mentor.a@umssy.test',
-    lastReadAtByA: { minutesAgo: 240 },
+    lastReadAtByA: { minutesAgo: 45 },
     lastReadAtByB: 'now',
     messages: [
-      { fromA: true,  content: 'Hola, ¿cómo va todo?',            minutesAgo: 300, status: 'READ' },
-      { fromA: false, content: 'Todo bien, gracias. ¿Y tú?',       minutesAgo: 290, status: 'READ' },
-      { fromA: false, content: '¿Revisaste el CV que te envié?',   minutesAgo: 120, status: 'SENT' },
-      { fromA: false, content: 'Avísame cuando puedas.',           minutesAgo: 30,  status: 'SENT' },
+      { fromA: true,  content: 'Hola Mentor Alfa, te envié la actualización de mi postulación.', minutesAgo: 60, status: 'READ' },
+      { fromA: false, content: 'Excelente, acabo de revisarla y se ve muy sólida.', minutesAgo: 30, status: 'SENT' },
+      { fromA: false, content: '¿Pudiste revisar los requerimientos de la vacante de Frontend?', minutesAgo: 15, status: 'SENT' },
     ],
   },
   {
-    key: 'conv-no-unread',
-    userAEmail: 'prueba@umss.edu.bo',
-    userBEmail: 'titulado.1@umssy.test',
+    key: 'conv-titulado-prueba',
+    userAEmail: 'titulado.1@umssy.test',
+    userBEmail: 'prueba@umss.edu.bo',
     lastReadAtByA: 'now',
     lastReadAtByB: 'now',
     messages: [
-      { fromA: false, content: 'Perfecto, coordinamos la llamada para mañana.', minutesAgo: 1440, status: 'READ' },
-      { fromA: true,  content: 'De acuerdo, nos vemos a las 9.',                minutesAgo: 1430, status: 'READ' },
+      { fromA: false, content: 'Perfecto, coordinamos la llamada para mañana a primera hora.', minutesAgo: 240, status: 'READ' },
+      { fromA: true,  content: 'De acuerdo, nos vemos a las 9.', minutesAgo: 230, status: 'READ' },
     ],
   },
   {
-    key: 'conv-recent-incoming',
-    userAEmail: 'prueba@umss.edu.bo',
-    userBEmail: 'estudiante.1@umssy.test',
-    lastReadAtByA: { minutesAgo: 90 },
+    key: 'conv-titulado-empresa',
+    userAEmail: 'titulado.1@umssy.test',
+    userBEmail: 'empresa@umssy.test',
+    lastReadAtByA: { minutesAgo: 2000 },
     lastReadAtByB: 'now',
     messages: [
-      { fromA: true,  content: '¿Tienes el documento de soporte?', minutesAgo: 200, status: 'READ' },
-      { fromA: false, content: 'Te envío el documento en PDF.',     minutesAgo: 60,  status: 'SENT' },
+      { fromA: true,  content: 'Hola Carlos, quedo atento a la documentación de la empresa.', minutesAgo: 1600, status: 'READ' },
+      { fromA: false, content: '[Archivo] Te envié el documento de soporte en formato PDF.', minutesAgo: 1440, status: 'SENT' },
+    ],
+  },
+  {
+    key: 'conv-titulado-mentor-b',
+    userAEmail: 'titulado.1@umssy.test',
+    userBEmail: 'mentor.b@umssy.test',
+    lastReadAtByA: 'now',
+    lastReadAtByB: 'now',
+    messages: [
+      { fromA: false, content: 'Tu sesión de orientación técnica fue agendada con éxito para el próximo ciclo.', minutesAgo: 4320, status: 'READ' },
+    ],
+  },
+  {
+    key: 'conv-titulado-estudiante',
+    userAEmail: 'titulado.1@umssy.test',
+    userBEmail: 'estudiante.1@umssy.test',
+    lastReadAtByA: 'now',
+    lastReadAtByB: 'now',
+    messages: [
+      { fromA: true,  content: 'Estimado estudiante, muchas gracias por la información compartida en el webinar dictado el mes pasado.', minutesAgo: 20160, status: 'READ' },
     ],
   },
 ];

@@ -99,11 +99,11 @@ async function seedConversations(
           createMany: {
             data: [
               {
-                userId: userAId,
+                userId: userA.id,
                 lastReadAt: resolveLastReadAt(definition.lastReadAtByA, now),
               },
               {
-                userId: userBId,
+                userId: userB.id,
                 lastReadAt: resolveLastReadAt(definition.lastReadAtByB, now),
               },
             ],
@@ -118,7 +118,7 @@ async function seedConversations(
     let lastMessageAt: Date | null = null;
 
     for (const message of definition.messages) {
-      const senderId = message.fromA ? userAId : userBId;
+      const senderId = message.fromA ? userA.id : userB.id;
       const sentAt = new Date(now - message.minutesAgo * MS_PER_MINUTE);
       const statusId = statusIdByTitle.get(message.status);
       if (!statusId) {

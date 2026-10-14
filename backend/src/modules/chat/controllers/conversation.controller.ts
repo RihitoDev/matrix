@@ -1,10 +1,10 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   UseGuards,
   UseInterceptors,
-  UsePipes,
 } from '@nestjs/common';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
@@ -24,10 +24,17 @@ import type { ConversationResponse } from '../responses/conversation.response.js
 export class ConversationController {
   constructor(private readonly conversationService: ConversationService) {}
 
+  @Get()
+  findAll(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<ConversationResponse[]> {
+    return this.conversationService.findAllForUser(user.id);
+  }
+
   @Post()
-  @UsePipes(new ZodValidationPipe(createConversationSchema))
   createOrGet(
-    @Body() body: CreateConversationDto,
+    @Body(new ZodValidationPipe(createConversationSchema))
+    body: CreateConversationDto,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<ConversationResponse> {
     return this.conversationService.getOrCreate(user.id, body.contactId);

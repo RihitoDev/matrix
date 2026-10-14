@@ -75,11 +75,18 @@ export function useConversations() {
         .replace(/[\u0300-\u036f]/g, '');
 
       list = list.filter((item) => {
-        const normalizedName = item.contact.fullName
+        const normalizedName = (item.contact?.fullName || '')
           .toLowerCase()
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '');
-        return normalizedName.includes(normalizedQuery);
+        const normalizedContent = (item.lastMessage?.content || '')
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
+        return (
+          normalizedName.includes(normalizedQuery) ||
+          normalizedContent.includes(normalizedQuery)
+        );
       });
     }
 

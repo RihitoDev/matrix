@@ -6,7 +6,6 @@ import {
   Query,
   UseGuards,
   UseInterceptors,
-  UsePipes,
 } from '@nestjs/common';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
@@ -30,9 +29,8 @@ export class MessageController {
   constructor(private readonly messageService: MessageService) {}
 
   @Post()
-  @UsePipes(new ZodValidationPipe(sendMessageSchema))
   send(
-    @Body() body: SendMessageDto,
+    @Body(new ZodValidationPipe(sendMessageSchema)) body: SendMessageDto,
     @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.messageService.send({
@@ -43,9 +41,9 @@ export class MessageController {
   }
 
   @Get()
-  @UsePipes(new ZodValidationPipe(getMessagesQuerySchema))
   getPage(
-    @Query() query: GetMessagesQuery,
+    @Query(new ZodValidationPipe(getMessagesQuerySchema))
+    query: GetMessagesQuery,
     @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.messageService.getPage({

@@ -60,8 +60,8 @@ export class UserLookupRepository {
       LEFT JOIN roles r ON r.id = ur.role_id
       WHERE u.id <> ${excludeUserId}::uuid
         AND u.is_active = true
-        AND unaccent(lower(u.first_name || ' ' || u.last_name))
-            LIKE unaccent(lower(${pattern})) ESCAPE '\\'
+        AND lower(u.first_name || ' ' || u.last_name)
+            LIKE lower(${pattern}) ESCAPE '\\'
       ORDER BY u.first_name ASC, u.last_name ASC
       LIMIT ${limit};
     `;

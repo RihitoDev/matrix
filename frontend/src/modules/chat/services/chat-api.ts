@@ -1,6 +1,8 @@
 import {
+  AttachmentType,
   Conversation,
   Message,
+  MessageStatus,
   SendMessagePayload,
   SendMessageOptions,
   SendMessageResponse,
@@ -18,9 +20,35 @@ import {
   markStoredConversationAsRead,
 } from './message-storage';
 import { apiClient } from '@/shared/services/api-client';
+import { getAccessToken } from '@/shared/services/storage/access-token-storage';
 import type { UserRole } from '../types/user.types';
 const MIN_SEARCH_CHARS = 2;
 const DEFAULT_MESSAGE_PAGE_SIZE = 10;
+
+export function getCurrentSessionUserId(): string {
+  const token = getAccessToken();
+  if (!token) return CURRENT_USER_ID;
+
+  try {
+    const parts = token.split('.');
+    if (parts.length >= 2) {
+      const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const json = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join(''),
+      );
+      const parsed = JSON.parse(json);
+      if (parsed && typeof parsed.sub === 'string' && parsed.sub.length > 0) {
+        return parsed.sub;
+      }
+    }
+  } catch {
+  }
+
+  return CURRENT_USER_ID;
+}
 
 export interface GetPaginatedMessagesParams {
   conversationId: string;
@@ -34,6 +62,19 @@ export interface PaginatedMessagesResponse {
   hasMore: boolean;
 }
 
+interface RawBackendMessageItem {
+  id?: string;
+  conversationId?: string;
+  senderId?: string;
+  content?: string;
+  timestamp?: string;
+  createdAt?: string;
+  sentAt?: string;
+  status?: string;
+  isAttachment?: boolean;
+  attachmentType?: AttachmentType | null;
+}
+
 interface ChatUserResponse {
   id: string;
   fullName: string;
@@ -43,9 +84,24 @@ interface ChatUserResponse {
   isOnline: boolean;
 }
 export async function getConversations(): Promise<Conversation[]> {
-  await new Promise((resolve) => setTimeout(resolve, 400));
-
   try {
+    const response = await apiClient.get<Conversation[] | { data: Conversation[] }>(
+      '/chat/conversations',
+    );
+
+    const body = response.data;
+    const items = Array.isArray(body)
+      ? body
+      : Array.isArray((body as { data?: Conversation[] })?.data)
+        ? (body as { data: Conversation[] }).data
+        : [];
+
+    return items.sort((a, b) => {
+      const dateA = new Date(a.lastMessage?.createdAt || a.updatedAt).getTime();
+      const dateB = new Date(b.lastMessage?.createdAt || b.updatedAt).getTime();
+      return dateB - dateA;
+    });
+  } catch {
     const readState = getStoredConversationReadState();
     const storedMessages = getStoredMessages();
 
@@ -86,8 +142,6 @@ export async function getConversations(): Promise<Conversation[]> {
       const dateB = new Date(b.lastMessage?.createdAt || b.updatedAt).getTime();
       return dateB - dateA;
     });
-  } catch {
-    return [...MOCK_CONVERSATIONS];
   }
 }
 
@@ -106,12 +160,18 @@ export async function searchUsers(rawQuery: string): Promise<User[]> {
     return [];
   }
 
-  const { data } = await apiClient.get<ChatUserResponse[]>(
-    '/chat/users/search',
-    { params: { q: query } },
-  );
+  const response = await apiClient.get<
+    ChatUserResponse[] | StandardApiResponse<ChatUserResponse[]>
+  >('/chat/users/search', { params: { q: query } });
 
-  return data.map((u) => ({
+  const body = response.data;
+  const items: ChatUserResponse[] = Array.isArray(body)
+    ? body
+    : Array.isArray((body as { data?: ChatUserResponse[] })?.data)
+      ? (body as { data: ChatUserResponse[] }).data
+      : [];
+
+  return items.map((u) => ({
     id: u.id,
     fullName: u.fullName,
     avatarUrl: u.avatarUrl,
@@ -135,8 +195,6 @@ export async function getPaginatedMessages({
   cursor = null,
   limit = DEFAULT_MESSAGE_PAGE_SIZE,
 }: GetPaginatedMessagesParams): Promise<PaginatedMessagesResponse> {
-  await new Promise((resolve) => setTimeout(resolve, 200));
-
   if (!conversationId) {
     throw new Error(
       'El identificador de conversacion es requerido',
@@ -147,6 +205,89 @@ export async function getPaginatedMessages({
     throw new Error(
       'El limite debe ser un numero entero mayor a 0',
     );
+  }
+
+  try {
+    const response = await apiClient.get<
+      | StandardApiResponse<PaginatedMessagesResponse>
+      | PaginatedMessagesResponse
+    >(`/conversations/${conversationId}/messages`, {
+      params: {
+        cursor: cursor ?? undefined,
+        limit,
+      },
+    });
+
+    const body = response?.data;
+    if (body) {
+      const payload =
+        typeof body === 'object' &&
+        body !== null &&
+        'data' in body &&
+        body.data !== null &&
+        typeof body.data === 'object' &&
+        'data' in body.data &&
+        Array.isArray((body.data as { data?: unknown[] }).data)
+          ? (body.data as PaginatedMessagesResponse)
+          : (body as PaginatedMessagesResponse);
+
+      const rawMessages = (
+        Array.isArray(payload.data) ? payload.data : []
+      ) as RawBackendMessageItem[];
+      const stored = getMessagesByConversation(conversationId);
+      const localOnly = stored.filter(
+        (localMsg) =>
+          !rawMessages.some(
+            (rm: RawBackendMessageItem) =>
+              rm.id === localMsg.id ||
+              (rm.content === localMsg.content &&
+                Math.abs(
+                  new Date(rm.createdAt || rm.timestamp || '').getTime() -
+                    new Date(
+                      localMsg.createdAt || localMsg.timestamp || '',
+                    ).getTime(),
+                ) < 10000),
+          ),
+      );
+      const combined = [...rawMessages, ...localOnly].sort(
+        (a, b) =>
+          new Date(a.timestamp || a.createdAt || a.sentAt || '').getTime() -
+          new Date(b.timestamp || b.createdAt || b.sentAt || '').getTime(),
+      );
+
+      if (
+        combined.length > 0 ||
+        payload.nextCursor !== undefined ||
+        payload.hasMore !== undefined
+      ) {
+        const mappedMessages: Message[] = combined.map(
+          (m: RawBackendMessageItem) => ({
+            id: m.id || '',
+            conversationId: m.conversationId || conversationId,
+            senderId: m.senderId || '',
+            content: m.content || '',
+            timestamp:
+              m.timestamp || m.createdAt || m.sentAt || new Date().toISOString(),
+            createdAt:
+              m.createdAt || m.sentAt || m.timestamp || new Date().toISOString(),
+            status: (m.status as MessageStatus) || 'sent',
+            isAttachment: Boolean(
+              m.isAttachment ?? m.content?.startsWith('[Archivo]'),
+            ),
+            attachmentType:
+              m.attachmentType ??
+              (m.content?.startsWith('[Archivo]') ? 'file' : null),
+          }),
+        );
+
+        return {
+          data: mappedMessages,
+          nextCursor: payload.nextCursor ?? null,
+          hasMore: Boolean(payload.hasMore),
+        };
+      }
+    }
+  } catch {
   }
 
   const messages = getMessagesByConversation(conversationId);
@@ -251,6 +392,57 @@ export async function sendMessage(
     );
   }
 
+  try {
+    const response = await apiClient.post<
+      | StandardApiResponse<Message>
+      | Message
+    >('/chat/messages', {
+      conversationId: payload.conversationId,
+      content: trimmedContent,
+    });
+
+    const body = response?.data;
+    if (body) {
+      const msg =
+        typeof body === 'object' &&
+        body !== null &&
+        'data' in body &&
+        body.data !== null &&
+        typeof body.data === 'object' &&
+        'id' in body.data
+          ? (body.data as Message)
+          : (body as Message);
+
+      if (msg && msg.id) {
+        const createdMessage: Message = {
+          id: msg.id,
+          conversationId: msg.conversationId,
+          senderId:
+            msg.senderId || payload.senderId || getCurrentSessionUserId(),
+          content: msg.content,
+          timestamp:
+            msg.timestamp || msg.createdAt || new Date().toISOString(),
+          status: 'sent',
+          createdAt:
+            msg.createdAt || msg.timestamp || new Date().toISOString(),
+          isAttachment: Boolean(msg.isAttachment),
+          attachmentType: msg.attachmentType || null,
+        };
+
+        saveStoredMessage(createdMessage);
+        markStoredConversationAsRead(payload.conversationId);
+
+        return {
+          statusCode: 201,
+          ok: true,
+          detail: 'Mensaje enviado exitosamente',
+          data: createdMessage,
+        };
+      }
+    }
+  } catch {
+  }
+
   const minLatency = 300;
   const maxLatency = 600;
 
@@ -272,7 +464,7 @@ export async function sendMessage(
       .toString(36)
       .substring(2, 9)}`,
     conversationId: payload.conversationId,
-    senderId: payload.senderId || CURRENT_USER_ID,
+    senderId: payload.senderId || getCurrentSessionUserId(),
     content: payload.content,
     timestamp: nowIso,
     status: 'sent',

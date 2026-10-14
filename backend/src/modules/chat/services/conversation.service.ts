@@ -67,6 +67,17 @@ export class ConversationService {
     return participant !== null;
   }
 
+  async findAllForUser(
+    currentUserId: string,
+  ): Promise<ConversationResponse[]> {
+    const list =
+      await this.conversationRepository.findUserConversations(currentUserId);
+
+    return Promise.all(
+      list.map((conversation) => this.toResponse(conversation, currentUserId)),
+    );
+  }
+
   private async toResponse(
     conversation: {
       id: string;
@@ -108,6 +119,13 @@ export class ConversationService {
       : 0;
 
     const lastMessage = conversation.messages[0];
+    const isAttachment = Boolean(
+      lastMessage?.content.startsWith('[Archivo] '),
+    );
+    const content = isAttachment
+      ? lastMessage!.content.slice(10)
+      : (lastMessage?.content ?? '');
+    const attachmentType = isAttachment ? ('file' as const) : null;
 
     return {
       id: conversation.id,
@@ -121,9 +139,9 @@ export class ConversationService {
         ? {
             id: lastMessage.id,
             senderId: lastMessage.senderId,
-            content: lastMessage.content,
-            isAttachment: false,
-            attachmentType: null,
+            content,
+            isAttachment,
+            attachmentType,
             createdAt: lastMessage.sentAt.toISOString(),
           }
         : null,

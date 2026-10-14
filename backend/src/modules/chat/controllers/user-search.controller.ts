@@ -4,7 +4,6 @@ import {
   Query,
   UseGuards,
   UseInterceptors,
-  UsePipes,
 } from '@nestjs/common';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
@@ -25,9 +24,8 @@ export class UserSearchController {
   constructor(private readonly userSearchService: UserSearchService) {}
 
   @Get('search')
-  @UsePipes(new ZodValidationPipe(searchUsersSchema))
   search(
-    @Query() query: SearchUsersDto,
+    @Query(new ZodValidationPipe(searchUsersSchema)) query: SearchUsersDto,
     @CurrentUser() user: AuthenticatedUser,
   ): Promise<ChatUserResponse[]> {
     return this.userSearchService.search(query.q, user.id);
