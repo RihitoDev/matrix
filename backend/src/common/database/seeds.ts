@@ -18,7 +18,6 @@ import {
   seedUsers,
 } from '../../modules/users/seeds/users.seed.js';
 import { PrismaClient } from '../../prisma/client.js';
-import { SEED_TRANSACTION_OPTIONS } from '../constants/seed.constants.js';
 import { buildDatabaseConnectionString } from '../prisma/build-connection-string.js';
 import type { SeedEnv } from '../types/seed-env.types.js';
 import type { SeedSummary } from '../types/seed-summary.types.js';
@@ -77,7 +76,7 @@ export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
         plan: availabilityResult.plan,
         roles: usersResult.roles,
         statuses: availabilityResult.statuses,
-        users: SEED_USERS.length + 1,
+        users: SEED_USERS.length,
         userRoles: usersResult.userRoles,
         blocks: availabilityResult.blocks,
         appointments: availabilityResult.appointments,
@@ -85,7 +84,7 @@ export async function runSeed(client?: PrismaClient): Promise<SeedSummary> {
         warnings: availabilityResult.warnings,
         accessRequests: accessRequestsResult,
       };
-    }, SEED_TRANSACTION_OPTIONS);
+    }, { maxWait: 5_000, timeout: 30_000 });
   } finally {
     if (ownsClient) {
       await prisma.$disconnect();

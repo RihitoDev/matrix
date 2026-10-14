@@ -4,11 +4,6 @@ export const JOB_OFFER_LANGUAGES_MAX_LENGTH = 100;
 export const JOB_OFFER_MAX_POSITIONS = 500;
 export const JOB_OFFER_MAX_SKILLS = 10;
 
-export const JOB_OFFER_TITLE_REGEX = /^[a-zA-Z0-9\sÁÉÍÓÚÜÑáéíóúüñ]+$/;
-
-export const GOOGLE_MAPS_LINK_REGEX =
-  /^https:\/\/(maps\.google\.com\/|www\.google\.com\/maps|goo\.gl\/maps\/|maps\.app\.goo\.gl\/)/;
-
 export const JOB_OFFER_VALIDATION_MESSAGES = {
   REQUIRED_FIELD: 'Este campo es obligatorio',
   TITLE_TOO_LONG: `El titulo del puesto no debe exceder los ${JOB_OFFER_TITLE_MAX_LENGTH} caracteres`,

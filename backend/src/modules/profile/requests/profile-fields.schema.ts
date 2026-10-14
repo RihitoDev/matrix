@@ -1,9 +1,5 @@
 import { z } from 'zod';
-import {
-  PHONE_MAX_DIGITS,
-  PHONE_MIN_DIGITS,
-  PHONE_PATTERN,
-} from '../constants/profile.constants.js';
+import { PHONE_MAX_DIGITS, PHONE_MIN_DIGITS } from '../constants/profile.constants.js';
 
 const countDigits = (value: string): number => value.replace(/\D/g, '').length;
 
@@ -14,7 +10,7 @@ export const cityIdSchema = z.uuid();
 export const phoneSchema = z
   .string()
   .trim()
-  .regex(PHONE_PATTERN, 'Phone can only contain digits, spaces, hyphens and a leading +')
+  .regex(/^\+?[\d\s-]+$/, 'Phone can only contain digits, spaces, hyphens and a leading +')
   .refine(
     (value) => {
       const digits = countDigits(value);
