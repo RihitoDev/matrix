@@ -5,13 +5,8 @@ import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import { RADAR_AREA_SCORES } from "../data/radar-profile.data";
 import { RadarProfileView } from "./radar-profile-view";
 
-vi.mock("next/navigation", () => ({
-  usePathname: () => "/perfil/radar",
-}));
-
 vi.mock("recharts", async (importOriginal) => {
   const actual = await importOriginal<typeof import("recharts")>();
-
   return {
     ...actual,
     ResponsiveContainer: ({ children }: { children: ReactElement<{ width: number; height: number }> }) =>
@@ -45,14 +40,14 @@ describe("RadarProfileView", () => {
     expect(breakdown.getByText("6,25")).toBeDefined();
   });
 
-  it("lives inside Mi Perfil in the app shell", () => {
+  it("shows the fifth profile tab and does not create another sidebar", () => {
     render(<RadarProfileView />);
 
-    expect(screen.getByRole("link", { name: "Mi Perfil" }).getAttribute("aria-current")).toBe("page");
-    expect(screen.getByRole("navigation", { name: "Ruta de navegación" }).textContent).toContain(
-      "Radar de afinidad",
-    );
-    expect(screen.getByText("Egresado")).toBeDefined();
+    expect(screen.getByRole("link", { name: "Mi Perfil" }).getAttribute("href")).toBe("/profile");
+    expect(screen.getByRole("navigation", { name: "Ruta de navegación" }).textContent).toContain("Radar de afinidad");
+    expect(screen.getByRole("navigation", { name: "Secciones del perfil" })).toBeDefined();
+    expect(screen.getByRole("link", { name: "Radar de afinidad" }).getAttribute("aria-current")).toBe("page");
+    expect(document.querySelector('[data-slot="sidebar"]')).toBeNull();
   });
 
   it("does not make HTTP requests", () => {
@@ -60,7 +55,6 @@ describe("RadarProfileView", () => {
     vi.stubGlobal("fetch", fetchSpy);
 
     render(<RadarProfileView />);
-
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 });
