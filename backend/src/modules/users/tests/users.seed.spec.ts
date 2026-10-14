@@ -18,8 +18,10 @@ function buildTx(options: { legacy?: Array<{ id: string }>; references?: number;
     userRole: {
       deleteMany: vi.fn().mockResolvedValue({ count: 0 }),
       count: vi.fn().mockResolvedValue(options.references ?? 0),
-      findFirst: vi.fn().mockResolvedValue(options.assigned ? { id: 'ur-1' } : null),
-      create: vi.fn().mockResolvedValue({}),
+      findMany: vi.fn().mockResolvedValue(options.assigned ? SEED_USERS.flatMap((user) =>
+        user.roles.map((role) => ({ userId: `user-${user.email}`, roleId: `role-${role}` })),
+      ) : []),
+      createMany: vi.fn().mockImplementation(async ({ data }) => ({ count: data.length })),
     },
     user: {
       upsert: vi.fn().mockImplementation(async ({ where }) => ({ id: `user-${where.email}`, email: where.email })),
@@ -47,6 +49,7 @@ describe('seedUsers', () => {
     expect(result).toMatchObject({ roles: ROLE_NAMES.length, userRoles: 15, legacyRoles: 0 });
     expect(Object.keys(result.users)).toHaveLength(SEED_USERS.length);
     expect(result.users.eventGraduate.email).toBe('prueba@umss.edu.bo');
+    expect(tx.user.upsert).toHaveBeenCalledWith(expect.objectContaining({ select: { id: true, email: true } }));
   });
 
   it('siembra un usuario administrativo con la misma contraseña de siembra', async () => {
@@ -62,7 +65,7 @@ describe('seedUsers', () => {
         create: { firstName: 'Admin', lastName: 'Uno', email: 'admin.1@umssy.test', password: 'hash-compartido', isAvailableForMentoring: false },
       }),
     );
-    expect(tx.userRole.create).toHaveBeenCalledWith({ data: { userId: 'user-admin.1@umssy.test', roleId: 'role-administrativo' } });
+    expect(tx.userRole.createMany).toHaveBeenCalledWith({ data: expect.arrayContaining([{ userId: 'user-admin.1@umssy.test', roleId: 'role-administrativo' }]) });
   });
 
   it('siembra un usuario de empresa con la misma contraseña de siembra', async () => {
@@ -83,8 +86,8 @@ describe('seedUsers', () => {
         },
       }),
     );
-    expect(tx.userRole.create).toHaveBeenCalledWith({
-      data: { userId: 'user-empresa@umssy.test', roleId: 'role-empresa' },
+    expect(tx.userRole.createMany).toHaveBeenCalledWith({
+      data: expect.arrayContaining([{ userId: 'user-empresa@umssy.test', roleId: 'role-empresa' }]),
     });
   });
 
@@ -101,24 +104,21 @@ describe('seedUsers', () => {
       create: expect.objectContaining({ password: 'hash-compartido', isAvailableForMentoring }),
       update: expect.objectContaining({ password: 'hash-compartido', isAvailableForMentoring }),
     }));
-    const assignments = tx.userRole.create.mock.calls
-      .map(([input]) => input.data)
-      .filter(({ userId }) => userId === `user-${email}`);
-    expect(assignments.map(({ roleId }) => roleId)).toEqual(roles.map((role) => `role-${role}`));
+    const assignments = tx.userRole.createMany.mock.calls[0][0].data
+      .filter(({ userId }: { userId: string }) => userId === `user-${email}`);
+    expect(assignments.map(({ roleId }: { roleId: string }) => roleId)).toEqual(roles.map((role) => `role-${role}`));
   });
 
   it('repite la siembra sin duplicar usuarios ni sus asignaciones de roles', async () => {
     const tx = buildTx();
-    const assignments = new Set<string>();
+    const assignments: Prisma.UserRoleCreateManyInput[] = [];
     tx.role.findMany.mockImplementation(({ where }: { where: { name: { in: readonly string[] } } }) =>
       Promise.resolve(ROLE_NAMES.filter((name) => where.name.in.includes(name)).map((name) => ({ id: `role-${name}`, name }))),
     );
-    tx.userRole.findFirst.mockImplementation(({ where }: { where: { userId: string; roleId: string } }) =>
-      Promise.resolve(assignments.has(`${where.userId}:${where.roleId}`) ? { id: 'existing' } : null),
-    );
-    tx.userRole.create.mockImplementation(({ data }: { data: { userId: string; roleId: string } }) => {
-      assignments.add(`${data.userId}:${data.roleId}`);
-      return Promise.resolve({});
+    tx.userRole.findMany.mockImplementation(async () => [...assignments]);
+    tx.userRole.createMany.mockImplementation(async ({ data }: { data: Prisma.UserRoleCreateManyInput[] }) => {
+      assignments.push(...data);
+      return { count: data.length };
     });
 
     const first = await seedUsers(tx as unknown as Prisma.TransactionClient, 'hash');
@@ -126,8 +126,26 @@ describe('seedUsers', () => {
 
     expect(first.userRoles).toBe(15);
     expect(second.userRoles).toBe(0);
-    expect(assignments.size).toBe(15);
-    expect(tx.userRole.create).toHaveBeenCalledTimes(15);
+    expect(assignments).toHaveLength(15);
+    expect(tx.userRole.createMany).toHaveBeenCalledOnce();
+    expect(tx.userRole.findMany).toHaveBeenCalledTimes(2);
+  });
+
+  it('inserta únicamente los roles faltantes de una cuenta parcialmente sembrada', async () => {
+    const tx = buildTx({ assigned: true });
+    const existing = SEED_USERS.flatMap((user) => user.roles.map((role) => ({
+      userId: `user-${user.email}`, roleId: `role-${role}`,
+    }))).filter(({ userId, roleId }) => !(userId === 'user-multi.role@umssy.test' && roleId === 'role-mentor'));
+    tx.userRole.findMany.mockResolvedValue(existing);
+    const result = await seedUsers(tx as unknown as Prisma.TransactionClient, 'hash');
+    expect(result.userRoles).toBe(1);
+    expect(tx.userRole.createMany).toHaveBeenCalledExactlyOnceWith({
+      data: [{ userId: 'user-multi.role@umssy.test', roleId: 'role-mentor' }],
+    });
+    expect(tx.userRole.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ deletedAt: null }),
+      select: { userId: true, roleId: true },
+    }));
   });
 
   it('no repite la asignación de rol si ya existe', async () => {
@@ -135,7 +153,7 @@ describe('seedUsers', () => {
 
     const result = await seedUsers(tx as any, 'hash');
 
-    expect(tx.userRole.create).not.toHaveBeenCalled();
+    expect(tx.userRole.createMany).not.toHaveBeenCalled();
     expect(result.userRoles).toBe(0);
   });
 
