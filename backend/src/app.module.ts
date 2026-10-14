@@ -26,6 +26,7 @@ import { ReportsModule } from './modules/reports/reports.module.js';
 import { AccessRequestsModule } from './modules/access-requests/access-requests.module.js';
 import { ChatModule } from './modules/chat/chat.module.js';
 import { MatchingModule } from './modules/matching/matching.module.js';
+import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
 
 @Module({
   imports: [
@@ -50,6 +51,8 @@ import { MatchingModule } from './modules/matching/matching.module.js';
     ReportsModule,
     ChatModule,
     MatchingModule,
+    JobOffersModule,
+
   ],
   controllers: [AppController],
   providers: [
