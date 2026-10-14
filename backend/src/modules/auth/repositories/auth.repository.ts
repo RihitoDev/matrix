@@ -16,10 +16,13 @@ export class AuthRepository {
   findUserByEmailWithRoles(email: string) {
     return this.prisma.user.findUnique({
       where: { email },
-      include: {
+      select: {
+        id: true,
+        password: true,
+        isActive: true,
         roles: {
-          where: { deletedAt: null },
-          include: { role: true },
+          where: { deletedAt: null, startAt: { lte: new Date() } },
+          select: { role: { select: { name: true } } },
         },
       },
     });

@@ -3,6 +3,8 @@ import type { JwtService } from '@nestjs/jwt';
 import type { PrismaService } from '../prisma/prisma.service.js';
 import { describe, expect, it, vi } from 'vitest';
 import { UnauthorizedSessionException } from '../exceptions/unauthorized-session.exception.js';
+import { SessionService } from '../services/session.service.js';
+import { SessionRepository } from '../repositories/session.repository.js';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard.js';
 import type { AuthenticatedRequest } from '../types/authenticated-request.types.js';
 import type { LoginJwtPayload } from '../types/login-jwt-payload.types.js';
@@ -34,7 +36,7 @@ function createGuard() {
   const prisma = { user: { findFirst } } as unknown as PrismaService;
 
   return {
-    guard: new JwtAuthGuard(jwtService, prisma),
+    guard: new JwtAuthGuard(jwtService, new SessionService(new SessionRepository(prisma))),
     verifyAsync,
     findFirst,
   };
@@ -111,7 +113,6 @@ describe('JwtAuthGuard', () => {
           where: {
             deletedAt: null,
             startAt: { lte: expect.any(Date) },
-            role: { name: 'mentor' },
           },
           select: { role: { select: { name: true } } },
         },
@@ -191,7 +192,7 @@ describe('JwtAuthGuard', () => {
       expect.objectContaining({
         select: expect.objectContaining({
           roles: expect.objectContaining({
-            where: expect.objectContaining({ role: { name: 'titulado' } }),
+            where: expect.objectContaining({ deletedAt: null, startAt: { lte: expect.any(Date) } }),
           }),
         }),
       }),
@@ -202,4 +203,14 @@ describe('JwtAuthGuard', () => {
       roles: ['titulado'],
     });
   });
+  it('uses all current database roles and excludes roles only claimed by the JWT', async () => {
+    const { guard, verifyAsync, findFirst } = createGuard();
+    verifyAsync.mockResolvedValue({ sub: USER_ID, roleTag: 'titulado', roles: ['titulado', 'mentor', 'administrativo'] });
+    findFirst.mockResolvedValue({ id: USER_ID, email: 'user@test.com', roles: [{ role: { name: 'titulado' } }, { role: { name: 'mentor' } }] });
+    const request = createRequest(`Bearer ${VALID_TOKEN}`);
+    await expect(guard.canActivate(createContext(request))).resolves.toBe(true);
+    expect(request.user?.roles).toEqual(['titulado', 'mentor']);
+    expect(request.user?.roles).not.toContain('administrativo');
+  });
+
 });

@@ -7,7 +7,7 @@ function build() {
 }
 
 describe('AuthRepository', () => {
-  it('findUserByEmailWithRoles busca por correo e incluye solo roles activos', async () => {
+  it('findUserByEmailWithRoles busca por correo e selecciona solo campos de autenticación y roles activos', async () => {
     const { user, repository } = build();
     user.findUnique.mockResolvedValue(null);
 
@@ -15,7 +15,16 @@ describe('AuthRepository', () => {
 
     const args = user.findUnique.mock.calls[0][0];
     expect(args.where).toEqual({ email: 'ana@umss.edu.bo' });
-    expect(args.include.roles.where).toEqual({ deletedAt: null });
+    expect(args.select).toEqual({
+      id: true,
+      password: true,
+      isActive: true,
+      roles: {
+        where: { deletedAt: null, startAt: { lte: expect.any(Date) } },
+        select: { role: { select: { name: true } } },
+      },
+    });
+    expect(args.include).toBeUndefined();
   });
 
   it.each([
