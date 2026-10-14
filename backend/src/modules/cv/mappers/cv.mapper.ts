@@ -1,12 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  CV_FILE_EXTENSION,
-  CV_FILE_NAME_PREFIX,
-  CV_MIME_TYPE,
-  DIACRITIC_MARKS_PATTERN,
-  EDGE_HYPHENS_PATTERN,
-  NON_ALPHANUMERIC_PATTERN,
-} from '../constants/cv.constants.js';
+import { CV_MIME_TYPE } from '../constants/cv.constants.js';
 import type { CvResponse } from '../responses/cv.response.js';
 import type { CvFileDownload } from '../types/cv-file-download.type.js';
 import type { CvMetadataRecord } from '../types/cv-metadata-record.type.js';
@@ -50,14 +43,14 @@ export class CvMapper {
       .map((part) => this.toAsciiSlug(part))
       .filter((part) => part.length > 0);
 
-    return [CV_FILE_NAME_PREFIX, ...nameParts].join('-') + CV_FILE_EXTENSION;
+    return ['CV', ...nameParts].join('-') + '.pdf';
   }
 
   private toAsciiSlug(value: string): string {
     return value
       .normalize('NFD')
-      .replace(DIACRITIC_MARKS_PATTERN, '')
-      .replace(NON_ALPHANUMERIC_PATTERN, '-')
-      .replace(EDGE_HYPHENS_PATTERN, '');
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^A-Za-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
 }

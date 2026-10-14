@@ -30,9 +30,13 @@ describe("AppSidebar", () => {
   });
 
   it("shows the brand without an identity footer when no user is provided", () => {
-    renderSidebar();
+    const { container } = renderSidebar();
 
     expect(screen.getByText("UMSSY")).toBeDefined();
+    const icon = container.querySelector('[data-slot="sidebar-header"] img');
+    expect(icon).toBeInTheDocument();
+    const iconUrl = new URL(icon?.getAttribute("src") ?? "", "http://localhost");
+    expect(iconUrl.searchParams.get("url") ?? iconUrl.pathname).toBe("/icons/icon-192x192.png");
     expect(screen.getByText("Universidad para el futuro")).toBeDefined();
     expect(screen.queryByText("Alejandro Vargas")).toBeNull();
     expect(screen.queryByText("Administrador")).toBeNull();

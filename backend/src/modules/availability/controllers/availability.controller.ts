@@ -17,7 +17,6 @@ import type { AuthenticatedUser } from '../../../common/types/authenticated-user
 import { ProvisionalSessionGuard } from '../../../common/guards/provisional.guard.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import {
-  CREATE_BLOCK_DOCS,
   DELETE_BLOCK_DOCS,
   FIND_MY_BLOCKS_DOCS,
   UPDATE_BLOCK_DOCS,
@@ -38,7 +37,7 @@ export class AvailabilityController {
   @Post()
   @UseGuards(ProvisionalSessionGuard, RolesGuard)
   @Roles('mentor')
-  @ApiOperation({ summary: CREATE_BLOCK_DOCS.summary })
+  @ApiOperation({ summary: 'Crea un bloque de disponibilidad del mentor en sesión y lo devuelve como libre (201, guardado en UTC)' })
   create(
     @CurrentUser() user: AuthenticatedUser,
     @Body() body: CreateBlockDto,
