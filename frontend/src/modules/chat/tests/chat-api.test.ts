@@ -24,6 +24,9 @@ import {
 } from '../services/message-storage';
 
 const apiClientMock = vi.mocked(apiClient);
+beforeEach(() => {
+  vi.resetAllMocks();
+});
 
 describe('chat-api', () => {
   it('debe retornar las conversaciones ordenadas cronologicamente descendente', async () => {
@@ -127,7 +130,7 @@ describe('chat-api — searchUsers (HU-2, backend integration)', () => {
   });
 
   it('debe propagar el error del backend cuando la peticion falla', async () => {
-    apiClientMock.get.mockRejectedValue(new Error('Network Error'));
+    apiClientMock.get.mockRejectedValueOnce(new Error('Network Error'));
 
     await expect(searchUsers('maria')).rejects.toThrow('Network Error');
   });
@@ -232,79 +235,154 @@ describe('chat-api — getMessages', () => {
   });
 });
 
-/*
- * Pruebas de la tarea #383.
- *
- * Verifican el servicio paginado utilizado para cargar
- * el historial de mensajes de una conversacion.
- */
 describe('chat-api — getPaginatedMessages', () => {
-  it('debe retornar la pagina mas reciente del historial', async () => {
-    const result = await getPaginatedMessages({
+it('debe retornar la pagina mas reciente del historial', async () => {
+  clearStoredMessages();
+
+  const messages = Array.from({ length: 10 }, (_, index) => {
+    const number = index + 21;
+
+    return {
+      id: `msg-1-${number}`,
       conversationId: 'conv-1',
-      limit: 10,
-    });
-
-    expect(result.data).toHaveLength(10);
-
-    expect(result.data[0].id).toBe(
-      'msg-1-21',
-    );
-
-    expect(result.data[9].id).toBe(
-      'msg-1-30',
-    );
-
-    expect(result.hasMore).toBe(true);
-    expect(result.nextCursor).toBe(
-      'msg-1-21',
-    );
+      senderId: 'user-101',
+      content: `Mensaje ${number}`,
+      createdAt: new Date(
+        Date.UTC(2026, 9, 14, 10, number),
+      ).toISOString(),
+    };
   });
+
+  apiClientMock.get.mockResolvedValueOnce({
+    data: {
+      statusCode: 200,
+      ok: true,
+      detail: 'Operación exitosa',
+      data: {
+        data: messages,
+        nextCursor: 'msg-1-21',
+        hasMore: true,
+      },
+    },
+  } as never);
+
+  const result = await getPaginatedMessages({
+    conversationId: 'conv-1',
+    limit: 10,
+  });
+
+  expect(result.data).toHaveLength(10);
+  expect(result.data[0].id).toBe('msg-1-21');
+  expect(result.data[9].id).toBe('msg-1-30');
+  expect(result.hasMore).toBe(true);
+  expect(result.nextCursor).toBe('msg-1-21');
+});
 
   it('debe cargar la pagina anterior utilizando el cursor', async () => {
-    const result = await getPaginatedMessages({
+  clearStoredMessages();
+
+  const messages = Array.from({ length: 10 }, (_, index) => {
+    const number = index + 11;
+
+    return {
+      id: `msg-1-${number}`,
       conversationId: 'conv-1',
-      cursor: 'msg-1-21',
-      limit: 10,
-    });
-
-    expect(result.data).toHaveLength(10);
-
-    expect(result.data[0].id).toBe(
-      'msg-1-11',
-    );
-
-    expect(result.data[9].id).toBe(
-      'msg-1-20',
-    );
-
-    expect(result.hasMore).toBe(true);
-
-    expect(result.nextCursor).toBe(
-      'msg-1-11',
-    );
+      senderId: 'user-101',
+      content: `Mensaje ${number}`,
+      createdAt: new Date(
+        Date.UTC(2026, 9, 14, 10, number),
+      ).toISOString(),
+    };
   });
+
+  apiClientMock.get.mockResolvedValueOnce({
+    data: {
+      statusCode: 200,
+      ok: true,
+      detail: 'Operación exitosa',
+      data: {
+        data: messages,
+        nextCursor: 'msg-1-11',
+        hasMore: true,
+      },
+    },
+  } as never);
+
+  const result = await getPaginatedMessages({
+    conversationId: 'conv-1',
+    cursor: 'msg-1-21',
+    limit: 10,
+  });
+
+  expect(apiClientMock.get).toHaveBeenCalledWith(
+    '/conversations/conv-1/messages',
+    {
+      params: {
+        cursor: 'msg-1-21',
+        limit: 10,
+      },
+    },
+  );
+
+  expect(result.data).toHaveLength(10);
+  expect(result.data[0].id).toBe('msg-1-11');
+  expect(result.data[9].id).toBe('msg-1-20');
+  expect(result.hasMore).toBe(true);
+  expect(result.nextCursor).toBe('msg-1-11');
+});
 
   it('debe indicar cuando se alcanza el inicio del historial', async () => {
-    const result = await getPaginatedMessages({
+  clearStoredMessages();
+
+  const messages = Array.from({ length: 10 }, (_, index) => {
+    const number = index + 1;
+
+    return {
+      id: `msg-1-${String(number).padStart(2, '0')}`,
       conversationId: 'conv-1',
-      cursor: 'msg-1-11',
-      limit: 10,
-    });
-
-    expect(result.data).toHaveLength(10);
-
-    expect(result.data[0].id).toBe(
-      'msg-1-01',
-    );
-
-    expect(result.data[9].id).toBe(
-      'msg-1-10',
-    );
-
-    expect(result.hasMore).toBe(false);
-    expect(result.nextCursor).toBeNull();
+      senderId: 'user-101',
+      content: `Mensaje ${number}`,
+      createdAt: new Date(
+        Date.UTC(2026, 9, 14, 10, number),
+      ).toISOString(),
+    };
   });
+
+  apiClientMock.get.mockResolvedValueOnce({
+    data: {
+      statusCode: 200,
+      ok: true,
+      detail: 'Operación exitosa',
+      data: {
+        data: messages,
+        nextCursor: null,
+        hasMore: false,
+      },
+    },
+  } as never);
+
+  const result = await getPaginatedMessages({
+    conversationId: 'conv-1',
+    cursor: 'msg-1-11',
+    limit: 10,
+  });
+
+  expect(apiClientMock.get).toHaveBeenCalledWith(
+    '/conversations/conv-1/messages',
+    {
+      params: {
+        cursor: 'msg-1-11',
+        limit: 10,
+      },
+    },
+  );
+
+  expect(result.data).toHaveLength(10);
+  expect(result.data[0].id).toBe('msg-1-01');
+  expect(result.data[9].id).toBe('msg-1-10');
+  expect(result.hasMore).toBe(false);
+  expect(result.nextCursor).toBeNull();
+});
 
   it('debe retornar una pagina vacia si la conversacion no tiene mensajes', async () => {
     const result = await getPaginatedMessages({
@@ -360,16 +438,28 @@ describe('chat-api — getPaginatedMessages', () => {
   });
 
   it('debe rechazar un cursor que no pertenece al historial', async () => {
-    await expect(
-      getPaginatedMessages({
-        conversationId: 'conv-1',
+  apiClientMock.get.mockRejectedValueOnce(
+    new Error('Cursor de mensajes no valido'),
+  );
+
+  await expect(
+    getPaginatedMessages({
+      conversationId: 'conv-1',
+      cursor: 'cursor-inexistente',
+      limit: 10,
+    }),
+  ).rejects.toThrow('Cursor de mensajes no valido');
+
+  expect(apiClientMock.get).toHaveBeenCalledWith(
+    '/conversations/conv-1/messages',
+    {
+      params: {
         cursor: 'cursor-inexistente',
         limit: 10,
-      }),
-    ).rejects.toThrow(
-      'Cursor de mensajes no valido',
-    );
-  });
+      },
+    },
+  );
+});
 
   it('debe llamar a GET /conversations/:conversationId/messages y retornar mensajes paginados mapeados', async () => {
     apiClientMock.get.mockResolvedValueOnce({

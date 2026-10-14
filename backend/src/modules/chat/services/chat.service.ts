@@ -42,6 +42,20 @@ export class ChatService {
       );
     }
 
+    if (cursor) {
+  const cursorMessage =
+    await this.chatRepository.findMessageCursor(
+      conversationId,
+      cursor,
+    );
+
+  if (!cursorMessage) {
+    throw new BadRequestException(
+      'El cursor no pertenece a esta conversación o no existe',
+    );
+  }
+}
+
     const messages = await this.chatRepository.findMessages(
       conversationId,
       limit,

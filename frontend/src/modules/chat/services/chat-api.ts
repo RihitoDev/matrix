@@ -235,22 +235,8 @@ export async function getPaginatedMessages({
       const rawMessages = (
         Array.isArray(payload.data) ? payload.data : []
       ) as RawBackendMessageItem[];
-      const stored = getMessagesByConversation(conversationId);
-      const localOnly = stored.filter(
-        (localMsg) =>
-          !rawMessages.some(
-            (rm: RawBackendMessageItem) =>
-              rm.id === localMsg.id ||
-              (rm.content === localMsg.content &&
-                Math.abs(
-                  new Date(rm.createdAt || rm.timestamp || '').getTime() -
-                    new Date(
-                      localMsg.createdAt || localMsg.timestamp || '',
-                    ).getTime(),
-                ) < 10000),
-          ),
-      );
-      const combined = [...rawMessages, ...localOnly].sort(
+      
+      const combined = [...rawMessages].sort(
         (a, b) =>
           new Date(a.timestamp || a.createdAt || a.sentAt || '').getTime() -
           new Date(b.timestamp || b.createdAt || b.sentAt || '').getTime(),
@@ -288,7 +274,8 @@ export async function getPaginatedMessages({
         };
       }
     }
-  } catch {
+  } catch (error){
+    throw error;
   }
 
   const messages = getMessagesByConversation(conversationId);
