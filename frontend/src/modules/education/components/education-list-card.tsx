@@ -11,7 +11,6 @@ export function EducationListCard({
   isLoading = false,
   error = null,
   isBusy = false,
-  onAdd,
   onEdit,
   onDelete,
 }: EducationListCardProps) {
@@ -19,16 +18,6 @@ export function EducationListCard({
     <SectionCard
       title={EDUCATION_UI_TEXTS.listTitle}
       description={EDUCATION_UI_TEXTS.listDescription}
-      action={onAdd ? (
-        <Button
-          type="button"
-          onClick={onAdd}
-          disabled={isBusy}
-          className="h-10 bg-accent px-4 text-[14px] font-semibold text-white hover:bg-danger"
-        >
-          {EDUCATION_UI_TEXTS.addButton}
-        </Button>
-      ) : undefined}
     >
       {isLoading ? (
         <p role="status" className="text-[14px] text-text-secondary">

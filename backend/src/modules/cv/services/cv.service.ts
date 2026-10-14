@@ -47,7 +47,11 @@ export class CvService {
       CV_VALIDATION_RULES,
     );
 
-    await this.fileStorage.save(userId, validatedFile.buffer);
+    await this.fileStorage.save(
+      userId,
+      validatedFile.buffer,
+      this.cvMapper.toStoredFileName(file?.originalname),
+    );
 
     return this.getMetadata(userId);
   }
