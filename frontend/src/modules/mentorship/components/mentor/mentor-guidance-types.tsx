@@ -89,7 +89,7 @@ export function MentorGuidanceTypes({
             <ToggleGroupItem
               key={guidance.id}
               value={String(guidance.id)}
-              className="h-auto cursor-pointer rounded-lg border-umssy-border bg-white px-4 py-2 text-sm font-semibold text-umssy-secondary shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-umssy-red hover:bg-umssy-background hover:shadow-md focus-visible:border-umssy-red focus-visible:ring-umssy-red/30 aria-pressed:border-umssy-red aria-pressed:bg-umssy-red-soft aria-pressed:text-umssy-ink aria-pressed:shadow-md"
+              className="h-auto min-w-0 max-w-full cursor-pointer whitespace-normal [overflow-wrap:anywhere] rounded-lg border-umssy-border bg-white px-4 py-2 text-sm font-semibold text-umssy-secondary shadow-sm hover:border-umssy-red hover:bg-umssy-background focus-visible:border-umssy-red focus-visible:ring-umssy-red/30 aria-pressed:border-umssy-red aria-pressed:bg-umssy-red-soft aria-pressed:text-umssy-ink"
             >
               {guidance.name}
             </ToggleGroupItem>
@@ -98,7 +98,7 @@ export function MentorGuidanceTypes({
 
         {selectedGuidance.description && (
           <div className="mt-5 rounded-lg bg-umssy-background p-4">
-            <p className="text-sm leading-6 text-umssy-ink">
+            <p className="whitespace-pre-line [overflow-wrap:anywhere] text-sm leading-6 text-umssy-ink">
               {selectedGuidance.description}
             </p>
           </div>
