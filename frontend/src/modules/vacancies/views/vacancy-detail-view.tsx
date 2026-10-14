@@ -1,32 +1,23 @@
-import { vacancies } from "@/modules/vacancies/data/vacancies";
 import Link from "next/link";
+import { vacancies } from "../data/vacancies";
+import type { VacancyDetailViewProps } from "../types/vacancy-detail-view-props.types";
 
-interface VacancyDetailPageProps {
-  params: Promise<{
-    id: string;
-  }>;
-}
-
-export default async function VacancyDetailPage({
-  params,
-}: VacancyDetailPageProps) {
-  const { id } = await params;
-
+export function VacancyDetailView({ id }: VacancyDetailViewProps) {
   const vacancy = vacancies.find(
     (vacancy) => vacancy.id === Number(id),
   );
 
   if (!vacancy) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-surface-soft p-6">
-        <div className="rounded-lg bg-white p-8 text-center shadow">
+      <main className="flex min-h-full items-center justify-center bg-surface-soft p-6">
+        <div className="rounded-lg bg-surface p-8 text-center shadow-sm">
           <h1 className="text-2xl font-bold">
             Vacante no encontrada
           </h1>
 
           <Link
             href="/vacancies"
-            className="mt-6 inline-block rounded-md bg-black px-4 py-2 text-white"
+            className="mt-6 inline-block rounded-md bg-ink px-4 py-2 text-surface"
           >
             ← Volver a vacantes
           </Link>
@@ -36,7 +27,7 @@ export default async function VacancyDetailPage({
   }
 
   return (
-    <main className="min-h-screen bg-surface-soft p-6">
+    <main className="min-h-full bg-surface-soft p-6">
       <div className="mx-auto w-full max-w-3xl">
         <Link
           href="/vacancies"
@@ -45,7 +36,7 @@ export default async function VacancyDetailPage({
           ← Volver a vacantes
         </Link>
 
-        <article className="rounded-lg bg-white p-8 shadow">
+        <article className="rounded-lg bg-surface p-8 shadow-sm">
           <h1 className="text-3xl font-bold">
             {vacancy.cargo}
           </h1>
@@ -59,7 +50,7 @@ export default async function VacancyDetailPage({
               Descripción
             </h2>
 
-            <p className="mt-2 text-gray-600">
+            <p className="mt-2 text-text-secondary">
               {vacancy.descripcion}
             </p>
           </div>
@@ -70,7 +61,7 @@ export default async function VacancyDetailPage({
                 Salario
               </h3>
 
-              <p className="mt-1 text-gray-600">
+              <p className="mt-1 text-text-secondary">
                 {vacancy.salario}
               </p>
             </div>
@@ -80,7 +71,7 @@ export default async function VacancyDetailPage({
                 Ubicación
               </h3>
 
-              <p className="mt-1 text-gray-600">
+              <p className="mt-1 text-text-secondary">
                 {vacancy.ubicacion}
               </p>
             </div>
@@ -90,7 +81,7 @@ export default async function VacancyDetailPage({
                 Tipo de contrato
               </h3>
 
-              <p className="mt-1 text-gray-600">
+              <p className="mt-1 text-text-secondary">
                 {vacancy.tipoContrato}
               </p>
             </div>
@@ -100,7 +91,7 @@ export default async function VacancyDetailPage({
                 Jornada
               </h3>
 
-              <p className="mt-1 text-gray-600">
+              <p className="mt-1 text-text-secondary">
                 {vacancy.jornada}
               </p>
             </div>
@@ -111,7 +102,7 @@ export default async function VacancyDetailPage({
               Requisitos
             </h2>
 
-            <ul className="mt-3 list-disc space-y-2 pl-5 text-gray-600">
+            <ul className="mt-3 list-disc space-y-2 pl-5 text-text-secondary">
               {vacancy.requisitos.map((requisito, index) => (
                 <li key={index}>
                   {requisito}
