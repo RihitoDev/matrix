@@ -1,8 +1,9 @@
 import type { ExecutionContext } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard.js';
+import { PrismaService } from '../prisma/prisma.service.js';
 import { JwtAuthModule } from '../guards/jwt-auth.module.js';
 import type { AuthenticatedRequest } from '../types/authenticated-request.types.js';
 
@@ -20,7 +21,14 @@ describe('JwtAuthModule', () => {
   });
 
   it('verifies tokens signed with JWT_SECRET, the same secret used by the login', async () => {
-    const moduleRef = await Test.createTestingModule({ imports: [JwtAuthModule] }).compile();
+    const moduleRef = await Test.createTestingModule({ imports: [JwtAuthModule] })
+      .overrideProvider(PrismaService)
+      .useValue({ user: { findFirst: vi.fn().mockResolvedValue({
+        id: userId,
+        email: 'user@test.com',
+        roles: [{ role: { name: 'titulado' } }],
+      }) } })
+      .compile();
     const guard = moduleRef.get(JwtAuthGuard);
     const loginToken = new JwtService({ secret: 'module-test-secret' }).sign({
       sub: userId,
@@ -34,6 +42,6 @@ describe('JwtAuthModule', () => {
     } as unknown as ExecutionContext;
 
     await expect(guard.canActivate(context)).resolves.toBe(true);
-    expect(request.user).toEqual({ id: userId, email: '', roles: ['titulado'] });
+    expect(request.user).toEqual({ id: userId, email: 'user@test.com', roles: ['titulado'] });
   });
 });

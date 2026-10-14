@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable, Optional } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ROLE_NAMES } from '../enums/roles.enum.js';
@@ -12,7 +12,7 @@ import type { LoginJwtPayload } from '../types/login-jwt-payload.types.js';
 export class JwtAuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
-    @Optional() private readonly prisma?: PrismaService,
+    private readonly prisma: PrismaService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -52,41 +52,27 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedSessionException();
     }
 
-    let user = {
-      id: payload.sub,
-      email: '',
-      roles: (payload.roles ?? [payload.roleTag]).map((name) => ({ role: { name } })),
-    };
-
-    if (this.prisma && typeof this.prisma.user?.findFirst === 'function') {
-      const dbUser = await this.prisma.user.findFirst({
-        where: { id: payload.sub, isActive: true },
-        select: {
-          id: true,
-          email: true,
-          roles: {
-            where: {
-              deletedAt: null,
-              startAt: { lte: new Date() },
-            },
-            select: { role: { select: { name: true } } },
+    const user = await this.prisma.user.findFirst({
+      where: { id: payload.sub, isActive: true },
+      select: {
+        id: true,
+        email: true,
+        roles: {
+          where: {
+            deletedAt: null,
+            startAt: { lte: new Date() },
           },
+          select: { role: { select: { name: true } } },
         },
-      });
+      },
+    });
 
-      if (!dbUser) {
-        throw new UnauthorizedSessionException(
-          'Usuario no encontrado o inactivo',
-        );
-      }
+    if (!user) {
+      throw new UnauthorizedSessionException('Usuario no encontrado o inactivo');
+    }
 
-      if (dbUser.roles.length === 0) {
-        throw new UnauthorizedSessionException(
-          'El rol de la sesión ya no está vigente',
-        );
-      }
-
-      user = dbUser;
+    if (user.roles.length === 0) {
+      throw new UnauthorizedSessionException('El rol de la sesión ya no está vigente');
     }
 
     request.user = {

@@ -4,10 +4,11 @@ import { AuthController } from './controllers/auth.controller.js';
 import { AuthService } from './services/auth.service.js';
 import { AuthRepository } from './repositories/auth.repository.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
-import { JwtAuthGuard as EventsJwtAuthGuard } from './guards/jwt-auth.guard.js';
+import { PrismaModule } from '../../common/prisma/prisma.module.js';
 
 @Module({
   imports: [
+    PrismaModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: {
@@ -17,7 +18,7 @@ import { JwtAuthGuard as EventsJwtAuthGuard } from './guards/jwt-auth.guard.js';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthRepository, JwtAuthGuard, EventsJwtAuthGuard],
-  exports: [AuthService, JwtModule, JwtAuthGuard, EventsJwtAuthGuard],
+  providers: [AuthService, AuthRepository, JwtAuthGuard],
+  exports: [AuthService, JwtModule, JwtAuthGuard],
 })
 export class AuthModule {}
