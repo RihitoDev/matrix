@@ -7,7 +7,9 @@ import {
 const ACCESS_TOKEN_STORAGE_KEY = "accessToken";
 
 export function saveAccessToken(accessToken: string): boolean {
-  return writeSessionStorage(ACCESS_TOKEN_STORAGE_KEY, accessToken);
+  const isSaved = writeSessionStorage(ACCESS_TOKEN_STORAGE_KEY, accessToken);
+  if (isSaved && typeof window !== "undefined") window.dispatchEvent(new Event("access-token-change"));
+  return isSaved;
 }
 
 export function getAccessToken(): string | null {
@@ -15,5 +17,16 @@ export function getAccessToken(): string | null {
 }
 
 export function clearAccessToken(): boolean {
-  return removeSessionStorage(ACCESS_TOKEN_STORAGE_KEY);
+  const isRemoved = removeSessionStorage(ACCESS_TOKEN_STORAGE_KEY);
+  if (isRemoved && typeof window !== "undefined") window.dispatchEvent(new Event("access-token-change"));
+  return isRemoved;
+}
+
+export function subscribeAccessToken(onChange: () => void): () => void {
+  window.addEventListener("access-token-change", onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    window.removeEventListener("access-token-change", onChange);
+    window.removeEventListener("storage", onChange);
+  };
 }

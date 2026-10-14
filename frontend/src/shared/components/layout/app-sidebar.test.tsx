@@ -2,10 +2,18 @@ import { cleanup, fireEvent, render, screen, within } from "@testing-library/rea
 import { House } from "lucide-react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import type { RoleTag } from "@/shared/types/role-tag.types";
+import { ROLE_TAGS } from "@/shared/constants/roles.constants";
 import { SIDEBAR_NAVIGATION } from "@/shared/config/navigation.config";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import type { AppSidebarProps } from "@/shared/types/app-sidebar-props.types";
 import { AppSidebar } from "./app-sidebar";
+
+const sessionRoles = vi.hoisted(() => ({ current: [] as readonly RoleTag[] }));
+
+vi.mock("@/shared/contexts/auth-context", () => ({
+  useAuth: () => ({ roles: sessionRoles.current, isLoading: false, refreshRoles: vi.fn() }),
+}));
 
 const { route } = vi.hoisted(() => ({ route: { pathname: "/home" } }));
 vi.mock("next/navigation", () => ({
@@ -23,6 +31,7 @@ function renderSidebar(props: AppSidebarProps = {}) {
 describe("AppSidebar", () => {
   beforeEach(() => {
     route.pathname = "/home";
+    sessionRoles.current = ROLE_TAGS;
     stubMatchMedia();
   });
 
@@ -103,6 +112,7 @@ describe("AppSidebar", () => {
       .queryAllByRole("listitem")
       .filter((item) => item.getAttribute("data-slot") === "sidebar-menu-item");
     expect(topLevelItems).toHaveLength(SIDEBAR_NAVIGATION.length);
+    expect(within(navigation).queryByRole("link", { name: "Inicio" })).toBeNull();
   });
 
   it("renders the items and user received by props", () => {
@@ -115,4 +125,21 @@ describe("AppSidebar", () => {
     expect(screen.getByText("María Pérez")).toBeDefined();
     expect(screen.getByText("MP")).toBeDefined();
   });
+  it('updates enabled functions when a graduate gains the mentor role', () => {
+    sessionRoles.current = ['titulado'];
+    const view = renderSidebar();
+    fireEvent.click(screen.getByRole('button', { name: 'Mentorías' }));
+    expect(screen.queryByRole('link', { name: 'Mi disponibilidad' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Solicitudes' })).toBeNull();
+
+    sessionRoles.current = ['titulado', 'mentor'];
+    view.rerender(<SidebarProvider><AppSidebar /></SidebarProvider>);
+    expect(screen.getByRole('link', { name: 'Mi disponibilidad' })).toHaveAttribute('href', '/mentor/availability');
+    expect(screen.getAllByRole('link', { name: 'Chat' })).toHaveLength(1);
+
+    sessionRoles.current = ['titulado'];
+    view.rerender(<SidebarProvider><AppSidebar /></SidebarProvider>);
+    expect(screen.queryByRole('link', { name: 'Mi disponibilidad' })).toBeNull();
+  });
+
 });

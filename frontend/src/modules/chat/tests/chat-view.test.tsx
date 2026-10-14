@@ -171,13 +171,14 @@ describe('ChatView & ChatPage', () => {
 
   it('renders the chat page inside one app navigation', async () => {
     stubMatchMedia();
-    sessionStorage.setItem("accessToken", "token-de-prueba");
+    sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: "titulado" }))}.s`);
     vi.spyOn(chatApi, 'getConversations').mockResolvedValue(mockList);
 
     renderWithQueryClient(<AppLayout><ChatPage /></AppLayout>);
 
     expect(screen.getByText('Chats')).toBeDefined();
     expect(screen.getAllByRole('navigation', { name: 'Menú principal' })).toHaveLength(1);
+    expect(screen.getByRole('link', { name: 'Chat' })).toHaveAttribute('href', '/chat');
     expect(await screen.findByText('Maria Fernandez')).toBeDefined();
   });
 });

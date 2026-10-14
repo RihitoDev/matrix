@@ -51,14 +51,14 @@ describe("AppRouteLayout", () => {
     expect(screen.getByTestId("app-shell")).toHaveAttribute("data-full-bleed", fullBleed);
   });
 
-  it.each(["/recruiters", "/recruiters/job-offers/new"])("uses the recruiters navigation on %s", (pathname) => {
+  it.each(["/recruiters", "/recruiters/job-offers/new"])("uses the shared navigation on %s", (pathname) => {
     route.pathname = pathname;
     render(<AppLayout><p>recruiters-content</p></AppLayout>);
 
     expect(screen.getByTestId("app-shell")).toContainElement(screen.getByText("recruiters-content"));
     expect(screen.getByTestId("app-shell")).toHaveAttribute(
       "data-navigation",
-      "Inicio,Mis vacantes,Registrar nueva vacante,Perfil de empresa",
+      "general",
     );
   });
 

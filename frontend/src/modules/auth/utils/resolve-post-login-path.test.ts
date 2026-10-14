@@ -26,4 +26,14 @@ describe("resolvePostLoginPath", () => {
   it("un rol sin acceso al backoffice no vuelve a él", () => {
     expect(resolvePostLoginPath("titulado", "/backoffice/solicitudes")).toBe("/profile");
   });
+  it('lets administrative accounts resume common functions without selecting a role', () => {
+    expect(resolvePostLoginPath(['administrativo'], '/chat')).toBe('/chat');
+    expect(resolvePostLoginPath(['administrativo', 'mentor'], '/mentor/availability')).toBe('/mentor/availability');
+  });
+
+  it('chooses the company portal for a company session and denies backoffice return without that role', () => {
+    expect(resolvePostLoginPath(['empresa'], null)).toBe('/recruiters');
+    expect(resolvePostLoginPath(['empresa'], '/backoffice/solicitudes')).toBe('/recruiters');
+  });
+
 });

@@ -18,9 +18,13 @@ vi.mock("@/modules/request-review/hooks/use-status-counts", () => ({
 }));
 
 describe("BackofficeLayout inside AppLayout", () => {
-  beforeEach(() => stubMatchMedia());
+  beforeEach(() => {
+    stubMatchMedia();
+    sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roles: ["administrativo"] }))}.s`);
+  });
   afterEach(() => {
     cleanup();
+    sessionStorage.clear();
     vi.unstubAllGlobals();
   });
 
@@ -34,6 +38,6 @@ describe("BackofficeLayout inside AppLayout", () => {
     expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
     expect(screen.getByRole("link", { name: /Solicitudes/ })).toHaveAttribute("href", "/backoffice/solicitudes");
     expect(screen.getByText("Contenido administrativo")).toBeDefined();
-    expect(screen.queryByRole("link", { name: "Mi perfil" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Mi perfil" })).toBeDefined();
   });
 });

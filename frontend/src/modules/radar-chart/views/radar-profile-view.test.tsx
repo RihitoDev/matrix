@@ -54,7 +54,7 @@ describe("RadarProfileView", () => {
   });
 
   it("renders only one app navigation when wrapped by the route layout", () => {
-    sessionStorage.setItem("accessToken", "token-de-prueba");
+    sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: "titulado" }))}.s`);
     render(<AppLayout><RadarProfileView /></AppLayout>);
 
     expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);

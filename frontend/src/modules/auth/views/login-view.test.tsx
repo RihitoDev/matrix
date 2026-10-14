@@ -1,7 +1,5 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { SELECT_ITEM_CONTRAST_CLASS } from "@/shared/constants/select.constants";
 import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { useLogin } from "../hooks/use-login";
 import { LoginView } from "./login-view";
@@ -48,7 +46,6 @@ describe("LoginView", () => {
       expect(login).toHaveBeenCalledWith({
         email: "person@example.com",
         password: "secret",
-        roleTag: "titulado",
       });
       expect(saveAccessToken).toHaveBeenCalledWith("returned-token");
       expect(push).toHaveBeenCalledWith("/profile");
@@ -191,7 +188,7 @@ describe("LoginView", () => {
 
     expect(screen.getByLabelText("Correo electrónico")).toHaveAttribute("autocomplete", "username");
     expect(screen.getByLabelText("Contraseña")).toHaveAttribute("autocomplete", "current-password");
-    expect(screen.getByRole("combobox", { name: "Rol" })).toHaveTextContent("Titulado");
+    expect(screen.queryByRole("combobox", { name: "Rol" })).toBeNull();
     expect(screen.getByRole("heading", { name: "Iniciar sesión" })).toBeInTheDocument();
     expect(screen.getByText("Universidad para el futuro")).toBeInTheDocument();
   });
@@ -225,13 +222,9 @@ describe("LoginView", () => {
     expect(button).toBeDisabled();
   });
 
-  it("las opciones del rol fijan texto tinta al resaltarse (el tema pone blanco sobre fondo claro)", async () => {
-    vi.mocked(useLogin).mockReturnValue({ login: vi.fn(), isLoading: false, error: null });
-    render(<LoginView />);
-
-    await userEvent.setup().click(screen.getByRole("combobox", { name: "Rol" }));
-    const option = await screen.findByRole("option", { name: "Mentor" });
-
-    for (const token of SELECT_ITEM_CONTRAST_CLASS.split(" ")) expect(option.className).toContain(token);
+  it("uses the combined roles returned by the server when resuming a mentor route", async () => {
+    window.history.replaceState({}, "", "/login?next=/mentor/availability");
+    await submitLogin(vi.fn().mockResolvedValue({ accessToken: "multi", roleTag: "administrativo", roles: ["administrativo", "mentor"] }));
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/mentor/availability"));
   });
 });
