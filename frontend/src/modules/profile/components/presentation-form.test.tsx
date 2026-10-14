@@ -9,7 +9,6 @@ import { PresentationForm } from "./presentation-form";
 const SAVED_VALUES: PresentationValues = {
   headline: "Desarrolladora web junior",
   aboutMe: "Systems engineering graduate from UMSS.",
-  interestedOpportunities: "",
 };
 
 function renderForm(initialValues = EMPTY_PRESENTATION_VALUES, fullName = "", isSaving = false) {
@@ -47,12 +46,23 @@ describe("PresentationForm", () => {
     const { user } = renderForm(EMPTY_PRESENTATION_VALUES, "Valeria Quispe");
 
     await user.type(screen.getByLabelText(/Titular profesional/), "Desarrolladora web junior");
-    await user.type(screen.getByLabelText(/Oportunidades que me interesan/), "Remote work");
+    await user.type(screen.getByLabelText(/Acerca de/), "Looking for remote work.");
 
     expect(screen.getByText("Valeria Quispe")).toBeInTheDocument();
     expect(screen.getByText("VQ")).toBeInTheDocument();
     expect(screen.getByText("Desarrolladora web junior")).toBeInTheDocument();
-    expect(screen.getByText("Remote work", { selector: "p" })).toBeInTheDocument();
+    expect(screen.getByText("Looking for remote work.", { selector: "p" })).toBeInTheDocument();
+  });
+
+  it("only shows the headline and about me fields", () => {
+    renderForm();
+
+    expect(screen.getAllByRole("textbox")).toHaveLength(2);
+    expect(screen.queryByLabelText(/Oportunidades que me interesan/)).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/Acerca de/)).toHaveAttribute(
+      "placeholder",
+      "Cuenta quién eres, en qué te especializas y qué oportunidades laborales te interesan.",
+    );
   });
 
   it("shows the server field errors next to their fields", () => {
@@ -93,14 +103,12 @@ describe("PresentationForm", () => {
     expect(onSubmit).toHaveBeenCalledWith({
       headline: "Desarrolladora web junior",
       aboutMe: "Graduate from UMSS.",
-      interestedOpportunities: "",
     });
   });
 
   it("shows an error next to each empty required field and does not submit", async () => {
     const { onSubmit, user } = renderForm();
 
-    await user.type(screen.getByLabelText(/Oportunidades que me interesan/), "Remote work");
     await user.click(screen.getByRole("button", { name: "Guardar presentación" }));
 
     expect(onSubmit).not.toHaveBeenCalled();
@@ -109,10 +117,6 @@ describe("PresentationForm", () => {
     );
     expect(screen.getByLabelText(/Acerca de/)).toHaveAccessibleDescription(
       PROFILE_VALIDATION_MESSAGES.required,
-    );
-    expect(screen.getByLabelText(/Oportunidades que me interesan/)).not.toHaveAttribute(
-      "aria-invalid",
-      "true",
     );
   });
 
