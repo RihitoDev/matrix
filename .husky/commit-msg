@@ -1,0 +1,5 @@
+if [ -f "$(git rev-parse --git-path MERGE_HEAD)" ]; then
+  exit 0
+fi
+
+pnpm --dir backend exec tsx scripts/check-commit-messages.ts --message-file "$(realpath "$1")"
