@@ -80,7 +80,10 @@ describe("ProfileOverviewView", () => {
     );
     expect(screen.getByText("Aún no agregaste un titular profesional")).toBeInTheDocument();
     expect(screen.getAllByText("Sin registrar")).toHaveLength(3);
-    expect(screen.getByText("Cuenta quién eres y en qué te especializas.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Cuenta quién eres, en qué te especializas y qué oportunidades laborales te interesan."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Oportunidades que me interesan")).not.toBeInTheDocument();
   });
 
   it("shows the registered data of a complete profile", async () => {
