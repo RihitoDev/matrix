@@ -46,7 +46,9 @@ export function AppShell({
         itemClassName={sidebarItemClassName}
         itemBadges={sidebarItemBadges}
       />
-      <SidebarInset className="bg-surface-soft">
+      {/* min-w-0: sin esto el contenido no puede ser más angosto que una tabla ancha y desborda la pantalla,
+          lo que en móviles provoca un zoom que se acumula al rotar el dispositivo. */}
+      <SidebarInset className="min-w-0 bg-surface-soft">
         {header ?? (
           <header className={fullBleed ? "absolute left-4 top-3 z-10 flex items-center" : "flex items-center px-4 py-3"}>
             <SidebarToggleButton />
