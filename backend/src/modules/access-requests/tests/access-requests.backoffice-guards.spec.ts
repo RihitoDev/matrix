@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { SessionModule } from '../../../common/session/session.module.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { DomainExceptionFilter } from '../../../common/filters/domain-exception.filter.js';
 import { AccessRequestsController } from '../controllers/access-requests.controller.js';
@@ -20,15 +21,18 @@ describe('AccessRequestsController: guards compartidos del backoffice', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
+      imports: [SessionModule],
       controllers: [AccessRequestsController],
       providers: [
         { provide: AccessRequestsService, useValue: service },
         { provide: JwtService, useValue: jwtService },
-        { provide: PrismaService, useValue: prisma },
         JwtAuthGuard,
         RolesGuard,
       ],
-    }).compile();
+    })
+      .overrideProvider(PrismaService)
+      .useValue(prisma)
+      .compile();
     app = moduleRef.createNestApplication();
     app.useGlobalFilters(new DomainExceptionFilter());
     await app.init();

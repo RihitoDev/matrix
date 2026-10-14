@@ -6,7 +6,7 @@ describe("getPostLoginPath", () => {
     expect(getPostLoginPath("administrativo")).toBe("/backoffice/solicitudes");
   });
 
-  it("el rol empresa va al módulo de reclutadores", () => {
+  it("envía las empresas a su portal", () => {
     expect(getPostLoginPath("empresa")).toBe("/recruiters");
   });
 

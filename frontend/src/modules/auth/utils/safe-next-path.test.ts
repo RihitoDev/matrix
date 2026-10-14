@@ -4,6 +4,8 @@ import { buildLoginUrl, getSafeNextPath } from "./safe-next-path";
 describe("getSafeNextPath", () => {
   it.each([
     ["/events/my-passes", "/events/my-passes"],
+    ["/request-access", "/request-access"],
+    ["/future-public-page", "/future-public-page"],
     ["/profile", "/profile"],
     ["/profile?tab=cv", "/profile?tab=cv"],
     ["/reports/history#top", "/reports/history#top"],
@@ -29,7 +31,6 @@ describe("getSafeNextPath", () => {
     ["subruta del login", "/login/otro"],
     ["el login con consulta", "/login?next=/profile"],
     ["la raíz", "/"],
-    ["una ruta pública", "/request-access"],
     ["demasiado largo", `/${"a".repeat(400)}`],
   ])("rechaza %s", (_name, value) => {
     expect(getSafeNextPath(value as string | null | undefined)).toBeNull();
@@ -46,7 +47,7 @@ describe("buildLoginUrl", () => {
     expect(buildLoginUrl("/profile?tab=cv")).toBe("/login?next=%2Fprofile%3Ftab%3Dcv");
   });
 
-  it.each(["/", "/login", "//evil.com", "https://evil.com", null, undefined, "/request-access"])("sin next para %s", (value) => {
+  it.each(["/", "/login", "//evil.com", "https://evil.com", null, undefined])("sin next para %s", (value) => {
     expect(buildLoginUrl(value as string | null | undefined)).toBe("/login");
   });
 });
