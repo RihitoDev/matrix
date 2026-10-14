@@ -48,6 +48,13 @@ describe('Education HTTP flow', () => {
       .useValue(jwt)
       .overrideProvider(PrismaService)
       .useValue({
+        user: {
+          findFirst: ({ where }: { where: { id: string } }) => Promise.resolve({
+            id: where.id,
+            email: 'user@test.com',
+            roles: [{ role: { name: 'titulado' } }],
+          }),
+        },
         async $transaction(operation: (client: unknown) => Promise<unknown>) { return operation(this); },
         education: {
           create: ({

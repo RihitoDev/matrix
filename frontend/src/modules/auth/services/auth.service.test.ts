@@ -2,7 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiClient } from '@/shared/services/api-client';
 import { authService } from './auth.service';
-vi.mock('@/shared/services/api-client', () => ({ apiClient: { defaults: { baseURL: 'http://localhost:8080/api' }, post: vi.fn() } }));
+vi.mock('@/shared/services/api-client', () => ({ apiClient: { defaults: { baseURL: 'http://localhost:8080/api' }, post: vi.fn(), get: vi.fn() } }));
 const payload = { email: 'prueba@umss.edu.bo', password: 'Prueba123', roleTag: 'titulado' as const };
 beforeEach(() => { vi.clearAllMocks(); apiClient.defaults.baseURL = 'http://localhost:8080/api'; });
 describe('authService', () => {
@@ -37,4 +37,18 @@ describe('authService', () => {
       await expect(authService.login(payload)).rejects.toThrow('token de sesión válido');
     },
   );
+  it('preserves every role returned by credentials-only login', async () => {
+    const session = { accessToken: 'token', roleTag: 'titulado', roles: ['titulado', 'mentor'] };
+    vi.mocked(apiClient.post).mockResolvedValue({ data: { data: session } });
+    await expect(authService.login({ email: 'user@test.com', password: 'password' })).resolves.toEqual(session);
+    expect(apiClient.post).toHaveBeenCalledWith('/auth/login', { email: 'user@test.com', password: 'password' });
+  });
+
+  it('binds session readback to the token used by its query key', async () => {
+    const session = { id: 'u1', email: 'user@test.com', roles: ['titulado', 'mentor'] };
+    vi.mocked(apiClient.get).mockResolvedValue({ data: { data: session } });
+    await expect(authService.getSession('session-token')).resolves.toEqual(session);
+    expect(apiClient.get).toHaveBeenCalledWith('/auth/session', { headers: { Authorization: 'Bearer session-token' } });
+  });
+
 });

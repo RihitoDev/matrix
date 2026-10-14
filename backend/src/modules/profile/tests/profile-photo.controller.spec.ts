@@ -2,6 +2,8 @@ import type { INestApplication } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
+import { SessionModule } from '../../../common/session/session.module.js';
+import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DomainExceptionFilter } from '../../../common/filters/domain-exception.filter.js';
@@ -35,7 +37,7 @@ describe('ProfilePhotoController', () => {
     };
 
     const moduleRef = await Test.createTestingModule({
-      imports: [JwtModule.register({ global: true, secret: 'test-secret' })],
+      imports: [SessionModule, JwtModule.register({ global: true, secret: 'test-secret' })],
       controllers: [ProfilePhotoController],
       providers: [
         ProfilePhotoService,
@@ -48,7 +50,18 @@ describe('ProfilePhotoController', () => {
         },
         { provide: APP_FILTER, useClass: DomainExceptionFilter },
       ],
-    }).compile();
+    })
+      .overrideProvider(PrismaService)
+      .useValue({
+        user: {
+          findFirst: ({ where }: { where: { id: string } }) => Promise.resolve({
+            id: where.id,
+            email: 'user@test.com',
+            roles: [{ role: { name: 'titulado' } }],
+          }),
+        },
+      })
+      .compile();
 
     app = moduleRef.createNestApplication();
     await app.init();
