@@ -1,3 +1,4 @@
+import { calculateGap } from "@/modules/radar-chart/utils/calculate-gap";
 import { describe, expect, it } from "vitest";
 import { CANDIDATES_POOL, AFFINITY_AXES } from "./matching.data";
 import { getCandidateAreaDetail } from "./candidate-area-evidence.data";
@@ -10,7 +11,7 @@ describe("HU4: evidencias por candidato y área", () => {
         expect(detail.id).toBe(axis.id);
         expect(detail.name).toBe(axis.label);
         expect(detail.score).toBe(candidate.scores[axis.id]);
-        expect(detail.gap).toBeCloseTo(detail.score - detail.globalAverage, 1);
+        expect(detail.gap).toBe(calculateGap(detail.score, detail.globalAverage));
       }
     }
   });
