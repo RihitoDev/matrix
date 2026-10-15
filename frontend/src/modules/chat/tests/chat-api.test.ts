@@ -4,6 +4,7 @@ vi.mock('@/shared/services/api-client', () => ({
     get: vi.fn(),
     post: vi.fn(),
     patch: vi.fn(),
+    
   },
 }));
 import {
@@ -1094,3 +1095,56 @@ it('debe marcar la conversacion como leida de forma persistente al enviar un men
   });
 
   });
+
+  
+describe('chat-api — estado leído con datos de la BD (HU-1)', () => {
+  const buildConversation = (lastMessageAt: string, unreadCount: number) => ({
+    id: 'conv-bd',
+    contact: { id: 'user-2', fullName: 'User 2', avatarUrl: null, isOnline: false },
+    lastMessage: {
+      id: 'm-bd',
+      senderId: 'user-2',
+      content: 'hola',
+      isAttachment: false,
+      attachmentType: null,
+      createdAt: lastMessageAt,
+    },
+    unreadCount,
+    updatedAt: lastMessageAt,
+  });
+
+  beforeEach(() => {
+    window.localStorage.clear();
+    apiClientMock.get.mockReset();
+    apiClientMock.patch.mockReset();
+  });
+
+  it('no vuelve a mostrar el contador al recargar si la conversación ya se leyó', async () => {
+    const lastMessageAt = new Date(Date.now() - 60_000).toISOString();
+    apiClientMock.get.mockResolvedValue({ data: [buildConversation(lastMessageAt, 2)] } as never);
+
+    expect((await getConversations())[0].unreadCount).toBe(2);
+    await markConversationAsRead('conv-bd');
+    expect((await getConversations())[0].unreadCount).toBe(0);
+  });
+
+ 
+  it('si el PATCH falla, igual conserva el estado leído en el navegador', async () => {
+    apiClientMock.patch.mockRejectedValue(new Error('Network error'));
+    const lastMessageAt = new Date(Date.now() - 60_000).toISOString();
+    apiClientMock.get.mockResolvedValue({ data: [buildConversation(lastMessageAt, 2)] } as never);
+
+    await expect(markConversationAsRead('conv-bd')).resolves.toBeUndefined();
+    expect((await getConversations())[0].unreadCount).toBe(0);
+  });
+
+  it('muestra el contador si llega un mensaje nuevo después de leer', async () => {
+    await markConversationAsRead('conv-bd');
+
+    const newerMessageAt = new Date(Date.now() + 60_000).toISOString();
+    apiClientMock.get.mockResolvedValue({ data: [buildConversation(newerMessageAt, 1)] } as never);
+
+    expect((await getConversations())[0].unreadCount).toBe(1);
+  });
+});
+

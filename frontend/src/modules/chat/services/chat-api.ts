@@ -18,6 +18,11 @@ import {
   saveStoredMessage,
   markStoredConversationAsRead,
 } from './message-storage';
+
+import {
+  applyStoredReadState,
+  saveConversationReadAt,
+} from './conversation-read-storage';
 import { apiClient } from '@/shared/services/api-client';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
 import type { UserRole } from '../types/user.types';
@@ -96,7 +101,7 @@ export async function getConversations(): Promise<Conversation[]> {
       ? body.data
       : [];
 
-  return items.sort((a, b) => {
+  return applyStoredReadState(items).sort((a, b) => {
     const dateA = new Date(
       a.lastMessage?.createdAt || a.updatedAt,
     ).getTime();
@@ -413,6 +418,7 @@ export async function markConversationAsRead(
   conversationId: string,
 ): Promise<void> {
   markStoredConversationAsRead(conversationId);
+ saveConversationReadAt(conversationId);
   try {
     await apiClient.patch(`/chat/messages/${conversationId}/read`);
   } catch {
