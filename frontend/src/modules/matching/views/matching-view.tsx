@@ -57,6 +57,7 @@ export function MatchingView() {
 
         <div className="min-h-[420px] lg:h-full">
           <CandidateDetailPanel
+            key={`${vacancyId}:${selectedCandidate?.id ?? "none"}`}
             candidate={selectedCandidate}
             vacancy={vacancy}
             axes={axes}
