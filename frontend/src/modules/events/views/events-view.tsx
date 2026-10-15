@@ -41,12 +41,11 @@ export function EventsView() {
     }
     function handleOutsideClick(event: MouseEvent) {
       const target = event.target;
-      if (!(target instanceof Element) || !viewRef.current?.contains(target)) return;
-      if (target.closest('[role="search"]')) {
-        setSelectedEventId(null);
-        return;
-      }
-      if (target.closest('aside, button, a, input, textarea, select, label, [role="button"], [contenteditable="true"]')) return;
+      if (!(target instanceof Element)) return;
+      if (
+        viewRef.current?.contains(target) &&
+        target.closest('aside, [aria-label="Listado de talleres"] button[aria-pressed]')
+      ) return;
       setSelectedEventId(null);
     }
     function handleSearchFocus(event: FocusEvent) {
@@ -66,8 +65,8 @@ export function EventsView() {
   }, [selectedEventId]);
 
   return (
-    <div ref={viewRef} className="flex min-h-svh w-full flex-1 flex-col bg-surface-soft text-foreground lg:flex-row">
-      <div className="flex min-w-0 flex-1 flex-col gap-6 px-6 pb-8 pt-20 sm:px-10">
+    <div ref={viewRef} className="flex h-dvh min-h-0 w-full flex-col overflow-hidden bg-surface-soft text-foreground lg:flex-row">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-6 overflow-y-auto overscroll-contain px-6 pb-8 pt-20 sm:px-10">
         <header className="flex flex-col gap-1">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">
             Talleres disponibles
@@ -147,7 +146,7 @@ export function EventsView() {
         </section>
       </div>
 
-      {detail.event ? (
+      {selectedEventId && (detail.event ? (
         <EventDetailPanel event={detail.event} onClose={() => setSelectedEventId(null)} />
       ) : (
         <EventDetailState
@@ -158,7 +157,7 @@ export function EventsView() {
           retry={detail.retry}
           onClose={() => setSelectedEventId(null)}
         />
-      )}
+      ))}
     </div>
   );
 }
