@@ -48,7 +48,7 @@ export function IdCardField() {
             >
               <SelectValue placeholder="Elegir" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent alignItemWithTrigger={false}>
               {ID_CARD_ISSUED_IN.map((code) => (
                 <SelectItem
                   key={code}
