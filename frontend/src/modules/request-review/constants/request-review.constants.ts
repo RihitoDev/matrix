@@ -35,3 +35,6 @@ export const REJECTION_REASONS = [
   "El documento no corresponde a la carrera",
   OTHER_REJECTION_REASON,
 ] as const;
+
+export const BACKOFFICE_USER_FALLBACK_NAME = "Personal administrativo";
+export const BACKOFFICE_USER_LOADING_NAME = "Cargando usuario…";
