@@ -1,8 +1,6 @@
 "use client";
 
-import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { ProfileTabs } from "@/modules/profile/components/profile-tabs";
 import { RADAR_AREA_SCORES, RADAR_KPIS, RADAR_PROFILE } from "../data/radar-profile.data";
 import { calculateAverage } from "../utils/calculate-average";
 import { AffinityRadarChart } from "../components/affinity-radar-chart";
@@ -18,7 +16,7 @@ export function RadarProfileView() {
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
         <nav aria-label="Ruta de navegación">
           <ol className="flex items-center gap-1 text-xs text-text-secondary">
-            <li><Link href="/profile" className="hover:underline">Mi Perfil</Link></li>
+            <li>Mi Perfil</li>
             <li className="flex items-center gap-1 font-medium text-ink-soft" aria-current="page">
               <ChevronRight className="size-3" aria-hidden="true" />
               Radar de afinidad
@@ -30,7 +28,6 @@ export function RadarProfileView() {
         </p>
       </div>
 
-      <ProfileTabs activeTab="radar" />
       <ProfileHeader profile={RADAR_PROFILE} />
       <KpiCards kpis={RADAR_KPIS} />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">

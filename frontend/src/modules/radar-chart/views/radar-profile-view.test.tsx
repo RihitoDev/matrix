@@ -4,9 +4,21 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { stubMatchMedia } from "@/shared/testing/stub-match-media";
 import { RADAR_AREA_SCORES } from "../data/radar-profile.data";
 import { RadarProfileView } from "./radar-profile-view";
+import AppLayout from "@/app/(app)/layout";
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/profile/radar",
+  useRouter: () => ({ replace: vi.fn() }),
+}));
+
+vi.mock("@/modules/auth", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/modules/auth")>();
+  return { ...actual, SessionUserCard: () => null };
+});
 
 vi.mock("recharts", async (importOriginal) => {
   const actual = await importOriginal<typeof import("recharts")>();
+
   return {
     ...actual,
     ResponsiveContainer: ({ children }: { children: ReactElement<{ width: number; height: number }> }) =>
@@ -21,6 +33,7 @@ describe("RadarProfileView", () => {
 
   afterEach(() => {
     cleanup();
+    sessionStorage.clear();
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
@@ -40,14 +53,16 @@ describe("RadarProfileView", () => {
     expect(breakdown.getByText("6,25")).toBeDefined();
   });
 
-  it("shows the fifth profile tab and does not create another sidebar", () => {
-    render(<RadarProfileView />);
+  it("renders only one app navigation when wrapped by the route layout", () => {
+    sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: "titulado" }))}.s`);
+    render(<AppLayout><RadarProfileView /></AppLayout>);
 
-    expect(screen.getByRole("link", { name: "Mi Perfil" }).getAttribute("href")).toBe("/profile");
-    expect(screen.getByRole("navigation", { name: "Ruta de navegación" }).textContent).toContain("Radar de afinidad");
-    expect(screen.getByRole("navigation", { name: "Secciones del perfil" })).toBeDefined();
-    expect(screen.getByRole("link", { name: "Radar de afinidad" }).getAttribute("aria-current")).toBe("page");
-    expect(document.querySelector('[data-slot="sidebar"]')).toBeNull();
+    expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
+    expect(screen.getByRole("link", { name: "Resumen del perfil" })).toHaveAttribute("href", "/profile");
+    expect(screen.getByRole("navigation", { name: "Ruta de navegación" }).textContent).toContain(
+      "Radar de afinidad",
+    );
+
   });
 
   it("does not make HTTP requests", () => {
@@ -55,6 +70,7 @@ describe("RadarProfileView", () => {
     vi.stubGlobal("fetch", fetchSpy);
 
     render(<RadarProfileView />);
+
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 });
