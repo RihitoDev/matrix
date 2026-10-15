@@ -72,7 +72,14 @@ describe("RequestDetailView", () => {
     expect(revoke).toHaveBeenCalledWith("blob:documento");
   });
 
-  const openedHistory = { submittedAt: "2026-09-22T13:14:00.000Z", reviewedAt: "2026-09-22T15:02:00.000Z", reviewedBy: "Admin Uno", rejectionReason: null };
+  const openedHistory = {
+    submittedAt: "2026-09-22T13:14:00.000Z",
+    openedAt: "2026-09-22T15:02:00.000Z",
+    openedBy: "Admin Uno",
+    reviewedAt: "2026-09-22T15:02:00.000Z",
+    reviewedBy: "Admin Uno",
+    rejectionReason: null,
+  };
 
   it("al aprobar, el estado en pantalla pasa de En revisión a Aprobada con lo que devuelve el servidor", async () => {
     getRequestDetail
@@ -98,7 +105,7 @@ describe("RequestDetailView", () => {
     expect(getRequestDetail).toHaveBeenCalledTimes(2);
   });
 
-  it("al rechazar con motivo, el estado y la hora del historial salen del servidor sin recargar la página", async () => {
+  it("al rechazar con motivo, el historial conserva la apertura y suma el rechazo con su hora sin recargar la página", async () => {
     getRequestDetail
       .mockResolvedValueOnce({ ok: true, data: { ...detail, history: openedHistory } })
       .mockResolvedValue({
@@ -127,14 +134,15 @@ describe("RequestDetailView", () => {
     expect(await screen.findByText("Rechazada")).toBeInTheDocument();
     expect(screen.getByText("Rechazada por Admin Uno")).toBeInTheDocument();
     expect(screen.getByText(formatShortDate("2026-09-22T18:30:00.000Z") ?? "")).toBeInTheDocument();
-    expect(screen.queryByText(formatShortDate("2026-09-22T15:02:00.000Z") ?? "")).toBeNull();
+    expect(screen.getByText("Abierta por Admin Uno")).toBeInTheDocument();
+    expect(screen.getByText(formatShortDate("2026-09-22T15:02:00.000Z") ?? "")).toBeInTheDocument();
     expect(getRequestDetail).toHaveBeenCalledTimes(2);
   });
 
   it("muestra las migas, el nombre con la pastilla de estado y el subtítulo con la carrera y la fecha larga", async () => {
     getRequestDetail.mockResolvedValue({
       ok: true,
-      data: { ...detail, history: { submittedAt: "2026-09-22T13:14:00.000Z", reviewedAt: "2026-09-22T15:02:00.000Z", reviewedBy: "Carla Montaño", rejectionReason: null } },
+      data: { ...detail, history: { ...openedHistory, openedBy: "Carla Montaño", reviewedBy: "Carla Montaño" } },
     });
     getDocumentBlob.mockResolvedValue({ ok: true, data: new Blob(["%PDF"]) });
     renderWithQuery(<RequestDetailView id="id-1" />);

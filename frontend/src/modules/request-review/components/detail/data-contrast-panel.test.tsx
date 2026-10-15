@@ -18,7 +18,7 @@ export const detail: ReviewDetail = {
   graduationYear: 2022,
   career: "Licenciatura en Ingeniería de Sistemas",
   document: { type: "academic_diploma", name: "diploma", extension: "pdf", mimeType: "application/pdf", size: 1024 },
-  history: { submittedAt: null, reviewedAt: null, reviewedBy: null, rejectionReason: null },
+  history: { submittedAt: null, openedAt: null, openedBy: null, reviewedAt: null, reviewedBy: null, rejectionReason: null },
 };
 
 describe("DataContrastPanel", () => {

@@ -48,6 +48,8 @@ export interface ReviewDetail {
   document: ReviewDocument | null;
   history: {
     submittedAt: string | null;
+    openedAt: string | null;
+    openedBy: string | null;
     reviewedAt: string | null;
     reviewedBy: string | null;
     rejectionReason: string | null;

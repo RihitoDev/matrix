@@ -1,25 +1,28 @@
 import { formatShortDate } from "../../utils/format-long-date";
 import type { HistoryCardProps } from "../../types/history-card-props.types";
 
-const REVIEWER_LABELS: Record<string, string> = {
-  in_review: "Abierta por",
+const VERDICT_LABELS: Record<string, string> = {
   approved: "Aprobada por",
   rejected: "Rechazada por",
 };
 
-// Solo muestra lo que la respuesta de detalle ya trae (fechas y revisor)
 export function HistoryCard({ detail }: HistoryCardProps) {
-  const { history } = detail;
+  const { history, status } = detail;
   const entries: Array<{ label: string; date: string | null }> = [];
+  const hasVerdict = status in VERDICT_LABELS;
 
   if (history?.submittedAt) {
     entries.push({ label: "Solicitud enviada por la persona titulada", date: formatShortDate(history.submittedAt) });
   }
-  if (history?.reviewedBy && history.reviewedAt) {
-    entries.push({
-      label: `${REVIEWER_LABELS[detail.status] ?? "Revisada por"} ${history.reviewedBy}`,
-      date: formatShortDate(history.reviewedAt),
-    });
+
+  const openedAt = history?.openedAt ?? (hasVerdict ? null : history?.reviewedAt);
+  const openedBy = history?.openedBy ?? (hasVerdict ? null : history?.reviewedBy);
+  if (openedAt) {
+    entries.push({ label: openedBy ? `Abierta por ${openedBy}` : "Solicitud abierta", date: formatShortDate(openedAt) });
+  }
+
+  if (hasVerdict && history?.reviewedBy && history.reviewedAt) {
+    entries.push({ label: `${VERDICT_LABELS[status]} ${history.reviewedBy}`, date: formatShortDate(history.reviewedAt) });
   }
   if (entries.length === 0) return null;
 
