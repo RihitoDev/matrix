@@ -108,22 +108,26 @@ export function MentorAvailabilityView({ initialWeekStart }: MentorAvailabilityV
             <AvailabilityLoading />
           ) : error ? (
             <p className="text-center text-destructive">{error}</p>
-          ) : blocks.length === 0 ? (
-            <section
-              className={cn(
-                "flex flex-col items-center gap-3 rounded-lg",
-                "border border-dashed border-border p-8 text-center",
-              )}
-            >
-              <p className="text-muted-foreground">{MY_AVAILABILITY_TEXT.emptyWeek}</p>
-            </section>
           ) : (
-            <WeekGrid
-              blocks={blocks}
-              weekRange={weekRange}
-              variant="owner"
-              onEditBlock={handleEditBlock}
-            />
+            <>
+              {blocks.length === 0 && (
+                <p
+                  role="status"
+                  className={cn(
+                    "rounded-lg border border-dashed border-border px-4 py-3",
+                    "text-center text-sm text-muted-foreground",
+                  )}
+                >
+                  {MY_AVAILABILITY_TEXT.emptyWeek}
+                </p>
+              )}
+              <WeekGrid
+                blocks={blocks}
+                weekRange={weekRange}
+                variant="owner"
+                onEditBlock={handleEditBlock}
+              />
+            </>
           )}
         </div>
 
