@@ -1,12 +1,10 @@
 "use client";
 
-import { useAuth } from "@/shared/contexts/auth-context";
-import { getRolesLabel } from "@/modules/auth";
 import { useMemo } from "react";
 import { AppShell } from "@/shared/components/layout";
 import { SidebarToggleButton } from "@/shared/components/layout/sidebar-toggle-button";
-import type { SidebarUser } from "@/shared/types/sidebar-user.types";
 import { useBackofficeSession } from "../../hooks/use-backoffice-session";
+import { useBackofficeUser } from "../../hooks/use-backoffice-user";
 import { useStatusCounts } from "../../hooks/use-status-counts";
 import type { ReviewStatus } from "../../types/request-review.types";
 import { BackofficeBrand } from "./backoffice-brand";
@@ -17,16 +15,13 @@ import type { BackofficeShellProps } from "../../types/backoffice-shell-props.ty
 const PENDING_ONLY: readonly ReviewStatus[] = ["pending"];
 const NONE: readonly ReviewStatus[] = [];
 
-// TODO: mostrar el nombre y el cargo reales cuando el login los devuelva
-const BACKOFFICE_USER: SidebarUser = { fullName: "Personal administrativo", role: "Administrativo" };
-
 // Ítem activo con fondo tenue y barra roja en el borde izquierdo (sin el fondo rojo por defecto)
 const ITEM_CLASS =
   "overflow-visible data-active:bg-surface/10 data-active:before:-left-3 data-active:before:w-1 data-active:before:bg-accent";
 
 export function BackofficeShell({ children }: BackofficeShellProps) {
   const { state, logout } = useBackofficeSession();
-  const { roles } = useAuth();
+  const user = useBackofficeUser(state === "allowed");
   // El conteo de pendientes solo se pide con sesión de administrativo
   const counts = useStatusCounts(state === "allowed" ? PENDING_ONLY : NONE);
 
@@ -48,7 +43,7 @@ export function BackofficeShell({ children }: BackofficeShellProps) {
   return (
     <AppShell
       brand={<BackofficeBrand />}
-      sidebarFooter={<BackofficeUserFooter user={{ ...BACKOFFICE_USER, role: getRolesLabel(roles) }} onLogout={logout} />}
+      sidebarFooter={<BackofficeUserFooter user={user} onLogout={logout} />}
       sidebarItemClassName={ITEM_CLASS}
       sidebarItemBadges={badges}
       sidebarWidth="15.5rem"

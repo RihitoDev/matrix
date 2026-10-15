@@ -1,9 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { downloadFile } from "@/shared/utils/download-file";
 import { saveFile, selectCsvDestination } from "@/shared/utils/save-file";
-import { EXPORT_SUCCESS_MESSAGE, EXPORT_SUCCESS_TOAST_DURATION_MS } from "../constants/reports.constants";
+import {
+  EXPORT_ERROR_MESSAGE,
+  EXPORT_SUCCESS_MESSAGE,
+  EXPORT_SUCCESS_TOAST_DURATION_MS,
+  REPORT_ALERT_DURATION_MS,
+} from "../constants/reports.constants";
 import type { ExportedFile } from "../types/registered-user.types";
 
 export function useExportReportCsv(exportReport: () => Promise<ExportedFile>, suggestedFileName: string) {
@@ -50,7 +56,12 @@ export function useExportReportCsv(exportReport: () => Promise<ExportedFile>, su
       }
       setSuccessMessage(EXPORT_SUCCESS_MESSAGE);
     } catch {
-      setErrorMessage("No se pudo exportar el reporte. Inténtalo de nuevo.");
+      setErrorMessage(EXPORT_ERROR_MESSAGE);
+      toast.error(EXPORT_ERROR_MESSAGE, {
+        duration: REPORT_ALERT_DURATION_MS,
+        closeButton: true,
+        richColors: true,
+      });
     } finally {
       exportInProgress.current = false;
       setIsExporting(false);
