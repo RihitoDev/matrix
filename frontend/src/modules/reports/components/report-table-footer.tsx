@@ -26,7 +26,9 @@ export function ReportTableFooter({
         <RefreshButton onClick={onRefresh} isRefreshing={isLoading} />
       </div>
       <div className="flex justify-center md:justify-end">
-        <TablePagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+        {totalItems > 0 && (
+          <TablePagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
+        )}
       </div>
     </div>
   );

@@ -188,9 +188,9 @@ describe('ReportsController', () => {
       .spyOn(historyService, 'getReportHistory')
       .mockResolvedValue({ items: [], totalItems: 0, totalPages: 0, ...query });
 
-    const result = await controller.getReportHistory(query);
+    const result = await controller.getReportHistory(query, 'admin-1');
 
-    expect(spy).toHaveBeenCalledWith(query);
+    expect(spy).toHaveBeenCalledWith('admin-1', query);
     expect(result).toEqual({
       items: [],
       totalItems: 0,

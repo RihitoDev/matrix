@@ -36,7 +36,6 @@ export function RegisteredUsersReportView() {
   const {
     exportCsv,
     isExporting,
-    errorMessage: exportErrorMessage,
     successMessage: exportSuccessMessage,
   } = useExportRegisteredUsersCsv(userType, period, search);
 
@@ -99,12 +98,6 @@ export function RegisteredUsersReportView() {
         </div>
         <ReportActions onExport={exportCsv} isExporting={isExporting} period={period} onPeriodChange={handlePeriodChange} />
       </div>
-
-      {exportErrorMessage && (
-        <p role="alert" className="text-sm text-accent">
-          {exportErrorMessage}
-        </p>
-      )}
 
       <RegisteredUsersTable users={users} isLoading={isLoading} errorMessage={errorMessage} searchTerm={search} />
 
