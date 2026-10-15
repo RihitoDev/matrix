@@ -4514,6 +4514,8 @@ export const AccessRequestScalarFieldEnum = {
   documentTypeId: 'documentTypeId',
   documentFileId: 'documentFileId',
   submittedAt: 'submittedAt',
+  openedById: 'openedById',
+  openedAt: 'openedAt',
   reviewedById: 'reviewedById',
   reviewedAt: 'reviewedAt',
   rejectionReason: 'rejectionReason',

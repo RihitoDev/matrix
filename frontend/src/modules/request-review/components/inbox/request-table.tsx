@@ -15,6 +15,7 @@ import type { RequestTableProps } from "../../types/request-table-props.types";
 const HEAD_CLASS = "h-10 px-5 lg:px-4 text-[12.5px] font-semibold text-text-secondary";
 const CELL_CLASS = "px-5 lg:px-4 text-[14.5px] text-ink";
 const WRAP_CLASS = "lg:whitespace-normal";
+const TABLE_COLUMN_COUNT = 7;
 
 export function RequestTable({ items = [], isLoading = false }: RequestTableProps) {
   return (
@@ -23,6 +24,7 @@ export function RequestTable({ items = [], isLoading = false }: RequestTableProp
         <TableRow className="hover:bg-transparent">
           <TableHead className={HEAD_CLASS}>Solicitante</TableHead>
           <TableHead className={HEAD_CLASS}>Código SIS</TableHead>
+          <TableHead className={HEAD_CLASS}>Carrera</TableHead>
           <TableHead className={HEAD_CLASS}>Documento</TableHead>
           <TableHead className={HEAD_CLASS}>Enviada</TableHead>
           <TableHead className={HEAD_CLASS}>Estado</TableHead>
@@ -33,7 +35,7 @@ export function RequestTable({ items = [], isLoading = false }: RequestTableProp
         {isLoading
           ? Array.from({ length: REVIEW_PAGE_SIZE / 2 }, (_, index) => (
               <TableRow key={index} data-testid="request-skeleton-row" className="h-[60px] border-border">
-                {Array.from({ length: 6 }, (_, cell) => (
+                {Array.from({ length: TABLE_COLUMN_COUNT }, (_, cell) => (
                   <TableCell key={cell} className={CELL_CLASS}>
                     <Skeleton className="h-5 w-full" />
                   </TableCell>
@@ -57,6 +59,7 @@ export function RequestTable({ items = [], isLoading = false }: RequestTableProp
                   </div>
                 </TableCell>
                 <TableCell className={CELL_CLASS}>{item.sisCode}</TableCell>
+                <TableCell className={cn(CELL_CLASS, WRAP_CLASS)}>{item.career}</TableCell>
                 <TableCell className={cn(CELL_CLASS, WRAP_CLASS)}>
                   <span className="inline-flex items-center gap-1.5">
                     <FileText className="size-4 shrink-0 text-text-secondary" strokeWidth={1.75} aria-hidden="true" />

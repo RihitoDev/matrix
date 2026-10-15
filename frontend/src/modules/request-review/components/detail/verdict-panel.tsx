@@ -5,6 +5,7 @@ import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RejectDialog } from "../reject-dialog/reject-dialog";
 import { ApproveDialog } from "./approve-dialog";
+import { useInvalidateReviewQueries } from "../../hooks/use-invalidate-review-queries";
 import { requestReviewService } from "../../services/request-review.service";
 import type { VerdictPanelProps } from "../../types/verdict-panel-props.types";
 
@@ -13,7 +14,8 @@ const REJECTED_MESSAGE = "Solicitud rechazada. Se notificó al titulado con el m
 const REJECTED_NO_MAIL_MESSAGE = "Solicitud rechazada, pero no se pudo enviar el correo al titulado.";
 const APPROVED_NO_CODE_MESSAGE = "Solicitud aprobada, pero no se pudo enviar el código de activación al correo del titulado.";
 
-export function VerdictPanel({ detail, status, onStatusChange }: VerdictPanelProps) {
+export function VerdictPanel({ detail }: VerdictPanelProps) {
+  const invalidateReviewQueries = useInvalidateReviewQueries();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
@@ -27,8 +29,8 @@ export function VerdictPanel({ detail, status, onStatusChange }: VerdictPanelPro
     setIsApproving(false);
     setConfirmOpen(false);
     if (result.ok) {
+      await invalidateReviewQueries(detail.id);
       setMessage(result.data.activationCodeSent ? APPROVED_MESSAGE : APPROVED_NO_CODE_MESSAGE);
-      onStatusChange("approved");
     } else {
       setError(result.message);
     }
@@ -38,7 +40,7 @@ export function VerdictPanel({ detail, status, onStatusChange }: VerdictPanelPro
     <section className="flex flex-col gap-4 rounded-[10px] border border-border bg-surface p-5" aria-label="Dictamen">
       <h2 className="font-tight text-[17px] font-bold text-ink">Dictamen</h2>
 
-      {status === "in_review" ? (
+      {detail.status === "in_review" ? (
         <>
           <div className="flex flex-wrap gap-3">
             <Button
@@ -91,9 +93,9 @@ export function VerdictPanel({ detail, status, onStatusChange }: VerdictPanelPro
         detail={detail}
         open={rejectOpen}
         onOpenChange={setRejectOpen}
-        onRejected={(notificationSent) => {
+        onRejected={async (notificationSent) => {
+          await invalidateReviewQueries(detail.id);
           setMessage(notificationSent ? REJECTED_MESSAGE : REJECTED_NO_MAIL_MESSAGE);
-          onStatusChange("rejected");
         }}
       />
     </section>

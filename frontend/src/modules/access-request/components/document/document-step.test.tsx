@@ -218,7 +218,17 @@ describe("DocumentStep", () => {
     const panel = screen.getByRole("complementary");
     expect(within(panel).getByRole("heading", { name: "Para que tu solicitud se apruebe sin demoras" })).toBeInTheDocument();
     expect(within(panel).getAllByRole("listitem")).toHaveLength(4);
-    expect(within(panel).getByText("Formato JPG, PNG o PDF de hasta 10 MB.")).toBeInTheDocument();
+    expect(within(panel).getByText("Documento original, no una copia.")).toBeInTheDocument();
+  });
+
+  it("la lista del tipo de documento se despliega debajo del campo sin tapar su valor", async () => {
+    const view = renderWithContext(<DocumentStep />);
+    await reachStep2(view.ctx);
+
+    await userEvent.setup().click(typeSelect());
+
+    expect(await screen.findByRole("option", { name: "Diploma académico" })).toBeInTheDocument();
+    expect(document.querySelector("[data-slot=select-content]")).toHaveAttribute("data-align-trigger", "false");
   });
 
   it("no usa los términos prohibidos ni el atributo capture", async () => {
