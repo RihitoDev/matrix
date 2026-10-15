@@ -70,6 +70,12 @@ export class MessageService {
       now,
     );
 
+    await this.participantRepository.markRead(
+      params.conversationId,
+      params.senderId,
+      now,
+    );
+
     return {
       id: created.id,
       conversationId: created.conversationId,

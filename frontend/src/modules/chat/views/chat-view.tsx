@@ -1,3 +1,4 @@
+﻿
 'use client';
 
 import { useState } from 'react';
@@ -10,15 +11,22 @@ import { ConversationList } from '../components/conversation-list';
 import { EmptyChatState } from '../components/empty-chat-state';
 import { ContactSearchModal } from '../components/contact-search-modal';
 import { ChatRoom } from '../components/chat-room';
+import { ChatConnectionDialog } from '../components/chat-connection-dialog';
 
-import { Conversation } from '../types/conversation.types';
-import { User } from '../types/user.types';
-import { sendMessage, getCurrentSessionUserId } from '../services/chat-api';
+import type { Conversation } from '../types/conversation.types';
+import type { User } from '../types/user.types';
+
+import {
+  sendMessage,
+  getCurrentSessionUserId,
+} from '../services/chat-api';
 
 export function ChatView() {
   const currentUserId = getCurrentSessionUserId();
+
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [dismissedError, setDismissedError] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -52,6 +60,8 @@ export function ChatView() {
     refetch: retryMessages,
   } = useMessages(selectedId);
 
+  const showConnectionDialog = isError && !dismissedError;
+
   const handleBackToList = () => {
     clearSelectedConversation();
   };
@@ -79,7 +89,9 @@ export function ChatView() {
 
   const handleSendMessage = async (content: string): Promise<void> => {
     if (!selectedId || isSending) {
-      throw new Error('No hay una conversación seleccionada o ya se está enviando un mensaje.');
+      throw new Error(
+        'No hay una conversaciÃ³n seleccionada o ya se estÃ¡ enviando un mensaje.',
+      );
     }
 
     const conversationId = selectedId;
@@ -93,22 +105,35 @@ export function ChatView() {
         senderId: currentUserId,
       });
 
-      updateConversationLastMessage(conversationId, content, currentUserId);
+      updateConversationLastMessage(
+        conversationId,
+        content,
+        currentUserId,
+      );
 
       await queryClient.invalidateQueries({
         queryKey: messagesQueryKey(conversationId),
       });
-    } catch (error) {
-      throw error;
     } finally {
       setIsSending(false);
     }
   };
 
+  const handleRetryConversations = async () => {
+    setDismissedError(true);
+
+    try {
+      await retryConversations();
+    } catch {
+    } finally {
+      setDismissedError(false);
+    }
+  };
+
   return (
-    <div className="flex h-full min-h-0 w-full max-w-full flex-1 bg-surface-soft overflow-hidden font-sans">
+    <div className="flex h-full min-h-0 w-full max-w-full flex-1 overflow-hidden bg-surface-soft font-sans">
       <aside
-        className={`w-full md:w-80 lg:w-96 h-full shrink-0 overflow-hidden ${
+        className={`h-full w-full shrink-0 overflow-hidden md:w-80 lg:w-96 ${
           selectedId ? 'hidden md:block' : 'block'
         }`}
       >
@@ -117,7 +142,6 @@ export function ChatView() {
           selectedId={selectedId}
           isLoading={isLoading}
           isError={isError}
-          onRetry={retryConversations}
           hasMore={hasMore}
           activeFilter={activeFilter}
           searchQuery={searchQuery}
@@ -130,7 +154,7 @@ export function ChatView() {
       </aside>
 
       <main
-        className={`flex-1 h-full min-w-0 min-h-0 bg-white flex flex-col overflow-hidden ${
+        className={`flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white ${
           !selectedId ? 'hidden md:flex' : 'flex'
         }`}
       >
@@ -162,6 +186,14 @@ export function ChatView() {
         )}
       </main>
 
+      <ChatConnectionDialog
+        open={showConnectionDialog}
+        onClose={() => setDismissedError(true)}
+        onRetry={() => {
+          void handleRetryConversations();
+        }}
+      />
+
       <ContactSearchModal
         isOpen={isSearchModalOpen}
         onClose={() => setIsSearchModalOpen(false)}
@@ -170,3 +202,4 @@ export function ChatView() {
     </div>
   );
 }
+

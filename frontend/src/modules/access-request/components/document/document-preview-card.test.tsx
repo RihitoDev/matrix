@@ -1,4 +1,4 @@
-import { act, cleanup, screen } from "@testing-library/react";
+import { act, cleanup, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { accessRequestService } from "../../services/access-request.service";
@@ -96,7 +96,9 @@ describe("DocumentPreviewCard", () => {
     await userEvent.setup().click(screen.getByRole("button", { name: "Quitar" }));
 
     expect(removeDoc).toHaveBeenCalledWith("draft-1");
-    expect(view.ctx().hasDocument).toBe(false);
+    await waitFor(() => {
+      expect(view.ctx().hasDocument).toBe(false);
+    });
     expect(screen.queryByText("Listo")).toBeNull();
   });
 

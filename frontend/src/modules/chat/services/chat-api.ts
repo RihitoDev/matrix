@@ -8,18 +8,21 @@ import {
   SendMessageResponse,
   StandardApiResponse,
 } from '../types/conversation.types';
-import { MOCK_CONVERSATIONS } from '../mocks/mock-conversations';
+//import { MOCK_CONVERSATIONS } from '../mocks/mock-conversations';
 import { User } from '../types/user.types';
 import {
   CURRENT_USER_ID
 } from '../mocks/mock-users';
 import {
   getMessagesByConversation,
-  getStoredMessages,
   saveStoredMessage,
-  getStoredConversationReadState,
   markStoredConversationAsRead,
 } from './message-storage';
+
+import {
+  applyStoredReadState,
+  saveConversationReadAt,
+} from './conversation-read-storage';
 import { apiClient } from '@/shared/services/api-client';
 import { getAccessToken } from '@/shared/services/storage/access-token-storage';
 import type { UserRole } from '../types/user.types';
@@ -84,66 +87,31 @@ interface ChatUserResponse {
   role: string;
   isOnline: boolean;
 }
+
 export async function getConversations(): Promise<Conversation[]> {
-  try {
-    const response = await apiClient.get<Conversation[] | { data: Conversation[] }>(
-      '/chat/conversations',
-    );
+  const response = await apiClient.get<
+    Conversation[] | { data: Conversation[] }
+  >('/chat/conversations');
 
-    const body = response.data;
-    const items = Array.isArray(body)
-      ? body
-      : Array.isArray((body as { data?: Conversation[] })?.data)
-        ? (body as { data: Conversation[] }).data
-        : [];
+  const body = response.data;
 
-    return items.sort((a, b) => {
-      const dateA = new Date(a.lastMessage?.createdAt || a.updatedAt).getTime();
-      const dateB = new Date(b.lastMessage?.createdAt || b.updatedAt).getTime();
-      return dateB - dateA;
-    });
-  } catch {
-    const readState = getStoredConversationReadState();
-    const storedMessages = getStoredMessages();
+  const items = Array.isArray(body)
+    ? body
+    : Array.isArray(body?.data)
+      ? body.data
+      : [];
 
-    const conversations = MOCK_CONVERSATIONS.map((conv) => {
-      const unread = conv.id in readState ? readState[conv.id] : conv.unreadCount;
+  return applyStoredReadState(items).sort((a, b) => {
+    const dateA = new Date(
+      a.lastMessage?.createdAt || a.updatedAt,
+    ).getTime();
 
-      const convMessages = Array.isArray(storedMessages)
-        ? storedMessages.filter((m) => m && m.conversationId === conv.id)
-        : [];
+    const dateB = new Date(
+      b.lastMessage?.createdAt || b.updatedAt,
+    ).getTime();
 
-      if (convMessages.length === 0) {
-        return {
-          ...conv,
-          unreadCount: unread,
-        };
-      }
-
-      const lastMsg = convMessages[convMessages.length - 1];
-      const lastDate = lastMsg.timestamp || lastMsg.createdAt || conv.updatedAt;
-
-      return {
-        ...conv,
-        unreadCount: unread,
-        updatedAt: lastDate,
-        lastMessage: {
-          id: lastMsg.id,
-          senderId: lastMsg.senderId,
-          content: lastMsg.content,
-          isAttachment: Boolean(lastMsg.isAttachment),
-          attachmentType: lastMsg.attachmentType,
-          createdAt: lastDate,
-        },
-      };
-    });
-
-    return conversations.sort((a, b) => {
-      const dateA = new Date(a.lastMessage?.createdAt || a.updatedAt).getTime();
-      const dateB = new Date(b.lastMessage?.createdAt || b.updatedAt).getTime();
-      return dateB - dateA;
-    });
-  }
+    return dateB - dateA;
+  });
 }
 
 
@@ -185,9 +153,15 @@ export async function searchUsers(rawQuery: string): Promise<User[]> {
 export async function getMessages(
   conversationId: string,
 ): Promise<Message[]> {
-  await new Promise((resolve) => setTimeout(resolve, 200));
-
-  return getMessagesByConversation(conversationId);
+  try {
+    const res = await getPaginatedMessages({
+      conversationId,
+      limit: 100,
+    });
+    return res.data;
+  } catch {
+    return getMessagesByConversation(conversationId);
+  }
 }
 
 
@@ -235,22 +209,8 @@ export async function getPaginatedMessages({
       const rawMessages = (
         Array.isArray(payload.data) ? payload.data : []
       ) as RawBackendMessageItem[];
-      const stored = getMessagesByConversation(conversationId);
-      const localOnly = stored.filter(
-        (localMsg) =>
-          !rawMessages.some(
-            (rm: RawBackendMessageItem) =>
-              rm.id === localMsg.id ||
-              (rm.content === localMsg.content &&
-                Math.abs(
-                  new Date(rm.createdAt || rm.timestamp || '').getTime() -
-                    new Date(
-                      localMsg.createdAt || localMsg.timestamp || '',
-                    ).getTime(),
-                ) < 10000),
-          ),
-      );
-      const combined = [...rawMessages, ...localOnly].sort(
+      
+      const combined = [...rawMessages].sort(
         (a, b) =>
           new Date(a.timestamp || a.createdAt || a.sentAt || '').getTime() -
           new Date(b.timestamp || b.createdAt || b.sentAt || '').getTime(),
@@ -288,7 +248,8 @@ export async function getPaginatedMessages({
         };
       }
     }
-  } catch {
+  } catch (error){
+    throw error;
   }
 
   const messages = getMessagesByConversation(conversationId);
@@ -403,89 +364,64 @@ export async function sendMessage(
     });
 
     const body = response?.data;
-    if (body) {
-      const msg =
-        typeof body === 'object' &&
-        body !== null &&
-        'data' in body &&
-        body.data !== null &&
-        typeof body.data === 'object' &&
-        'id' in body.data
-          ? (body.data as Message)
-          : (body as Message);
+    const msg =
+      typeof body === 'object' &&
+      body !== null &&
+      'data' in body &&
+      body.data !== null &&
+      typeof body.data === 'object' &&
+      'id' in body.data
+        ? (body.data as Message)
+        : (body as Message);
 
-      if (msg && msg.id) {
-        const createdMessage: Message = {
-          id: msg.id,
-          conversationId: msg.conversationId,
-          senderId:
-            msg.senderId || payload.senderId || getCurrentSessionUserId(),
-          content: msg.content,
-          timestamp:
-            msg.timestamp || msg.createdAt || new Date().toISOString(),
-          status: 'sent',
-          createdAt:
-            msg.createdAt || msg.timestamp || new Date().toISOString(),
-          isAttachment: Boolean(msg.isAttachment),
-          attachmentType: msg.attachmentType || null,
-        };
-
-        saveStoredMessage(createdMessage);
-        markStoredConversationAsRead(payload.conversationId);
-
-        return {
-          statusCode: 201,
-          ok: true,
-          detail: 'Mensaje enviado exitosamente',
-          data: createdMessage,
-        };
-      }
+    if (!msg || !msg.id) {
+      throw new Error(
+        'Error del servidor: No se pudo procesar el envio del mensaje',
+      );
     }
-  } catch {
+
+    const createdMessage: Message = {
+      id: msg.id,
+      conversationId: msg.conversationId || payload.conversationId,
+      senderId:
+        msg.senderId || payload.senderId || getCurrentSessionUserId(),
+      content: msg.content || trimmedContent,
+      timestamp:
+        msg.timestamp || msg.createdAt || new Date().toISOString(),
+      status: (msg.status as MessageStatus) || 'sent',
+      createdAt:
+        msg.createdAt || msg.timestamp || new Date().toISOString(),
+      isAttachment: Boolean(msg.isAttachment),
+      attachmentType: msg.attachmentType || null,
+    };
+
+    saveStoredMessage(createdMessage);
+    markStoredConversationAsRead(payload.conversationId);
+
+    return {
+      statusCode: 201,
+      ok: true,
+      detail: 'Mensaje enviado exitosamente',
+      data: createdMessage,
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error(
+      'Error del servidor: No se pudo procesar el envio del mensaje',
+    );
   }
-
-  const minLatency = 300;
-  const maxLatency = 600;
-
-  const latency =
-    options?.latencyMs ??
-    Math.floor(
-      Math.random() * (maxLatency - minLatency + 1),
-    ) +
-      minLatency;
-
-  await new Promise((resolve) =>
-    setTimeout(resolve, latency),
-  );
-
-  const nowIso = new Date().toISOString();
-
-  const createdMessage: Message = {
-    id: `msg-${Date.now()}-${Math.random()
-      .toString(36)
-      .substring(2, 9)}`,
-    conversationId: payload.conversationId,
-    senderId: payload.senderId || getCurrentSessionUserId(),
-    content: payload.content,
-    timestamp: nowIso,
-    status: 'sent',
-    createdAt: nowIso,
-    isAttachment: false,
-  };
-
-  saveStoredMessage(createdMessage);
-  markStoredConversationAsRead(payload.conversationId);
-
-  return {
-    statusCode: 201,
-    ok: true,
-    detail: 'Mensaje enviado exitosamente',
-    data: createdMessage,
-  };
 }
 
 export async function markConversationAsRead(
   conversationId: string,
 ): Promise<void> {
   markStoredConversationAsRead(conversationId);
+ saveConversationReadAt(conversationId);
+  try {
+    await apiClient.patch(`/chat/messages/${conversationId}/read`);
+  } catch {
+    // Graceful fallback
+  }
 }
