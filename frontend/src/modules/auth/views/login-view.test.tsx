@@ -7,7 +7,7 @@ import { LoginView } from "./login-view";
 const push = vi.fn();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push }),
+  useRouter: () => ({ push, replace: vi.fn() }),
 }));
 
 vi.mock("../hooks/use-login", () => ({
@@ -16,6 +16,7 @@ vi.mock("../hooks/use-login", () => ({
 
 vi.mock("@/shared/services/storage/access-token-storage", () => ({
   saveAccessToken: vi.fn(),
+  getAccessToken: vi.fn(() => null),
 }));
 
 describe("LoginView", () => {

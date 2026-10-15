@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLogin } from "../hooks/use-login";
+import { useRedirectAuthenticated } from "../hooks/use-redirect-authenticated";
 import { NEXT_PARAM } from "../constants/session.constants";
 import { resolvePostLoginPath } from "../utils/resolve-post-login-path";
 import { startSession } from "../utils/session";
@@ -16,6 +17,7 @@ import { validateLoginFields, type LoginFieldErrors } from "../utils/validate-lo
 
 export function LoginView() {
   const router = useRouter();
+  useRedirectAuthenticated();
   const { login, isLoading, error } = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
