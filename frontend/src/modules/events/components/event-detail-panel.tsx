@@ -20,7 +20,7 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
   return (
     <aside
       aria-label={`Detalle de ${event.title}`}
-      className="w-full shrink-0 border-t border-border bg-surface lg:min-h-svh lg:w-[340px] lg:self-stretch lg:border-l lg:border-t-0 xl:w-[360px]"
+      className="max-h-[55dvh] min-h-0 w-full shrink-0 overflow-y-auto overscroll-contain border-t border-border bg-surface lg:h-full lg:max-h-none lg:w-[340px] lg:border-l lg:border-t-0 xl:w-[360px]"
     >
       <Card className="gap-0 rounded-none border-0 shadow-none bg-transparent space-y-5 px-6 py-7 lg:px-7">
         <header className="space-y-3">

@@ -11,6 +11,14 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace }),
 }));
 
+vi.mock("../../hooks/use-backoffice-user", async () => {
+  const { useAuth } = await import("@/shared/contexts/auth-context");
+  const { getRolesLabel } = await import("@/modules/auth");
+  return {
+    useBackofficeUser: () => ({ fullName: "Personal administrativo", role: getRolesLabel(useAuth().roles) }),
+  };
+});
+
 const tokenFor = (roleTag: string) => `h.${btoa(JSON.stringify({ sub: "u1", roleTag }))}.s`;
 
 describe("BackofficeShell", () => {

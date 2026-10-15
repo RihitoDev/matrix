@@ -28,6 +28,7 @@ import { ChatModule } from './modules/chat/chat.module.js';
 import { MatchingModule } from './modules/matching/matching.module.js';
 import { JobOffersModule } from './modules/job-offers/job-offers.module.js';
 
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),

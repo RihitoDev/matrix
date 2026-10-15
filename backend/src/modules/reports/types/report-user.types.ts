@@ -42,3 +42,25 @@ export interface ReportCsvFile {
   readonly fileName: string;
   readonly content: string;
 }
+
+export interface ReportUserRecord {
+  readonly id: string;
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly email: string;
+  readonly createdAt: Date;
+  readonly roles: readonly { readonly role: { readonly name: string } }[];
+}
+
+export interface ReportAccessRequestRecord {
+  readonly id: string;
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly email: string;
+  readonly idCardNumber: string;
+  readonly rejectionReason: string | null;
+  readonly submittedAt: Date | null;
+  readonly createdAt: Date;
+  readonly status: { readonly title: string };
+  readonly documentType: { readonly title: string } | null;
+}
