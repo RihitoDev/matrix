@@ -17,11 +17,12 @@ import { validateLoginFields, type LoginFieldErrors } from "../utils/validate-lo
 
 export function LoginView() {
   const router = useRouter();
-  useRedirectAuthenticated();
   const { login, isLoading, error } = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  useRedirectAuthenticated(!isSigningIn);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -30,6 +31,7 @@ export function LoginView() {
     if (errors.email || errors.password) return;
     const result = await login({ email, password });
     if (result) {
+      setIsSigningIn(true);
       startSession(result.accessToken);
       const next = new URLSearchParams(window.location.search).get(NEXT_PARAM);
       router.push(resolvePostLoginPath(result.roles ?? result.roleTag, next));
