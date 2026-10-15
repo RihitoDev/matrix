@@ -13,6 +13,10 @@ vi.mock("@/modules/request-review/hooks/use-backoffice-session", () => ({
   useBackofficeSession: () => ({ state: "allowed", logout: vi.fn() }),
 }));
 
+vi.mock("@/modules/request-review/hooks/use-backoffice-user", () => ({
+  useBackofficeUser: () => ({ fullName: "Personal administrativo", role: "Administrativo" }),
+}));
+
 vi.mock("@/modules/request-review/hooks/use-status-counts", () => ({
   useStatusCounts: () => ({ pending: 0 }),
 }));

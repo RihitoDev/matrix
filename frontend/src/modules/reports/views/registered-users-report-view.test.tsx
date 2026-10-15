@@ -1,6 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent, { type UserEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { toast } from "sonner";
 import type { ApiResponse, PaginatedData } from "@/shared/types/api-response.types";
 import * as downloadFileModule from "@/shared/utils/download-file";
 import { reportsService } from "../services/reports.service";
@@ -411,11 +412,14 @@ describe("RegisteredUsersReportView", () => {
   it("muestra un mensaje si falla la exportación", async () => {
     vi.spyOn(reportsService, "exportRegisteredUsersCsv").mockRejectedValueOnce(new Error("Network error"));
     const downloadSpy = vi.spyOn(downloadFileModule, "downloadFile");
+    const toastErrorSpy = vi.spyOn(toast, "error");
     await renderLoadedView();
 
     fireEvent.click(screen.getByRole("button", { name: "Exportar CSV" }));
 
-    expect((await screen.findByRole("alert")).textContent).toBe("No se pudo exportar el reporte. Inténtalo de nuevo.");
+    await waitFor(() =>
+      expect(toastErrorSpy).toHaveBeenCalledWith("No se pudo exportar el reporte. Inténtalo de nuevo.", expect.any(Object)),
+    );
     expect(downloadSpy).not.toHaveBeenCalled();
     expect(screen.queryByText("La exportación de la tabla ha sido un éxito")).toBeNull();
   });

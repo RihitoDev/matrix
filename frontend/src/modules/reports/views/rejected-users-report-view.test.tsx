@@ -1,6 +1,7 @@
 import { notifyManager } from "@tanstack/react-query";
 import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { toast } from "sonner";
 import type { ApiResponse, PaginatedData } from "@/shared/types/api-response.types";
 import { renderWithQuery } from "@/shared/testing/render-with-query";
 import * as downloadFileModule from "@/shared/utils/download-file";
@@ -313,6 +314,7 @@ describe("RejectedUsersReportView", () => {
   it("muestra un mensaje si falla la exportación", async () => {
     vi.spyOn(reportsService, "exportRejectedUsersCsv").mockRejectedValueOnce(new Error("Network error"));
     const downloadSpy = vi.spyOn(downloadFileModule, "downloadFile");
+    const toastErrorSpy = vi.spyOn(toast, "error");
     renderWithQuery(<RejectedUsersReportView />);
     await waitFor(() => {
       expect(screen.getByText("Juan Carlos Peres Rojas")).toBeDefined();
@@ -320,7 +322,9 @@ describe("RejectedUsersReportView", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Exportar CSV" }));
 
-    expect((await screen.findByRole("alert")).textContent).toBe("No se pudo exportar el reporte. Inténtalo de nuevo.");
+    await waitFor(() =>
+      expect(toastErrorSpy).toHaveBeenCalledWith("No se pudo exportar el reporte. Inténtalo de nuevo.", expect.any(Object)),
+    );
     expect(downloadSpy).not.toHaveBeenCalled();
     expect(screen.queryByText("La exportación de la tabla ha sido un éxito")).toBeNull();
   });
