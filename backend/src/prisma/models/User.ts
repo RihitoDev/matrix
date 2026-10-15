@@ -2181,8 +2181,6 @@ export type UserUncheckedUpdateWithoutCertificationsInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
-<<<<<<< HEAD
-=======
 }
 
 export type UserCreateWithoutCvFileInput = {
@@ -2367,7 +2365,6 @@ export type UserUncheckedUpdateWithoutCvFileInput = {
   chatMessages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   chatParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   presence?: Prisma.UserPresenceUncheckedUpdateOneWithoutUserNestedInput
->>>>>>> origin/develop
 }
 
 export type UserCreateWithoutMentorTechnicalAreasInput = {
@@ -4959,10 +4956,6 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
-<<<<<<< HEAD
-  cvPdfUrl?: runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Date | string
   updatedAt?: Date | string
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
@@ -4971,10 +4964,7 @@ export type UserCreateWithoutConversationsAsUserAInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -5009,10 +4999,6 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
-<<<<<<< HEAD
-  cvPdfUrl?: runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Date | string
   updatedAt?: Date | string
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
@@ -5020,10 +5006,7 @@ export type UserUncheckedCreateWithoutConversationsAsUserAInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -5062,10 +5045,6 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
-<<<<<<< HEAD
-  cvPdfUrl?: runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Date | string
   updatedAt?: Date | string
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
@@ -5074,10 +5053,7 @@ export type UserCreateWithoutConversationsAsUserBInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -5112,10 +5088,6 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
-<<<<<<< HEAD
-  cvPdfUrl?: runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Date | string
   updatedAt?: Date | string
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
@@ -5123,10 +5095,7 @@ export type UserUncheckedCreateWithoutConversationsAsUserBInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -5176,10 +5145,6 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-  cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
@@ -5188,10 +5153,7 @@ export type UserUpdateWithoutConversationsAsUserAInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -5226,10 +5188,6 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-  cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
@@ -5237,10 +5195,7 @@ export type UserUncheckedUpdateWithoutConversationsAsUserAInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -5285,10 +5240,6 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-  cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
@@ -5297,10 +5248,7 @@ export type UserUpdateWithoutConversationsAsUserBInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -5335,10 +5283,6 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-  cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
@@ -5346,10 +5290,7 @@ export type UserUncheckedUpdateWithoutConversationsAsUserBInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -5383,10 +5324,6 @@ export type UserCreateWithoutChatParticipantsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
-<<<<<<< HEAD
-  cvPdfUrl?: runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Date | string
   updatedAt?: Date | string
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
@@ -5395,10 +5332,7 @@ export type UserCreateWithoutChatParticipantsInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -5433,10 +5367,6 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
-<<<<<<< HEAD
-  cvPdfUrl?: runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Date | string
   updatedAt?: Date | string
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
@@ -5444,10 +5374,7 @@ export type UserUncheckedCreateWithoutChatParticipantsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -5497,10 +5424,6 @@ export type UserUpdateWithoutChatParticipantsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-  cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
@@ -5509,10 +5432,7 @@ export type UserUpdateWithoutChatParticipantsInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -5547,10 +5467,6 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-  cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
@@ -5558,10 +5474,7 @@ export type UserUncheckedUpdateWithoutChatParticipantsInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -5595,10 +5508,6 @@ export type UserCreateWithoutChatMessagesInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
-<<<<<<< HEAD
-  cvPdfUrl?: runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Date | string
   updatedAt?: Date | string
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
@@ -5607,10 +5516,7 @@ export type UserCreateWithoutChatMessagesInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -5645,10 +5551,6 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
-<<<<<<< HEAD
-  cvPdfUrl?: runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Date | string
   updatedAt?: Date | string
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
@@ -5656,10 +5558,7 @@ export type UserUncheckedCreateWithoutChatMessagesInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -5709,10 +5608,6 @@ export type UserUpdateWithoutChatMessagesInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-  cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
@@ -5721,10 +5616,7 @@ export type UserUpdateWithoutChatMessagesInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -5759,10 +5651,6 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-  cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
@@ -5770,10 +5658,7 @@ export type UserUncheckedUpdateWithoutChatMessagesInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
@@ -5807,10 +5692,6 @@ export type UserCreateWithoutPresenceInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
-<<<<<<< HEAD
-  cvPdfUrl?: runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Date | string
   updatedAt?: Date | string
   city?: Prisma.CityCreateNestedOneWithoutUsersInput
@@ -5819,10 +5700,7 @@ export type UserCreateWithoutPresenceInput = {
   workExperiences?: Prisma.WorkExperienceCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationCreateNestedManyWithoutUserInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileCreateNestedOneWithoutUserInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockCreateNestedManyWithoutMentorInput
@@ -5857,10 +5735,6 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   personalEmail?: string | null
   headline?: string | null
   aboutMe?: string | null
-<<<<<<< HEAD
-  cvPdfUrl?: runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Date | string
   updatedAt?: Date | string
   roles?: Prisma.UserRoleUncheckedCreateNestedManyWithoutUserInput
@@ -5868,10 +5742,7 @@ export type UserUncheckedCreateWithoutPresenceInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedCreateNestedManyWithoutUserInput
   userSkills?: Prisma.UserSkillUncheckedCreateNestedManyWithoutUserInput
   certifications?: Prisma.CertificationUncheckedCreateNestedManyWithoutUserInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileUncheckedCreateNestedOneWithoutUserInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedCreateNestedManyWithoutMentorInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedCreateNestedManyWithoutMentorInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedCreateNestedManyWithoutMentorInput
@@ -5921,10 +5792,6 @@ export type UserUpdateWithoutPresenceInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-  cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   city?: Prisma.CityUpdateOneWithoutUsersNestedInput
@@ -5933,10 +5800,7 @@ export type UserUpdateWithoutPresenceInput = {
   workExperiences?: Prisma.WorkExperienceUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUpdateManyWithoutUserNestedInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileUpdateOneWithoutUserNestedInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUpdateManyWithoutMentorNestedInput
@@ -5971,10 +5835,6 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   personalEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   headline?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aboutMe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-<<<<<<< HEAD
-  cvPdfUrl?: Prisma.NullableBytesFieldUpdateOperationsInput | runtime.Bytes | null
-=======
->>>>>>> origin/develop
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   roles?: Prisma.UserRoleUncheckedUpdateManyWithoutUserNestedInput
@@ -5982,10 +5842,7 @@ export type UserUncheckedUpdateWithoutPresenceInput = {
   workExperiences?: Prisma.WorkExperienceUncheckedUpdateManyWithoutUserNestedInput
   userSkills?: Prisma.UserSkillUncheckedUpdateManyWithoutUserNestedInput
   certifications?: Prisma.CertificationUncheckedUpdateManyWithoutUserNestedInput
-<<<<<<< HEAD
-=======
   cvFile?: Prisma.UserCvFileUncheckedUpdateOneWithoutUserNestedInput
->>>>>>> origin/develop
   mentorTechnicalAreas?: Prisma.MentorTechnicalAreaUncheckedUpdateManyWithoutMentorNestedInput
   mentorOrientationTypes?: Prisma.MentorOrientationTypeUncheckedUpdateManyWithoutMentorNestedInput
   availabilityBlocks?: Prisma.AvailabilityBlockUncheckedUpdateManyWithoutMentorNestedInput
