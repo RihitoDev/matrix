@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { toast } from "sonner";
 import { downloadFile } from "@/shared/utils/download-file";
 import { saveFile, selectCsvDestination } from "@/shared/utils/save-file";
 import { EXPORT_SUCCESS_MESSAGE, EXPORT_SUCCESS_TOAST_DURATION_MS } from "../constants/reports.constants";
@@ -10,24 +11,12 @@ export function useExportReportCsv(exportReport: () => Promise<ExportedFile>, su
   const exportInProgress = useRef(false);
   const [isExporting, setIsExporting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
-  const [successMessage, setSuccessMessage] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    if (!successMessage) {
-      return;
-    }
-
-    const timeoutId = setTimeout(() => setSuccessMessage(undefined), EXPORT_SUCCESS_TOAST_DURATION_MS);
-
-    return () => clearTimeout(timeoutId);
-  }, [successMessage]);
 
   const exportCsv = useCallback(async () => {
     if (exportInProgress.current) return;
     exportInProgress.current = true;
     setIsExporting(true);
     setErrorMessage(undefined);
-    setSuccessMessage(undefined);
 
     try {
       const destination = selectCsvDestination(suggestedFileName);
@@ -48,7 +37,11 @@ export function useExportReportCsv(exportReport: () => Promise<ExportedFile>, su
       } else {
         downloadFile(file, fileName);
       }
-      setSuccessMessage(EXPORT_SUCCESS_MESSAGE);
+      toast.success(EXPORT_SUCCESS_MESSAGE, {
+        duration: EXPORT_SUCCESS_TOAST_DURATION_MS,
+        closeButton: true,
+        richColors: true,
+      });
     } catch {
       setErrorMessage("No se pudo exportar el reporte. Inténtalo de nuevo.");
     } finally {
@@ -57,5 +50,5 @@ export function useExportReportCsv(exportReport: () => Promise<ExportedFile>, su
     }
   }, [exportReport, suggestedFileName]);
 
-  return { exportCsv, isExporting, errorMessage, successMessage };
+  return { exportCsv, isExporting, errorMessage };
 }
