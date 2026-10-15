@@ -1,12 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  CV_FILE_EXTENSION,
-  CV_FILE_NAME_PREFIX,
-  CV_MIME_TYPE,
-  DIACRITIC_MARKS_PATTERN,
-  EDGE_HYPHENS_PATTERN,
-  NON_ALPHANUMERIC_PATTERN,
-} from '../constants/cv.constants.js';
+import { CV_FILE_NAME_MAX_LENGTH, CV_MIME_TYPE } from '../constants/cv.constants.js';
 import type { CvResponse } from '../responses/cv.response.js';
 import type { CvFileDownload } from '../types/cv-file-download.type.js';
 import type { CvMetadataRecord } from '../types/cv-metadata-record.type.js';
@@ -25,22 +18,30 @@ export class CvMapper {
   }
 
   toResponse(record: CvMetadataRecord): CvResponse | null {
-    if (record.sizeBytes === null) {
+    if (record.sizeBytes === null || record.uploadedAt === null) {
       return null;
     }
 
     return {
-      fileName: this.buildFileName(record),
+      fileName: record.fileName ?? this.buildFileName(record),
       fileType: CV_MIME_TYPE,
       sizeInBytes: record.sizeBytes,
-      updatedAt: record.updatedAt.toISOString(),
+      updatedAt: record.uploadedAt.toISOString(),
     };
+  }
+
+  toStoredFileName(originalName: string | undefined): string | undefined {
+    const trimmed = originalName?.trim();
+
+    return trimmed ? trimmed.slice(0, CV_FILE_NAME_MAX_LENGTH) : undefined;
   }
 
   toFileDownload(content: Buffer, record: CvMetadataRecord): CvFileDownload {
     return {
       content,
-      fileName: this.buildFileName(record),
+      fileName: record.fileName
+        ? this.toHeaderSafeName(record.fileName)
+        : this.buildFileName(record),
       mimeType: CV_MIME_TYPE,
     };
   }
@@ -50,14 +51,18 @@ export class CvMapper {
       .map((part) => this.toAsciiSlug(part))
       .filter((part) => part.length > 0);
 
-    return [CV_FILE_NAME_PREFIX, ...nameParts].join('-') + CV_FILE_EXTENSION;
+    return ['CV', ...nameParts].join('-') + '.pdf';
+  }
+
+  private toHeaderSafeName(fileName: string): string {
+    return fileName.replace(/[^\x20-\x7E]|["\\;]/g, '_');
   }
 
   private toAsciiSlug(value: string): string {
     return value
       .normalize('NFD')
-      .replace(DIACRITIC_MARKS_PATTERN, '')
-      .replace(NON_ALPHANUMERIC_PATTERN, '-')
-      .replace(EDGE_HYPHENS_PATTERN, '');
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^A-Za-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
   }
 }

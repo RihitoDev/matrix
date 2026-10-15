@@ -12,9 +12,10 @@ import type { MentorDirectoryItem } from "../../types/mentor-directory.types";
 
 type MentorCardProps = {
   mentor: MentorDirectoryItem;
+  isOwnProfile?: boolean;
 };
 
-export function MentorCard({ mentor }: MentorCardProps) {
+export function MentorCard({ mentor, isOwnProfile = false }: MentorCardProps) {
   const hasTechnicalAreas = mentor.technicalAreas.length > 0;
 
   return (
@@ -119,9 +120,13 @@ export function MentorCard({ mentor }: MentorCardProps) {
             variant: "outline",
             className: "max-w-full border-border-strong text-ink",
           })}
-          aria-label={`Ver perfil de ${mentor.fullName}`}
+          aria-label={
+            isOwnProfile
+              ? `Ver mi perfil de ${mentor.fullName}`
+              : `Ver perfil de ${mentor.fullName}`
+          }
         >
-          Ver perfil
+          {isOwnProfile ? "Ver mi perfil" : "Ver perfil"}
         </Link>
       </CardFooter>
     </Card>

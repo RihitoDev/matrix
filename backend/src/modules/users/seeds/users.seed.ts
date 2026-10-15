@@ -1,15 +1,15 @@
 import bcrypt from 'bcrypt';
 import { ROLE_NAMES } from '../../../common/enums/roles.enum.js';
 import type { RoleName } from '../../../common/enums/roles.enum.js';
-import type { Prisma, User } from '../../../prisma/client.js';
+import type { Prisma } from '../../../prisma/client.js';
 import {
   BCRYPT_ROUNDS,
-  EPIC_1_TEST_USER,
   LEGACY_ROLES,
   SEED_PASSWORD,
   SEED_USERS,
 } from '../constants/seed-users.constants.js';
 import type { SeedUserDefinition } from '../types/seed-user-definition.types.js';
+import type { SeedUserResponse } from '../types/seed-user-response.types.js';
 import type { SeedUsers } from '../types/seed-users.types.js';
 import type { UsersSeedResult } from '../types/users-seed-result.types.js';
 
@@ -41,9 +41,7 @@ async function removeLegacyRoles(
   }
 
   const ids = legacy.map((role) => role.id);
-  const seedEmails = [EPIC_1_TEST_USER, ...SEED_USERS].map(
-    (user) => user.email,
-  );
+  const seedEmails = SEED_USERS.map((user) => user.email);
   await tx.userRole.deleteMany({
     where: { roleId: { in: ids }, user: { email: { in: seedEmails } } },
   });
@@ -59,15 +57,14 @@ async function removeLegacyRoles(
   return count;
 }
 
-async function ensureUserWithRole(
+async function upsertSeedUser(
   tx: Prisma.TransactionClient,
   definition: SeedUserDefinition,
   password: string,
-  roleId: string,
-): Promise<{ user: User; roleAssigned: boolean }> {
+): Promise<SeedUserResponse> {
   const { firstName, lastName, email } = definition;
-  const isAvailableForMentoring = definition.role === 'mentor';
-  const user = await tx.user.upsert({
+  const isAvailableForMentoring = definition.roles.includes('mentor');
+  return tx.user.upsert({
     where: { email },
     update: { firstName, lastName, password, isAvailableForMentoring },
     create: {
@@ -77,17 +74,8 @@ async function ensureUserWithRole(
       password,
       isAvailableForMentoring,
     },
+    select: { id: true, email: true },
   });
-
-  const assigned = await tx.userRole.findFirst({
-    where: { userId: user.id, roleId, deletedAt: null },
-  });
-  if (assigned) {
-    return { user, roleAssigned: false };
-  }
-
-  await tx.userRole.create({ data: { userId: user.id, roleId } });
-  return { user, roleAssigned: true };
 }
 
 export async function seedUsers(
@@ -105,29 +93,29 @@ export async function seedUsers(
     return id;
   };
 
-  let userRoles = 0;
-  const testUser = await ensureUserWithRole(
-    tx,
-    EPIC_1_TEST_USER,
-    password,
-    roleIdOf(EPIC_1_TEST_USER.role),
-  );
-  if (testUser.roleAssigned) {
-    userRoles += 1;
+  const assignments: Prisma.UserRoleCreateManyInput[] = [];
+  const users: Partial<SeedUsers> = {};
+  for (const definition of SEED_USERS) {
+    const assignedRoleIds = [...new Set(definition.roles.map(roleIdOf))];
+    const user = await upsertSeedUser(tx, definition, password);
+    users[definition.key] = user;
+    assignments.push(...assignedRoleIds.map((roleId) => ({ userId: user.id, roleId })));
   }
 
-  const users: Partial<SeedUsers> = { eventGraduate: testUser.user };
-  for (const definition of SEED_USERS) {
-    const result = await ensureUserWithRole(
-      tx,
-      definition,
-      password,
-      roleIdOf(definition.role),
-    );
-    users[definition.key] = result.user;
-    if (result.roleAssigned) {
-      userRoles += 1;
-    }
+  const existing = await tx.userRole.findMany({
+    where: {
+      userId: { in: Object.values(users).map((user) => user.id) },
+      roleId: { in: [...roleIds.values()] },
+      deletedAt: null,
+    },
+    select: { userId: true, roleId: true },
+  });
+  const activeAssignments = new Set(existing.map(({ userId, roleId }) => `${userId}:${roleId}`));
+  const missing = assignments.filter(({ userId, roleId }) => !activeAssignments.has(`${userId}:${roleId}`));
+  let userRoles = 0;
+  if (missing.length > 0) {
+    const result = await tx.userRole.createMany({ data: missing });
+    userRoles = result.count;
   }
 
   return {

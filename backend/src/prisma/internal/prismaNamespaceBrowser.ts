@@ -68,6 +68,7 @@ export const ModelName = {
   JobOfferSkill: 'JobOfferSkill',
   UserSkill: 'UserSkill',
   Certification: 'Certification',
+  UserCvFile: 'UserCvFile',
   TechnicalArea: 'TechnicalArea',
   OrientationType: 'OrientationType',
   MentorTechnicalArea: 'MentorTechnicalArea',
@@ -91,7 +92,12 @@ export const ModelName = {
   File: 'File',
   Career: 'Career',
   AccessRequest: 'AccessRequest',
-  ActivationOtp: 'ActivationOtp'
+  ActivationOtp: 'ActivationOtp',
+  MessageStatus: 'MessageStatus',
+  Conversation: 'Conversation',
+  ConversationParticipant: 'ConversationParticipant',
+  Message: 'Message',
+  UserPresence: 'UserPresence'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -212,7 +218,6 @@ export const UserScalarFieldEnum = {
   personalEmail: 'personalEmail',
   headline: 'headline',
   aboutMe: 'aboutMe',
-  cvPdfUrl: 'cvPdfUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -319,6 +324,17 @@ export const CertificationScalarFieldEnum = {
 } as const
 
 export type CertificationScalarFieldEnum = (typeof CertificationScalarFieldEnum)[keyof typeof CertificationScalarFieldEnum]
+
+
+export const UserCvFileScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  cvFileName: 'cvFileName',
+  cvUploadedAt: 'cvUploadedAt',
+  cvPdfData: 'cvPdfData'
+} as const
+
+export type UserCvFileScalarFieldEnum = (typeof UserCvFileScalarFieldEnum)[keyof typeof UserCvFileScalarFieldEnum]
 
 
 export const TechnicalAreaScalarFieldEnum = {
@@ -560,6 +576,7 @@ export type JobOfferStatusScalarFieldEnum = (typeof JobOfferStatusScalarFieldEnu
 
 
 export const AdminExportHistoryScalarFieldEnum = {
+  id: 'id',
   userId: 'userId',
   createdAt: 'createdAt',
   reportName: 'reportName',
@@ -655,6 +672,69 @@ export const ActivationOtpScalarFieldEnum = {
 } as const
 
 export type ActivationOtpScalarFieldEnum = (typeof ActivationOtpScalarFieldEnum)[keyof typeof ActivationOtpScalarFieldEnum]
+
+
+export const MessageStatusScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MessageStatusScalarFieldEnum = (typeof MessageStatusScalarFieldEnum)[keyof typeof MessageStatusScalarFieldEnum]
+
+
+export const ConversationScalarFieldEnum = {
+  id: 'id',
+  userAId: 'userAId',
+  userBId: 'userBId',
+  lastMessageId: 'lastMessageId',
+  lastMessageAt: 'lastMessageAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConversationScalarFieldEnum = (typeof ConversationScalarFieldEnum)[keyof typeof ConversationScalarFieldEnum]
+
+
+export const ConversationParticipantScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  userId: 'userId',
+  lastReadAt: 'lastReadAt',
+  isMuted: 'isMuted',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConversationParticipantScalarFieldEnum = (typeof ConversationParticipantScalarFieldEnum)[keyof typeof ConversationParticipantScalarFieldEnum]
+
+
+export const MessageScalarFieldEnum = {
+  id: 'id',
+  conversationId: 'conversationId',
+  senderId: 'senderId',
+  content: 'content',
+  statusId: 'statusId',
+  sentAt: 'sentAt',
+  deliveredAt: 'deliveredAt',
+  readAt: 'readAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
+
+
+export const UserPresenceScalarFieldEnum = {
+  userId: 'userId',
+  isOnline: 'isOnline',
+  lastSeenAt: 'lastSeenAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserPresenceScalarFieldEnum = (typeof UserPresenceScalarFieldEnum)[keyof typeof UserPresenceScalarFieldEnum]
 
 
 export const SortOrder = {

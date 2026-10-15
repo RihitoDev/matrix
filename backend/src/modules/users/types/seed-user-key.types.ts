@@ -6,4 +6,7 @@ export type SeedUserKey =
   | 'eventGraduate'
   | 'emptyGraduate'
   | 'admin'
-  | 'admin2';
+  | 'admin2'
+  | 'company'
+  | 'adminGraduate'
+  | 'multiRole';

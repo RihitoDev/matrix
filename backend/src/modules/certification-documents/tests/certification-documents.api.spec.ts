@@ -4,7 +4,6 @@ import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { CORRUPTED_FILE_ERROR_CODE } from '../../../common/constants/file-error-codes.constants.js';
 import { DomainExceptionFilter } from '../../../common/filters/domain-exception.filter.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { CertificationDocumentsModule } from '../certification-documents.module.js';
@@ -52,7 +51,13 @@ describe('Certification documents API', () => {
       providers: [{ provide: APP_FILTER, useClass: DomainExceptionFilter }],
     })
       .overrideProvider(PrismaService)
-      .useValue({})
+      .useValue({ user: {
+          findFirst: ({ where }: { where: { id: string } }) => Promise.resolve({
+            id: where.id,
+            email: 'user@test.com',
+            roles: [{ role: { name: 'titulado' } }],
+          }),
+        } })
       .overrideProvider(JwtService)
       .useValue(jwt)
       .overrideProvider(CertificationsRepository)
@@ -102,7 +107,7 @@ describe('Certification documents API', () => {
 
       expect(response.body).toEqual({
         statusCode: 400,
-        data: { code: CORRUPTED_FILE_ERROR_CODE },
+        data: { code: 'CORRUPTED_FILE' },
         detail: 'File content is incomplete or corrupted',
         ok: false,
       });

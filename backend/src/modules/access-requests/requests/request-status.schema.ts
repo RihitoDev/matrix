@@ -1,8 +1,7 @@
 import { z } from 'zod';
-import { REQUEST_CODE_REGEX } from '../constants/request-code.constants.js';
 
 export const requestStatusParamsSchema = z.object({
-  code: z.string({ error: 'El código de solicitud es obligatorio' }).regex(REQUEST_CODE_REGEX, 'El código de solicitud no es válido'),
+  code: z.string({ error: 'El código de solicitud es obligatorio' }).regex(/^SOL-\d{4}-\d{4,}$/, 'El código de solicitud no es válido'),
 });
 
 export const requestStatusQuerySchema = z.object({

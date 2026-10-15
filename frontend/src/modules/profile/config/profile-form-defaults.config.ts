@@ -12,5 +12,4 @@ export const EMPTY_PERSONAL_INFO_VALUES: PersonalInfoValues = {
 export const EMPTY_PRESENTATION_VALUES: PresentationValues = {
   headline: "",
   aboutMe: "",
-  interestedOpportunities: "",
 };
