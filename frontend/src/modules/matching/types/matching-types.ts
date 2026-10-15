@@ -19,6 +19,7 @@ export interface Candidate {
   name: string;
   role: string;
   technologies: string[];
+  demoPhone: string;
   scores: AxisScores;
 }
 
