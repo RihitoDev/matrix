@@ -18,7 +18,7 @@ export const detail: ReviewDetail = {
   graduationYear: 2022,
   career: "Licenciatura en Ingeniería de Sistemas",
   document: { type: "academic_diploma", name: "diploma", extension: "pdf", mimeType: "application/pdf", size: 1024 },
-  history: { submittedAt: null, reviewedAt: null, reviewedBy: null, rejectionReason: null },
+  history: { submittedAt: null, openedAt: null, openedBy: null, reviewedAt: null, reviewedBy: null, rejectionReason: null },
 };
 
 describe("DataContrastPanel", () => {
@@ -34,6 +34,17 @@ describe("DataContrastPanel", () => {
     expect(screen.getAllByText("Por verificar")).toHaveLength(6);
     expect(screen.getByText("0 coinciden")).toBeInTheDocument();
     expect(screen.getByText("6 por verificar")).toBeInTheDocument();
+  });
+
+  it("la etiqueta de cada dato puede partirse en varias líneas para no montarse sobre el valor declarado", () => {
+    render(<DataContrastPanel detail={{ ...detail, idCardNumber: "123456" }} />);
+
+    for (const label of ["Carnet de identidad", "Año de titulación"]) {
+      const cell = screen.getByText(label).closest("td");
+      expect(cell).toHaveClass("whitespace-normal");
+      expect(screen.getByText(label)).toHaveClass("leading-snug", "break-words");
+    }
+    expect(screen.getByText("123456").closest("td")).toHaveClass("whitespace-normal");
   });
 
   it("marca Coincide cuando el valor del documento coincide y actualiza el resumen", () => {

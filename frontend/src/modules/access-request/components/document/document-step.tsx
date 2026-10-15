@@ -21,7 +21,7 @@ const RECOMMENDATIONS = [
   "Documento completo, sin recortes ni partes tapadas.",
   "Nombre y número del documento legibles.",
   "Imagen con buena luz, sin reflejos ni sombras.",
-  "Formato JPG, PNG o PDF de hasta 10 MB.",
+  "Documento original, no una copia.",
 ];
 
 export function DocumentStep() {
@@ -61,7 +61,7 @@ export function DocumentStep() {
             >
               <SelectValue placeholder="Elige el tipo de documento" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent alignItemWithTrigger={false}>
               {DOCUMENT_TYPE_OPTIONS.map((option) => (
                 <SelectItem key={option.value} value={option.value} className={SELECT_ITEM_CONTRAST_CLASS}>
                   {option.label}

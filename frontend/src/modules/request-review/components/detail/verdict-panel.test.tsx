@@ -1,5 +1,7 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { REQUEST_REVIEW_QUERY_KEYS } from "../../constants/request-review-query-keys.constants";
 import { requestReviewService } from "../../services/request-review.service";
 import { detail } from "./data-contrast-panel.test";
 import { VerdictPanel } from "./verdict-panel";
@@ -8,9 +10,14 @@ const approveRequest = vi.spyOn(requestReviewService, "approveRequest");
 const rejectRequest = vi.spyOn(requestReviewService, "rejectRequest");
 
 function setup(status: "pending" | "in_review" | "approved" | "rejected" = "in_review") {
-  const onStatusChange = vi.fn();
-  render(<VerdictPanel detail={detail} status={status} onStatusChange={onStatusChange} />);
-  return { onStatusChange };
+  const view = renderWithQuery(<VerdictPanel detail={{ ...detail, status }} />);
+  const invalidate = vi.spyOn(view.client, "invalidateQueries");
+  return { invalidate };
+}
+
+function expectDetailAndInboxRefreshed(invalidate: ReturnType<typeof vi.spyOn>) {
+  expect(invalidate).toHaveBeenCalledWith({ queryKey: REQUEST_REVIEW_QUERY_KEYS.detail(detail.id) });
+  expect(invalidate).toHaveBeenCalledWith({ queryKey: REQUEST_REVIEW_QUERY_KEYS.inbox });
 }
 
 describe("VerdictPanel", () => {
@@ -31,46 +38,46 @@ describe("VerdictPanel", () => {
   });
 
   it("cancelar el diálogo no aprueba nada", async () => {
-    const { onStatusChange } = setup();
+    const { invalidate } = setup();
     fireEvent.click(screen.getByRole("button", { name: "Aprobar solicitud" }));
 
     fireEvent.click(await screen.findByRole("button", { name: "Cancelar" }));
 
     await waitFor(() => expect(screen.queryByText("¿Aprobar la solicitud?")).toBeNull());
     expect(approveRequest).not.toHaveBeenCalled();
-    expect(onStatusChange).not.toHaveBeenCalled();
+    expect(invalidate).not.toHaveBeenCalled();
   });
 
-  it("al confirmar aprueba, cambia el estado y avisa que se envió el código", async () => {
+  it("al confirmar aprueba, refresca las consultas y avisa que se envió el código", async () => {
     approveRequest.mockResolvedValue({ ok: true, data: { id: "id-1", status: "approved", activationCodeSent: true } });
-    const { onStatusChange } = setup();
+    const { invalidate } = setup();
     fireEvent.click(screen.getByRole("button", { name: "Aprobar solicitud" }));
 
     fireEvent.click(await screen.findByRole("button", { name: "Aprobar y enviar código" }));
 
     expect(await screen.findByRole("status")).toHaveTextContent("Solicitud aprobada. Se envió el código de activación al correo del titulado.");
     expect(approveRequest).toHaveBeenCalledWith("id-1");
-    expect(onStatusChange).toHaveBeenCalledWith("approved");
+    expectDetailAndInboxRefreshed(invalidate);
   });
 
   it("si el código no se pudo enviar lo dice, pero la solicitud queda aprobada", async () => {
     approveRequest.mockResolvedValue({ ok: true, data: { id: "id-1", status: "approved", activationCodeSent: false } });
-    const { onStatusChange } = setup();
+    const { invalidate } = setup();
     fireEvent.click(screen.getByRole("button", { name: "Aprobar solicitud" }));
     fireEvent.click(await screen.findByRole("button", { name: "Aprobar y enviar código" }));
 
     expect(await screen.findByRole("status")).toHaveTextContent("no se pudo enviar el código de activación");
-    expect(onStatusChange).toHaveBeenCalledWith("approved");
+    expectDetailAndInboxRefreshed(invalidate);
   });
 
   it("un error del servidor se muestra en español y no cambia el estado", async () => {
     approveRequest.mockResolvedValue({ ok: false, status: 409, message: "La solicitud no está en revisión" });
-    const { onStatusChange } = setup();
+    const { invalidate } = setup();
     fireEvent.click(screen.getByRole("button", { name: "Aprobar solicitud" }));
     fireEvent.click(await screen.findByRole("button", { name: "Aprobar y enviar código" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("La solicitud no está en revisión");
-    expect(onStatusChange).not.toHaveBeenCalled();
+    expect(invalidate).not.toHaveBeenCalled();
   });
 
   it.each(["pending", "approved", "rejected"] as const)("con la solicitud %s no hay botón de aprobar", (status) => {
@@ -125,7 +132,7 @@ describe("VerdictPanel", () => {
       ["Otro motivo", "  Falta el sello  ", "Otro motivo. Falta el sello"],
     ])("con el motivo %s envía UNA sola cadena", async (option, hintText, expected) => {
       rejectRequest.mockResolvedValue({ ok: true, data: { id: "id-1", status: "rejected", notificationSent: true } });
-      const { onStatusChange } = setup();
+      const { invalidate } = setup();
       const hint = await openRejectDialog();
       choose(option);
       if (hintText) fireEvent.change(hint, { target: { value: hintText } });
@@ -135,48 +142,48 @@ describe("VerdictPanel", () => {
       expect(await screen.findByRole("status")).toHaveTextContent("Solicitud rechazada. Se notificó al titulado con el motivo.");
       expect(rejectRequest).toHaveBeenCalledTimes(1);
       expect(rejectRequest).toHaveBeenCalledWith("id-1", expected);
-      expect(onStatusChange).toHaveBeenCalledWith("rejected");
+      expectDetailAndInboxRefreshed(invalidate);
     });
 
-    it("muestra el contador y bloquea el envío si pasa de 500 caracteres", async () => {
+    it("el contador cuenta solo la indicación y bloquea el envío si el mensaje pasa de 500 caracteres", async () => {
       setup();
       const hint = await openRejectDialog();
       choose("Documento ilegible");
 
       fireEvent.change(hint, { target: { value: "a".repeat(500 - "Documento ilegible. ".length) } });
-      expect(screen.getByText("500/500")).toBeInTheDocument();
+      expect(screen.getByText("480/480")).toBeInTheDocument();
       expect(confirm()).toBeEnabled();
 
       fireEvent.change(hint, { target: { value: "a".repeat(501 - "Documento ilegible. ".length) } });
-      expect(screen.getByText("501/500")).toBeInTheDocument();
-      expect(screen.getByRole("alert")).toHaveTextContent("El motivo no puede superar los 500 caracteres");
+      expect(screen.getByText("481/480")).toBeInTheDocument();
+      expect(screen.getByRole("alert")).toHaveTextContent("La indicación no puede superar los 480 caracteres");
       expect(confirm()).toBeDisabled();
     });
 
     it("si el correo no se pudo enviar lo dice, pero la solicitud queda rechazada", async () => {
       rejectRequest.mockResolvedValue({ ok: true, data: { id: "id-1", status: "rejected", notificationSent: false } });
-      const { onStatusChange } = setup();
+      const { invalidate } = setup();
       await openRejectDialog();
       choose("Documento ilegible");
       fireEvent.click(confirm());
 
       expect(await screen.findByRole("status")).toHaveTextContent("no se pudo enviar el correo");
-      expect(onStatusChange).toHaveBeenCalledWith("rejected");
+      expectDetailAndInboxRefreshed(invalidate);
     });
 
     it("un error del servidor se muestra en español dentro del diálogo y no cambia el estado", async () => {
       rejectRequest.mockResolvedValue({ ok: false, status: 409, message: "La solicitud no está en revisión" });
-      const { onStatusChange } = setup();
+      const { invalidate } = setup();
       await openRejectDialog();
       choose("Documento ilegible");
       fireEvent.click(confirm());
 
       expect(await screen.findByRole("alert")).toHaveTextContent("La solicitud no está en revisión");
-      expect(onStatusChange).not.toHaveBeenCalled();
+      expect(invalidate).not.toHaveBeenCalled();
     });
 
     it("cancelar limpia el motivo y la indicación y no rechaza nada", async () => {
-      const { onStatusChange } = setup();
+      const { invalidate } = setup();
       const hint = await openRejectDialog();
       choose("Documento ilegible");
       fireEvent.change(hint, { target: { value: "A medias" } });
@@ -187,7 +194,7 @@ describe("VerdictPanel", () => {
       expect(confirm()).toBeDisabled();
 
       expect(rejectRequest).not.toHaveBeenCalled();
-      expect(onStatusChange).not.toHaveBeenCalled();
+      expect(invalidate).not.toHaveBeenCalled();
     });
   });
 

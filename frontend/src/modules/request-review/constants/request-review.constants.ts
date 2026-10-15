@@ -27,6 +27,7 @@ export const LOGIN_PATH = "/login";
 export const INBOX_PATH = "/backoffice/solicitudes";
 
 export const REJECTION_MAX_LENGTH = 500;
+export const REJECTION_REASON_SEPARATOR = ". ";
 export const OTHER_REJECTION_REASON = "Otro motivo";
 export const REJECTION_REASONS = [
   "Documento ilegible",

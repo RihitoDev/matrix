@@ -76,7 +76,7 @@ describe("requestReviewService.listRequests", () => {
 });
 
 describe("requestReviewService.getRequestDetail", () => {
-  const detailBody = { id: "1", history: { submittedAt: null, reviewedAt: null, reviewedBy: null, rejectionReason: null } };
+  const detailBody = { id: "1", history: { submittedAt: null, openedAt: null, openedBy: null, reviewedAt: null, reviewedBy: null, rejectionReason: null } };
   beforeEach(() => {
     get.mockReset();
     get.mockResolvedValue({ status: 500, data: {} } as never);

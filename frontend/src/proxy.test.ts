@@ -17,14 +17,10 @@ describe("Root proxy", () => {
     expect(response.headers.get("location")).toBe(`${BASE_ORIGIN}/login`);
   });
 
-  it("redirects users with a session marker from the root to their profile", () => {
-    const response = callProxy("/", "1");
+  it.each(["1", "0"])("sends the root to login even when the session marker is %s, because the proxy does not know the role", (marker) => {
+    const response = callProxy("/", marker);
     expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe(`${BASE_ORIGIN}/profile`);
-  });
-
-  it("rejects an invalid session marker at the root", () => {
-    expect(callProxy("/", "0").headers.get("location")).toBe(`${BASE_ORIGIN}/login`);
+    expect(response.headers.get("location")).toBe(`${BASE_ORIGIN}/login`);
   });
 
   it("matches only the root, leaving authentication to route layouts", () => {

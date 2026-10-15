@@ -20,12 +20,14 @@ const detailRow = (status: string, extra: Record<string, unknown> = {}) => ({
   graduationYear: 2022,
   documentFileId: 'file-1',
   submittedAt: new Date('2026-10-05T12:00:00.000Z'),
+  openedAt: null,
   reviewedAt: null,
   rejectionReason: null,
   status: { title: status },
   career: { title: 'Licenciatura en Ingeniería de Sistemas' },
   documentType: { title: 'academic_diploma' },
   documentFile: { name: 'diploma', extension: 'pdf', mimeType: 'application/pdf', size: 1024 },
+  openedBy: null,
   reviewedBy: null,
   ...extra,
 });
@@ -42,7 +44,14 @@ describe('toAccessRequestDetail', () => {
       birthDate: '2000-05-10',
       career: 'Licenciatura en Ingeniería de Sistemas',
       document: { type: 'academic_diploma', name: 'diploma', extension: 'pdf', mimeType: 'application/pdf', size: 1024 },
-      history: { submittedAt: '2026-10-05T12:00:00.000Z', reviewedAt: null, reviewedBy: null, rejectionReason: null },
+      history: {
+        submittedAt: '2026-10-05T12:00:00.000Z',
+        openedAt: null,
+        openedBy: null,
+        reviewedAt: null,
+        reviewedBy: null,
+        rejectionReason: null,
+      },
     });
     expect(JSON.stringify(detail)).not.toContain('content');
   });
@@ -61,11 +70,43 @@ describe('toAccessRequestDetail', () => {
   });
 });
 
+describe('toAccessRequestDetail: apertura y dictamen', () => {
+  it('devuelve por separado quién la abrió y cuándo, y quién dictaminó y cuándo', () => {
+    const detail = toAccessRequestDetail(
+      detailRow('rejected', {
+        openedAt: new Date('2026-10-05T13:00:00.000Z'),
+        openedBy: { firstName: 'Bo', lastName: 'Admin' },
+        reviewedAt: new Date('2026-10-05T15:30:00.000Z'),
+        reviewedBy: { firstName: 'Cy', lastName: 'Revisor' },
+        rejectionReason: 'Documento ilegible',
+      }) as never,
+    );
+
+    expect(detail.history).toEqual({
+      submittedAt: '2026-10-05T12:00:00.000Z',
+      openedAt: '2026-10-05T13:00:00.000Z',
+      openedBy: 'Bo Admin',
+      reviewedAt: '2026-10-05T15:30:00.000Z',
+      reviewedBy: 'Cy Revisor',
+      rejectionReason: 'Documento ilegible',
+    });
+  });
+
+  it('una solicitud anterior a las columnas de apertura devuelve la apertura en null', () => {
+    const detail = toAccessRequestDetail(
+      detailRow('approved', { reviewedAt: new Date('2026-10-05T15:30:00.000Z'), reviewedBy: { firstName: 'Cy', lastName: 'Revisor' } }) as never,
+    );
+
+    expect(detail.history).toMatchObject({ openedAt: null, openedBy: null, reviewedBy: 'Cy Revisor' });
+  });
+});
+
 describe('AccessRequestsRepository: detalle y revisión', () => {
   const prismaError = (code: string) => new Prisma.PrismaClientKnownRequestError('boom', { code, clientVersion: 'test' });
   const build = () => {
-    const accessRequest = { findUnique: vi.fn(), update: vi.fn() };
-    return { accessRequest, repository: new AccessRequestsRepository({ accessRequest } as any) };
+    const accessRequest = { findUnique: vi.fn(), update: vi.fn(), updateMany: vi.fn().mockResolvedValue({ count: 1 }) };
+    const prisma = { accessRequest, $transaction: vi.fn((callback: (tx: unknown) => unknown) => callback({ accessRequest })) };
+    return { accessRequest, prisma, repository: new AccessRequestsRepository(prisma as any) };
   };
 
   it('findDetailById selecciona metadatos del archivo y nunca su contenido', async () => {
@@ -77,6 +118,8 @@ describe('AccessRequestsRepository: detalle y revisión', () => {
     const { where, select } = accessRequest.findUnique.mock.calls[0][0];
     expect(where).toEqual({ id: 'id-1' });
     expect(select.documentFile.select).toEqual({ name: true, extension: true, mimeType: true, size: true });
+    expect(select.openedAt).toBe(true);
+    expect(select.openedBy).toEqual({ select: { firstName: true, lastName: true } });
     expect(JSON.stringify(select)).not.toContain('"content"');
   });
 
@@ -91,6 +134,28 @@ describe('AccessRequestsRepository: detalle y revisión', () => {
     expect(args.data.status).toEqual({ connect: { title: 'in_review' } });
     expect(args.data.reviewedBy).toEqual({ connect: { id: 'admin-1' } });
     expect(args.data.reviewedAt).toBeInstanceOf(Date);
+  });
+
+  it('markInReview registra la apertura solo donde todavía no existe y con la misma hora', async () => {
+    const { accessRequest, repository } = build();
+    accessRequest.update.mockResolvedValue({ id: 'id-1' });
+
+    await repository.markInReview('id-1', 'admin-1');
+
+    const opened = accessRequest.updateMany.mock.calls[0][0];
+    expect(opened.where).toEqual({ id: 'id-1', openedAt: null });
+    expect(opened.data.openedById).toBe('admin-1');
+    expect(opened.data.openedAt).toBeInstanceOf(Date);
+    expect(opened.data.openedAt).toBe(accessRequest.update.mock.calls[0][0].data.reviewedAt);
+  });
+
+  it('markInReview no registra la apertura si la solicitud ya no estaba pendiente', async () => {
+    const { accessRequest, repository } = build();
+    accessRequest.update.mockRejectedValueOnce(prismaError('P2025'));
+
+    await repository.markInReview('id-1', 'admin-1');
+
+    expect(accessRequest.updateMany).not.toHaveBeenCalled();
   });
 
   it('markInReview devuelve false si ya no estaba pendiente (P2025) y relanza otros errores', async () => {
