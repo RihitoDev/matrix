@@ -103,6 +103,11 @@ export type UserSkill = Prisma.UserSkillModel
  */
 export type Certification = Prisma.CertificationModel
 /**
+ * Model UserCvFile
+ * 
+ */
+export type UserCvFile = Prisma.UserCvFileModel
+/**
  * Model TechnicalArea
  * 
  */
@@ -222,3 +227,28 @@ export type AccessRequest = Prisma.AccessRequestModel
  * 
  */
 export type ActivationOtp = Prisma.ActivationOtpModel
+/**
+ * Model MessageStatus
+ * 
+ */
+export type MessageStatus = Prisma.MessageStatusModel
+/**
+ * Model Conversation
+ * 
+ */
+export type Conversation = Prisma.ConversationModel
+/**
+ * Model ConversationParticipant
+ * 
+ */
+export type ConversationParticipant = Prisma.ConversationParticipantModel
+/**
+ * Model Message
+ * 
+ */
+export type Message = Prisma.MessageModel
+/**
+ * Model UserPresence
+ * 
+ */
+export type UserPresence = Prisma.UserPresenceModel

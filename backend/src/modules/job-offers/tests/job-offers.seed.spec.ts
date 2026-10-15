@@ -24,6 +24,26 @@ function createTransaction() {
     MODELS.map((model) => [
       model,
       {
+        createMany: async ({ data }: { data: Record<string, unknown>[] }) => {
+          let count = 0;
+          for (const record of data) {
+            const key = String(record.title ?? record.name);
+            if (stores[model].has(key)) continue;
+            stores[model].set(key, record);
+            count += 1;
+          }
+          return { count };
+        },
+        updateMany: async ({ where, data }: { where: { name: { in: string[] } }; data: Record<string, unknown> }) => {
+          let count = 0;
+          for (const name of where.name.in) {
+            const existing = stores[model].get(name);
+            if (!existing) continue;
+            stores[model].set(name, { ...existing, ...data });
+            count += 1;
+          }
+          return { count };
+        },
         upsert: async (args: UpsertArgs) => {
           const [key] = Object.keys(args.where);
           const current = stores[model].get(args.where[key]);
@@ -67,6 +87,19 @@ describe('seedJobOffers', () => {
     expect(stores.company.size).toBe(SEED_JOB_OFFER_COMPANIES.length);
     expect(stores.company.get('TechBolivia S.R.L.')).toMatchObject({
       id: 'a0000000-0000-4000-8000-000000000001',
+    });
+  });
+
+  it('actualiza tecnologías del catálogo sin alterar habilidades personalizadas ajenas', async () => {
+    const { stores, tx } = createTransaction();
+    stores.skill.set('Python', { name: 'Python', isCustom: true });
+    stores.skill.set('Otra habilidad', { name: 'Otra habilidad', isCustom: true });
+    stores.company.set('TechBolivia S.R.L.', { id: 'existing-id', title: 'TechBolivia S.R.L.', description: 'Anterior' });
+    await seedJobOffers(tx);
+    expect(stores.skill.get('Python')?.isCustom).toBe(false);
+    expect(stores.skill.get('Otra habilidad')?.isCustom).toBe(true);
+    expect(stores.company.get('TechBolivia S.R.L.')).toMatchObject({
+      id: 'existing-id', description: SEED_JOB_OFFER_COMPANIES[0].description,
     });
   });
 
