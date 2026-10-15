@@ -1,15 +1,17 @@
 import { ADMINISTRATIVE_ROLE_TAG, BACKOFFICE_HOME_PATH } from "../constants/login-redirect.constants";
+import { getRouteRoles } from "@/shared/utils/get-route-roles";
 import { getPostLoginPath } from "./get-post-login-path";
 import { getSafeNextPath } from "./safe-next-path";
 
-const BACKOFFICE_PREFIX = "/backoffice";
-const isBackofficePath = (path: string) => path === BACKOFFICE_PREFIX || path.startsWith(`${BACKOFFICE_PREFIX}/`);
+export function resolvePostLoginPath(roleTag: string | readonly string[] | null | undefined, next: string | null | undefined): string {
+  const roles: readonly (string | null | undefined)[] = Array.isArray(roleTag) ? roleTag : [roleTag];
+  let fallback = getPostLoginPath(typeof roleTag === "string" ? roleTag : roles[0]);
+  if (roles.includes(ADMINISTRATIVE_ROLE_TAG)) fallback = BACKOFFICE_HOME_PATH;
+  else if (roles.includes("empresa")) fallback = "/recruiters";
 
-export function resolvePostLoginPath(roleTag: string | null | undefined, next: string | null | undefined): string {
-  const fallback = getPostLoginPath(roleTag);
   const safeNext = getSafeNextPath(next);
   if (!safeNext) return fallback;
-  const isAdministrative = roleTag === ADMINISTRATIVE_ROLE_TAG;
-  if (isAdministrative) return isBackofficePath(safeNext) ? safeNext : BACKOFFICE_HOME_PATH;
-  return isBackofficePath(safeNext) ? fallback : safeNext;
+  const pathname = new URL(safeNext, "http://localhost").pathname;
+  const allowedRoles: readonly string[] = getRouteRoles(pathname);
+  return roles.some((role) => typeof role === "string" && allowedRoles.includes(role)) ? safeNext : fallback;
 }

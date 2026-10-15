@@ -1,3 +1,4 @@
+import { getSessionRoles } from "./get-session-roles";
 import type { RoleTag } from "../types/auth-types";
 
 const ROLE_LABELS: Record<RoleTag, string> = {
@@ -9,18 +10,10 @@ const ROLE_LABELS: Record<RoleTag, string> = {
 };
 
 export function getSessionRoleLabel(accessToken: string): string {
-  try {
-    const payload = accessToken.split(".")[1];
-    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const decoded: unknown = JSON.parse(atob(normalized));
-    if (typeof decoded !== "object" || decoded === null || !("roleTag" in decoded)) {
-      return "Usuario autenticado";
-    }
-    const role = decoded.roleTag;
-    return typeof role === "string" && Object.hasOwn(ROLE_LABELS, role)
-      ? ROLE_LABELS[role as RoleTag]
-      : "Usuario autenticado";
-  } catch {
-    return "Usuario autenticado";
-  }
+  const roles = getSessionRoles(accessToken);
+  return getRolesLabel(roles);
+}
+
+export function getRolesLabel(roles: readonly RoleTag[]): string {
+  return roles.length ? roles.map((role) => ROLE_LABELS[role]).join(" · ") : "Usuario autenticado";
 }

@@ -28,6 +28,7 @@ export interface Message {
   timestamp: string;
   status: MessageStatus;
   createdAt: string;
+  sentAt?: string;
   isAttachment?: boolean;
   attachmentType?: AttachmentType | null;
 }

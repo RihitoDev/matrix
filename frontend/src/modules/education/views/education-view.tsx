@@ -22,7 +22,6 @@ export function EducationView() {
   const [editingEducation, setEditingEducation] = useState<EducationItem | null>(null);
   const [pendingDelete, setPendingDelete] = useState<EducationItem | null>(null);
   const [formVersion, setFormVersion] = useState(0);
-  const [isFormOpen, setIsFormOpen] = useState(false);
 
   const resetForm = () => {
     setEditingEducation(null);
@@ -38,19 +37,10 @@ export function EducationView() {
 
   const isBusy = saveMutation.isSaving || deleteMutation.isDeleting || pendingDelete !== null;
 
-  const handleAdd = () => {
-    if (isBusy) return;
-    saveMutation.clearFeedback();
-    deleteMutation.clearFeedback();
-    resetForm();
-    setIsFormOpen(true);
-  };
-
   const handleCancel = () => {
     if (isBusy) return;
     saveMutation.clearFeedback();
     resetForm();
-    setIsFormOpen(false);
   };
 
   const handleEdit = (education: EducationItem) => {
@@ -59,7 +49,6 @@ export function EducationView() {
     deleteMutation.clearFeedback();
     setEditingEducation(education);
     setFormVersion((version) => version + 1);
-    setIsFormOpen(true);
   };
 
   const handleDelete = (education: EducationItem) => {
@@ -99,27 +88,24 @@ export function EducationView() {
     >
       <TrajectorySteps activeStep="education" />
       <FeedbackMessage feedback={pendingDelete ? null : deleteMutation.feedback} />
-      <div className={`grid grid-cols-1 items-start gap-6 ${isFormOpen ? "lg:grid-cols-2" : ""}`}>
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
         <EducationListCard
           educations={educations}
           isLoading={isLoading}
           error={error}
           isBusy={isBusy}
-          onAdd={handleAdd}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />
-        {isFormOpen ? (
-          <EducationForm
-            key={`${editingEducation?.id ?? "new"}-${formVersion}`}
-            initialValues={editingEducation ? toEducationFormValues(editingEducation) : undefined}
-            allowMissingEndDate={editingEducation?.endDate === null}
-            isPending={saveMutation.isSaving}
-            feedback={saveMutation.feedback}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-          />
-        ) : null}
+        <EducationForm
+          key={`${editingEducation?.id ?? "new"}-${formVersion}`}
+          initialValues={editingEducation ? toEducationFormValues(editingEducation) : undefined}
+          allowMissingEndDate={editingEducation?.endDate === null}
+          isPending={saveMutation.isSaving}
+          feedback={saveMutation.feedback}
+          onSubmit={handleSubmit}
+          onCancel={handleCancel}
+        />
       </div>
       <EducationDeleteDialog
         isOpen={pendingDelete !== null}

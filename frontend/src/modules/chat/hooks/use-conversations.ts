@@ -3,7 +3,12 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Conversation, ConversationFilter } from '../types/conversation.types';
 import { User } from '../types/user.types';
-import { getConversations, getOrCreateConversation } from '../services/chat-api';
+import {
+  getConversations,
+  getOrCreateConversation,
+  markConversationAsRead,
+} from '../services/chat-api';
+import { setStoredConversationUnreadCount } from '../services/message-storage';
 
 const PAGE_SIZE = 10;
 
@@ -16,6 +21,7 @@ export function useConversations() {
   const [visibleCount, setVisibleCount] = useState<number>(PAGE_SIZE);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isError, setIsError] = useState<boolean>(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [pendingContactId, setPendingContactId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -38,7 +44,13 @@ export function useConversations() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [loadAttempt]);
+
+  const retryConversations = () => {
+    setIsError(false);
+    setIsLoading(true);
+    setLoadAttempt((attempt) => attempt + 1);
+  };
 
   const sortedConversations = useMemo(() => {
     return [...conversationsData].sort((a, b) => {
@@ -63,11 +75,18 @@ export function useConversations() {
         .replace(/[\u0300-\u036f]/g, '');
 
       list = list.filter((item) => {
-        const normalizedName = item.contact.fullName
+        const normalizedName = (item.contact?.fullName || '')
           .toLowerCase()
           .normalize('NFD')
           .replace(/[\u0300-\u036f]/g, '');
-        return normalizedName.includes(normalizedQuery);
+        const normalizedContent = (item.lastMessage?.content || '')
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
+        return (
+          normalizedName.includes(normalizedQuery) ||
+          normalizedContent.includes(normalizedQuery)
+        );
       });
     }
 
@@ -106,6 +125,8 @@ export function useConversations() {
       setKeptInUnreadId(null);
     }
 
+    markConversationAsRead(conversation.id);
+
     if (conversation.unreadCount > 0) {
       setConversationsData((prev) =>
         prev.map((item) =>
@@ -125,14 +146,42 @@ export function useConversations() {
     setConversationsData((prev) => {
       return prev.map((item) => {
         if (item.id === conversationId) {
+          const newUnread = selectedId === conversationId ? 0 : item.unreadCount + 1;
+          setStoredConversationUnreadCount(conversationId, newUnread);
           return {
             ...item,
             updatedAt: timestamp,
-            unreadCount: selectedId === conversationId ? 0 : item.unreadCount + 1,
+            unreadCount: newUnread,
             lastMessage: {
               id: `msg-${Date.now()}`,
               senderId: item.contact.id,
               content: newContent,
+              isAttachment: false,
+              createdAt: timestamp,
+            },
+          };
+        }
+        return item;
+      });
+    });
+  };
+
+  const updateConversationLastMessage = (
+    conversationId: string,
+    content: string,
+    senderId: string
+  ) => {
+    const timestamp = new Date().toISOString();
+    setConversationsData((prev) => {
+      return prev.map((item) => {
+        if (item.id === conversationId) {
+          return {
+            ...item,
+            updatedAt: timestamp,
+            lastMessage: {
+              id: `msg-${Date.now()}`,
+              senderId,
+              content,
               isAttachment: false,
               createdAt: timestamp,
             },
@@ -179,12 +228,14 @@ export function useConversations() {
     searchQuery,
     isLoading,
     isError,
+    retryConversations,
     loadMore,
     setActiveFilter,
     setSearchQuery,
     handleSelectConversation,
     clearSelectedConversation,
     simulateIncomingMessage,
+    updateConversationLastMessage,
     startConversationWithContact,
   };
 }

@@ -12,4 +12,12 @@ describe('AuthController', () => {
     expect(authService.login).toHaveBeenCalledWith(body);
     expect(result).toEqual({ accessToken: 'token', roleTag: 'titulado' });
   });
+  it('delegates session readback with the identity verified by the guard', () => {
+    const user = { id: 'u-1', email: 'user@test.com', roles: ['titulado', 'mentor'] };
+    const authService = { getSession: vi.fn().mockReturnValue(user) };
+    const controller = new AuthController(authService as any);
+    expect(controller.getSession(user)).toEqual(user);
+    expect(authService.getSession).toHaveBeenCalledWith(user);
+  });
+
 });

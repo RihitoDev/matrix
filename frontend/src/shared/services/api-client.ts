@@ -15,3 +15,5 @@ apiClient.interceptors.request.use((config) => {
 
   return config;
 });
+
+export const isApiError = axios.isAxiosError;
