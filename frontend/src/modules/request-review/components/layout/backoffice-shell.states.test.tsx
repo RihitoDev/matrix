@@ -9,6 +9,13 @@ vi.mock("next/navigation", () => ({ usePathname: () => "/backoffice/solicitudes"
 vi.mock("../../hooks/use-backoffice-session", () => ({
   useBackofficeSession: () => ({ state: session.state, logout: vi.fn() }),
 }));
+vi.mock("../../hooks/use-backoffice-user", async () => {
+  const { useAuth } = await import("@/shared/contexts/auth-context");
+  const { getRolesLabel } = await import("@/modules/auth");
+  return {
+    useBackofficeUser: () => ({ fullName: "Personal administrativo", role: getRolesLabel(useAuth().roles) }),
+  };
+});
 vi.mock("../../services/request-review.service", () => ({
   requestReviewService: { listRequests: vi.fn().mockResolvedValue({ ok: false, status: 0, message: "x" }) },
 }));

@@ -55,7 +55,7 @@ describe('ReportHistoryService', () => {
     it('devuelve los reportes en el orden que entrega el repositorio', async () => {
       const { service } = buildService();
 
-      const result = await service.getReportHistory(historyQuery());
+      const result = await service.getReportHistory('admin-1', historyQuery());
 
       expect(result.items.map((report) => report.id)).toEqual(['b', 'a']);
     });
@@ -63,7 +63,9 @@ describe('ReportHistoryService', () => {
     it('expone el nombre, el tipo y la fecha de generación de cada reporte (CA 2, 3, 4, 30, 31, 32)', async () => {
       const { service } = buildService();
 
-      const [report] = (await service.getReportHistory(historyQuery())).items;
+      const [report] = (
+        await service.getReportHistory('admin-1', historyQuery())
+      ).items;
 
       expect(report).toEqual({
         id: 'b',
@@ -77,10 +79,11 @@ describe('ReportHistoryService', () => {
       const { service, findPage } = buildService(REPORTS, 25);
 
       const result = await service.getReportHistory(
+        'admin-1',
         historyQuery({ page: 3, limit: 10 }),
       );
 
-      expect(findPage).toHaveBeenCalledWith(20, 10, undefined);
+      expect(findPage).toHaveBeenCalledWith('admin-1', 20, 10, undefined);
       expect(result).toMatchObject({
         totalItems: 25,
         totalPages: 3,
@@ -92,7 +95,7 @@ describe('ReportHistoryService', () => {
     it('devuelve una lista vacía cuando no hay reportes', async () => {
       const { service } = buildService([], 0);
 
-      const result = await service.getReportHistory(historyQuery());
+      const result = await service.getReportHistory('admin-1', historyQuery());
 
       expect(result).toEqual({
         items: [],
@@ -109,10 +112,11 @@ describe('ReportHistoryService', () => {
       const { service, findPage } = buildService();
 
       await service.getReportHistory(
+        'admin-1',
         historyQuery({ reportType: 'REJECTED_USERS' }),
       );
 
-      expect(findPage).toHaveBeenCalledWith(0, 10, 'REJECTED_USERS');
+      expect(findPage).toHaveBeenCalledWith('admin-1', 0, 10, 'REJECTED_USERS');
     });
 
     it.each([{}, { reportType: 'ALL' }])(
@@ -120,9 +124,9 @@ describe('ReportHistoryService', () => {
       async (input) => {
         const { service, findPage } = buildService();
 
-        await service.getReportHistory(historyQuery(input));
+        await service.getReportHistory('admin-1', historyQuery(input));
 
-        expect(findPage).toHaveBeenCalledWith(0, 10, undefined);
+        expect(findPage).toHaveBeenCalledWith('admin-1', 0, 10, undefined);
       },
     );
 

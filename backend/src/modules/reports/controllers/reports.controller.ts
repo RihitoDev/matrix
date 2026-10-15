@@ -103,7 +103,8 @@ export class ReportsController {
   getReportHistory(
     @Query(new ZodValidationPipe(reportHistoryQuerySchema))
     query: ReportHistoryQuery,
+    @CurrentUserId() userId: string,
   ) {
-    return this.reportHistoryService.getReportHistory(query);
+    return this.reportHistoryService.getReportHistory(userId, query);
   }
 }

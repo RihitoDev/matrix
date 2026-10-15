@@ -21,6 +21,7 @@ export const REJECTED_USERS_LOAD_ERROR_MESSAGE = "No se pudo cargar el reporte d
 export const REGISTERED_USERS_CSV_FALLBACK_NAME = "usuarios-registrados.csv";
 export const REJECTED_USERS_CSV_FALLBACK_NAME = "usuarios-rechazados.csv";
 
+export const EXPORT_ERROR_MESSAGE = "No se pudo exportar el reporte. Inténtalo de nuevo.";
 export const EXPORT_SUCCESS_MESSAGE = "La exportación de la tabla ha sido un éxito";
 export const EXPORT_SUCCESS_TOAST_DURATION_MS = 4000;
 
