@@ -1,5 +1,7 @@
 "use client";
 
+import { useAuth } from "@/shared/contexts/auth-context";
+
 import { useState } from "react";
 import axios from "axios";
 
@@ -16,6 +18,7 @@ import { useMentorshipWizard } from "../hooks/use-mentorship-wizard";
 import { clearMentorshipWizardDraft } from "../services/mentorship-wizard-draft.service";
 
 export function MentorshipView() {
+  const { refreshRoles } = useAuth();
   const {
     currentStep,
     selectedTechnicalAreaIds,
@@ -83,6 +86,7 @@ export function MentorshipView() {
         technicalAreaIds: selectedTechnicalAreaIds,
         orientationTypeIds: selectedOrientationTypeIds,
       });
+      await refreshRoles();
 
       clearMentorshipWizardDraft();
       setIsActivated(true);

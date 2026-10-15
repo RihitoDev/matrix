@@ -63,7 +63,38 @@ describe('AuthService', () => {
 
     const result = await service.login({ email: 'prueba@umss.edu.bo', password: 'Prueba123', roleTag: 'titulado' });
 
-    expect(result).toEqual({ accessToken: 'token-firmado', roleTag: 'titulado' });
-    expect(jwtService.sign).toHaveBeenCalledWith({ sub: 'user-1', roleTag: 'titulado' });
+    expect(result).toEqual({ accessToken: 'token-firmado', roleTag: 'titulado', roles: ['titulado'] });
+    expect(jwtService.sign).toHaveBeenCalledWith({ sub: 'user-1', roleTag: 'titulado', roles: ['titulado'] });
   });
+  it('logs in with credentials and includes every assigned role without duplicates', async () => {
+    const password = await bcrypt.hash('Prueba123', 4);
+    authRepository.findUserByEmailWithRoles.mockResolvedValue({
+      id: 'u-1', isActive: true, password,
+      roles: [{ role: { name: 'mentor' } }, { role: { name: 'titulado' } }, { role: { name: 'mentor' } }],
+    });
+    jwtService.sign.mockReturnValue('multi-role-token');
+    await expect(service.login({ email: 'ana@umss.edu.bo', password: 'Prueba123' })).resolves.toEqual({
+      accessToken: 'multi-role-token', roleTag: 'titulado', roles: ['titulado', 'mentor'],
+    });
+    expect(jwtService.sign).toHaveBeenCalledWith({ sub: 'u-1', roleTag: 'titulado', roles: ['titulado', 'mentor'] });
+  });
+
+  it('rejects an inactive user before issuing a token', async () => {
+    authRepository.findUserByEmailWithRoles.mockResolvedValue({ id: 'u-1', isActive: false, password: 'hash', roles: [] });
+    await expect(service.login({ email: 'ana@umss.edu.bo', password: 'Prueba123' })).rejects.toBeInstanceOf(InvalidCredentialsException);
+    expect(jwtService.sign).not.toHaveBeenCalled();
+  });
+
+  it('rejects an account without active roles', async () => {
+    authRepository.findUserByEmailWithRoles.mockResolvedValue({ id: 'u-1', password: await bcrypt.hash('Prueba123', 4), roles: [] });
+    await expect(service.login({ email: 'ana@umss.edu.bo', password: 'Prueba123' })).rejects.toBeInstanceOf(RoleNotAssignedException);
+    expect(jwtService.sign).not.toHaveBeenCalled();
+  });
+
+  it('returns the verified session roles', () => {
+    expect(service.getSession({ id: 'u-1', email: 'ana@umss.edu.bo', roles: ['titulado', 'mentor'] })).toEqual({
+      id: 'u-1', email: 'ana@umss.edu.bo', roles: ['titulado', 'mentor'],
+    });
+  });
+
 });

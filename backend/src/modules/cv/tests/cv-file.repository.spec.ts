@@ -14,72 +14,97 @@ const content = Buffer.from([0x25, 0x50, 0x44, 0x46]);
 
 describe('CvFileRepository', () => {
   let repository: CvFileRepository;
-  let user: {
+  let userCvFile: {
     findUnique: ReturnType<typeof vi.fn>;
-    update: ReturnType<typeof vi.fn>;
+    upsert: ReturnType<typeof vi.fn>;
+    delete: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(() => {
-    user = {
+    userCvFile = {
       findUnique: vi.fn(),
-      update: vi.fn(),
+      upsert: vi.fn(),
+      delete: vi.fn(),
     };
-    repository = new CvFileRepository({ user } as unknown as PrismaService);
+    repository = new CvFileRepository({ userCvFile } as unknown as PrismaService);
   });
 
-  it('saves the cv bytes on the user without returning the user data', async () => {
-    user.update.mockResolvedValue({ id: userId });
+  it('upserts the cv as base64 with its file name and a fresh upload date', async () => {
+    userCvFile.upsert.mockResolvedValue({ id: 'cv-id' });
+    const before = Date.now();
 
-    await expect(repository.save(userId, content)).resolves.toBeUndefined();
-    expect(user.update).toHaveBeenCalledWith({
-      where: { id: userId },
-      data: { cvPdfUrl: new Uint8Array(content) },
-      select: { id: true },
+    await expect(repository.save(userId, content, 'resume.pdf')).resolves.toBeUndefined();
+
+    const [args] = userCvFile.upsert.mock.calls[0] as [
+      {
+        where: object;
+        create: { userId: string; cvUploadedAt: Date };
+        update: { cvUploadedAt: Date };
+        select: object;
+      },
+    ];
+    expect(args.where).toEqual({ userId });
+    expect(args.select).toEqual({ id: true });
+    expect(args.create).toMatchObject({
+      userId,
+      cvFileName: 'resume.pdf',
+      cvPdfData: content.toString('base64'),
     });
+    expect(args.update).toMatchObject({
+      cvFileName: 'resume.pdf',
+      cvPdfData: content.toString('base64'),
+    });
+    expect(args.create.cvUploadedAt.getTime()).toBeGreaterThanOrEqual(before);
+    expect(args.update.cvUploadedAt).toBeInstanceOf(Date);
   });
 
-  it('reads only the cv column and returns it as a buffer', async () => {
-    user.findUnique.mockResolvedValue({ cvPdfUrl: new Uint8Array(content) });
+  it('stores a null file name when none is given', async () => {
+    userCvFile.upsert.mockResolvedValue({ id: 'cv-id' });
+
+    await repository.save(userId, content);
+
+    const [args] = userCvFile.upsert.mock.calls[0] as [{ update: { cvFileName: null } }];
+    expect(args.update.cvFileName).toBeNull();
+  });
+
+  it('reads only the pdf column and returns it decoded as a buffer', async () => {
+    userCvFile.findUnique.mockResolvedValue({ cvPdfData: content.toString('base64') });
 
     const result = await repository.read(userId);
 
-    expect(user.findUnique).toHaveBeenCalledWith({
-      where: { id: userId },
-      select: { cvPdfUrl: true },
+    expect(userCvFile.findUnique).toHaveBeenCalledWith({
+      where: { userId },
+      select: { cvPdfData: true },
     });
     expect(Buffer.isBuffer(result)).toBe(true);
     expect(result).toEqual(content);
   });
 
-  it('returns null when the user has no cv', async () => {
-    user.findUnique.mockResolvedValue({ cvPdfUrl: null });
+  it('returns null when the cv has no data', async () => {
+    userCvFile.findUnique.mockResolvedValue({ cvPdfData: null });
 
     await expect(repository.read(userId)).resolves.toBeNull();
   });
 
-  it('returns null when the user does not exist', async () => {
-    user.findUnique.mockResolvedValue(null);
+  it('returns null when the user has no cv row', async () => {
+    userCvFile.findUnique.mockResolvedValue(null);
 
     await expect(repository.read(userId)).resolves.toBeNull();
   });
 
-  it('removes the cv by clearing the column', async () => {
-    user.update.mockResolvedValue({ id: userId });
+  it('removes the cv row of the user', async () => {
+    userCvFile.delete.mockResolvedValue({ id: 'cv-id' });
 
     await expect(repository.remove(userId)).resolves.toBeUndefined();
-    expect(user.update).toHaveBeenCalledWith({
-      where: { id: userId },
-      data: { cvPdfUrl: null },
+    expect(userCvFile.delete).toHaveBeenCalledWith({
+      where: { userId },
       select: { id: true },
     });
   });
 
-  it('fails with a domain exception when the user does not exist', async () => {
-    user.update.mockRejectedValue(recordNotFoundError);
+  it('fails with a domain exception when there is no cv to remove', async () => {
+    userCvFile.delete.mockRejectedValue(recordNotFoundError);
 
-    await expect(repository.save(userId, content)).rejects.toBeInstanceOf(
-      ProfileNotFoundException,
-    );
     await expect(repository.remove(userId)).rejects.toBeInstanceOf(ProfileNotFoundException);
   });
 });

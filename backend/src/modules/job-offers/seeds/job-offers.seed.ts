@@ -8,21 +8,29 @@ import {
 } from '../constants/seed-job-offers.constants.js';
 
 export async function seedJobOffers(tx: Prisma.TransactionClient): Promise<void> {
-  for (const title of SEED_JOB_OFFER_MODALITIES) {
-    await tx.jobOfferModality.upsert({ where: { title }, update: {}, create: { title } });
-  }
+  await tx.jobOfferModality.createMany({
+    data: SEED_JOB_OFFER_MODALITIES.map((title) => ({ title })),
+    skipDuplicates: true,
+  });
 
-  for (const title of SEED_JOB_OFFER_CONTRACT_TYPES) {
-    await tx.jobOfferContractType.upsert({ where: { title }, update: {}, create: { title } });
-  }
+  await tx.jobOfferContractType.createMany({
+    data: SEED_JOB_OFFER_CONTRACT_TYPES.map((title) => ({ title })),
+    skipDuplicates: true,
+  });
 
-  for (const title of SEED_JOB_OFFER_STATUSES) {
-    await tx.jobOfferStatus.upsert({ where: { title }, update: {}, create: { title } });
-  }
+  await tx.jobOfferStatus.createMany({
+    data: SEED_JOB_OFFER_STATUSES.map((title) => ({ title })),
+    skipDuplicates: true,
+  });
 
-  for (const name of SEED_JOB_OFFER_SKILLS) {
-    await tx.skill.upsert({ where: { name }, update: { isCustom: false }, create: { name, isCustom: false } });
-  }
+  await tx.skill.createMany({
+    data: SEED_JOB_OFFER_SKILLS.map((name) => ({ name, isCustom: false })),
+    skipDuplicates: true,
+  });
+  await tx.skill.updateMany({
+    where: { name: { in: [...SEED_JOB_OFFER_SKILLS] } },
+    data: { isCustom: false },
+  });
 
   for (const company of SEED_JOB_OFFER_COMPANIES) {
     await tx.company.upsert({
