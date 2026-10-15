@@ -1,3 +1,12 @@
+const pad = (value: number): string => String(value).padStart(2, '0');
+
+
+export function formatTime12h(date: Date): string {
+  const hours = date.getHours();
+  const period = hours >= 12 ? 'PM' : 'AM';
+  return `${pad(hours % 12 || 12)}:${pad(date.getMinutes())} ${period}`;
+}
+
 export function formatConversationDate(isoDateString?: string | null): string {
   if (!isoDateString) {
     return '';
@@ -24,21 +33,17 @@ export function formatConversationDate(isoDateString?: string | null): string {
     date.getFullYear() === yesterday.getFullYear();
 
   if (isSameDay) {
-    return date.toLocaleTimeString('es-ES', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    }).toUpperCase();
-  }
+        return formatTime12h(date);
+    }
+  
 
   if (isYesterday) {
     return 'Ayer';
+  
   }
+    return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${pad(date.getFullYear() % 100)}`;
 
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = String(date.getFullYear()).slice(-2);
-  return `${day}/${month}/${year}`;
+  
 }
 
 export function getInitials(fullName: string): string {
