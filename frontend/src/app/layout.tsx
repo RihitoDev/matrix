@@ -26,15 +26,15 @@ export const metadata: Metadata = {
     title: "UMSSY",
   },
   icons: {
-    icon: "/icons/icon-192x192.png",
-    apple: "/icons/icon-192x192.png",
+    icon: "/icons/icon-umssy.svg",
+    apple: "/icons/icon-umssy.svg",
   },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#1e3a8a",
+  themeColor:"--color-foreground",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
