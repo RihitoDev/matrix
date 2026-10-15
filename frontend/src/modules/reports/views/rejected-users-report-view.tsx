@@ -25,7 +25,6 @@ export function RejectedUsersReportView() {
   const {
     exportCsv,
     isExporting,
-    errorMessage: exportErrorMessage,
     successMessage: exportSuccessMessage,
   } = useExportRejectedUsersCsv(search);
 
@@ -52,12 +51,6 @@ export function RejectedUsersReportView() {
         <EmailSearchInput value={searchInput} onChange={handleSearchChange} />
         <ExportCsvButton onClick={exportCsv} isExporting={isExporting} />
       </div>
-
-      {exportErrorMessage && (
-        <p role="alert" className="text-sm text-accent">
-          {exportErrorMessage}
-        </p>
-      )}
 
       <RejectedUsersTable
         users={users}

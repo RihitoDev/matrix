@@ -1,22 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { ROLE_NAMES, type RoleName } from '../../../common/enums/roles.enum.js';
 import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { ACCESS_REQUEST_STATUS } from '../../access-requests/types/access-request.enum.js';
-import type {
-  ReportDocumentType,
-  ReportUser,
-} from '../types/report-user.types.js';
-
-const DEFAULT_USER_TYPE: RoleName = 'titulado';
-
-function toRoleName(name: string | undefined): RoleName {
-  const normalized = name?.toLowerCase().trim();
-  return ROLE_NAMES.find((role) => role === normalized) ?? DEFAULT_USER_TYPE;
-}
-
-function toFullName(firstName: string, lastName: string): string {
-  return `${firstName} ${lastName}`.trim();
-}
+import {
+  toAccessRequestReportUser,
+  toRegisteredReportUser,
+} from '../mappers/report-user-record.mapper.js';
+import type { ReportUser } from '../types/report-user.types.js';
 
 @Injectable()
 export class ReportUsersRepository {
@@ -66,45 +55,39 @@ export class ReportUsersRepository {
       }),
     ]);
 
-    const approvedByEmail = new Map(
-      requests
-        .filter(({ status }) => status.title === ACCESS_REQUEST_STATUS.APPROVED)
-        .map((request) => [request.email.toLowerCase(), request]),
+    const approvedRequests = requests.filter(
+      ({ status }) => status.title === ACCESS_REQUEST_STATUS.APPROVED,
     );
 
-    const registered = users.map((user): ReportUser => {
-      const request = approvedByEmail.get(user.email.toLowerCase());
+    const approvedByEmail = new Map(
+      approvedRequests.map((request) => [request.email.toLowerCase(), request]),
+    );
 
-      return {
-        id: user.id,
-        fullName: toFullName(user.firstName, user.lastName),
-        email: user.email,
-        userType: toRoleName(user.roles[0]?.role.name),
-        identifier: request?.idCardNumber ?? '',
-        documentType:
-          (request?.documentType?.title as ReportDocumentType | undefined) ??
-          null,
-        registeredAt: user.createdAt.toISOString(),
-        registrationStatus: 'APPROVED',
-        rejectionReason: null,
-      };
+    const registeredUsers = users.map((user) =>
+      toRegisteredReportUser(
+        user,
+        approvedByEmail.get(user.email.toLowerCase()),
+      ),
+    );
+
+    const seenEmails = new Set(users.map((user) => user.email.toLowerCase()));
+    const approvedRequestsNotInUsers = approvedRequests.filter((request) => {
+      const email = request.email.toLowerCase();
+      if (seenEmails.has(email)) return false;
+      seenEmails.add(email);
+      return true;
     });
+
+    const registered = [
+      ...registeredUsers,
+      ...approvedRequestsNotInUsers.map((request) =>
+        toAccessRequestReportUser(request, 'APPROVED'),
+      ),
+    ];
 
     const rejected = requests
       .filter(({ status }) => status.title === ACCESS_REQUEST_STATUS.REJECTED)
-      .map((request): ReportUser => ({
-        id: request.id,
-        fullName: toFullName(request.firstName, request.lastName),
-        email: request.email,
-        userType: DEFAULT_USER_TYPE,
-        identifier: request.idCardNumber,
-        documentType:
-          (request.documentType?.title as ReportDocumentType | undefined) ??
-          null,
-        registeredAt: (request.submittedAt ?? request.createdAt).toISOString(),
-        registrationStatus: 'REJECTED',
-        rejectionReason: request.rejectionReason,
-      }));
+      .map((request) => toAccessRequestReportUser(request, 'REJECTED'));
 
     return [...registered, ...rejected];
   }
