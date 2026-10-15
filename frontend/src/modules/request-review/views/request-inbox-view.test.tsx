@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
+import { renderWithQuery } from "@/shared/testing/render-with-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { requestReviewService } from "../services/request-review.service";
 import type { ReviewListItem } from "../types/request-review.types";
@@ -15,6 +16,7 @@ function row(index: number, status: ReviewListItem["status"] = "pending"): Revie
     fullName: `Persona ${index}`,
     email: `p${index}@umss.test`,
     sisCode: `20180${index}`,
+    career: "Licenciatura en Ingeniería de Sistemas",
     documentType: "academic_diploma",
     submittedAt: new Date().toISOString(),
     status,
@@ -45,7 +47,7 @@ describe("RequestInboxView", () => {
 
   it("carga la pestaña Pendientes, muestra el esqueleto y luego las filas", async () => {
     listRequests.mockResolvedValue(page([row(1), row(2)]));
-    render(<RequestInboxView />);
+    renderWithQuery(<RequestInboxView />);
 
     expect(screen.getAllByTestId("request-skeleton-row").length).toBeGreaterThan(0);
     expect(await screen.findByText("Persona 1")).toBeInTheDocument();
@@ -55,7 +57,7 @@ describe("RequestInboxView", () => {
 
   it("cada pestaña pide solo su estado y vuelve a la página 1", async () => {
     listRequests.mockResolvedValue(page([row(1)]));
-    render(<RequestInboxView />);
+    renderWithQuery(<RequestInboxView />);
     await screen.findByText("Persona 1");
 
     for (const [tab, status] of [["En revisión", "in_review"], ["Aprobadas", "approved"], ["Rechazadas", "rejected"]] as const) {
@@ -66,7 +68,7 @@ describe("RequestInboxView", () => {
 
   it("la paginación navega entre páginas", async () => {
     listRequests.mockResolvedValue(page(Array.from({ length: 10 }, (_, i) => row(i + 1)), 25));
-    render(<RequestInboxView />);
+    renderWithQuery(<RequestInboxView />);
     await screen.findByText("Persona 1");
     expect(screen.getByText("Mostrando 1 a 10 de 25 solicitudes, de la más reciente a la más antigua")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Anterior" })).toBeDisabled();
@@ -81,20 +83,20 @@ describe("RequestInboxView", () => {
 
   it("al llegar al final deshabilita Siguiente", async () => {
     listRequests.mockResolvedValue(page([row(1)], 1));
-    render(<RequestInboxView />);
+    renderWithQuery(<RequestInboxView />);
     await screen.findByText("Persona 1");
     expect(screen.getByRole("button", { name: "Siguiente" })).toBeDisabled();
   });
 
   it("muestra un mensaje claro si no hay solicitudes", async () => {
     listRequests.mockResolvedValue(page([], 0));
-    render(<RequestInboxView />);
+    renderWithQuery(<RequestInboxView />);
     expect(await screen.findByText("No hay solicitudes en este estado.")).toBeInTheDocument();
   });
 
   it("muestra el error del servicio en español", async () => {
     listRequests.mockResolvedValue({ ok: false, status: 403, message: "No tienes permiso para ver las solicitudes." });
-    render(<RequestInboxView />);
+    renderWithQuery(<RequestInboxView />);
     expect(await screen.findByRole("alert")).toHaveTextContent("No tienes permiso para ver las solicitudes.");
   });
 
@@ -105,7 +107,7 @@ describe("RequestInboxView", () => {
           ? { ok: true as const, data: { items: [], total: { pending: 18, in_review: 2, approved: 146, rejected: 23 }[status], page: 1, offset: 0 } }
           : page([row(1)]),
       );
-      render(<RequestInboxView />);
+      renderWithQuery(<RequestInboxView />);
 
       expect(await screen.findByLabelText("18 solicitudes")).toHaveTextContent("18");
       expect(screen.getByLabelText("2 solicitudes")).toBeInTheDocument();
@@ -123,7 +125,7 @@ describe("RequestInboxView", () => {
           ? { ok: false as const, status: 0, message: "sin red" }
           : { ok: true as const, data: { items: [], total: 4, page: 1, offset: 0 } };
       });
-      render(<RequestInboxView />);
+      renderWithQuery(<RequestInboxView />);
 
       await screen.findByText("Persona 1");
       await waitFor(() => expect(screen.getAllByLabelText("4 solicitudes")).toHaveLength(3));
@@ -133,7 +135,7 @@ describe("RequestInboxView", () => {
 
     it("las pestañas no generan scroll vertical: la lista oculta el desborde vertical y la línea activa queda dentro", async () => {
       listRequests.mockResolvedValue(page([row(1)]));
-      render(<RequestInboxView />);
+      renderWithQuery(<RequestInboxView />);
       await screen.findByText("Persona 1");
 
       const list = screen.getByRole("tablist");
@@ -147,7 +149,7 @@ describe("RequestInboxView", () => {
 
     it("la cabecera y la pestaña activa siguen el diseño", async () => {
       listRequests.mockResolvedValue(page([row(1)]));
-      render(<RequestInboxView />);
+      renderWithQuery(<RequestInboxView />);
 
       expect(screen.getByRole("heading", { name: "Solicitudes de acceso" })).toBeInTheDocument();
       expect(screen.getByText("Revisa el documento de cada solicitante y emite tu dictamen.")).toBeInTheDocument();
@@ -158,7 +160,7 @@ describe("RequestInboxView", () => {
 
   it("estructura: el contenedor raíz y la tarjeta ocupan todo el ancho disponible sin desbordar", async () => {
     listRequests.mockResolvedValue(page([row(1)]));
-    const { container } = render(<RequestInboxView />);
+    const { container } = renderWithQuery(<RequestInboxView />);
     await screen.findByText("Persona 1");
 
     expect(container.firstElementChild).toHaveClass("w-full", "min-w-0");

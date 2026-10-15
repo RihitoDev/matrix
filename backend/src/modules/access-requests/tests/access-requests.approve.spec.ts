@@ -142,6 +142,18 @@ describe('AccessRequestsRepository.setVerdict', () => {
     expect(args.data.rejectionReason).toBeUndefined();
   });
 
+  it('no modifica las columnas de apertura al dictaminar', async () => {
+    const { accessRequest, repository } = build();
+    accessRequest.update.mockResolvedValue({ id: 'id-1' });
+
+    await repository.setVerdict('id-1', 'admin-2', { status: 'rejected', rejectionReason: 'Documento ilegible' });
+
+    const { data } = accessRequest.update.mock.calls[0][0];
+    expect(data).not.toHaveProperty('openedAt');
+    expect(data).not.toHaveProperty('openedById');
+    expect(data).not.toHaveProperty('openedBy');
+  });
+
   it('guarda el motivo del rechazo cuando se indica', async () => {
     const { accessRequest, repository } = build();
     accessRequest.update.mockResolvedValue({ id: 'id-1' });

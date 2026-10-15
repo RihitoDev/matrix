@@ -1,5 +1,6 @@
 import { CAREERS } from "../constants/careers.constants";
 import { ID_CARD_ISSUED_IN } from "../constants/id-card-issued-in.constants";
+import { ID_CARD_MAX_LENGTH, ID_CARD_MIN_LENGTH, SIS_CODE_LENGTH } from "../constants/personal-data-rules.constants";
 import type { FieldErrors, PersonalDataValues } from "../types/access-request.types";
 
 export const MIN_AGE = 18;
@@ -7,7 +8,7 @@ export const MIN_AGE = 18;
 const NAME_REGEX = /^\p{L}[\p{L}\p{M}]*(?:[ '’-]\p{L}[\p{L}\p{M}]*)*$/u;
 const DIGITS_REGEX = /^\d+$/;
 const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)*\.[a-z]{2,}$/;
 
 function isRealIsoDate(value: string): boolean {
   const date = new Date(`${value}T00:00:00.000Z`);
@@ -29,8 +30,22 @@ function validateName(value: string, label: string): string | undefined {
 function validateDigits(value: string, label: string): string | undefined {
   const text = value.trim();
   if (text.length === 0) return `${label} es obligatorio`;
-  if (text.length > 20) return `${label} no puede superar los 20 dígitos`;
   if (!DIGITS_REGEX.test(text)) return `${label} solo puede contener dígitos`;
+}
+
+function validateIdCard(value: string): string | undefined {
+  const digitsError = validateDigits(value, "El carnet de identidad");
+  if (digitsError) return digitsError;
+  const length = value.trim().length;
+  if (length < ID_CARD_MIN_LENGTH || length > ID_CARD_MAX_LENGTH) {
+    return `El carnet de identidad debe tener entre ${ID_CARD_MIN_LENGTH} y ${ID_CARD_MAX_LENGTH} dígitos`;
+  }
+}
+
+function validateSisCode(value: string): string | undefined {
+  const digitsError = validateDigits(value, "El código SIS");
+  if (digitsError) return digitsError;
+  if (value.trim().length !== SIS_CODE_LENGTH) return `El código SIS debe tener exactamente ${SIS_CODE_LENGTH} dígitos`;
 }
 
 function validateEmail(value: string): string | undefined {
@@ -63,14 +78,14 @@ export function validatePersonalData(values: PersonalDataValues, now: Date = new
 
   assign("firstName", validateName(values.firstName, "Los nombres"));
   assign("lastName", validateName(values.lastName, "Los apellidos"));
-  assign("idCardNumber", validateDigits(values.idCardNumber, "El carnet de identidad"));
+  assign("idCardNumber", validateIdCard(values.idCardNumber));
   assign(
     "idCardIssuedIn",
     (ID_CARD_ISSUED_IN as readonly string[]).includes(values.idCardIssuedIn)
       ? undefined
       : "El departamento de expedición no es válido",
   );
-  assign("sisCode", validateDigits(values.sisCode, "El código SIS"));
+  assign("sisCode", validateSisCode(values.sisCode));
   assign("email", validateEmail(values.email));
 
   const phone = (values.phone ?? "").trim();

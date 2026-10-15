@@ -6,6 +6,7 @@ export interface ReviewListItem {
   fullName: string;
   email: string;
   sisCode: string;
+  career: string;
   documentType: string | null;
   submittedAt: string | null;
   status: ReviewStatus;
@@ -47,6 +48,8 @@ export interface ReviewDetail {
   document: ReviewDocument | null;
   history: {
     submittedAt: string | null;
+    openedAt: string | null;
+    openedBy: string | null;
     reviewedAt: string | null;
     reviewedBy: string | null;
     rejectionReason: string | null;

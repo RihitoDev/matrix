@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SELECT_ITEM_CONTRAST_CLASS } from "@/shared/constants/select.constants";
 import { ID_CARD_ISSUED_IN } from "../../constants/id-card-issued-in.constants";
+import { ID_CARD_MAX_LENGTH } from "../../constants/personal-data-rules.constants";
 import { useAccessRequestForm } from "../../contexts/access-request-context";
 import { usePersonalDataBind } from "../../hooks/use-personal-data-bind";
 import { FieldError } from "./field-error";
@@ -23,7 +24,7 @@ export function IdCardField() {
           label="Carnet de identidad"
           isRequired
           inputMode="numeric"
-          maxLength={20}
+          maxLength={ID_CARD_MAX_LENGTH}
           placeholder="Ej. 7845123"
           className="min-w-0 flex-1"
         />
@@ -47,7 +48,7 @@ export function IdCardField() {
             >
               <SelectValue placeholder="Elegir" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent alignItemWithTrigger={false}>
               {ID_CARD_ISSUED_IN.map((code) => (
                 <SelectItem
                   key={code}

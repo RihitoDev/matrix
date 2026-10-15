@@ -31,7 +31,7 @@ export function CareerSelect() {
         >
           <SelectValue placeholder="Selecciona tu carrera" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent alignItemWithTrigger={false}>
           {CAREERS.map((career) => (
             <SelectItem
               key={career}

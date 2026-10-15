@@ -23,7 +23,7 @@ describe('rejectAccessRequestSchema', () => {
 
   it('acepta 500 caracteres y rechaza 501', () => {
     expect(messagesOf({ reason: 'a'.repeat(MAX_REJECTION_REASON_LENGTH) })).toEqual([]);
-    expect(messagesOf({ reason: 'a'.repeat(MAX_REJECTION_REASON_LENGTH + 1) })).toContain('reason: El motivo no puede superar los 500 caracteres');
+    expect(messagesOf({ reason: 'a'.repeat(MAX_REJECTION_REASON_LENGTH + 1) })).toContain('reason: El motivo y la indicación no pueden superar los 500 caracteres en total');
   });
 });
 

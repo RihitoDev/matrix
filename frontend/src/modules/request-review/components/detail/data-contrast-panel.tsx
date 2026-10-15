@@ -23,8 +23,7 @@ function buildFields(detail: ReviewDetail): ContrastField[] {
 
 const HEAD_CLASS = "h-9 px-4 text-[12.5px] font-semibold text-text-secondary";
 
-// Mientras la lectura automática del documento esté fuera de alcance, la persona revisora escribe el valor que ve en él
-// TODO: confirmar con la docente cómo se obtiene el valor del documento
+// TODO: reemplazar la captura manual por el valor leído del documento cuando exista la lectura automática
 export function DataContrastPanel({ detail }: DataContrastPanelProps) {
   const fields = buildFields(detail);
   const [documentValues, setDocumentValues] = useState<Record<string, string>>({});
@@ -65,8 +64,8 @@ export function DataContrastPanel({ detail }: DataContrastPanelProps) {
             const Icon = matches ? CircleCheck : CircleAlert;
             return (
               <TableRow key={field.key} className="border-border">
-                <TableCell className="px-4 py-3 align-middle">
-                  <Label htmlFor={`contrast-${field.key}`} className="font-semibold break-words text-ink">
+                <TableCell className="px-4 py-3 align-middle whitespace-normal">
+                  <Label htmlFor={`contrast-${field.key}`} className="font-semibold leading-snug break-words text-ink">
                     {field.label}
                   </Label>
                 </TableCell>
