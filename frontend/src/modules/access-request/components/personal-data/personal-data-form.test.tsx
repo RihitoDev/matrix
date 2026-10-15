@@ -106,6 +106,16 @@ describe("PersonalDataForm", () => {
     ]);
   });
 
+  it.each(["Expedido", "Carrera"])("la lista de %s se despliega debajo del campo sin tapar su valor", async (name) => {
+    const user = userEvent.setup();
+    renderForm();
+
+    await user.click(screen.getByRole("combobox", { name }));
+
+    await screen.findAllByRole("option");
+    expect(document.querySelector("[data-slot=select-content][data-open]")).toHaveAttribute("data-align-trigger", "false");
+  });
+
   it("reemplaza el año de ingreso por el año de titulación", () => {
     const { container } = renderForm();
 

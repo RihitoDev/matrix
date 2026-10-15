@@ -224,7 +224,35 @@ describe("PersonalDataForm: criterios de #500 en el formulario", () => {
     await submitForm();
 
     expect(screen.getByText("Los nombres solo pueden contener letras, espacios, guiones y apóstrofes")).toBeInTheDocument();
-    expect(screen.getByText("El código SIS solo puede contener dígitos")).toBeInTheDocument();
+    expect(screen.getByText("El código SIS debe tener exactamente 9 dígitos")).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Código SIS/)).toHaveValue("2012");
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it("el carnet y el SIS ignoran letras y no admiten más dígitos que su límite", async () => {
+    renderForm();
+
+    type(/^Carnet de identidad/, "12a34b56789012345");
+    type(/^Código SIS/, "2020x123456789");
+
+    expect(screen.getByLabelText(/^Carnet de identidad/)).toHaveAttribute("maxLength", "10");
+    expect(screen.getByLabelText(/^Código SIS/)).toHaveAttribute("maxLength", "9");
+    expect(screen.getByLabelText(/^Carnet de identidad/)).toHaveValue("123456789012345");
+    expect(screen.getByLabelText(/^Código SIS/)).toHaveValue("2020123456789");
+  });
+
+  it("con datos inválidos el botón de continuar no avanza y muestra los errores", async () => {
+    renderForm();
+    await fillForm(["idCardNumber", "sisCode", "email"]);
+    type(/^Carnet de identidad/, "12345678901");
+    type(/^Código SIS/, "2020123456");
+    type(/^Correo electrónico/, "code0156@gma.c");
+
+    await submitForm();
+
+    expect(screen.getByText("El carnet de identidad debe tener entre 6 y 10 dígitos")).toBeInTheDocument();
+    expect(screen.getByText("El código SIS debe tener exactamente 9 dígitos")).toBeInTheDocument();
+    expect(screen.getByText("El correo no tiene un formato válido")).toBeInTheDocument();
     expect(create).not.toHaveBeenCalled();
   });
 

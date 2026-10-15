@@ -40,6 +40,14 @@ describe('AccessRequestsService (documento de respaldo)', () => {
       expect(result).toEqual({ id: 'id-1', documentFileId: 'file-new', documentType: 'academic_diploma' });
     });
 
+    it('guarda el nombre del archivo con tildes y ñ decodificado como UTF-8', async () => {
+      const received = { ...file, originalname: Buffer.from('Título Peña.pdf', 'utf8').toString('latin1') };
+
+      await service.attachDocument('id-1', { file: received, documentType: 'academic_diploma' });
+
+      expect(filesService.create).toHaveBeenCalledWith({ name: 'Título Peña.pdf', content: file.buffer });
+    });
+
     it('lanza 404 si el borrador no existe', async () => {
       repository.findById.mockResolvedValue(null);
 

@@ -1,6 +1,8 @@
 export interface RejectionReasonResult {
   reason: string;
-  length: number;
+  hintLength: number;
+  hintMaxLength: number;
+  reservedLength: number;
   isValid: boolean;
   error: string | null;
 }

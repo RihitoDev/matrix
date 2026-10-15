@@ -1,23 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { REQUEST_REVIEW_QUERY_KEYS } from "../constants/request-review-query-keys.constants";
 import { requestReviewService } from "../services/request-review.service";
-import type { ReviewDetail } from "../types/request-review.types";
+import { unwrapReviewResult } from "../utils/unwrap-review-result";
 
 export function useRequestDetail(id: string) {
-  const [result, setResult] = useState<{ id: string; detail: ReviewDetail | null; error: string | null } | null>(null);
+  const queryClient = useQueryClient();
+  const query = useQuery({
+    queryKey: REQUEST_REVIEW_QUERY_KEYS.detail(id),
+    queryFn: async () => {
+      const detail = unwrapReviewResult(await requestReviewService.getRequestDetail(id));
+      if (detail.status === "in_review") {
+        void queryClient.invalidateQueries({ queryKey: REQUEST_REVIEW_QUERY_KEYS.inbox });
+      }
+      return detail;
+    },
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    requestReviewService.getRequestDetail(id).then((response) => {
-      if (cancelled) return;
-      setResult(response.ok ? { id, detail: response.data, error: null } : { id, detail: null, error: response.message });
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
-
-  const isLoading = result?.id !== id;
-  return { detail: isLoading ? null : (result?.detail ?? null), error: isLoading ? null : (result?.error ?? null), isLoading };
+  return {
+    detail: query.data ?? null,
+    error: query.error?.message ?? null,
+    isLoading: query.isPending,
+  };
 }

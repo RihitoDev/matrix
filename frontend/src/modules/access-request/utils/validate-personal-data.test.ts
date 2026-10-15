@@ -55,12 +55,33 @@ describe("validatePersonalData", () => {
     expect(errorsOf({ firstName: "a".repeat(101) }).firstName).toBe("Los nombres no pueden superar los 100 caracteres");
   });
 
-  it("valida carnet y SIS: obligatorios, dígitos y máximo 20", () => {
+  it("valida el carnet: obligatorio, dígitos y entre 6 y 10", () => {
     expect(errorsOf({ idCardNumber: "" }).idCardNumber).toBe("El carnet de identidad es obligatorio");
     expect(errorsOf({ idCardNumber: "12a" }).idCardNumber).toBe("El carnet de identidad solo puede contener dígitos");
-    expect(errorsOf({ sisCode: "1".repeat(21) }).sisCode).toBe("El código SIS no puede superar los 20 dígitos");
+    expect(errorsOf({ idCardNumber: "12345" }).idCardNumber).toBe("El carnet de identidad debe tener entre 6 y 10 dígitos");
+    expect(errorsOf({ idCardNumber: "1".repeat(11) }).idCardNumber).toBe("El carnet de identidad debe tener entre 6 y 10 dígitos");
+    expect(errorsOf({ idCardNumber: "123456" }).idCardNumber).toBeUndefined();
+    expect(errorsOf({ idCardNumber: "1".repeat(10) }).idCardNumber).toBeUndefined();
+  });
+
+  it("valida el SIS: obligatorio, dígitos y exactamente 9", () => {
+    expect(errorsOf({ sisCode: "" }).sisCode).toBe("El código SIS es obligatorio");
     expect(errorsOf({ sisCode: "2020AB" }).sisCode).toBe("El código SIS solo puede contener dígitos");
-    expect(errorsOf({ sisCode: "1".repeat(20) }).sisCode).toBeUndefined();
+    expect(errorsOf({ sisCode: "20201234" }).sisCode).toBe("El código SIS debe tener exactamente 9 dígitos");
+    expect(errorsOf({ sisCode: "1".repeat(10) }).sisCode).toBe("El código SIS debe tener exactamente 9 dígitos");
+    expect(errorsOf({ sisCode: "1".repeat(20) }).sisCode).toBe("El código SIS debe tener exactamente 9 dígitos");
+    expect(errorsOf({ sisCode: "202012345" }).sisCode).toBeUndefined();
+  });
+
+  it.each(["code0156@gma.c", "code0156@gma.c1", "code0156@gma", "code0156@gma.123", "code0156@.com"])(
+    "rechaza el correo %s sin dominio de letras",
+    (email) => {
+      expect(errorsOf({ email }).email).toBe("El correo no tiene un formato válido");
+    },
+  );
+
+  it.each(["code0156@gma.con", "ana@umss.edu.bo", "a.b+c@mail.co"])("acepta el correo %s", (email) => {
+    expect(errorsOf({ email }).email).toBeUndefined();
   });
 
   it("valida el departamento de expedición", () => {

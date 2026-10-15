@@ -1,36 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { REQUEST_REVIEW_QUERY_KEYS } from "../constants/request-review-query-keys.constants";
 import { requestReviewService } from "../services/request-review.service";
-import type { InboxSummary } from "../types/inbox-summary.types";
-
-type SummaryState = { attempt: number; summary: InboxSummary | null; error: string | null };
+import { unwrapReviewResult } from "../utils/unwrap-review-result";
 
 export function useInboxSummary() {
-  const [attempt, setAttempt] = useState(0);
-  const [state, setState] = useState<SummaryState | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    requestReviewService.getSummary().then((response) => {
-      if (cancelled) return;
-      setState(
-        response.ok
-          ? { attempt, summary: response.data, error: null }
-          : { attempt, summary: null, error: response.message },
-      );
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [attempt]);
-
-  const isLoading = state?.attempt !== attempt;
+  const query = useQuery({
+    queryKey: REQUEST_REVIEW_QUERY_KEYS.summary,
+    queryFn: async () => unwrapReviewResult(await requestReviewService.getSummary()),
+  });
 
   return {
-    summary: isLoading ? null : (state?.summary ?? null),
-    error: isLoading ? null : (state?.error ?? null),
-    isLoading,
-    retry: () => setAttempt((current) => current + 1),
+    summary: query.data ?? null,
+    error: query.error?.message ?? null,
+    isLoading: query.isPending,
+    retry: () => void query.refetch(),
   };
 }

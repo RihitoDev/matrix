@@ -9,6 +9,7 @@ const item: ReviewListItem = {
   fullName: "Ana Pérez",
   email: "ana@umss.test",
   sisCode: "2018001",
+  career: "Licenciatura en Ingeniería de Sistemas",
   documentType: "academic_diploma",
   submittedAt: new Date(Date.now() - 2 * 3_600_000).toISOString(),
   status: "in_review",
@@ -20,16 +21,25 @@ describe("RequestTable", () => {
   it("muestra las columnas del mockup y el botón Revisar con su enlace", () => {
     render(<RequestTable items={[item]} />);
 
-    for (const header of ["Solicitante", "Código SIS", "Documento", "Enviada", "Estado", "Acción"]) {
+    for (const header of ["Solicitante", "Código SIS", "Carrera", "Documento", "Enviada", "Estado", "Acción"]) {
       expect(screen.getByRole("columnheader", { name: header })).toBeInTheDocument();
     }
     expect(screen.getByText("Ana Pérez")).toBeInTheDocument();
     expect(screen.getByText("ana@umss.test")).toBeInTheDocument();
     expect(screen.getByText("2018001")).toBeInTheDocument();
+    expect(screen.getByText("Licenciatura en Ingeniería de Sistemas")).toBeInTheDocument();
     expect(screen.getByText("Diploma académico")).toBeInTheDocument();
     expect(screen.getByText("hace 2 h")).toBeInTheDocument();
     expect(screen.getByText("En revisión")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Revisar" })).toHaveAttribute("href", "/backoffice/solicitudes/id-1");
+  });
+
+  it("coloca la columna Carrera entre Código SIS y Documento", () => {
+    render(<RequestTable items={[item]} />);
+
+    const headers = screen.getAllByRole("columnheader").map((header) => header.textContent);
+    expect(headers.indexOf("Carrera")).toBe(headers.indexOf("Código SIS") + 1);
+    expect(headers.indexOf("Documento")).toBe(headers.indexOf("Carrera") + 1);
   });
 
   it("muestra el estado como texto y tolera un documento ausente o desconocido", () => {
@@ -50,7 +60,9 @@ describe("RequestTable", () => {
 
   it("muestra filas de esqueleto mientras carga", () => {
     render(<RequestTable isLoading />);
-    expect(screen.getAllByTestId("request-skeleton-row")).toHaveLength(5);
+    const rows = screen.getAllByTestId("request-skeleton-row");
+    expect(rows).toHaveLength(5);
+    expect(rows[0].querySelectorAll("td")).toHaveLength(screen.getAllByRole("columnheader").length);
   });
 
   it("sin datos renderiza solo los encabezados", () => {
