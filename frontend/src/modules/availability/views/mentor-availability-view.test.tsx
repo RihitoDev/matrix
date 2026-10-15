@@ -114,12 +114,34 @@ describe("MentorAvailabilityView", () => {
     expect(within(grid).getByRole("button", { name: "libre, 10:00 a 11:00" })).toBeInTheDocument()
   })
 
-  it("muestra el estado vacío sin bloques esta semana", async () => {
+  it("muestra la grilla con sus fechas y el aviso cuando la semana no tiene bloques", async () => {
     vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockResolvedValue([])
 
     renderWithQuery(<MentorAvailabilityView />)
 
     expect(await screen.findByText("Aún no registraste bloques esta semana")).toBeInTheDocument()
+    const grid = screen.getByRole("region", { name: "Disponibilidad semanal" })
+    expect(within(grid).getByRole("heading", { name: "LUN 5" })).toBeInTheDocument()
+    expect(within(grid).getByRole("heading", { name: "DOM 11" })).toBeInTheDocument()
+    expect(within(grid).getAllByText("Sin bloques")).toHaveLength(7)
+  })
+
+  it("al pasar a una semana sin bloques sigue mostrando la grilla con las fechas de esa semana", async () => {
+    vi.spyOn(availabilityApi, "getAvailabilityBlocks").mockImplementation(async (filters) =>
+      filters?.from === "2026-10-05T04:00:00.000Z"
+        ? [blockAt("in-week", "2026-10-06T14:00:00.000Z", "2026-10-06T15:00:00.000Z")]
+        : [],
+    )
+    renderWithQuery(<MentorAvailabilityView />)
+    await screen.findByRole("button", { name: "libre, 10:00 a 11:00" })
+
+    fireEvent.click(screen.getByRole("button", { name: "Semana siguiente" }))
+
+    expect(await screen.findByText("Aún no registraste bloques esta semana")).toBeInTheDocument()
+    const grid = screen.getByRole("region", { name: "Disponibilidad semanal" })
+    expect(within(grid).getByRole("heading", { name: "LUN 12" })).toBeInTheDocument()
+    expect(within(grid).getByRole("heading", { name: "DOM 18" })).toBeInTheDocument()
+    expect(within(grid).queryAllByRole("button", { name: /^libre,/ })).toHaveLength(0)
   })
 
   it("muestra el error si falla la consulta", async () => {

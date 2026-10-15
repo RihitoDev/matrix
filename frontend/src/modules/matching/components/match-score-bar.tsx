@@ -1,42 +1,33 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { MatchScoreProps } from '../types/match-score.types';
+import { cn } from "@/lib/utils";
+import { Progress } from "@/components/ui/progress";
+import type { MatchScoreProps } from "../types/match-score.types";
 
-export const MatchScoreBar: React.FC<MatchScoreProps> = ({
-  score,
-  showLabel = true,
-  size = 'md',
-  className = '',
-}) => {
-  const normalizedScore = Math.min(Math.max(score, 0), 100);
+const SIZE_CLASSES = {
+  sm: "[&_[data-slot=progress-track]]:h-2",
+  md: "[&_[data-slot=progress-track]]:h-3",
+  lg: "[&_[data-slot=progress-track]]:h-4",
+} as const;
 
-  const sizeClasses = {
-    sm: 'h-2 text-xs',
-    md: 'h-3 text-sm',
-    lg: 'h-4 text-base',
-  };
+export function MatchScoreBar({ score, showLabel = true, size = "md", className }: MatchScoreProps) {
+  const normalizedScore = Number.isFinite(score)
+    ? Math.round(Math.min(Math.max(score, 0), 100))
+    : 0;
 
   return (
-    <div className={`w-full flex flex-col gap-1.5 ${className}`}>
+    <div className={cn("flex w-full flex-col gap-1.5", className)}>
       {showLabel && (
-        <div className="flex justify-between items-center text-sm font-medium text-slate-800">
+        <div className="flex items-center justify-between text-sm font-medium text-foreground">
           <span>Compatibilidad</span>
-          <span className="font-semibold text-slate-900">{normalizedScore}%</span>
+          <span className="font-semibold">{normalizedScore}%</span>
         </div>
       )}
-      <div
-        className={`w-full bg-slate-200 rounded-full overflow-hidden ${sizeClasses[size]}`}
-        role="progressbar"
-        aria-valuenow={normalizedScore}
-        aria-valuemin={0}
-        aria-valuemax={100}
-      >
-        <div
-          className="bg-red-700 h-full transition-all duration-500 ease-out rounded-full"
-          style={{ width: `${normalizedScore}%` }}
-        />
-      </div>
+      <Progress
+        value={normalizedScore}
+        aria-label="Compatibilidad"
+        className={cn("w-full", SIZE_CLASSES[size])}
+      />
     </div>
   );
-};
+}

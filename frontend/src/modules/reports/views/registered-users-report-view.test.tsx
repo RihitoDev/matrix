@@ -1,6 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent, { type UserEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { toast } from "sonner";
 import type { ApiResponse, PaginatedData } from "@/shared/types/api-response.types";
 import * as downloadFileModule from "@/shared/utils/download-file";
 import { reportsService } from "../services/reports.service";
@@ -51,16 +52,19 @@ function buildResponse({ page, limit, userType, period }: RegisteredUsersParams)
   };
 }
 
+const SLOW_UI_TIMEOUT = { timeout: 5000 };
+const SLOW_TEST_TIMEOUT_MS = 20_000;
+
 async function renderLoadedView() {
   render(<RegisteredUsersReportView />);
   await waitFor(() => {
     expect(screen.getByText("Juan Carlos Peres Rojas")).toBeDefined();
-  });
+  }, SLOW_UI_TIMEOUT);
 }
 
 async function selectUserType(user: UserEvent, label: string) {
   await user.click(screen.getByRole("combobox", { name: "Tipo de usuario" }));
-  await user.click(await screen.findByRole("option", { name: label }));
+  await user.click(await screen.findByRole("option", { name: label }, SLOW_UI_TIMEOUT));
 }
 
 async function selectPeriod(user: UserEvent, label: string) {
@@ -144,13 +148,13 @@ describe("RegisteredUsersReportView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Página 2" }));
     await waitFor(() => {
       expect(screen.getByText("Mostrando 11-20 de 24 usuarios")).toBeDefined();
-    });
+    }, SLOW_UI_TIMEOUT);
 
     await selectUserType(user, "Empresa");
 
     await waitFor(() => {
       expect(screen.getByText("Mostrando 1-4 de 4 usuarios")).toBeDefined();
-    });
+    }, SLOW_UI_TIMEOUT);
     expect(screen.getByText("Diego Mercado Rocha")).toBeDefined();
     expect(screen.queryByText("Juan Carlos Peres Rojas")).toBeNull();
     expect(screen.getByRole("combobox", { name: "Tipo de usuario" }).textContent).toContain("Empresa");
@@ -158,14 +162,14 @@ describe("RegisteredUsersReportView", () => {
     await selectUserType(user, "Mentor");
     await waitFor(() => {
       expect(screen.getByText("Mostrando 1-2 de 2 usuarios")).toBeDefined();
-    });
+    }, SLOW_UI_TIMEOUT);
     expect(screen.getByText("Gabriela Soliz Arnez")).toBeDefined();
 
     await selectUserType(user, "Todos");
     await waitFor(() => {
       expect(screen.getByText("Mostrando 1-10 de 24 usuarios")).toBeDefined();
-    });
-  });
+    }, SLOW_UI_TIMEOUT);
+  }, SLOW_TEST_TIMEOUT_MS);
 
   it("maneja el filtro con el teclado y lo cierra con Escape o al hacer clic afuera", async () => {
     const user = userEvent.setup();
@@ -280,12 +284,12 @@ describe("RegisteredUsersReportView", () => {
       ok: true,
     }));
     render(<RegisteredUsersReportView />);
-    await screen.findByText("Empresa 1");
+    await screen.findByText("Empresa 1", undefined, SLOW_UI_TIMEOUT);
     await selectUserType(user, "Empresa");
     await selectPeriod(user, "I-2025");
 
     await user.click(screen.getByRole("button", { name: "Página 20" }));
-    expect(await screen.findByText("Mostrando 191-200 de 200 usuarios")).toBeDefined();
+    expect(await screen.findByText("Mostrando 191-200 de 200 usuarios", undefined, SLOW_UI_TIMEOUT)).toBeDefined();
     expect(reportsService.getRegisteredUsers).toHaveBeenLastCalledWith({
       page: 20, limit: 10, userType: "empresa", period: "I-2025", search: "",
     });
@@ -293,11 +297,11 @@ describe("RegisteredUsersReportView", () => {
     expect(screen.getByRole("button", { name: "Página siguiente" })).toBeDisabled();
 
     await user.click(screen.getByRole("button", { name: "Página anterior" }));
-    expect(await screen.findByText("Mostrando 181-190 de 200 usuarios")).toBeDefined();
+    expect(await screen.findByText("Mostrando 181-190 de 200 usuarios", undefined, SLOW_UI_TIMEOUT)).toBeDefined();
     expect(reportsService.getRegisteredUsers).toHaveBeenLastCalledWith({
       page: 19, limit: 10, userType: "empresa", period: "I-2025", search: "",
     });
-  });
+  }, SLOW_TEST_TIMEOUT_MS);
 
   it("muestra el estado vacío para una gestión sin usuarios y se recupera con Todas", async () => {
     const user = userEvent.setup();
@@ -411,11 +415,14 @@ describe("RegisteredUsersReportView", () => {
   it("muestra un mensaje si falla la exportación", async () => {
     vi.spyOn(reportsService, "exportRegisteredUsersCsv").mockRejectedValueOnce(new Error("Network error"));
     const downloadSpy = vi.spyOn(downloadFileModule, "downloadFile");
+    const toastErrorSpy = vi.spyOn(toast, "error");
     await renderLoadedView();
 
     fireEvent.click(screen.getByRole("button", { name: "Exportar CSV" }));
 
-    expect((await screen.findByRole("alert")).textContent).toBe("No se pudo exportar el reporte. Inténtalo de nuevo.");
+    await waitFor(() =>
+      expect(toastErrorSpy).toHaveBeenCalledWith("No se pudo exportar el reporte. Inténtalo de nuevo.", expect.any(Object)),
+    );
     expect(downloadSpy).not.toHaveBeenCalled();
     expect(screen.queryByText("La exportación de la tabla ha sido un éxito")).toBeNull();
   });

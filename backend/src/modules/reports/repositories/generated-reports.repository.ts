@@ -14,11 +14,15 @@ export class GeneratedReportsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findPage(
+    userId: string,
     skip: number,
     take: number,
     reportType?: ReportType,
   ): Promise<GeneratedReportsPage> {
-    const where = { reportType: reportType ?? { in: [...REPORT_TYPES] } };
+    const where = {
+      userId,
+      reportType: reportType ?? { in: [...REPORT_TYPES] },
+    };
     const [records, total] = await Promise.all([
       this.prisma.adminExportHistory.findMany({
         where,

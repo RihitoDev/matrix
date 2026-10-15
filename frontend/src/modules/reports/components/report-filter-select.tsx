@@ -39,7 +39,8 @@ export function ReportFilterSelect<TValue extends string>({
             <SelectItem
               key={option.value}
               value={option.value}
-              className="rounded-none px-3 py-2 text-ink-soft focus:bg-surface-soft focus:text-ink data-selected:font-semibold data-selected:text-ink"
+              variant="subtle"
+              className="rounded-none px-3 py-2 text-ink-soft data-selected:font-semibold"
             >
               {option.label}
             </SelectItem>
