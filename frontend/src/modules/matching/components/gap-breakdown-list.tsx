@@ -25,24 +25,24 @@ export function GapBreakdownList({ axes, gaps }: GapBreakdownListProps) {
           const delta = gaps[axis.id];
           const isGap = delta < 0;
           return (
-            <li key={axis.id} className="flex items-center justify-between gap-3 text-sm">
-              <span className="text-foreground">{axis.label}</span>
-              <div className="flex flex-1 items-center gap-2">
-                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+            <li key={axis.id} className="grid grid-cols-[minmax(0,8.5rem)_minmax(0,1fr)_3rem] items-center gap-3 text-sm">
+              <span className="min-w-0 text-foreground">{axis.label}</span>
+              <div className="min-w-0">
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                   <div
                     className={cn("h-full rounded-full", isGap ? "bg-amber-500" : "bg-emerald-500")}
                     style={{ width: `${Math.min(100, (Math.abs(delta) / AXIS_MAX_SCORE) * 100 * 2.5)}%` }}
                   />
                 </div>
-                <span
-                  className={cn(
-                    "w-12 shrink-0 text-right font-medium tabular-nums",
-                    isGap ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"
-                  )}
-                >
-                  {formatDelta(delta)}
-                </span>
               </div>
+              <span
+                className={cn(
+                  "text-right font-medium tabular-nums",
+                  isGap ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"
+                )}
+              >
+                {formatDelta(delta)}
+              </span>
             </li>
           );
         })}
