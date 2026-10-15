@@ -18,7 +18,8 @@ export function AppRouteLayout({ children }: AppRouteLayoutProps) {
     <SessionGate>
       <AppShell
         fullBleed={pathname === "/events"}
-        contentClassName={isChat ? "flex h-[calc(100dvh-4rem)] min-h-0 flex-col" : undefined}
+        contentClassName={isChat ? "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden" : undefined
+}
       >
         <RoleGate allowedRoles={getRouteRoles(pathname ?? "")}>{children}</RoleGate>
       </AppShell>
