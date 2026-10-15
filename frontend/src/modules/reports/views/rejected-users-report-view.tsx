@@ -10,6 +10,7 @@ import {
 } from "../constants/reports.constants";
 import { EmailSearchInput } from "../components/email-search-input";
 import { ExportCsvButton } from "../components/export-csv-button";
+import { ExportSuccessToast } from "../components/export-success-toast";
 import { RefreshButton } from "../components/refresh-button";
 import { RejectedUsersTable } from "../components/rejected-users-table";
 import { TablePagination } from "../components/table-pagination";
@@ -25,6 +26,7 @@ export function RejectedUsersReportView() {
     exportCsv,
     isExporting,
     errorMessage: exportErrorMessage,
+    successMessage: exportSuccessMessage,
   } = useExportRejectedUsersCsv(search);
 
   const handleSearchChange = (value: string) => {
@@ -78,6 +80,8 @@ export function RejectedUsersReportView() {
           )}
         </div>
       </div>
+
+      <ExportSuccessToast message={exportSuccessMessage} />
     </section>
   );
 }

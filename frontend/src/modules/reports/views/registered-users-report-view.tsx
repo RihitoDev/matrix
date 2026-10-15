@@ -15,6 +15,7 @@ import {
   SLOW_REQUEST_MESSAGE,
 } from "../constants/reports.constants";
 import { EmailSearchInput } from "../components/email-search-input";
+import { ExportSuccessToast } from "../components/export-success-toast";
 import { RegisteredUsersTable } from "../components/registered-users-table";
 import { ReportActions } from "../components/report-actions";
 import { ReportTableFooter } from "../components/report-table-footer";
@@ -36,6 +37,7 @@ export function RegisteredUsersReportView() {
     exportCsv,
     isExporting,
     errorMessage: exportErrorMessage,
+    successMessage: exportSuccessMessage,
   } = useExportRegisteredUsersCsv(userType, period, search);
 
   useEffect(() => {
@@ -116,6 +118,8 @@ export function RegisteredUsersReportView() {
         onPageChange={setCurrentPage}
         onRefresh={refresh}
       />
+
+      <ExportSuccessToast message={exportSuccessMessage} />
     </section>
   );
 }
