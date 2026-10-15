@@ -21,4 +21,18 @@ describe("MatchScoreBar", () => {
     expect(screen.queryByText("Compatibilidad")).not.toBeInTheDocument();
     expect(screen.getByRole("progressbar", { name: "Compatibilidad" })).toHaveAttribute("aria-valuenow", "60");
   });
+
+  it("updates the UI progress when compatibility changes after loading a profile", () => {
+    const { rerender } = render(<MatchScoreBar score={0} />);
+    rerender(<MatchScoreBar score={87.6} />);
+    expect(screen.getByRole("progressbar", { name: "Compatibilidad" })).toHaveAttribute("aria-valuenow", "88");
+    expect(screen.getByText("88%")).toBeInTheDocument();
+    expect(screen.queryByText("0%")).not.toBeInTheDocument();
+  });
+
+  it("uses themed UI track and indicator for compatibility", () => {
+    const { container } = render(<MatchScoreBar score={75} />);
+    expect(container.querySelector('[data-slot="progress-track"]')).toHaveClass("bg-muted");
+    expect(container.querySelector('[data-slot="progress-indicator"]')).toHaveClass("bg-primary");
+  });
 });
