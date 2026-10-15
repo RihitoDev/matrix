@@ -114,7 +114,6 @@ export class AccessRequestsRepository {
   findDetailById(id: string) {
     return this.prisma.accessRequest.findUnique({
       where: { id },
-      // Del archivo solo metadatos, nunca content.
       select: {
         id: true,
         requestCode: true,
@@ -307,7 +306,6 @@ export class AccessRequestsRepository {
   findByRequestCode(requestCode: string, email: string) {
     return this.prisma.accessRequest.findFirst({
       where: { requestCode, email: { equals: email, mode: 'insensitive' } },
-      // Solo metadatos; no se exponen archivos ni datos personales.
       select: {
         requestCode: true,
         submittedAt: true,
