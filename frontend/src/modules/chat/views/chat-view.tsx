@@ -13,10 +13,10 @@ import { ChatRoom } from '../components/chat-room';
 
 import { Conversation } from '../types/conversation.types';
 import { User } from '../types/user.types';
-import { sendMessage } from '../services/chat-api';
-import { CURRENT_USER_ID } from '../mocks/mock-users';
+import { sendMessage, getCurrentSessionUserId } from '../services/chat-api';
 
 export function ChatView() {
+  const currentUserId = getCurrentSessionUserId();
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
@@ -31,20 +31,26 @@ export function ChatView() {
     activeFilter,
     searchQuery,
     isLoading,
+    isError,
+    retryConversations,
     setActiveFilter,
     setSearchQuery,
     handleSelectConversation,
     clearSelectedConversation,
     startConversationWithContact,
+    updateConversationLastMessage,
   } = useConversations();
 
   const {
-  data: messages = [],
-  isLoading: isLoadingMessages,
-  hasMoreMessages,
-  loadMoreMessages,
-  isLoadingMoreMessages,
-} = useMessages(selectedId);
+    data: messages = [],
+    isLoading: isLoadingMessages,
+    hasMoreMessages,
+    loadMoreMessages,
+    isLoadingMoreMessages,
+    isError: isMessagesError,
+    isFetchNextPageError,
+    refetch: retryMessages,
+  } = useMessages(selectedId);
 
   const handleBackToList = () => {
     clearSelectedConversation();
@@ -58,6 +64,7 @@ export function ChatView() {
     if (activeFilter !== 'all') {
       setActiveFilter('all');
     }
+
     setIsSearchModalOpen(true);
   };
 
@@ -65,32 +72,41 @@ export function ChatView() {
     if (activeFilter !== 'all') {
       setActiveFilter('all');
     }
+
     await startConversationWithContact(contactUser);
     setIsSearchModalOpen(false);
   };
 
-  const handleSendMessage = async (content: string) => {
-    if (!selectedId || isSending) return;
+  const handleSendMessage = async (content: string): Promise<void> => {
+    if (!selectedId || isSending) {
+      throw new Error('No hay una conversación seleccionada o ya se está enviando un mensaje.');
+    }
+
+    const conversationId = selectedId;
 
     setIsSending(true);
+
     try {
       await sendMessage({
-        conversationId: selectedId,
+        conversationId,
         content,
-        senderId: CURRENT_USER_ID,
+        senderId: currentUserId,
       });
 
+      updateConversationLastMessage(conversationId, content, currentUserId);
+
       await queryClient.invalidateQueries({
-        queryKey: messagesQueryKey(selectedId),
+        queryKey: messagesQueryKey(conversationId),
       });
-    } catch {
+    } catch (error) {
+      throw error;
     } finally {
       setIsSending(false);
     }
   };
 
   return (
-    <div className="flex h-screen h-[100dvh] w-full max-w-full bg-slate-50 overflow-hidden font-sans">
+    <div className="flex h-full min-h-0 w-full max-w-full flex-1 bg-surface-soft overflow-hidden font-sans">
       <aside
         className={`w-full md:w-80 lg:w-96 h-full shrink-0 overflow-hidden ${
           selectedId ? 'hidden md:block' : 'block'
@@ -100,6 +116,8 @@ export function ChatView() {
           conversations={conversations}
           selectedId={selectedId}
           isLoading={isLoading}
+          isError={isError}
+          onRetry={retryConversations}
           hasMore={hasMore}
           activeFilter={activeFilter}
           searchQuery={searchQuery}
@@ -118,9 +136,10 @@ export function ChatView() {
       >
         {selectedConversation ? (
           <ChatRoom
+            key={selectedConversation.id}
             conversation={selectedConversation}
             messages={messages}
-            currentUserId={CURRENT_USER_ID}
+            currentUserId={currentUserId}
             onBack={handleBackToList}
             onSendMessage={handleSendMessage}
             isLoadingMessages={isLoadingMessages}
@@ -128,6 +147,11 @@ export function ChatView() {
             hasMoreMessages={hasMoreMessages}
             onLoadMoreMessages={loadMoreMessages}
             isLoadingMoreMessages={isLoadingMoreMessages}
+            isMessagesError={isMessagesError}
+            isLoadingOlderError={isFetchNextPageError}
+            onRetryMessages={() => {
+              void retryMessages();
+            }}
           />
         ) : (
           <EmptyChatState

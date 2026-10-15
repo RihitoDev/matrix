@@ -9,12 +9,14 @@ export class CvMetadataRepository {
   async findByUserId(userId: string): Promise<CvMetadataRecord | null> {
     const rows = await this.prisma.$queryRaw<CvMetadataRecord[]>`
       SELECT
-        first_name AS "firstName",
-        last_name AS "lastName",
-        octet_length(cv_pdf_url) AS "sizeBytes",
-        updated_at AS "updatedAt"
-      FROM users
-      WHERE id = ${userId}::uuid
+        u.first_name AS "firstName",
+        u.last_name AS "lastName",
+        c.cv_file_name AS "fileName",
+        octet_length(decode(c.cv_pdf_data, 'base64')) AS "sizeBytes",
+        c.cv_uploaded_at AS "uploadedAt"
+      FROM users u
+      LEFT JOIN user_cv_file c ON c.user_id = u.id
+      WHERE u.id = ${userId}::uuid
     `;
 
     return rows[0] ?? null;
