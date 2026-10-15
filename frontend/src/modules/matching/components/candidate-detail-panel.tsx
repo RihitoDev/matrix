@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { AreaDetailPanel } from "@/modules/radar-chart/components/area-detail-panel";
+import type { AreaId } from "@/modules/radar-chart/types/area-detail.types";
+import { getCandidateAreaDetail } from "../data/candidate-area-evidence.data";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -43,6 +46,7 @@ export function CandidateDetailPanel({
   const [inlineAction, setInlineAction] = useState<InlineAction>(null);
   const [scheduleDate, setScheduleDate] = useState("");
   const [scheduleTime, setScheduleTime] = useState("");
+  const [selectedAreaId, setSelectedAreaId] = useState<AreaId | null>(null);
 
   if (!candidate || !vacancy) {
     return (
@@ -58,13 +62,13 @@ export function CandidateDetailPanel({
   const isPendingDiscard = pendingDiscardId === candidate.id;
 
   function handleSubmitSchedule() {
-  if (!candidate || !scheduleDate || !scheduleTime) return;
+    if (!candidate || !scheduleDate || !scheduleTime) return;
 
-  onConfirmSchedule(candidate.name, scheduleDate, scheduleTime);
-  setInlineAction(null);
-  setScheduleDate("");
-  setScheduleTime("");
-}
+    onConfirmSchedule(candidate.name, scheduleDate, scheduleTime);
+    setInlineAction(null);
+    setScheduleDate("");
+    setScheduleTime("");
+  }
 
   return (
     <Card className="flex h-full flex-col overflow-y-auto">
@@ -105,9 +109,22 @@ export function CandidateDetailPanel({
               values: vacancy.targetProfile,
             },
           ]}
+          onAxisSelect={setSelectedAreaId}
         />
 
         <GapBreakdownList axes={axes} gaps={candidate.gaps} />
+
+        {selectedAreaId && (
+          <div className="flex min-w-0 flex-col gap-2" role="region" aria-label={`Evidencias de ${candidate.name}`}>
+            <p className="text-xs text-muted-foreground">
+              Información ilustrativa de {candidate.name}; cursos, certificaciones y experiencias de demostración.
+            </p>
+            <AreaDetailPanel
+              area={getCandidateAreaDetail(candidate, selectedAreaId)}
+              onClose={() => setSelectedAreaId(null)}
+            />
+          </div>
+        )}
 
         {actionFeedback && (
           <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-300">
@@ -131,7 +148,6 @@ export function CandidateDetailPanel({
               </Button>
               <Button
                 type="button"
-                variant="secondary"
                 className="w-full"
                 onClick={() => setInlineAction(inlineAction === "schedule" ? null : "schedule")}
               >
@@ -139,7 +155,6 @@ export function CandidateDetailPanel({
               </Button>
               <Button
                 type="button"
-                variant="outline"
                 className="w-full"
                 onClick={() => onRequestDiscard(candidate.id)}
               >
@@ -161,7 +176,10 @@ export function CandidateDetailPanel({
               <p className="mt-1 text-muted-foreground">
                 {candidate.name.toLowerCase().replace(/\s+/g, ".")}@umss-egresados.bo
               </p>
-              <p className="text-muted-foreground">+591 7xx-xxx-{candidate.id.slice(-2)}</p>
+              <p className="text-muted-foreground" aria-label="Teléfono de demostración">
+                {candidate.demoPhone}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">Datos ficticios: no utilizar para contactar.</p>
             </div>
           )}
 
