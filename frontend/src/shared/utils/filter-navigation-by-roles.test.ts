@@ -27,7 +27,7 @@ describe("Role navigation", () => {
 
   it("exposes recruiter functions only to company accounts", () => {
     const paths = getPaths(["empresa"]);
-    expect(paths).not.toContain("/chat");
+    expect(paths).toContain("/chat");
     expect(paths).toContain("/recruiters/job-offers/new");
     expect(paths).toContain("/matching");
     expect(paths).toContain("/profile");
@@ -56,7 +56,7 @@ describe("Role navigation", () => {
     expect(paths).toContain("/mentorship/mentors");
     expect(paths).not.toContain("/mentors/participation");
     expect(paths).not.toContain("/mentor/availability");
-    expect(paths).not.toContain("/chat");
+    expect(paths).toContain("/chat");
     expect(paths).not.toContain("/events");
     expect(filterNavigationByRoles(SIDEBAR_NAVIGATION, [])).toEqual([]);
   });
