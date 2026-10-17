@@ -1,17 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import type { DetectedSkillResponse } from '../types/matching.types.js';
-import { NlpService } from './nlp.service.js';
+import { buildSkillKey } from '../utils/build-skill-key.js';
 
 @Injectable()
 export class SkillsClassifierService {
-  constructor(private readonly nlpService: NlpService) {}
-
   classify(candidates: string[], catalog: DetectedSkillResponse[]): DetectedSkillResponse[] {
     const catalogByKey = this.buildCatalogIndex(catalog);
     const detected = new Map<string, DetectedSkillResponse>();
 
     for (const candidate of candidates) {
-      const skill = catalogByKey.get(candidate.trim().toLowerCase());
+      const skill = catalogByKey.get(buildSkillKey(candidate));
       if (skill !== undefined && !detected.has(skill.id)) {
         detected.set(skill.id, skill);
       }
@@ -24,7 +22,7 @@ export class SkillsClassifierService {
     const skillsByKey = new Map<string, DetectedSkillResponse[]>();
 
     for (const skill of catalog) {
-      const key = this.nlpService.normalizeText(skill.name).replace(/ /g, '_');
+      const key = buildSkillKey(skill.name);
       if (key.length === 0) continue;
       skillsByKey.set(key, [...(skillsByKey.get(key) ?? []), skill]);
     }
