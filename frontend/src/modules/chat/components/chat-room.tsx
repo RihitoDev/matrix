@@ -14,7 +14,7 @@ import Image from 'next/image';
 import { Conversation, Message } from '../types/conversation.types';
 import { MessageInputBar } from './message-input-bar';
 import { ChatErrorState } from './chat-error-state';
-import { getInitials } from '../utils/date-formatter';
+import { getInitials, formatMessageDateSeparator } from '../utils/date-formatter';
 import { isContentValidForSend } from '../utils/unicode-counter';
 
 interface ChatRoomProps {
@@ -53,19 +53,7 @@ function formatMessageTime(isoString?: string | null): string {
 }
 
 function formatMessageDate(isoString?: string | null): string {
-  if (!isoString) return '';
-
-  const date = new Date(isoString);
-
-  if (Number.isNaN(date.getTime())) return '';
-
-  return new Intl.DateTimeFormat('es-BO', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
-    .format(date)
-    .toUpperCase();
+  return formatMessageDateSeparator(isoString);
 }
 
 function isSameDay(
@@ -181,7 +169,7 @@ function ChatRoomContent({
           previousScrollHeightRef.current;
 
         container.scrollTop =
-          previousScrollTopRef.current + heightDifference;
+          container.scrollTop + heightDifference;
 
         isLoadingPreviousPageRef.current = false;
       } else if (!isLoadingMoreMessages) {

@@ -29,7 +29,9 @@ export class UserSearchService {
     return rows.map((row) => ({
       id: row.id,
       fullName: `${row.first_name} ${row.last_name}`.trim(),
-      avatarUrl: null, 
+      avatarUrl: row.photo_url
+        ? `data:image/jpeg;base64,${Buffer.from(row.photo_url).toString('base64')}`
+        : null,
       headline: row.headline,
       role: row.role_name ?? 'GRADUATE',
       isOnline: row.is_online ?? false,

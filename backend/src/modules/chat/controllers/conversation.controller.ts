@@ -2,10 +2,13 @@ import {
   Body,
   Controller,
   Get,
+  HttpStatus,
   Post,
+  Res,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { Roles } from '../../../common/decorators/roles.decorator.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
@@ -35,11 +38,19 @@ export class ConversationController {
   }
 
   @Post()
-  createOrGet(
+  async createOrGet(
     @Body(new ZodValidationPipe(createConversationSchema))
     body: CreateConversationDto,
     @CurrentUser() user: AuthenticatedUser,
+    @Res({ passthrough: true }) res: Response,
   ): Promise<ConversationResponse> {
-    return this.conversationService.getOrCreate(user.id, body.contactId);
+    const result = await this.conversationService.getOrCreateWithStatus(
+      user.id,
+      body.contactId,
+    );
+    if (!result.isCreated) {
+      res.status(HttpStatus.OK);
+    }
+    return result.conversation;
   }
 }

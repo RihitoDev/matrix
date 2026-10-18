@@ -23,11 +23,25 @@ export class ConversationService {
     currentUserId: string,
     contactId: string,
   ): Promise<ConversationResponse> {
-    if (currentUserId === contactId) {
+    const { conversation } = await this.getOrCreateWithStatus(
+      currentUserId,
+      contactId,
+    );
+    return conversation;
+  }
+
+  async getOrCreateWithStatus(
+    currentUserId: string,
+    contactId: string,
+  ): Promise<{ conversation: ConversationResponse; isCreated: boolean }> {
+    const normalizedCurrentUserId = currentUserId.trim().toLowerCase();
+    const normalizedContactId = contactId.trim().toLowerCase();
+
+    if (normalizedCurrentUserId === normalizedContactId) {
       throw new SelfConversationException();
     }
 
-    const contact = await this.userLookupRepository.findById(contactId);
+    const contact = await this.userLookupRepository.findById(normalizedContactId);
     if (!contact) {
       throw new UserNotFoundException();
     }
@@ -36,9 +50,9 @@ export class ConversationService {
     }
 
     const [userAId, userBId] =
-      currentUserId < contactId
-        ? [currentUserId, contactId]
-        : [contactId, currentUserId];
+      normalizedCurrentUserId < normalizedContactId
+        ? [normalizedCurrentUserId, normalizedContactId]
+        : [normalizedContactId, normalizedCurrentUserId];
 
     const existing = await this.conversationRepository.findByOrderedPair(
       userAId,
@@ -46,16 +60,41 @@ export class ConversationService {
     );
 
     if (existing) {
-      return this.toResponse(existing, currentUserId);
+      const conversation = await this.toResponse(existing, normalizedCurrentUserId);
+      return { conversation, isCreated: false };
     }
 
-    const created = await this.conversationRepository.createWithParticipants(
-      userAId,
-      userBId,
-      new Date(),
-    );
+    try {
+      const created = await this.conversationRepository.createWithParticipants(
+        userAId,
+        userBId,
+        new Date(),
+      );
 
-    return this.toResponse(created, currentUserId);
+      const conversation = await this.toResponse(created, normalizedCurrentUserId);
+      return { conversation, isCreated: true };
+    } catch (error: unknown) {
+      const err = error as { code?: string; message?: string };
+      if (
+        err?.code === 'P2002' ||
+        err?.message?.includes('P2002') ||
+        err?.message?.includes('Unique constraint')
+      ) {
+        const concurrentExisting =
+          await this.conversationRepository.findByOrderedPair(
+            userAId,
+            userBId,
+          );
+        if (concurrentExisting) {
+          const conversation = await this.toResponse(
+            concurrentExisting,
+            normalizedCurrentUserId,
+          );
+          return { conversation, isCreated: false };
+        }
+      }
+      throw error;
+    }
   }
 
   async isParticipant(conversationId: string, userId: string): Promise<boolean> {
@@ -127,12 +166,17 @@ export class ConversationService {
       : (lastMessage?.content ?? '');
     const attachmentType = isAttachment ? ('file' as const) : null;
 
+    const contactPhoto = (contact as { photoUrl?: Uint8Array | null }).photoUrl;
+    const avatarUrl = contactPhoto
+      ? `data:image/jpeg;base64,${Buffer.from(contactPhoto).toString('base64')}`
+      : null;
+
     return {
       id: conversation.id,
       contact: {
         id: contact.id,
         fullName: `${contact.firstName} ${contact.lastName}`.trim(),
-        avatarUrl: null,
+        avatarUrl,
         isOnline: onlineMap.get(contact.id) ?? false,
       },
       lastMessage: lastMessage

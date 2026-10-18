@@ -15,8 +15,8 @@ export class ConversationRepository {
     return this.prisma.conversation.findUnique({
       where: { userAId_userBId: { userAId, userBId } },
       include: {
-        userA: { select: { id: true, firstName: true, lastName: true } },
-        userB: { select: { id: true, firstName: true, lastName: true } },
+        userA: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
+        userB: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
         messages: {
           orderBy: { sentAt: 'desc' },
           take: 1,
@@ -45,8 +45,8 @@ export class ConversationRepository {
         },
       },
       include: {
-        userA: { select: { id: true, firstName: true, lastName: true } },
-        userB: { select: { id: true, firstName: true, lastName: true } },
+        userA: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
+        userB: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
         messages: {
           orderBy: { sentAt: 'desc' },
           take: 1,
@@ -76,8 +76,8 @@ export class ConversationRepository {
         ],
       },
       include: {
-        userA: { select: { id: true, firstName: true, lastName: true } },
-        userB: { select: { id: true, firstName: true, lastName: true } },
+        userA: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
+        userB: { select: { id: true, firstName: true, lastName: true, photoUrl: true } },
         messages: {
           orderBy: { sentAt: 'desc' },
           take: 1,
