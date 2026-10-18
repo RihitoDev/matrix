@@ -13,6 +13,7 @@ const row = {
   sisCode: '2018001',
   submittedAt: new Date('2026-10-05T12:00:00.000Z'),
   status: { title: 'pending' },
+  career: { title: 'Licenciatura en Ingeniería de Sistemas' },
   documentType: { title: 'academic_diploma' },
 };
 
@@ -25,6 +26,7 @@ describe('toAccessRequestListItem', () => {
       fullName: 'Ana Pérez',
       email: 'ana@umss.test',
       sisCode: '2018001',
+      career: 'Licenciatura en Ingeniería de Sistemas',
       documentType: 'academic_diploma',
       submittedAt: '2026-10-05T12:00:00.000Z',
       status: 'pending',
@@ -68,6 +70,7 @@ describe('AccessRequestsRepository.findPage', () => {
     expect(where.status.title.in).toEqual(['pending', 'in_review', 'approved', 'rejected']);
     expect(where.status.title.in).not.toContain('draft');
     expect(select.documentFile).toBeUndefined();
+    expect(select.career).toEqual({ select: { title: true } });
     expect(JSON.stringify(select)).not.toContain('content');
   });
 });

@@ -85,6 +85,7 @@ export class AccessRequestsRepository {
           sisCode: true,
           submittedAt: true,
           status: { select: { title: true } },
+          career: { select: { title: true } },
           documentType: { select: { title: true } },
         } satisfies Prisma.AccessRequestSelect,
       }),
@@ -113,7 +114,6 @@ export class AccessRequestsRepository {
   findDetailById(id: string) {
     return this.prisma.accessRequest.findUnique({
       where: { id },
-      // Del archivo solo metadatos, nunca content.
       select: {
         id: true,
         requestCode: true,
@@ -130,25 +130,34 @@ export class AccessRequestsRepository {
         submittedAt: true,
         reviewedAt: true,
         rejectionReason: true,
+        openedAt: true,
         status: { select: { title: true } },
         career: { select: { title: true } },
         documentType: { select: { title: true } },
         documentFile: { select: { name: true, extension: true, mimeType: true, size: true } },
+        openedBy: { select: { firstName: true, lastName: true } },
         reviewedBy: { select: { firstName: true, lastName: true } },
       } satisfies Prisma.AccessRequestSelect,
     });
   }
 
   async markInReview(id: string, reviewerId: string): Promise<boolean> {
+    const now = new Date();
     try {
-      await this.prisma.accessRequest.update({
-        where: { id, status: { title: ACCESS_REQUEST_STATUS.PENDING } },
-        data: {
-          status: { connect: { title: ACCESS_REQUEST_STATUS.IN_REVIEW } },
-          reviewedBy: { connect: { id: reviewerId } },
-          reviewedAt: new Date(),
-        },
-        select: { id: true },
+      await this.prisma.$transaction(async (tx) => {
+        await tx.accessRequest.update({
+          where: { id, status: { title: ACCESS_REQUEST_STATUS.PENDING } },
+          data: {
+            status: { connect: { title: ACCESS_REQUEST_STATUS.IN_REVIEW } },
+            reviewedBy: { connect: { id: reviewerId } },
+            reviewedAt: now,
+          },
+          select: { id: true },
+        });
+        await tx.accessRequest.updateMany({
+          where: { id, openedAt: null },
+          data: { openedById: reviewerId, openedAt: now },
+        });
       });
       return true;
     } catch (error) {
@@ -306,7 +315,6 @@ export class AccessRequestsRepository {
   findByRequestCode(requestCode: string, email: string) {
     return this.prisma.accessRequest.findFirst({
       where: { requestCode, email: { equals: email, mode: 'insensitive' } },
-      // Solo metadatos; no se exponen archivos ni datos personales.
       select: {
         requestCode: true,
         submittedAt: true,

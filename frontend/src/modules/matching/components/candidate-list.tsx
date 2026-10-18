@@ -23,7 +23,7 @@ export function CandidateList({
     <div className="flex h-full flex-col gap-3">
       <Input
         type="search"
-        placeholder="Buscar candidato, cargo..."
+        placeholder="Buscar candidato"
         value={query}
         onChange={(event) => onQueryChange(event.target.value)}
         aria-label="Buscar candidato"

@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { ALL_CAREERS_VALUE, DEFAULT_PERIOD, MIN_SEARCH_LENGTH, SEARCH_DEBOUNCE_MS } from "../constants/inbox-filters.constants";
+import { REQUEST_REVIEW_QUERY_KEYS } from "../constants/request-review-query-keys.constants";
 import { REVIEW_PAGE_SIZE } from "../constants/request-review.constants";
 import { requestReviewService } from "../services/request-review.service";
 import type { InboxPeriod } from "../types/inbox-filters.types";
-import type { ReviewListItem, ReviewStatus } from "../types/request-review.types";
+import type { ReviewStatus } from "../types/request-review.types";
+import { unwrapReviewResult } from "../utils/unwrap-review-result";
 
 export function useRequestList() {
   const [status, setStatus] = useState<ReviewStatus>("pending");
@@ -21,32 +24,16 @@ export function useRequestList() {
   const [pageState, setPageState] = useState({ key: filterKey, page: 1 });
   const page = pageState.key === filterKey ? pageState.page : 1;
 
-  const [result, setResult] = useState<{ key: string; items: ReviewListItem[]; total: number; error: string | null } | null>(
-    null,
-  );
-  const key = `${filterKey}:${page}`;
+  const filters = { search, career: careerFilter, period };
+  const query = useQuery({
+    queryKey: REQUEST_REVIEW_QUERY_KEYS.list(status, page, filters),
+    queryFn: async () => unwrapReviewResult(await requestReviewService.listRequests(status, page, undefined, filters)),
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    requestReviewService
-      .listRequests(status, page, undefined, { search, career: careerFilter, period })
-      .then((response) => {
-        if (cancelled) return;
-        setResult(
-          response.ok
-            ? { key, items: response.data.items, total: response.data.total, error: null }
-            : { key, items: [], total: 0, error: response.message },
-        );
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [status, page, search, careerFilter, period, key]);
-
-  const isLoading = result?.key !== key;
-  const items = result?.items ?? [];
-  const total = result?.total ?? 0;
-  const error = isLoading ? null : (result?.error ?? null);
+  const isLoading = query.isPending;
+  const items = query.data?.items ?? [];
+  const total = query.data?.total ?? 0;
+  const error = query.error?.message ?? null;
   const hasActiveFilters = searchInput.trim() !== "" || career !== ALL_CAREERS_VALUE || period !== DEFAULT_PERIOD;
 
   function clearFilters() {

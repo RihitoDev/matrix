@@ -21,7 +21,7 @@ import type { ChatUserResponse } from '../responses/chat-user.response.js';
 
 @Controller('chat/users')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('titulado', 'mentor')
+@Roles('titulado', 'estudiante', 'mentor', 'empresa')
 @UseInterceptors(ResponseInterceptor)
 export class UserSearchController {
   constructor(private readonly userSearchService: UserSearchService) {}

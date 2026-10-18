@@ -34,11 +34,12 @@ export function RejectDialog({ detail, open, onOpenChange, onRejected }: RejectD
     setIsRejecting(true);
     setRejectError(null);
     const result = await requestReviewService.rejectRequest(detail.id, rejection.reason);
-    setIsRejecting(false);
     if (result.ok) {
+      await onRejected(result.data.notificationSent);
+      setIsRejecting(false);
       onOpenChange(false);
-      onRejected(result.data.notificationSent);
     } else {
+      setIsRejecting(false);
       setRejectError(result.message);
     }
   }
@@ -110,8 +111,13 @@ export function RejectDialog({ detail, open, onOpenChange, onRejected }: RejectD
             className="min-h-24 max-w-full rounded-lg [overflow-wrap:anywhere]"
           />
           <p className="text-xs text-text-secondary" aria-live="polite">
-            {rejection.length}/{REJECTION_MAX_LENGTH}
+            {rejection.hintLength}/{rejection.hintMaxLength}
           </p>
+          {rejection.reservedLength > 0 && (
+            <p className="text-xs text-text-secondary">
+              El motivo elegido ocupa {rejection.reservedLength} de los {REJECTION_MAX_LENGTH} caracteres del mensaje.
+            </p>
+          )}
           {rejection.error && (
             <p role="alert" className="text-sm text-ink">
               {rejection.error}

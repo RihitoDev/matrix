@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLogin } from "../hooks/use-login";
+import { useRedirectAuthenticated } from "../hooks/use-redirect-authenticated";
 import { NEXT_PARAM } from "../constants/session.constants";
 import { resolvePostLoginPath } from "../utils/resolve-post-login-path";
 import { startSession } from "../utils/session";
@@ -20,6 +21,8 @@ export function LoginView() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  useRedirectAuthenticated(!isSigningIn);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -28,6 +31,7 @@ export function LoginView() {
     if (errors.email || errors.password) return;
     const result = await login({ email, password });
     if (result) {
+      setIsSigningIn(true);
       startSession(result.accessToken);
       const next = new URLSearchParams(window.location.search).get(NEXT_PARAM);
       router.push(resolvePostLoginPath(result.roles ?? result.roleTag, next));

@@ -50,6 +50,76 @@ describe('NlpService', () => {
     });
   });
 
+  describe('tokenizeAndFilter', () => {
+    it('devuelve arreglo vacío con texto vacío', () => {
+      expect(nlpService.tokenizeAndFilter('')).toEqual([]);
+    });
+
+    it('separa por saltos de línea, viñetas y comas', () => {
+      const text = '- Experiencia en NestJS\n• Conocimiento de Docker, PostgreSQL';
+      expect(nlpService.tokenizeAndFilter(text)).toEqual([
+        'experiencia',
+        'nestjs',
+        'conocimiento',
+        'docker',
+        'postgresql',
+      ]);
+    });
+
+    it('convierte a minúsculas y descarta stopwords en español e inglés', () => {
+      expect(nlpService.tokenizeAndFilter('Manejo DE la API and the SQL')).toEqual([
+        'manejo',
+        'api',
+        'sql',
+      ]);
+    });
+
+    it('conserva tokens técnicos con símbolos', () => {
+      expect(nlpService.tokenizeAndFilter('C++, C#, .NET, Node.js.')).toEqual([
+        'c++',
+        'c#',
+        '.net',
+        'node.js',
+      ]);
+    });
+
+    it('separa términos unidos por barra', () => {
+      expect(nlpService.tokenizeAndFilter('React/Next.js')).toEqual(['react', 'next.js']);
+    });
+
+    it('ignora signos sueltos y puntos aislados', () => {
+      expect(nlpService.tokenizeAndFilter('... - , ¿Python?')).toEqual(['python']);
+    });
+
+    it('conserva tildes y la ñ', () => {
+      expect(nlpService.tokenizeAndFilter('Gestión de diseño')).toEqual(['gestión', 'diseño']);
+    });
+  });
+
+  describe('generateNGrams', () => {
+    it('devuelve vacío con menos de dos tokens', () => {
+      expect(nlpService.generateNGrams(['python'])).toEqual([]);
+    });
+
+    it('genera bigramas y trigramas', () => {
+      expect(nlpService.generateNGrams(['a', 'b', 'c'])).toEqual(['a_b', 'a_b_c', 'b_c']);
+    });
+  });
+
+  describe('extractRequirementTerms', () => {
+    it('devuelve tokens y n-gramas sin duplicados', () => {
+      const terms = nlpService.extractRequirementTerms('Machine Learning, machine learning');
+      expect(terms).toContain('machine');
+      expect(terms).toContain('learning');
+      expect(terms).toContain('machine_learning');
+      expect(new Set(terms).size).toBe(terms.length);
+    });
+
+    it('devuelve vacío con texto vacío', () => {
+      expect(nlpService.extractRequirementTerms('')).toEqual([]);
+    });
+  });
+
   describe('rendimiento', () => {
     const longText = Array(200).fill(SAMPLE_TEXT).join(' ');
 

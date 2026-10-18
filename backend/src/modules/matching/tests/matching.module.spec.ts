@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
+import { PrismaService } from '../../../common/prisma/prisma.service.js';
 import { MatchingModule } from '../matching.module.js';
 import { MatchingController } from '../controllers/matching.controller.js';
 import { MatchingService } from '../services/matching.service.js';
@@ -13,7 +14,10 @@ describe('MatchingModule', () => {
   beforeEach(async () => {
     moduleRef = await Test.createTestingModule({
       imports: [MatchingModule],
-    }).compile();
+    })
+      .overrideProvider(PrismaService)
+      .useValue({})
+      .compile();
   });
 
   it.each([

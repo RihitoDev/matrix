@@ -148,6 +148,7 @@ model User {
   checkedInAttendances EventAttendance[]
 
   exportHistories        AdminExportHistory[] @relation("AdminExportHistories")
+  openedAccessRequests   AccessRequest[]      @relation("AccessRequestOpenedBy")
   reviewedAccessRequests AccessRequest[]      @relation("AccessRequestReviewedBy")
 
   conversationsAsUserA Conversation[]            @relation("UserAConversations")
@@ -694,6 +695,8 @@ model AccessRequest {
   documentTypeId  String?   @map("document_type_id") @db.Uuid
   documentFileId  String?   @unique @map("document_file_id") @db.Uuid
   submittedAt     DateTime? @map("submitted_at") @db.Timestamptz(6)
+  openedById      String?   @map("opened_by_id") @db.Uuid
+  openedAt        DateTime? @map("opened_at") @db.Timestamptz(6)
   reviewedById    String?   @map("reviewed_by_id") @db.Uuid
   reviewedAt      DateTime? @map("reviewed_at") @db.Timestamptz(6)
   rejectionReason String?   @map("rejection_reason") @db.VarChar(500)
@@ -703,6 +706,7 @@ model AccessRequest {
   status       AccessRequestStatus        @relation(fields: [statusId], references: [id], onDelete: Restrict)
   documentType AccessRequestDocumentType? @relation(fields: [documentTypeId], references: [id], onDelete: Restrict)
   documentFile File?                      @relation(fields: [documentFileId], references: [id], onDelete: SetNull)
+  openedBy     User?                      @relation("AccessRequestOpenedBy", fields: [openedById], references: [id], onDelete: SetNull)
   reviewedBy   User?                      @relation("AccessRequestReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
   career       Career                     @relation(fields: [careerId], references: [id], onDelete: Restrict)
 

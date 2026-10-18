@@ -91,10 +91,10 @@ describe("AppRouteLayout", () => {
 
   it.each([
     [["administrativo"], false],
-    [["empresa"], false],
+    [["empresa"], true],
     [["empresa", "titulado"], true],
     [["administrativo", "mentor"], true],
-    [["estudiante"], false],
+    [["estudiante"], true],
   ])("checks chat permissions for roles %s", (roles, isAllowed) => {
     sessionStorage.setItem("accessToken", `h.${btoa(JSON.stringify({ roleTag: roles[0], roles }))}.s`);
     route.pathname = "/chat";

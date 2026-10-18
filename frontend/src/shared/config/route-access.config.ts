@@ -8,7 +8,7 @@ export const APP_ROUTE_ACCESS: readonly RouteAccessRule[] = [
   { pattern: /^\/area-detail(?:-interaction)?-preview\/?$/, roles: ["empresa"] },
   { pattern: /^\/profile\/radar\/?$/, roles: ["titulado", "mentor"] },
   { pattern: /^\/profile(?:\/|$)/, roles: ["titulado", "estudiante", "mentor", "empresa"] },
-  { pattern: /^\/chat(?:\/|$)/, roles: ["titulado", "mentor"] },
+  { pattern: /^\/chat(?:\/|$)/, roles: ["titulado", "estudiante", "mentor", "empresa"] },
   { pattern: /^\/events(?:\/|$)/, roles: ["titulado", "mentor"] },
   { pattern: /^\/vacancies(?:\/|$)/, roles: ["titulado", "estudiante", "mentor"] },
   { pattern: /^\/mentor\/availability\/?$/, roles: ["mentor"] },
