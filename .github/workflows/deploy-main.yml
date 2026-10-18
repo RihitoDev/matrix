@@ -1,0 +1,75 @@
+name: Deploy UMSSY main
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: deploy-umssy-main
+  cancel-in-progress: false
+
+jobs:
+  deploy-frontend-main:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: ghcr.io/umssy/umssy-app-frontend:main-${{ github.sha }}
+    steps:
+      - name: Checkout UMSSY application
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+
+      - name: Build and push frontend image
+        run: |
+          docker build \
+            --label org.opencontainers.image.source=https://github.com/UMSSY/umssy-app \
+            --build-arg NEXT_PUBLIC_APP_ENV=prod \
+            --build-arg NEXT_PUBLIC_API_URL_LOCAL=http://localhost:8080/api \
+            --build-arg NEXT_PUBLIC_API_URL_DEV=https://umssy.zer4c.dev/api \
+            --build-arg NEXT_PUBLIC_API_URL_PROD=https://umssy.zer4c.dev/api \
+            -f frontend/Dockerfile -t "$IMAGE" ./frontend
+          docker push "$IMAGE"
+
+      - name: Notify UMSSY deployment repository
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.DEPLOY_TOKEN }}
+          repository: UMSSY/umssy-app-deploy
+          event-type: update-frontend-main
+          client-payload: '{"image": "${{ env.IMAGE }}"}'
+
+  deploy-backend-main:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: ghcr.io/umssy/umssy-app-backend:main-${{ github.sha }}
+    steps:
+      - name: Checkout UMSSY application
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+
+      - name: Build and push backend image
+        run: |
+          docker build \
+            --label org.opencontainers.image.source=https://github.com/UMSSY/umssy-app \
+            -f backend/dockerfile -t "$IMAGE" ./backend
+          docker push "$IMAGE"
+
+      - name: Notify UMSSY deployment repository
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.DEPLOY_TOKEN }}
+          repository: UMSSY/umssy-app-deploy
+          event-type: update-backend-main
+          client-payload: '{"image": "${{ env.IMAGE }}"}'
