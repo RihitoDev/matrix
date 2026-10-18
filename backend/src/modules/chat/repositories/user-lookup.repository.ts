@@ -43,6 +43,7 @@ export class UserLookupRepository {
         first_name: string;
         last_name: string;
         headline: string | null;
+        photo_url: Uint8Array | null;
         is_online: boolean | null;
         role_name: string | null;
       }>
@@ -52,6 +53,7 @@ export class UserLookupRepository {
         u.first_name,
         u.last_name,
         u.headline,
+        u.photo_url,
         up.is_online,
         r.name AS role_name
       FROM users u

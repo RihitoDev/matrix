@@ -43,6 +43,13 @@ export function ContactSearchModal({ isOpen, onClose, onSelectContact }: Contact
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      handleClose();
+      return;
+    }
+
     if (results.length === 0) return;
 
     if (e.key === 'ArrowDown') {
@@ -61,9 +68,17 @@ export function ContactSearchModal({ isOpen, onClose, onSelectContact }: Contact
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent
+        className="sm:max-w-md"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="contact-search-title"
+      >
         <DialogHeader>
-          <DialogTitle className="text-slate-900 font-heading text-base font-medium">
+          <DialogTitle
+            id="contact-search-title"
+            className="text-slate-900 font-heading text-base font-medium"
+          >
             Nueva conversación
           </DialogTitle>
         </DialogHeader>

@@ -1,42 +1,43 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
+import { DomainException } from '../../../common/exceptions/domain.exception.js';
 
-export class UserNotFoundException extends HttpException {
+export class UserNotFoundException extends DomainException {
   constructor() {
-    super('UserNotFoundException', HttpStatus.NOT_FOUND);
+    super('Usuario destinatario no encontrado', HttpStatus.NOT_FOUND);
   }
 }
 
-export class InactiveUserException extends HttpException {
+export class InactiveUserException extends DomainException {
   constructor() {
-    super('InactiveUserException', HttpStatus.FORBIDDEN);
+    super('El usuario no se encuentra activo', HttpStatus.FORBIDDEN);
   }
 }
 
-export class SelfConversationException extends HttpException {
+export class SelfConversationException extends DomainException {
   constructor() {
-    super('SelfConversationException', HttpStatus.BAD_REQUEST);
+    super('No es posible iniciar una conversación consigo mismo', HttpStatus.BAD_REQUEST);
   }
 }
 
-export class ConversationNotFoundException extends HttpException {
+export class ConversationNotFoundException extends DomainException {
   constructor() {
-    super('ConversationNotFoundException', HttpStatus.NOT_FOUND);
+    super('Conversación no encontrada', HttpStatus.NOT_FOUND);
   }
 }
 
-export class NotConversationParticipantException extends HttpException {
+export class NotConversationParticipantException extends DomainException {
   constructor() {
-    super('NotConversationParticipantException', HttpStatus.FORBIDDEN);
+    super('No eres participante de esta conversación', HttpStatus.FORBIDDEN);
   }
 }
 
-export class MessageStatusNotFoundException extends HttpException {
+export class MessageStatusNotFoundException extends DomainException {
   constructor() {
-    super('MessageStatusNotFoundException', HttpStatus.INTERNAL_SERVER_ERROR);
+    super('Estado del mensaje no encontrado', HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
 
-export class InvalidMessageContentException extends HttpException {
+export class InvalidMessageContentException extends DomainException {
   constructor(message: string) {
     super(message, HttpStatus.BAD_REQUEST);
   }

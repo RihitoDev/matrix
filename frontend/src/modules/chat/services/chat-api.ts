@@ -313,12 +313,22 @@ export async function getPaginatedMessages({
 export async function getOrCreateConversation(
   contactId: string,
 ): Promise<Conversation> {
-  const { data } = await apiClient.post<Conversation>(
-    '/chat/conversations',
-    { contactId },
-  );
+  const { data } = await apiClient.post<
+    Conversation | StandardApiResponse<Conversation>
+  >('/chat/conversations', { contactId });
 
-  return data;
+  if (
+    typeof data === 'object' &&
+    data !== null &&
+    'data' in data &&
+    data.data !== null &&
+    typeof data.data === 'object' &&
+    'id' in data.data
+  ) {
+    return data.data as Conversation;
+  }
+
+  return data as Conversation;
 }
 
 export async function sendMessage(
