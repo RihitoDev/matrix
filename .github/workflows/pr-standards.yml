@@ -42,7 +42,8 @@ jobs:
       - name: Validate branch name
         env:
           HEAD_REF: ${{ github.head_ref }}
-        run: bash scripts/check-branch-name.sh "$HEAD_REF"
+          BASE_REF: ${{ github.base_ref }}
+        run: bash scripts/check-branch-name.sh "$HEAD_REF" "$BASE_REF"
 
       - name: Validate integration flow
         env:
