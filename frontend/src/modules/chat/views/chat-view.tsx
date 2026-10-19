@@ -87,37 +87,39 @@ export function ChatView() {
     setIsSearchModalOpen(false);
   };
 
-  const handleSendMessage = async (content: string): Promise<void> => {
-    if (!selectedId || isSending) {
-      throw new Error(
-        'No hay una conversaciÃ³n seleccionada o ya se estÃ¡ enviando un mensaje.',
-      );
-    }
+const handleSendMessage = async (content: string): Promise<void> => {
+  if (!selectedId || isSending) {
+    throw new Error(
+      'No hay una conversación seleccionada o ya se está enviando un mensaje.',
+    );
+  }
 
-    const conversationId = selectedId;
+  const conversationId = selectedId;
 
-    setIsSending(true);
+  setIsSending(true);
 
-    try {
-      await sendMessage({
-        conversationId,
-        content,
-        senderId: currentUserId,
-      });
+  try {
+    await sendMessage({
+      conversationId,
+      content,
+      senderId: currentUserId,
+    });
 
-      updateConversationLastMessage(
-        conversationId,
-        content,
-        currentUserId,
-      );
+    updateConversationLastMessage(
+      conversationId,
+      content,
+      currentUserId,
+    );
 
-      await queryClient.invalidateQueries({
-        queryKey: messagesQueryKey(conversationId),
-      });
-    } finally {
-      setIsSending(false);
-    }
-  };
+    // Actualiza el historial sin bloquear la finalización del envío.
+    void queryClient.invalidateQueries({
+      queryKey: messagesQueryKey(conversationId),
+    });
+  } finally {
+    setIsSending(false);
+  }
+};
+
 
   const handleRetryConversations = async () => {
     setDismissedError(true);
@@ -131,9 +133,9 @@ export function ChatView() {
   };
 
   return (
-    <div className="flex h-full min-h-0 w-full max-w-full flex-1 overflow-hidden bg-surface-soft font-sans">
+    <div className="flex size-full min-h-0 max-w-full flex-1 overflow-hidden bg-surface-soft font-sans">
       <aside
-        className={`h-full w-full shrink-0 overflow-hidden md:w-80 lg:w-96 ${
+        className={`size-full shrink-0 overflow-hidden md:w-80 lg:w-96 ${
           selectedId ? 'hidden md:block' : 'block'
         }`}
       >
