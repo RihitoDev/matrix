@@ -111,17 +111,25 @@ export class MessageService {
     });
 
     return {
-      data: page.data.map((m) => ({
-        id: m.id,
-        conversationId: m.conversationId,
-        senderId: m.senderId,
-        content: m.content,
-        timestamp: m.sentAt.toISOString(),
-        createdAt: m.createdAt.toISOString(),
-        status: 'sent' as const,
-        isAttachment: false,
-        attachmentType: null,
-      })),
+      data: page.data.map((m) => {
+        const isAttachment = Boolean(m.content.startsWith('[Archivo] '));
+        const content = isAttachment ? m.content.slice(10) : m.content;
+        const attachmentType = isAttachment ? ('file' as const) : null;
+        const statusTitle = (m as { status?: { title?: string } }).status?.title?.toLowerCase();
+        const status = statusTitle === 'read' ? ('read' as const) : ('sent' as const);
+
+        return {
+          id: m.id,
+          conversationId: m.conversationId,
+          senderId: m.senderId,
+          content,
+          timestamp: m.sentAt.toISOString(),
+          createdAt: m.createdAt.toISOString(),
+          status,
+          isAttachment,
+          attachmentType,
+        };
+      }),
       hasMore: page.hasMore,
       nextCursor: page.nextCursor,
     };

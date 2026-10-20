@@ -27,11 +27,12 @@ export class MessageRepository {
 
     const rows = await this.prisma.message.findMany({
       where: { conversationId },
+      include: { status: { select: { title: true } } },
       orderBy: { sentAt: 'desc' },
       take: limit + 1,
       ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
     });
-
+    
     const hasMore = rows.length > limit;
     const data = hasMore ? rows.slice(0, limit) : rows;
 
