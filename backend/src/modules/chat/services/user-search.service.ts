@@ -26,7 +26,14 @@ export class UserSearchService {
       MAX_SEARCH_RESULTS,
     );
 
-    return rows.map((row) => ({
+    const seenIds = new Set<string>();
+    const uniqueRows = rows.filter((row) => {
+      if (seenIds.has(row.id)) return false;
+      seenIds.add(row.id);
+      return true;
+    });
+
+    return uniqueRows.map((row) => ({
       id: row.id,
       fullName: `${row.first_name} ${row.last_name}`.trim(),
       avatarUrl: row.photo_url

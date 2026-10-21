@@ -55,11 +55,16 @@ export class UserLookupRepository {
         u.headline,
         u.photo_url,
         up.is_online,
-        r.name AS role_name
+        (
+          SELECT r.name
+          FROM user_roles ur
+          JOIN roles r ON r.id = ur.role_id
+          WHERE ur.user_id = u.id AND ur.deleted_at IS NULL
+          ORDER BY ur.created_at ASC
+          LIMIT 1
+        ) AS role_name
       FROM users u
       LEFT JOIN user_presences up ON up.user_id = u.id
-      LEFT JOIN user_roles ur ON ur.user_id = u.id AND ur.deleted_at IS NULL
-      LEFT JOIN roles r ON r.id = ur.role_id
       WHERE u.id <> ${excludeUserId}::uuid
         AND u.is_active = true
         AND lower(u.first_name || ' ' || u.last_name)
