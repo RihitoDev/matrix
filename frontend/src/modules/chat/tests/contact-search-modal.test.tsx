@@ -137,4 +137,24 @@ describe('ContactSearchModal - Suite Completa HU2', () => {
 
     expect(screen.getByText(/no se encontraron usuarios/i)).toBeInTheDocument();
   });
+
+  test('debe cerrar el modal al presionar la tecla Escape en el input de busqueda', () => {
+    (useContactSearch as Mock).mockReturnValue({
+      results: [],
+      isSearching: false,
+    });
+
+    render(
+      <ContactSearchModal
+        isOpen={true}
+        onClose={mockOnClose}
+        onSelectContact={mockOnSelectContact}
+      />
+    );
+
+    const input = screen.getByPlaceholderText('Buscar por nombre...');
+    fireEvent.keyDown(input, { key: 'Escape' });
+
+    expect(mockOnClose).toHaveBeenCalledTimes(1);
+  });
 });

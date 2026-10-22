@@ -644,7 +644,7 @@ describe('chat-api — getOrCreateConversation ', () => {
       contact: {
         id: 'user-1',
         fullName: 'Maria Peredo',
-        avatarUrl: 'https\://example.com/a.jpg',
+        avatarUrl: 'https://example.com/a.jpg',
         isOnline: true,
       },
       lastMessage: {
@@ -661,6 +661,34 @@ describe('chat-api — getOrCreateConversation ', () => {
     vi.spyOn(apiClient, 'post').mockResolvedValue({ data: conversation });
 
     const result = await getOrCreateConversation('user-1');
+
+    expect(result).toEqual(conversation);
+
+  });
+
+  it('debe desempaquetar la conversacion si el backend envia el sobre estandarizado con status 201', async () => {
+    const conversation = {
+      id: 'conv-wrapped-1',
+      contact: {
+        id: 'user-2',
+        fullName: 'Juan Perez',
+        avatarUrl: null,
+        isOnline: true,
+      },
+      lastMessage: null,
+      unreadCount: 0,
+      updatedAt: '2026-01-01T00:00:00.000Z',
+    };
+    vi.spyOn(apiClient, 'post').mockResolvedValue({
+      data: {
+        statusCode: 201,
+        ok: true,
+        detail: 'Conversación creada exitosamente',
+        data: conversation,
+      },
+    });
+
+    const result = await getOrCreateConversation('user-2');
 
     expect(result).toEqual(conversation);
 

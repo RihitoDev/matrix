@@ -238,7 +238,7 @@ describe('ChatRoom - carga de mensajes anteriores (#387)', () => {
 
     expect(
       screen.getByText(
-        'Inicio de la conversacion',
+        'Inicio de la conversación',
       ),
     ).toBeDefined();
   });

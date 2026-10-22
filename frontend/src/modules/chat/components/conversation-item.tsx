@@ -1,7 +1,11 @@
-/* eslint-disable @next/next/no-img-element */
+
 'use client';
 
-import { Conversation } from '../types/conversation.types';
+/* eslint-disable @next/next/no-img-element */
+
+import { Button } from '@/components/ui/button';
+
+import type { Conversation } from '../types/conversation.types';
 import { formatConversationDate, getInitials } from '../utils/date-formatter';
 
 interface ConversationItemProps {
@@ -20,7 +24,11 @@ export function ConversationItem({
 
   const renderMessagePreview = () => {
     if (!lastMessage) {
-      return <span className="text-text-secondary italic">Conversación iniciada</span>;
+      return (
+        <span className="text-slate-400 italic">
+          Conversación iniciada
+        </span>
+      );
     }
 
     if (lastMessage.isAttachment) {
@@ -28,10 +36,11 @@ export function ConversationItem({
         lastMessage.attachmentType === 'image'
           ? 'Foto'
           : lastMessage.attachmentType === 'audio'
-          ? 'Audio'
-          : 'Archivo';
+            ? 'Audio'
+            : 'Archivo';
+
       return (
-        <span className="text-ink-soft font-medium">
+        <span className="font-medium text-blue-700">
           [{label}] {lastMessage.content}
         </span>
       );
@@ -41,14 +50,15 @@ export function ConversationItem({
   };
 
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
       onClick={() => onSelect(conversation)}
       aria-pressed={isSelected}
-      className={`w-full text-left p-3.5 flex items-center gap-3 transition-all border-b border-border hover:bg-surface-soft focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent ${
+      className={`h-auto w-full justify-start gap-3 rounded-none border-x-0 border-t-0 border-b border-slate-100 bg-transparent p-3.5 text-left font-normal whitespace-normal transition-all hover:bg-slate-50 focus:outline-none ${
         isSelected
-          ? 'bg-interaction ring-1 ring-inset ring-border-strong'
-          : 'bg-surface'
+          ? 'border-l-4 border-l-[#0B2545] bg-blue-50/80 hover:bg-blue-50/80'
+          : 'border-l-4 border-l-transparent'
       }`}
     >
       <div className="relative shrink-0">
@@ -56,56 +66,65 @@ export function ConversationItem({
           <img
             src={contact.avatarUrl}
             alt={contact.fullName}
-            className="w-12 h-12 rounded-full object-cover border border-border"
+            className="size-12 rounded-full border border-slate-200 object-cover"
           />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-border text-ink-soft flex items-center justify-center font-bold text-sm border border-border-strong">
+          <div className="flex size-12 items-center justify-center rounded-full border border-slate-300 bg-slate-200 text-sm font-bold text-slate-700">
             {getInitials(contact.fullName)}
           </div>
         )}
 
         {contact.isOnline && (
           <span
-            className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-ink-soft border-2 border-white rounded-full shadow-xs"
+            className="absolute right-0 bottom-0 size-3.5 rounded-full border-2 border-white bg-emerald-500 shadow-xs"
             title="En línea"
           />
         )}
       </div>
 
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between gap-1 mb-1">
+      <div className="min-w-0 flex-1">
+        <div className="mb-1 flex items-center justify-between gap-1">
           <h4
-            className={`text-sm truncate ${
-              hasUnread ? 'font-bold text-ink' : 'font-semibold text-ink'
+            className={`truncate text-sm ${
+              hasUnread
+                ? 'font-bold text-slate-900'
+                : 'font-semibold text-slate-800'
             }`}
           >
             {contact.fullName}
           </h4>
+
           <span
-            className={`text-xs whitespace-nowrap shrink-0 ${
-              hasUnread ? 'text-accent font-semibold' : 'text-text-secondary'
+            className={`shrink-0 text-xs whitespace-nowrap ${
+              hasUnread
+                ? 'font-semibold text-red-600'
+                : 'text-slate-400'
             }`}
           >
-            {formatConversationDate(lastMessage?.createdAt || conversation.updatedAt)}
+            {formatConversationDate(
+              lastMessage?.createdAt || conversation.updatedAt
+            )}
           </span>
         </div>
 
         <div className="flex items-center justify-between gap-2">
           <p
-            className={`text-xs truncate flex-1 ${
-              hasUnread ? 'text-ink font-medium' : 'text-text-secondary'
+            className={`min-w-0 flex-1 truncate text-xs ${
+              hasUnread
+                ? 'font-medium text-slate-900'
+                : 'text-slate-500'
             }`}
           >
             {renderMessagePreview()}
           </p>
 
-              {hasUnread && (
-            <span className="shrink-0 bg-accent text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-4 text-center shadow-xs">
+          {hasUnread && (
+            <span className="min-w-4 shrink-0 rounded-full bg-red-600 px-1.5 py-0.5 text-center text-[10px] font-bold text-white shadow-xs">
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
           )}
         </div>
       </div>
-    </button>
+    </Button>
   );
 }

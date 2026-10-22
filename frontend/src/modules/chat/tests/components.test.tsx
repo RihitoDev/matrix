@@ -187,7 +187,7 @@ describe('Chat Components', () => {
     fireEvent.click(unreadTab);
     expect(handleFilter).toHaveBeenCalledWith('unread');
 
-    const loadMoreBtn = screen.getByText('Cargar mas conversaciones');
+    const loadMoreBtn = screen.getByText('Cargar más conversaciones');
     fireEvent.click(loadMoreBtn);
     expect(handleLoadMore).toHaveBeenCalled();
   });
@@ -221,7 +221,8 @@ describe('Chat Components', () => {
         onSearchChange={vi.fn()}
       />
     );
-    expect(screen.getByText('No se encontraron conversaciones que coincidan con tu busqueda.')).toBeDefined();
+    expect(
+  screen.getByText('No se encontraron conversaciones que coincidan con tu búsqueda.',),).toBeDefined();
 
     rerender(
       <ConversationList
@@ -236,6 +237,8 @@ describe('Chat Components', () => {
         onSearchChange={vi.fn()}
       />
     );
-    expect(screen.getByText('Aun no tienes ninguna conversacion registrada.')).toBeDefined();
+    expect(
+  screen.getByText('Aún no tienes ninguna conversación registrada.'),
+).toBeDefined();
   });
 });

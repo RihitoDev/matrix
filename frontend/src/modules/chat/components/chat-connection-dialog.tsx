@@ -1,6 +1,8 @@
 
 'use client';
 
+import { Button } from '@/components/ui/button';
+
 interface ChatConnectionDialogProps {
   open: boolean;
   onRetry: () => void;
@@ -21,18 +23,18 @@ export function ChatConnectionDialog({
         aria-modal="true"
         aria-labelledby="chat-error-title"
         aria-describedby="chat-error-description"
-        className="w-full max-w-sm rounded-xl bg-white p-6 shadow-sm"
+        className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl"
       >
         <h2
           id="chat-error-title"
-          className="text-lg font-semibold text-ink"
+          className="text-lg font-semibold text-[#0B1F2E]"
         >
           Error de conexión
         </h2>
 
         <p
           id="chat-error-description"
-          className="mt-3 text-sm text-text-secondary"
+          className="mt-3 text-sm text-slate-600"
         >
           No pudimos cargar tus conversaciones.
           Comprueba tu conexión con el servidor
@@ -40,21 +42,23 @@ export function ChatConnectionDialog({
         </p>
 
         <div className="mt-6 flex justify-end gap-3">
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={onClose}
-            className="rounded-lg border border-border-strong px-4 py-2 text-sm"
+            className="h-auto rounded-lg border-slate-300 bg-white px-4 py-2 text-sm font-normal text-slate-800 hover:bg-slate-100"
           >
             Cerrar
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
+            variant="default"
             onClick={onRetry}
-            className="rounded-lg bg-ink px-4 py-2 text-sm text-white"
+            className="h-auto rounded-lg bg-[#0B1F2E] px-4 py-2 text-sm text-white hover:bg-[#16364B]"
           >
             Reintentar
-          </button>
+          </Button>
         </div>
       </div>
     </div>

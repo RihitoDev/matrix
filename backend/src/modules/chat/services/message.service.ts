@@ -10,6 +10,7 @@ import {
 } from '../exceptions/index.js';
 import { MAX_MESSAGE_LENGTH } from '../constants/chat.constants.js';
 import type { MessageResponse } from '../responses/message.response.js';
+import { countCharacters } from '../utils/unicode-counter.js';
 
 @Injectable()
 export class MessageService {
@@ -42,18 +43,21 @@ export class MessageService {
     }
 
     const content = this.sanitize(params.content);
-    if (content.length === 0) {
-      throw new InvalidMessageContentException(
-        'El contenido del mensaje no puede estar vacío',
-      );
-    }
-    if (content.length > MAX_MESSAGE_LENGTH) {
-      throw new InvalidMessageContentException(
-        `El contenido del mensaje no puede superar los ${MAX_MESSAGE_LENGTH} caracteres`,
-      );
-    }
+const characterCount = countCharacters(content);
 
-    const sentStatusId = await this.messageStatusService.getSentId();
+if (characterCount === 0) {
+  throw new InvalidMessageContentException(
+    'El contenido del mensaje no puede estar vacío',
+  );
+}
+
+if (characterCount > MAX_MESSAGE_LENGTH) {
+  throw new InvalidMessageContentException(
+    `El contenido del mensaje no puede superar los ${MAX_MESSAGE_LENGTH} caracteres`,
+  );
+}
+
+const sentStatusId = await this.messageStatusService.getSentId();
     const now = new Date();
 
     const created = await this.messageRepository.create({
@@ -111,17 +115,25 @@ export class MessageService {
     });
 
     return {
-      data: page.data.map((m) => ({
-        id: m.id,
-        conversationId: m.conversationId,
-        senderId: m.senderId,
-        content: m.content,
-        timestamp: m.sentAt.toISOString(),
-        createdAt: m.createdAt.toISOString(),
-        status: 'sent' as const,
-        isAttachment: false,
-        attachmentType: null,
-      })),
+      data: page.data.map((m) => {
+        const isAttachment = Boolean(m.content.startsWith('[Archivo] '));
+        const content = isAttachment ? m.content.slice(10) : m.content;
+        const attachmentType = isAttachment ? ('file' as const) : null;
+        const statusTitle = (m as { status?: { title?: string } }).status?.title?.toLowerCase();
+        const status = statusTitle === 'read' ? ('read' as const) : ('sent' as const);
+
+        return {
+          id: m.id,
+          conversationId: m.conversationId,
+          senderId: m.senderId,
+          content,
+          timestamp: m.sentAt.toISOString(),
+          createdAt: m.createdAt.toISOString(),
+          status,
+          isAttachment,
+          attachmentType,
+        };
+      }),
       hasMore: page.hasMore,
       nextCursor: page.nextCursor,
     };

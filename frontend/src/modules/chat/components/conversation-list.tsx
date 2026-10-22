@@ -1,8 +1,14 @@
 
 'use client';
 
-import { Plus, Search } from 'lucide-react';
-import { Conversation, ConversationFilter } from '../types/conversation.types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
+import type {
+  Conversation,
+  ConversationFilter,
+} from '../types/conversation.types';
+
 import { ConversationItem } from './conversation-item';
 import { ConversationSkeleton } from './conversation-skeleton';
 import { EmptyChatState } from './empty-chat-state';
@@ -36,82 +42,118 @@ export function ConversationList({
   onLoadMore,
   onStartNewChat,
 }: ConversationListProps) {
-  const isFiltered = Boolean(searchQuery.trim() || activeFilter === 'unread');
+  const isFiltered = Boolean(
+    searchQuery.trim() || activeFilter === 'unread'
+  );
 
   const getEmptyMessage = () => {
     if (activeFilter === 'unread') {
       return 'No tienes mensajes sin leer.';
     }
+
     if (searchQuery.trim().length > 0) {
-      return 'No se encontraron conversaciones que coincidan con tu busqueda.';
+      return 'No se encontraron conversaciones que coincidan con tu búsqueda.';
     }
-    return 'Aun no tienes ninguna conversacion registrada.';
+
+    return 'Aún no tienes ninguna conversación registrada.';
   };
 
   return (
-    <div className="relative flex flex-col h-full bg-white border-r border-border">
-      <div className="p-4 border-b border-border space-y-3">
+    <div className="relative flex h-full flex-col border-r border-slate-200 bg-white">
+      <div className="space-y-3 border-b border-slate-100 p-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-ink tracking-tight">Chats</h2>
+          <h2 className="text-xl font-bold tracking-tight text-slate-900">
+            Chats
+          </h2>
+
           {onStartNewChat && activeFilter !== 'unread' && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={onStartNewChat}
-              className="hidden md:inline-flex items-center gap-1.5 text-sm font-bold text-accent hover:text-brand-hover"
+              className="hidden h-auto items-center px-0 text-xs font-bold text-red-600 hover:bg-transparent hover:text-red-700 md:inline-flex"
             >
-              <Plus className="size-4" aria-hidden="true" /> Nuevo
-            </button>
+              + Nuevo
+            </Button>
           )}
         </div>
 
         <div className="relative">
-          <input
+          <Input
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            aria-label="Buscar conversaciones"
             placeholder="Buscar personas..."
-            className="w-full pl-9 pr-3 py-2 text-sm bg-surface border border-border rounded-lg focus:outline-none focus:bg-white focus:border-accent transition-all text-ink placeholder-text-secondary"
+            aria-label="Buscar conversaciones"
+            className="h-9 w-full rounded-lg border-transparent bg-slate-100 py-2 pr-3 pl-9 text-sm text-slate-800 placeholder:text-slate-400 focus-visible:border-[#0B2545] focus-visible:bg-white"
           />
-          <Search className="pointer-events-none absolute left-3 top-3 size-4 text-text-secondary" aria-hidden="true" />
+
+          <svg
+            className="pointer-events-none absolute top-2.5 left-3 size-4 text-slate-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
         </div>
 
         <div className="flex items-center gap-2 pt-1">
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => onFilterChange('all')}
-            className={`px-3.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+            aria-pressed={activeFilter === 'all'}
+            className={`h-auto rounded-full px-3.5 py-1 text-xs font-semibold transition-all ${
               activeFilter === 'all'
-                ? 'bg-interaction text-accent'
-                : 'bg-surface text-text-secondary hover:bg-surface-soft'
+                ? 'bg-[#0B2545] text-white shadow-xs hover:bg-[#16364B] hover:text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
             Todos
-          </button>
-          <button
+          </Button>
+
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => onFilterChange('unread')}
-            className={`px-3.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+            aria-pressed={activeFilter === 'unread'}
+            className={`h-auto rounded-full px-3.5 py-1 text-xs font-semibold transition-all ${
               activeFilter === 'unread'
-                ? 'bg-interaction text-accent'
-                : 'bg-surface text-text-secondary hover:bg-surface-soft'
+                ? 'bg-[#0B2545] text-white shadow-xs hover:bg-[#16364B] hover:text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
             Sin leer
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         {isLoading ? (
-          <div role="status" aria-label="Cargando conversaciones">
-            <span className="sr-only">Cargando conversaciones...</span>
+          <div
+            role="status"
+            aria-label="Cargando conversaciones"
+          >
+            <span className="sr-only">
+              Cargando conversaciones...
+            </span>
+
             <ConversationSkeleton />
           </div>
         ) : isError ? null : conversations.length === 0 ? (
           <EmptyChatState
             description={getEmptyMessage()}
-            actionLabel="Iniciar una nueva conversacion"
+            actionLabel="Iniciar una nueva conversación"
             onAction={isFiltered ? undefined : onStartNewChat}
           />
         ) : (
@@ -127,13 +169,16 @@ export function ConversationList({
 
             {hasMore && (
               <div className="p-3 text-center">
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={onLoadMore}
-                  className="text-xs font-semibold text-ink-soft hover:text-ink-soft"
+                  disabled={!onLoadMore}
+                  className="h-auto text-xs font-semibold text-blue-600 hover:bg-transparent hover:text-blue-800"
                 >
-                  Cargar mas conversaciones
-                </button>
+                  Cargar más conversaciones
+                </Button>
               </div>
             )}
           </div>
@@ -141,14 +186,29 @@ export function ConversationList({
       </div>
 
       {onStartNewChat && activeFilter !== 'unread' && (
-        <button
+        <Button
           type="button"
+          variant="default"
+          size="icon-lg"
           onClick={onStartNewChat}
-          className="md:hidden absolute bottom-6 right-4 w-12 h-12 bg-accent text-white rounded-xl shadow-sm flex items-center justify-center hover:bg-brand-hover active:scale-95 transition-all focus:outline-none"
-          aria-label="Iniciar nueva conversacion"
+          className="absolute right-4 bottom-6 flex size-12 items-center justify-center rounded-xl bg-red-600 text-white shadow-lg transition-all hover:bg-red-700 active:scale-95 md:hidden"
+          aria-label="Iniciar nueva conversación"
         >
-          <Plus className="size-6" aria-hidden="true" />
-        </button>
+          <svg
+            className="size-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+        </Button>
       )}
     </div>
   );

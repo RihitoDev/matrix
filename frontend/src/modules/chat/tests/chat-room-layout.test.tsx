@@ -121,7 +121,7 @@ describe('ChatRoom Layout y Componentes Responsivos (HU-03 Tarea 3)', () => {
     expect(onBack).toHaveBeenCalledTimes(1);
 
     expect(screen.getByText('Maria Fernandez')).toBeDefined();
-    expect(screen.getByText('En linea')).toBeDefined();
+    expect(screen.getByText('En línea')).toBeDefined();
   });
 
   it('debe deshabilitar el boton de enviar cuando el input esta vacio', () => {

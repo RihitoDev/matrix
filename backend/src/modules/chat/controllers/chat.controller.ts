@@ -16,6 +16,7 @@ import { Roles } from '../../../common/decorators/roles.decorator.js';
 import { RolesGuard } from '../../../common/guards/roles.guard.js';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard.js';
 import { ChatService } from '../services/chat.service.js';
+import { MessageService } from '../services/message.service.js';
 
 @ApiTags('Chat')
 @ApiBearerAuth()
@@ -23,7 +24,10 @@ import { ChatService } from '../services/chat.service.js';
 @Roles('titulado', 'estudiante', 'mentor', 'empresa')
 @Controller('conversations')
 export class ChatController {
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly messageService: MessageService,
+  ) {}
 
   @Get(':conversationId/messages')
   @ApiQuery({
@@ -46,11 +50,12 @@ export class ChatController {
   ) {
     const parsedLimit = limit === undefined ? 10 : Number(limit);
 
-    return this.chatService.getMessages(
+    return this.messageService.getPage({
       conversationId,
       userId,
-      parsedLimit,
-      cursor,
-    );
+      cursor: cursor ?? null,
+      limit: parsedLimit,
+    });
   }
 }
+
