@@ -10,6 +10,7 @@ import {
 } from '../exceptions/index.js';
 import { MAX_MESSAGE_LENGTH } from '../constants/chat.constants.js';
 import type { MessageResponse } from '../responses/message.response.js';
+import { countCharacters } from '../utils/unicode-counter.js';
 
 @Injectable()
 export class MessageService {
@@ -42,18 +43,21 @@ export class MessageService {
     }
 
     const content = this.sanitize(params.content);
-    if (content.length === 0) {
-      throw new InvalidMessageContentException(
-        'El contenido del mensaje no puede estar vacío',
-      );
-    }
-    if (content.length > MAX_MESSAGE_LENGTH) {
-      throw new InvalidMessageContentException(
-        `El contenido del mensaje no puede superar los ${MAX_MESSAGE_LENGTH} caracteres`,
-      );
-    }
+const characterCount = countCharacters(content);
 
-    const sentStatusId = await this.messageStatusService.getSentId();
+if (characterCount === 0) {
+  throw new InvalidMessageContentException(
+    'El contenido del mensaje no puede estar vacío',
+  );
+}
+
+if (characterCount > MAX_MESSAGE_LENGTH) {
+  throw new InvalidMessageContentException(
+    `El contenido del mensaje no puede superar los ${MAX_MESSAGE_LENGTH} caracteres`,
+  );
+}
+
+const sentStatusId = await this.messageStatusService.getSentId();
     const now = new Date();
 
     const created = await this.messageRepository.create({
