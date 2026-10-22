@@ -3,18 +3,18 @@ import type { AreaLevelBadgeProps } from "../types/area-detail-components.types"
 import type { AreaLevel } from "../types/area-detail.types";
 
 const BADGE_CLASS: Record<AreaLevel, string> = {
-  Bajo: "border-border-strong bg-surface-soft text-text-secondary",
+  Bajo: "border-transparent text-text-secondary",
   Medio:
-    "border-transparent bg-gold/10 text-[color-mix(in_srgb,var(--color-gold)_50%,var(--color-ink))]",
-  Alto: "border-transparent bg-ink text-surface",
-  Experto: "border-transparent bg-accent text-surface",
+    "border-transparent text-ink-soft",
+  Alto: "border-transparent text-ink",
+  Experto: "border-transparent font-bold text-ink",
 };
 
 const DOT_CLASS: Record<AreaLevel, string> = {
   Bajo: "bg-border-strong",
-  Medio: "bg-gold",
-  Alto: "bg-surface",
-  Experto: "bg-surface",
+  Medio: "bg-ink-soft",
+  Alto: "bg-ink-soft",
+  Experto: "bg-ink",
 };
 
 export function AreaLevelBadge({ level }: AreaLevelBadgeProps) {

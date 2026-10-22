@@ -1,4 +1,4 @@
-import type { Feedback } from "@/modules/profile/types/feedback.types";
+import type { Feedback } from "@/modules/profile";
 import type { WorkExperienceFormValues } from "./work-experience-form-values.types";
 
 export interface WorkExperienceFormProps {

@@ -83,18 +83,18 @@ describe("RequestAccessView", () => {
     expect(layout).toHaveClass("flex", "min-h-screen", "flex-col", "lg:flex-row");
   });
 
-  it("deja el formulario ocupando el espacio restante y centrado verticalmente", () => {
+  it("deja el formulario ocupando el espacio restante y alineado para completar los grupos de campos", () => {
     const { container } = render(<RequestAccessView />);
 
     const section = container.querySelector("section");
-    expect(section).toHaveClass("flex-1", "flex-col", "justify-center");
+    expect(section).toHaveClass("flex-1", "flex-col");
   });
 
   it("centra horizontalmente el contenido con un ancho máximo", () => {
     const { container } = render(<RequestAccessView />);
 
     const wrapper = container.querySelector("section > div");
-    expect(wrapper).toHaveClass("mx-auto", "w-full", "max-w-190", "2xl:max-w-5xl");
+    expect(wrapper).toHaveClass("mx-auto", "w-full", "max-w-5xl");
     expect(wrapper).toContainElement(screen.getByRole("heading", { name: "Solicita tu acceso a la comunidad" }));
   });
 

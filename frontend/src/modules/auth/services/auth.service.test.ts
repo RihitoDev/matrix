@@ -2,7 +2,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiClient } from '@/shared/services/api-client';
 import { authService } from './auth.service';
-vi.mock('@/shared/services/api-client', () => ({ apiClient: { defaults: { baseURL: 'http://localhost:8080/api' }, post: vi.fn(), get: vi.fn() } }));
+vi.mock("@/shared/services/api-client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { defaults: { baseURL: 'http://localhost:8080/api' }, post: vi.fn(), get: vi.fn() } }));
 const payload = { email: 'prueba@umss.edu.bo', password: 'Prueba123', roleTag: 'titulado' as const };
 beforeEach(() => { vi.clearAllMocks(); apiClient.defaults.baseURL = 'http://localhost:8080/api'; });
 describe('authService', () => {

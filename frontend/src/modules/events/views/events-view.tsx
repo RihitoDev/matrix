@@ -1,5 +1,6 @@
 'use client';
 
+import { PageHeading } from "@/shared/components/layout";
 import { Button } from '@/components/ui/button';
 import { useEffect, useRef, useState } from 'react';
 import { RequestFeedback } from '../components/request-feedback';
@@ -9,9 +10,9 @@ import { EventDetailPanel } from '../components/event-detail-panel';
 import { useEvent } from '../hooks/use-event';
 import { useEvents } from '../hooks/use-events';
 import { useEventsFilters } from '../hooks/use-events-filters';
-import { useEventCategories } from '../../event-categories/hooks/use-event-categories';
+import { useEventCategories } from '@/modules/event-categories';
 import { EventsSearchInput } from '../components/events-search-input';
-import { CategoryFilterChips } from '../../event-categories/components/category-filter-chips';
+import { CategoryFilterChips } from '@/modules/event-categories';
 import type { EventItem } from '../types/event.types';
 
 export function EventsView() {
@@ -26,7 +27,7 @@ export function EventsView() {
   const { events, error, hasMore, isLoading, isLoadingMore, loadMore, retry } =
     useEvents(filters);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const viewRef = useRef<HTMLDivElement>(null);
+  const viewRef = useRef<HTMLElement>(null);
 
   const handleSelectEvent = (selectedEvent: EventItem) => {
     setSelectedEventId(selectedEvent.id);
@@ -65,21 +66,14 @@ export function EventsView() {
   }, [selectedEventId]);
 
   return (
-    <div ref={viewRef} className="flex h-dvh min-h-0 w-full flex-col overflow-hidden bg-surface-soft text-foreground lg:flex-row">
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-6 overflow-y-auto overscroll-contain px-6 pb-8 pt-20 sm:px-10">
-        <header className="flex flex-col gap-1">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">
-            Talleres disponibles
-          </h1>
-          <p className="text-sm text-text-secondary">
-            {events.length} talleres cargados
-          </p>
-        </header>
-
+    <main ref={viewRef} className="mx-auto w-full max-w-7xl space-y-6">
+      <PageHeading title="Talleres disponibles" description={`${events.length} talleres cargados`} />
+      <div className={selectedEventId ? "grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]" : "grid items-start gap-6"}>
+      <div className="min-w-0 space-y-6">
         <div
           role="search"
           aria-label="Filtros de talleres"
-          className="flex flex-wrap items-center gap-2.5"
+          className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface p-4"
         >
           <EventsSearchInput value={searchInput} onChange={(value) => {
             setSelectedEventId(null);
@@ -108,7 +102,7 @@ export function EventsView() {
         )}
 
         <section aria-label="Listado de talleres">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className={selectedEventId ? "grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2" : "grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3"}>
             {events.map((eventItem) => (
               <EventCard
                 key={eventItem.id}
@@ -134,6 +128,7 @@ export function EventsView() {
           {hasMore && !error && (
             <div className="flex justify-center pt-6">
               <Button
+                variant="outline"
                 type="button"
                 onClick={loadMore}
                 disabled={isLoadingMore}
@@ -158,6 +153,7 @@ export function EventsView() {
           onClose={() => setSelectedEventId(null)}
         />
       ))}
-    </div>
+      </div>
+    </main>
   );
 }

@@ -10,9 +10,9 @@ import type { PassDetailProps } from '../types/pass-detail-props.types';
 export function PassDetail({ registration }: PassDetailProps) {
   return (
     <div className="flex flex-col gap-5 w-full min-w-0">
-      <Card className="border-0 bg-ink text-surface p-8 rounded-[24px] flex flex-col gap-6 shadow-sm">
-        <div className="flex items-center gap-2 text-gold text-[11px] font-bold tracking-widest uppercase">
-          <div className="w-1.5 h-1.5 rounded-full bg-gold"></div>
+      <Card className="border-0 bg-ink text-surface p-8 rounded-lg flex flex-col gap-6 shadow-sm">
+        <div className="flex items-center gap-2 text-surface/85 text-[11px] font-bold tracking-widest uppercase">
+          <div className="w-1.5 h-1.5 rounded-full bg-ink-soft"></div>
           Pase UMSS - Oficial
         </div>
 
@@ -60,7 +60,7 @@ export function PassDetail({ registration }: PassDetailProps) {
             <span className="text-[10px] text-surface-soft/50 uppercase tracking-widest">
               Estado
             </span>
-            <span className="font-bold text-gold text-sm flex items-center gap-1 justify-end">
+            <span className="font-bold text-surface/85 text-sm flex items-center gap-1 justify-end">
               <Check className="w-4 h-4" /> {registration.status}
             </span>
           </div>

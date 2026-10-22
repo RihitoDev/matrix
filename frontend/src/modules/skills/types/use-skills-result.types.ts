@@ -1,4 +1,4 @@
-import type { Feedback } from "@/modules/profile/types/feedback.types";
+import type { Feedback } from "@/modules/profile";
 import type { SkillItem } from "./skill-item.types";
 
 export interface UseSkillsResult {

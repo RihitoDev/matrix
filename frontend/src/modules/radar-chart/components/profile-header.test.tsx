@@ -13,7 +13,6 @@ describe("ProfileHeader", () => {
 
     expect(screen.getByRole("heading", { level: 1, name: "Carlos Mendoza Ríos" })).toBeDefined();
     expect(screen.getByText("Senior Software Engineer · 8 años de experiencia")).toBeDefined();
-    expect(screen.getByText("Análisis de perfil profesional con IA")).toBeDefined();
   });
 
   it("lists every technology", () => {

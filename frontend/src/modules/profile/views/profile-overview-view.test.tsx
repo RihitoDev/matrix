@@ -1,4 +1,5 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { cleanup, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { profileService } from "../services/profile.service";
 import type { ProfileResponse } from "../types/profile-response.types";
@@ -49,14 +50,12 @@ describe("ProfileOverviewView", () => {
     vi.clearAllMocks();
   });
 
-  it("renders the profile page without an active tab", async () => {
+  it("renders the profile page with a single screen heading and existing edit actions", async () => {
     render(<ProfileOverviewView />);
 
     expect(screen.getByRole("heading", { level: 1, name: "Mi perfil" })).toBeInTheDocument();
     await screen.findByText("Valeria Quispe");
-    for (const link of screen.getAllByRole("link", { name: /Datos personales|Presentación|Trayectoria/ })) {
-      expect(link).not.toHaveAttribute("aria-current");
-    }
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
   });
 
   it("shows a loading message while the profile is requested", () => {
@@ -120,4 +119,20 @@ describe("ProfileOverviewView", () => {
       "Tu sesión no es válida. Inicia sesión nuevamente.",
     );
   });
+  it("links directly to existing trajectory sections without inventing saved data", async () => {
+    render(<ProfileOverviewView />);
+    await screen.findByText("Valeria Quispe");
+    expect(screen.getByRole("link", { name: "Formación académica" })).toHaveAttribute("href", "/profile/trajectory/education");
+    expect(screen.getByRole("link", { name: "Experiencia laboral" })).toHaveAttribute("href", "/profile/trajectory/experience");
+    expect(screen.getByRole("link", { name: "Habilidades" })).toHaveAttribute("href", "/profile/trajectory/skills");
+    expect(screen.getByRole("link", { name: "Certificaciones" })).toHaveAttribute("href", "/profile/trajectory/certifications");
+    expect(screen.getByRole("link", { name: "Documentos y CV" })).toHaveAttribute("href", "/profile/documents");
+  });
+
+  it("suggests presentation when contact information is already complete", async () => {
+    vi.mocked(profileService.getProfile).mockResolvedValue({ ...COMPLETE_PROFILE, aboutMe: null });
+    render(<ProfileOverviewView />);
+    expect(await screen.findByRole("link", { name: "Completar perfil" })).toHaveAttribute("href", "/profile/presentation");
+  });
+
 });

@@ -41,7 +41,7 @@ export function DataContrastPanel({ detail }: DataContrastPanelProps) {
             {matching} coinciden
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <CircleAlert className="size-4 text-gold" strokeWidth={1.75} aria-hidden="true" />
+            <CircleAlert className="size-4 text-ink-soft" strokeWidth={1.75} aria-hidden="true" />
             {pending} por verificar
           </span>
         </p>
@@ -80,7 +80,7 @@ export function DataContrastPanel({ detail }: DataContrastPanelProps) {
                   />
                 </TableCell>
                 <TableCell className="px-2 align-middle">
-                  <Icon className={matches ? "size-5 text-ink" : "size-5 text-gold"} strokeWidth={1.75} aria-hidden="true" />
+                  <Icon className={matches ? "size-5 text-ink" : "size-5 text-ink-soft"} strokeWidth={1.75} aria-hidden="true" />
                   <span className="sr-only">{matches ? "Coincide" : "Por verificar"}</span>
                 </TableCell>
               </TableRow>

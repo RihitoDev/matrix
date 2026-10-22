@@ -1,12 +1,15 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
+
 import { useRef, useState } from "react";
 import { EDUCATION_FEEDBACK_MESSAGES } from "../constants/education-feedback.constants";
 import { educationsService } from "../services/educations.service";
 import type { EducationItem } from "../types/education-item.types";
-import type { Feedback } from "@/modules/profile/types/feedback.types";
+import type { Feedback } from "@/modules/profile";
 
 export function useDeleteEducation(onDeleted: () => void | Promise<void>) {
+  const mutation = useMutation({ mutationFn: (request: () => Promise<void>) => request() });
   const [isDeleting, setIsDeleting] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const isDeletingRef = useRef(false);
@@ -17,7 +20,7 @@ export function useDeleteEducation(onDeleted: () => void | Promise<void>) {
     setIsDeleting(true);
     setFeedback(null);
     try {
-      await educationsService.deleteEducation(education.id);
+      await mutation.mutateAsync(() => educationsService.deleteEducation(education.id));
       setFeedback({ type: "success", message: EDUCATION_FEEDBACK_MESSAGES.deleteSuccess });
       await onDeleted();
       return true;

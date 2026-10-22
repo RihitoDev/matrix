@@ -1,5 +1,6 @@
 'use client';
 
+import { PageHeading } from '@/shared/components/layout/page-heading';
 import { useState } from 'react';
 import { useMyPasses } from '../hooks/use-my-passes';
 import { RequestFeedback } from '../components/request-feedback';
@@ -17,16 +18,10 @@ export function MyPassesView() {
     registrations.find((item) => item.id === selectedId) ?? registrations[0];
 
   return (
-    <div className="flex flex-col lg:flex-row h-full w-full min-h-screen bg-transparent">
-      <div className="min-w-0 flex-1 p-8 pt-4 lg:p-12 lg:pt-6">
+    <div className="mx-auto flex h-full w-full max-w-7xl flex-col gap-7 bg-transparent lg:flex-row">
+      <div className="min-w-0 flex-1">
         <div className="mb-8">
-          <h1 className="text-3xl font-extrabold text-ink mb-1">
-            Mis inscripciones
-          </h1>
-          <p className="text-text-secondary text-sm">
-            {registrations.length}{' '}
-            {registrations.length === 1 ? 'pase' : 'pases'}
-          </p>
+          <PageHeading title="Mis inscripciones" description={`${registrations.length} ${registrations.length === 1 ? 'pase' : 'pases'}`} />
         </div>
         {isLoading ? (
           <RequestFeedback message="Cargando tus inscripciones..." />
@@ -42,7 +37,7 @@ export function MyPassesView() {
         ) : registrations.length === 0 ? (
           <MyPassesEmptyState />
         ) : (
-          <div className="max-w-md space-y-4">
+          <div className="space-y-4">
             {registrations.map((item) => (
               <PassCard
                 key={item.id}
@@ -59,7 +54,7 @@ export function MyPassesView() {
         )}
       </div>
       {!isLoading && !error && selected && (
-        <div className="w-full lg:w-[480px] border-l border-border bg-surface-soft/30 p-8 pt-4 lg:p-12 lg:pt-6 shrink-0">
+        <div className="w-full shrink-0 self-start rounded-lg border border-border bg-surface p-6 lg:w-[380px]">
           <PassDetail registration={selected} />
         </div>
       )}

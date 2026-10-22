@@ -11,7 +11,7 @@ const MAX_SCORE = 10;
 
 const BAR_CLASS: Record<AreaLevel, string> = {
   Bajo: "bg-border-strong",
-  Medio: "bg-gold",
+  Medio: "bg-ink-soft",
   Alto: "bg-ink",
   Experto: "bg-accent",
 };

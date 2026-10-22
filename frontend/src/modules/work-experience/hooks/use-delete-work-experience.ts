@@ -1,12 +1,15 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
+
 import { useState } from "react";
 import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
 import { workExperienceService } from "../services/work-experience.service";
-import type { Feedback } from "@/modules/profile/types/feedback.types";
+import type { Feedback } from "@/modules/profile";
 import type { WorkExperienceItem } from "../types/work-experience-item.types";
 
 export function useDeleteWorkExperience(onDeleted: (experience: WorkExperienceItem) => void) {
+  const mutation = useMutation({ mutationFn: (request: () => Promise<void>) => request() });
   const [isDeleting, setIsDeleting] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
@@ -14,7 +17,7 @@ export function useDeleteWorkExperience(onDeleted: (experience: WorkExperienceIt
     setIsDeleting(true);
     setFeedback(null);
     try {
-      await workExperienceService.deleteWorkExperience(experience.id);
+      await mutation.mutateAsync(() => workExperienceService.deleteWorkExperience(experience.id));
       setFeedback({ type: "success", message: WORK_EXPERIENCE_FEEDBACK_MESSAGES.deleteSuccess });
       onDeleted(experience);
     } catch {

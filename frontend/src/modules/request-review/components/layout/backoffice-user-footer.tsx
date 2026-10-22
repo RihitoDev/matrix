@@ -7,7 +7,7 @@ import type { BackofficeUserFooterProps } from "../../types/backoffice-user-foot
 
 export function BackofficeUserFooter({ user, onLogout }: BackofficeUserFooterProps) {
   return (
-    <div className="flex items-center gap-3 border-t border-surface/10 pt-4">
+    <div className="flex flex-wrap items-center gap-3">
       <span
         className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface/15 text-sm font-bold text-surface"
         aria-hidden="true"
@@ -21,12 +21,11 @@ export function BackofficeUserFooter({ user, onLogout }: BackofficeUserFooterPro
       <Button
         type="button"
         variant="ghost"
-        size="icon-sm"
         aria-label="Cerrar sesión"
         onClick={onLogout}
-        className="text-surface/80 hover:bg-surface/10 hover:text-surface"
+        className="mt-2 w-full justify-start text-surface/80 hover:bg-surface/10 hover:text-surface"
       >
-        <LogOut strokeWidth={1.75} aria-hidden="true" />
+        <LogOut strokeWidth={1.75} aria-hidden="true" />Cerrar sesión
       </Button>
     </div>
   );

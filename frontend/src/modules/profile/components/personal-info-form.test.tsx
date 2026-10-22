@@ -1,4 +1,5 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { cleanup, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { EMPTY_PERSONAL_INFO_VALUES } from "../config/profile-form-defaults.config";
@@ -40,7 +41,8 @@ describe("PersonalInfoForm", () => {
   it("renders the personal information card with all the fields", async () => {
     const { user } = renderForm();
 
-    expect(screen.getByText("Tu información personal")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Identidad" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Contacto" })).toBeInTheDocument();
     expect(screen.getByText("Fotografía de perfil")).toBeInTheDocument();
     expect(screen.getByLabelText(/Nombres/)).toBeInTheDocument();
     expect(screen.getByLabelText(/Apellidos/)).toBeInTheDocument();

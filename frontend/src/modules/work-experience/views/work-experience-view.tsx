@@ -1,16 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { ConfirmDeleteDialog } from "@/modules/profile/components/confirm-delete-dialog";
-import { FeedbackMessage } from "@/modules/profile/components/feedback-message";
-import { ProfilePageLayout } from "@/modules/profile/components/profile-page-layout";
-import { TrajectorySteps } from "@/modules/profile/components/trajectory-steps";
+import { ConfirmDeleteDialog } from "@/modules/profile";
+import { FeedbackMessage } from "@/modules/profile";
+import { ProfilePageLayout } from "@/modules/profile";
 import { WorkExperienceForm } from "../components/work-experience-form";
 import { WorkExperienceListCard } from "../components/work-experience-list-card";
 import { useDeleteWorkExperience } from "../hooks/use-delete-work-experience";
 import { useSaveWorkExperience } from "../hooks/use-save-work-experience";
 import { useWorkExperiences } from "../hooks/use-work-experiences";
-import type { Feedback } from "@/modules/profile/types/feedback.types";
+import type { Feedback } from "@/modules/profile";
 import type { WorkExperienceFormValues } from "../types/work-experience-form-values.types";
 import type { WorkExperienceItem } from "../types/work-experience-item.types";
 import { toWorkExperienceFormValues } from "../utils/to-work-experience-form-values";
@@ -79,13 +78,11 @@ export function WorkExperienceView() {
 
   return (
     <ProfilePageLayout
-      activeTab="trajectory"
-      title="Trayectoria"
-      description="Muestra tus estudios, experiencia, habilidades y certificaciones"
+      title="Experiencia laboral"
+      description="Registra tus puestos y funciones."
     >
-      <TrajectorySteps activeStep="experience" />
       <FeedbackMessage feedback={listFeedback} />
-      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 items-start gap-7 xl:grid-cols-[minmax(280px,0.9fr)_minmax(0,1.3fr)]">
         <WorkExperienceListCard
           experiences={experiences}
           isLoading={isLoading}

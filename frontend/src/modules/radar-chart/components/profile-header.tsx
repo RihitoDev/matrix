@@ -13,13 +13,12 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
 
   return (
     <RadarCard className="overflow-hidden">
-      <div className="h-[3px] bg-accent" aria-hidden="true" />
       <div className="flex flex-wrap items-center gap-5 p-6">
         {hasPhotoError ? (
           <span
             role="img"
             aria-label={profile.name}
-            className="flex size-20 shrink-0 items-center justify-center rounded-2xl bg-ink font-heading text-2xl font-semibold text-surface"
+            className="flex size-20 shrink-0 items-center justify-center rounded-full bg-ink font-heading text-2xl font-semibold text-surface"
           >
             {getInitials(profile.name)}
           </span>
@@ -31,13 +30,10 @@ export function ProfileHeader({ profile }: ProfileHeaderProps) {
             height={PHOTO_SIZE}
             priority
             onError={() => setHasPhotoError(true)}
-            className="size-20 shrink-0 rounded-2xl border border-border object-cover"
+            className="size-20 shrink-0 rounded-full border border-border object-cover"
           />
         )}
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold tracking-[0.14em] text-accent uppercase">
-            Análisis de perfil profesional con IA
-          </p>
           <h1 className="mt-1 font-heading text-2xl font-semibold tracking-tight break-words text-ink">
             {profile.name}
           </h1>

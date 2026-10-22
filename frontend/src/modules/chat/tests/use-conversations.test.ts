@@ -1,5 +1,6 @@
+import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
 import { describe, it, expect, vi } from 'vitest';
-import { renderHook, act, waitFor } from '@testing-library/react';
+import { act, waitFor } from "@testing-library/react";
 import { useConversations } from '../hooks/use-conversations';
 import * as chatApi from '../services/chat-api';
 import { User } from '../types/user.types';
@@ -75,7 +76,7 @@ describe('useConversations Hook', () => {
     });
 
     expect(result.current.selectedId).toBe('c1');
-    expect(markSpy).toHaveBeenCalledWith('c1');
+    await waitFor(() => expect(markSpy).toHaveBeenCalledWith('c1'));
     const selectedItem = result.current.conversations.find((c) => c.id === 'c1');
     expect(selectedItem?.unreadCount).toBe(0);
 
@@ -98,7 +99,7 @@ describe('useConversations Hook', () => {
       result.current.simulateIncomingMessage('c1', 'Nuevo mensaje');
     });
 
-    expect(result.current.conversations[0].id).toBe('c1');
+    await waitFor(() => expect(result.current.conversations[0].id).toBe('c1'));
     expect(result.current.conversations[0].lastMessage?.content).toBe('Nuevo mensaje');
   });
 

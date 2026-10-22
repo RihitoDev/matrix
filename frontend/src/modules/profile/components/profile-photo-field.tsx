@@ -27,7 +27,7 @@ export function ProfilePhotoField({
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    // Reset so the same file can be selected again after an error.
+    // Permite seleccionar el mismo archivo después de un error.
     event.target.value = "";
     if (file && onSelectPhoto) {
       onSelectPhoto(file);
@@ -40,7 +40,7 @@ export function ProfilePhotoField({
   };
 
   return (
-    <div className="flex items-center gap-8 border-b border-border pb-8">
+    <div className="flex flex-wrap items-center gap-5">
       <ProfileAvatar label="Foto" photoUrl={previewUrl ?? photoUrl} />
       <div className="flex flex-col gap-1">
         <p className="text-[15px] font-semibold text-ink">Fotografía de perfil</p>
@@ -64,7 +64,7 @@ export function ProfilePhotoField({
             <>
               <Button
                 type="button"
-                className="h-12 bg-accent px-6 text-[14px] font-semibold text-white hover:bg-danger"
+                className="h-10 bg-accent px-4 text-sm text-white hover:bg-brand-hover"
                 disabled={isBusy}
                 onClick={onConfirmPhoto}
               >
@@ -73,7 +73,7 @@ export function ProfilePhotoField({
               <Button
                 type="button"
                 variant="outline"
-                className="h-12 border-border-strong bg-surface px-6 text-[14px] font-semibold text-ink hover:bg-surface-soft"
+                className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
                 disabled={isBusy}
                 onClick={onCancelPhoto}
               >
@@ -85,7 +85,7 @@ export function ProfilePhotoField({
               <Button
                 type="button"
                 variant="outline"
-                className="h-12 border-border-strong bg-surface px-6 text-[14px] font-semibold text-ink hover:bg-surface-soft"
+                className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
                 disabled={!canSelect}
                 onClick={() => inputRef.current?.click()}
               >

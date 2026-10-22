@@ -1,4 +1,5 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { cleanup, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { skillsService } from "../services/skills.service";
@@ -32,16 +33,10 @@ describe("SkillsView", () => {
 
     expect(screen.getByRole("status")).toHaveTextContent("Cargando habilidades...");
     expect(await screen.findByRole("button", { name: "Quitar Python" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { level: 1, name: "Trayectoria" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Habilidades" })).toBeInTheDocument();
     expect(screen.getByText("Buscar en el catálogo")).toBeInTheDocument();
   });
 
-  it("marks Habilidades as the active step", async () => {
-    render(<SkillsView />);
-
-    await screen.findByRole("button", { name: "Quitar Python" });
-    expect(screen.getByText("Habilidades").closest("li")).toHaveAttribute("aria-current", "step");
-  });
 
   it("adds a catalog skill and saves the whole list", async () => {
     const user = userEvent.setup();

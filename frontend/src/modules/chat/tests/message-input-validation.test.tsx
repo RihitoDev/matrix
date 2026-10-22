@@ -1,5 +1,6 @@
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { screen, fireEvent, cleanup } from "@testing-library/react";
 import { useState } from 'react';
 import { MessageInputBar } from '../components/message-input-bar';
 import { ChatRoom } from '../components/chat-room';
@@ -163,7 +164,7 @@ describe('Validacion de Input, Contador 500 Caracteres y Soporte de Emojis (HU-0
     expect(textarea.value.length).toBe(500);
 
     // Indicador visual de limite alcanzado (clase roja)
-    expect(counter.className).toContain('text-[#E30613]');
+    expect(counter.className).toContain('text-accent');
     expect(counter.className).toContain('font-bold');
   });
 

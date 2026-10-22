@@ -1,60 +1,31 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
 import { workExperienceService } from "../services/work-experience.service";
-import type { WorkExperienceItem } from "../types/work-experience-item.types";
-import type { WorkExperiencesResult } from "../types/work-experiences-result.types";
-
-async function requestWorkExperiences(): Promise<WorkExperiencesResult> {
-  try {
-    const experiences = await workExperienceService.getWorkExperiences();
-    return { experiences, error: null };
-  } catch {
-    return { experiences: null, error: WORK_EXPERIENCE_FEEDBACK_MESSAGES.loadError };
-  }
-}
 
 export function useWorkExperiences() {
-  const [experiences, setExperiences] = useState<WorkExperienceItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const requestIdRef = useRef(0);
-  const isMountedRef = useRef(false);
-
-  const applyResult = useCallback((result: WorkExperiencesResult) => {
-    if (result.experiences) {
-      setExperiences(result.experiences);
-    }
-    setError(result.error);
-    setIsLoading(false);
-  }, []);
-
+  const queryClient = useQueryClient();
+  const mountedRef = useRef(false);
   useEffect(() => {
-    isMountedRef.current = true;
-    const requestId = ++requestIdRef.current;
-    void requestWorkExperiences().then((result) => {
-      if (isMountedRef.current && requestId === requestIdRef.current) {
-        applyResult(result);
-      }
-    });
-    return () => {
-      isMountedRef.current = false;
-      requestIdRef.current += 1;
-    };
-  }, [applyResult]);
-
-  const reload = useCallback(async () => {
-    if (!isMountedRef.current) {
-      return;
-    }
-    const requestId = ++requestIdRef.current;
-    setIsLoading(true);
-    const result = await requestWorkExperiences();
-    if (isMountedRef.current && requestId === requestIdRef.current) {
-      applyResult(result);
-    }
-  }, [applyResult]);
-
-  return { experiences, isLoading, error, reload };
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
+  const queryKey = ["work-experience", "experiences"];
+  const query = useQuery({
+    queryKey,
+    queryFn: async ({ signal }) => {
+      signal.throwIfAborted();
+      const items = await workExperienceService.getWorkExperiences();
+      return items;
+    },
+  });
+  async function reload() {
+    if (!mountedRef.current) return;
+    await queryClient.cancelQueries({ queryKey, exact: true });
+    await query.refetch();
+  }
+  return { experiences: query.data ?? [], isLoading: query.isFetching,
+    error: query.isError && !query.isFetching ? WORK_EXPERIENCE_FEEDBACK_MESSAGES.loadError : null, reload };
 }

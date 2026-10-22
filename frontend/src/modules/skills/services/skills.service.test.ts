@@ -2,7 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiClient } from "@/shared/services/api-client";
 import { skillsService } from "./skills.service";
 
-vi.mock("@/shared/services/api-client", () => ({
+vi.mock("@/shared/services/api-client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/shared/services/api-client")>()),
   apiClient: {
     get: vi.fn(),
     post: vi.fn(),

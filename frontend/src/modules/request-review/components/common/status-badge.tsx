@@ -3,12 +3,12 @@ import { cn } from "cn";
 import { REVIEW_STATUS_LABELS } from "../../constants/request-review.constants";
 import type { StatusBadgeProps } from "../../types/status-badge-props.types";
 
-// Estados según DESIGN.md sección 4: se distinguen por forma e icono además del color
+// Los estados se identifican por texto e icono sin fondos de color.
 const STATUS_STYLES = {
-  pending: { icon: Clock, className: "border-gold bg-surface text-ink" },
-  in_review: { icon: Eye, className: "border-ink bg-surface-soft text-ink" },
-  approved: { icon: Check, className: "border-ink bg-ink text-surface" },
-  rejected: { icon: X, className: "border-interaction bg-interaction text-accent" },
+  pending: { icon: Clock, className: "text-text-secondary" },
+  in_review: { icon: Eye, className: "text-ink-soft" },
+  approved: { icon: Check, className: "text-ink" },
+  rejected: { icon: X, className: "text-danger" },
 } as const;
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
@@ -18,7 +18,7 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[12.5px] font-semibold",
+        "inline-flex items-center gap-1.5 py-1 text-[12.5px] font-semibold",
         style?.className ?? "border-border bg-surface text-ink",
         className,
       )}

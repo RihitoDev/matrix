@@ -1,4 +1,4 @@
-import type { DocumentType } from "@/modules/access-request/constants/document-types.constants";
+import type { DocumentType } from "@/modules/access-request";
 
 export interface RejectedUser {
   id: string;

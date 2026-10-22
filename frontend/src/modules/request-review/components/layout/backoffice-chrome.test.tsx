@@ -10,12 +10,12 @@ describe("marca, cabeceras y pie del backoffice", () => {
   it("la marca muestra el icono de UMSSY con el subtítulo del backoffice", () => {
     const { container } = render(<BackofficeBrand />);
 
-    expect(screen.getByText("UMSSY")).toBeInTheDocument();
-    expect(screen.getByText("Backoffice de verificación")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "UMSSY, Acreditación y comunidad" })).toBeInTheDocument();
+
     const icon = container.querySelector("img");
     expect(icon).toBeInTheDocument();
     const iconUrl = new URL(icon?.getAttribute("src") ?? "", "http://localhost");
-    expect(iconUrl.searchParams.get("url") ?? iconUrl.pathname).toBe("/icons/icon-192x192.png");
+    expect(iconUrl.searchParams.get("url") ?? iconUrl.pathname).toBe("/icons/umssy-logo-web.svg");
     expect(container.querySelector("svg")).toBeNull();
     expect(document.body.textContent).not.toContain("Universidad para el futuro");
   });
@@ -30,8 +30,8 @@ describe("marca, cabeceras y pie del backoffice", () => {
     render(<DetailHeader requestCode="SOL-2026-0148" />);
 
     expect(screen.getByRole("link", { name: "Volver a la bandeja" })).toHaveAttribute("href", "/backoffice/solicitudes");
-    expect(screen.getByRole("link", { name: "Solicitudes de acceso" })).toHaveAttribute("href", "/backoffice/solicitudes");
-    expect(screen.getByText("SOL-2026-0148")).toHaveClass("font-semibold");
+    expect(screen.queryByRole("link", { name: "Solicitudes de acceso" })).not.toBeInTheDocument();
+    expect(screen.getByText("SOL-2026-0148")).toHaveClass("font-medium");
   });
 
   it("sin código las migas no muestran el separador", () => {

@@ -32,7 +32,7 @@ describe("Vacancy routes", () => {
 
     expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
     expect(screen.getByRole("heading", { name: "Vacantes", level: 1 })).toBeDefined();
-    expect(screen.getAllByRole("link", { name: "Ver detalles" })[0]).toHaveAttribute("href", "/vacancies/1");
+    expect(screen.getAllByRole("link", { name: /^Ver detalles de / })[0]).toHaveAttribute("href", "/vacancies/1");
   });
 
   it("renders resolved vacancy details and links back to the listing", async () => {
@@ -48,7 +48,7 @@ describe("Vacancy routes", () => {
     const page = await VacancyDetailPage({ params: Promise.resolve({ id: "missing" }) });
     render(<AppLayout>{page}</AppLayout>);
 
-    expect(within(screen.getByRole("navigation", { name: "Menú principal" })).getByRole("button", { name: "Mi perfil" })).toBeDefined();
+    expect(within(screen.getByRole("navigation", { name: "Menú principal" })).getByRole("link", { name: "Vacantes" })).toBeDefined();
     expect(screen.getByRole("heading", { name: "Vacante no encontrada" })).toBeDefined();
     expect(screen.getByRole("link", { name: /Volver a vacantes/ })).toHaveAttribute("href", "/vacancies");
   });

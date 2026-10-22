@@ -2,9 +2,9 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { SavedCvCardProps } from "../types/saved-cv-card-props.types";
-import { formatFileSize } from "@/modules/profile/utils/format-file-size";
+import { formatFileSize } from "@/modules/profile";
 import { formatUploadDate } from "../utils/format-upload-date";
-import { SectionCard } from "@/modules/profile/components/section-card";
+import { SectionCard } from "@/modules/profile";
 
 export function SavedCvCard({
   savedCv,
@@ -42,7 +42,7 @@ export function SavedCvCard({
             <Button
               type="button"
               variant="outline"
-              className="h-12 border-border-strong bg-surface px-6 text-[14px] font-semibold text-ink hover:bg-surface-soft"
+              className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
               disabled={isBusy}
               onClick={onReplace}
             >

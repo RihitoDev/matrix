@@ -5,7 +5,7 @@ import { isConnectionError } from "@/shared/utils/is-connection-error";
 import { REGISTERED_USERS_PAGE_SIZE, SLOW_REQUEST_THRESHOLD_MS } from "../constants/reports.constants";
 import { reportsService } from "../services/reports.service";
 import type { AcademicPeriod, RegisteredUsersState } from "../types/registered-user.types";
-import type { RoleTag } from "@/modules/auth/types/auth-types";
+import type { RoleTag } from "@/modules/auth";
 
 export function useRegisteredUsers(page: number, userType?: RoleTag, period?: AcademicPeriod, search = "") {
   const [state, setState] = useState<RegisteredUsersState | null>(null);

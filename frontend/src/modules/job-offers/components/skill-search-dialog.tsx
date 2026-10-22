@@ -69,7 +69,7 @@ export function SkillSearchDialog({ catalog, selected, isDisabled, onAdd }: Skil
             type="button"
             variant="outline"
             disabled={isDisabled}
-            className="h-auto rounded-full border-dashed border-amber-400 bg-amber-50 px-4 py-1.5 text-[13px] font-medium text-amber-700 hover:bg-amber-100"
+            className="h-auto rounded-full border-dashed border-border-strong bg-surface-soft px-4 py-1.5 text-[13px] font-medium text-ink-soft hover:bg-surface-soft"
           />
         }
       >
@@ -83,7 +83,7 @@ export function SkillSearchDialog({ catalog, selected, isDisabled, onAdd }: Skil
 
         <div>
           <Label htmlFor="skill-search" className="text-[12.5px] font-semibold">
-            {SKILL_SEARCH_TEXT.label} <span className="text-danger">*</span>
+            {SKILL_SEARCH_TEXT.label} <span className="text-ink-soft">*</span>
           </Label>
           <Input
             id="skill-search"
@@ -128,7 +128,7 @@ export function SkillSearchDialog({ catalog, selected, isDisabled, onAdd }: Skil
             type="button"
             disabled={!chosen}
             onClick={handleAdd}
-            className="bg-[#E50000] text-white hover:bg-red-700"
+            className="bg-accent text-white hover:bg-brand-hover"
           >
             {SKILL_SEARCH_TEXT.confirm}
           </Button>

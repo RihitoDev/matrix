@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CERTIFICATE_FILE_ACCEPT } from "../config/certification-document.config";
 import type { CertificationDocumentFieldProps } from "../types/certification-document-field-props.types";
-import { formatFileSize } from "@/modules/profile/utils/format-file-size";
-import { getFieldErrorProps } from "@/modules/profile/utils/get-field-error-props";
-import { FormField } from "@/modules/profile/components/form-field";
+import { formatFileSize } from "@/modules/profile";
+import { getFieldErrorProps } from "@/modules/profile";
+import { FormField } from "@/modules/profile";
 
 const OUTLINE_BUTTON_CLASS =
   "h-10 shrink-0 border-border-strong bg-surface px-4 text-[13px] font-semibold text-ink hover:bg-surface-soft";

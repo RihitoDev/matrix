@@ -11,7 +11,7 @@ function getPaths(roles: Parameters<typeof filterNavigationByRoles>[1]) {
 describe("Role navigation", () => {
   it("gives graduates the participation entry without mentor-only availability", () => {
     const paths = getPaths(["titulado"]);
-    expect(paths).toContain("/mentors/participation");
+    expect(paths).toContain("/mentorship/mentors");
     expect(paths).not.toContain("/mentor/availability");
     expect(paths).not.toContain("/backoffice/solicitudes");
     expect(paths).not.toContain("/recruiters");
@@ -19,18 +19,18 @@ describe("Role navigation", () => {
 
   it("combines graduate and mentor functions without duplicate entries", () => {
     const paths = getPaths(["titulado", "mentor"]);
-    expect(paths).toContain("/mentor/availability");
+    expect(paths).toContain("/mentorship/mentors");
     expect(paths).toContain("/vacancies");
     expect(paths.filter((path) => path === "/chat")).toHaveLength(1);
     expect(new Set(paths).size).toBe(paths.length);
   });
 
-  it("exposes recruiter functions and chat to company accounts", () => {
+  it("exposes recruiter functions only to company accounts", () => {
     const paths = getPaths(["empresa"]);
     expect(paths).toContain("/chat");
-    expect(paths).toContain("/recruiters/job-offers/new");
-    expect(paths).toContain("/matching");
-    expect(paths).toContain("/profile");
+    expect(paths).toContain("/recruiters");
+    expect(paths).not.toContain("/matching");
+    expect(paths).not.toContain("/profile");
     expect(paths).not.toContain("/profile/radar");
     expect(paths).not.toContain("/mentor/availability");
     expect(paths).not.toContain("/backoffice/solicitudes");
@@ -39,8 +39,8 @@ describe("Role navigation", () => {
   it("combines administrative and mentor functions", () => {
     const paths = getPaths(["administrativo", "mentor"]);
     expect(paths).toContain("/backoffice/solicitudes");
-    expect(paths).toContain("/backoffice/reports/history");
-    expect(paths).toContain("/mentor/availability");
+    expect(paths).toContain("/backoffice/reports/registered-users");
+    expect(paths).toContain("/mentorship/mentors");
     expect(paths).toContain("/chat");
   });
 

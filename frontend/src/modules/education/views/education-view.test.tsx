@@ -1,4 +1,5 @@
-import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { act, cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { educationsService } from "../services/educations.service";
@@ -144,7 +145,7 @@ describe("EducationView", () => {
   it("shows multiple records from the API with their institution, degree, period and description", async () => {
     render(<EducationView />);
 
-    expect(screen.getByRole("heading", { level: 1, name: "Trayectoria" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Formación académica" })).toBeInTheDocument();
     const list = await screen.findByRole("list", { name: "Formación registrada" });
     const records = within(list).getAllByRole("listitem");
 
@@ -268,30 +269,7 @@ describe("EducationView", () => {
     expect(educationsService.createEducation).not.toHaveBeenCalled();
   });
 
-  it("renders the four numbered trajectory sub-tabs with education as active", async () => {
-    render(<EducationView />);
-    await screen.findByRole("list", { name: "Formación registrada" });
 
-    const list = screen.getByRole("list", { name: "Sub-secciones de trayectoria" });
-
-    expect(list).toBeInTheDocument();
-    expect(screen.getByText("01")).toBeInTheDocument();
-    expect(screen.getByText("Formación académica")).toBeInTheDocument();
-    expect(screen.getByText("02")).toBeInTheDocument();
-    expect(screen.getByText("Experiencia laboral")).toBeInTheDocument();
-    expect(screen.getByText("03")).toBeInTheDocument();
-    expect(screen.getByText("Habilidades")).toBeInTheDocument();
-    expect(screen.getByText("04")).toBeInTheDocument();
-    expect(screen.getByText("Certificaciones")).toBeInTheDocument();
-  });
-
-  it("marks Trayectoria as the active tab", async () => {
-    render(<EducationView />);
-    await screen.findByRole("list", { name: "Formación registrada" });
-
-    expect(screen.getByRole("link", { name: "Trayectoria" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("link", { name: "Datos personales" })).not.toHaveAttribute("aria-current");
-  });
 
   it("shows the empty form immediately beside the list without an add information button", async () => {
     setupView();

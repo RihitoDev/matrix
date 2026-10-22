@@ -1,6 +1,6 @@
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
-import type { TechnicalAreaResponse } from "@/modules/mentorship/types/technical-area-response.types";
+import type { TechnicalAreaResponse } from "@/modules/mentorship";
 
 export async function getMentorTechnicalAreas(
   signal?: AbortSignal,

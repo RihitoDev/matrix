@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { apiClient } from "./api-client";
 import {
   clearAccessToken,
+  getAccessToken,
   saveAccessToken,
 } from "./storage/access-token-storage";
 
@@ -53,5 +54,36 @@ describe("apiClient authorization", () => {
     });
 
     expect(headers?.get("Authorization")).toBe("Basic explicit-credentials");
+  });
+});
+
+describe("apiClient session errors", () => {
+  afterEach(clearAccessToken);
+
+  function rejectWithStatus(status: number, tokenDuringResponse?: string) {
+    return apiClient.get("/private-resource", {
+      adapter: async (config) => {
+        if (tokenDuringResponse) saveAccessToken(tokenDuringResponse);
+        throw Object.assign(new Error("Solicitud rechazada"), { isAxiosError: true, config, response: { status, data: { detail: "Solicitud rechazada" } } });
+      },
+    });
+  }
+
+  it("invalidates the current session on an authenticated 401 without a mounted guard", async () => {
+    saveAccessToken("expired-token");
+    await expect(rejectWithStatus(401)).rejects.toThrow("Solicitud rechazada");
+    expect(getAccessToken()).toBeNull();
+  });
+
+  it("does not invalidate a newer session when an old request returns 401", async () => {
+    saveAccessToken("old-token");
+    await expect(rejectWithStatus(401, "new-token")).rejects.toThrow();
+    expect(getAccessToken()).toBe("new-token");
+  });
+
+  it.each([400, 403, 404, 422, 500])("preserves the session and original error on HTTP %s", async (status) => {
+    saveAccessToken("valid-token");
+    await expect(rejectWithStatus(status)).rejects.toMatchObject({ response: { status, data: { detail: "Solicitud rechazada" } } });
+    expect(getAccessToken()).toBe("valid-token");
   });
 });

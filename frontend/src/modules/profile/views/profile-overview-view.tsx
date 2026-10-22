@@ -1,5 +1,6 @@
 "use client";
 
+import { ProfileSectionLinks } from "../components/profile-section-links";
 import { ContactInfoCard } from "../components/contact-info-card";
 import { FeedbackMessage } from "../components/feedback-message";
 import { PresentationSummaryCard } from "../components/presentation-summary-card";
@@ -20,7 +21,7 @@ export function ProfileOverviewView() {
   return (
     <ProfilePageLayout
       title="Mi perfil"
-      description="Así ven tu perfil los egresados, mentores y empresas de la comunidad."
+      description="Tu información y trayectoria profesional, en un solo lugar."
     >
       {isLoading ? (
         <p role="status" className="text-[15px] text-text-secondary">
@@ -37,9 +38,12 @@ export function ProfileOverviewView() {
       {summary ? (
         <div className="flex flex-col gap-6">
           <ProfilePhotoFeedback error={photoLoadError} isLoading={isPhotoLoading} onRetry={() => void reloadPhoto()} />
-          {isProfileComplete(summary) ? null : <ProfileCompletionBanner />}
+          {isProfileComplete(summary) ? null : <ProfileCompletionBanner hasContactInfo={[summary.fullName, summary.city, summary.phone, summary.personalEmail].every((value) => value.trim().length > 0)} />}
           <ContactInfoCard profile={summary} photoUrl={photoUrl} />
-          <PresentationSummaryCard profile={summary} />
+          <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
+            <PresentationSummaryCard profile={summary} />
+            <ProfileSectionLinks />
+          </div>
         </div>
       ) : null}
     </ProfilePageLayout>

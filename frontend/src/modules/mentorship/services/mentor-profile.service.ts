@@ -1,4 +1,4 @@
-import { isAxiosError } from "axios";
+import { isApiError as isAxiosError } from "@/shared/services/api-client";
 import { apiClient } from "@/shared/services/api-client";
 import type { ApiResponse } from "@/shared/types/api-response.types";
 import type { MentorProfile } from "../types/mentor-profile.types";

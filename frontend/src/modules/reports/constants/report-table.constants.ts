@@ -1,4 +1,4 @@
-import { OTHER_REJECTION_REASON } from "@/modules/request-review/constants/request-review.constants";
+import { OTHER_REJECTION_REASON } from "@/modules/request-review";
 import type { RejectionReason } from "../types/rejection-reason.types";
 
 export const TABLE_SKELETON_ROWS = 10;
@@ -8,8 +8,8 @@ export const REGISTERED_USERS_COLUMN_COUNT = 6;
 export const REJECTED_USERS_COLUMN_COUNT = 5;
 export const REPORT_HISTORY_COLUMN_COUNT = 3;
 
-export const USERS_TABLE_HEAD_CLASSES = "h-auto px-6 py-3 font-semibold text-ink";
-export const REPORT_HISTORY_HEAD_CLASSES = "h-auto px-6 py-3 font-semibold text-text-secondary";
+export const USERS_TABLE_HEAD_CLASSES = "h-auto px-6 py-3 text-[11.5px] font-semibold text-ink";
+export const REPORT_HISTORY_HEAD_CLASSES = "h-auto px-6 py-3 text-[11.5px] font-semibold text-text-secondary";
 export const TABLE_CELL_CLASSES = "px-6 py-4 text-ink-soft";
 const STICKY_MOBILE_WIDTH_CLASSES =
   "w-32 min-w-32 px-3 whitespace-normal wrap-break-word md:w-auto md:min-w-0 md:px-6 md:whitespace-nowrap";
@@ -25,4 +25,4 @@ export const REJECTION_REASON_SHORT_LABELS: Record<RejectionReason, string> = {
   [OTHER_REJECTION_REASON]: OTHER_REJECTION_REASON,
 };
 export const REJECTION_BADGE_CLASSES =
-  "mt-2 inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-interaction bg-interaction px-2.5 py-0.5 text-xs font-semibold text-accent";
+  "mt-2 inline-flex items-center gap-1.5 whitespace-nowrap py-0.5 text-xs font-semibold text-danger";

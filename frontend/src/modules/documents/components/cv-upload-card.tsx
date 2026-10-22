@@ -2,8 +2,8 @@ import { CircleCheck, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { CvUploadCardProps } from "../types/cv-upload-card-props.types";
-import { formatFileSize } from "@/modules/profile/utils/format-file-size";
-import { SectionCard } from "@/modules/profile/components/section-card";
+import { formatFileSize } from "@/modules/profile";
+import { SectionCard } from "@/modules/profile";
 
 export function CvUploadCard({
   selectedFile,
@@ -28,7 +28,7 @@ export function CvUploadCard({
   if (hasSavedCv) {
     return (
       <SectionCard title="Subir currículum">
-        <div className="flex flex-col items-center gap-2 rounded-xl border border-border bg-surface-soft px-6 py-10 text-center">
+        <div className="flex flex-col items-center gap-2 rounded-lg bg-surface-soft px-6 py-12 text-center">
           <CircleCheck aria-hidden="true" className="size-6 text-ink-soft" />
           <p className="text-[15px] font-semibold text-ink">Ya tienes un CV guardado</p>
           <p className="text-[13px] text-text-secondary">
@@ -41,12 +41,12 @@ export function CvUploadCard({
 
   return (
     <SectionCard title="Subir currículum">
-      <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border-strong bg-surface-soft px-6 py-10 text-center">
+      <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border-strong bg-interaction/40 px-6 py-12 text-center">
         <p className="text-[15px] font-semibold text-ink">Selecciona tu CV en formato PDF</p>
         <Button
           type="button"
           variant="outline"
-          className="mt-3 h-12 border-border-strong bg-surface px-6 text-[14px] font-semibold text-ink hover:bg-surface-soft"
+          className="mt-3 h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
           disabled={isBusy}
           onClick={onSelectFile}
         >
@@ -61,7 +61,7 @@ export function CvUploadCard({
       <div className="mt-6 flex justify-end">
         <Button
           type="button"
-          className="h-12 bg-accent px-6 text-[14px] font-semibold text-white hover:bg-danger"
+          className="h-10 bg-accent px-4 text-sm text-white hover:bg-brand-hover"
           disabled={!selectedFile || isBusy}
           onClick={selectedFile ? () => onConfirmUpload(selectedFile) : undefined}
         >

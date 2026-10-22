@@ -16,8 +16,8 @@ function RequestAccessLayout() {
       <RequestStepsSidebar currentStep={currentStep} />
       <div className="flex flex-1 flex-col">
         <PublicHeader />
-        <section className="flex flex-1 flex-col justify-center px-6 py-10 lg:px-16">
-          <div className="mx-auto flex w-full max-w-190 justify-center 2xl:max-w-5xl">
+        <section className="flex flex-1 flex-col px-6 py-8 lg:px-10">
+          <div className="mx-auto flex w-full max-w-5xl justify-center">
             {currentStep === 1 ? <PersonalDataForm /> : currentStep === 2 ? <DocumentStep /> : <ReviewStep />}
           </div>
         </section>

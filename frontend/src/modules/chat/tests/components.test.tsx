@@ -1,5 +1,6 @@
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { screen, fireEvent, cleanup } from "@testing-library/react";
 import { EmptyChatState } from '../components/empty-chat-state';
 import { ConversationSkeleton } from '../components/conversation-skeleton';
 import { ConversationItem } from '../components/conversation-item';
@@ -154,7 +155,7 @@ describe('Chat Components', () => {
         onSelect={vi.fn()}
       />
     );
-    expect(screen.getByText('Conversacion iniciada')).toBeDefined();
+    expect(screen.getByText('Conversación iniciada')).toBeDefined();
   });
 
   it('ConversationList debe permitir buscar, cambiar filtros y cargar mas', () => {

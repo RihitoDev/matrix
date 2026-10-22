@@ -2,7 +2,7 @@
 
 import type { CertificationDocumentsPanelProps } from "../types/certification-documents-panel-props.types";
 import { CertificationDocumentItem } from "./certification-document-item";
-import { SectionCard } from "@/modules/profile/components/section-card";
+import { SectionCard } from "@/modules/profile";
 
 export function CertificationDocumentsPanel({
   certifications = [],

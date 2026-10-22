@@ -1,5 +1,5 @@
-import type { DocumentType } from "@/modules/access-request/constants/document-types.constants";
-import type { RoleTag } from "@/modules/auth/types/auth-types";
+import type { DocumentType } from "@/modules/access-request";
+import type { RoleTag } from "@/modules/auth";
 import type { PaginatedData } from "@/shared/types/api-response.types";
 
 export interface RegisteredUser {

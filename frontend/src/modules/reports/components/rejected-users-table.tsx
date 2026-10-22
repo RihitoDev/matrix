@@ -5,7 +5,7 @@ import {
   DOCUMENT_TYPE_LABELS,
   OTHER_REJECTION_REASON,
   REJECTION_REASONS,
-} from "@/modules/request-review/constants/request-review.constants";
+} from "@/modules/request-review";
 import { EMPTY_DOCUMENT_LABEL } from "../constants/registered-users.constants";
 import { EMAIL_SEARCH_NO_RESULTS_MESSAGE } from "../constants/reports.constants";
 import {

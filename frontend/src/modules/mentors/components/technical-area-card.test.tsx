@@ -1,5 +1,6 @@
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 ﻿import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { TechnicalAreaCard } from "./technical-area-card";
 
 const area = {
@@ -27,7 +28,7 @@ describe("TechnicalAreaCard", () => {
     );
     const card = screen.getByRole("checkbox");
     expect(card.getAttribute("aria-checked")).toBe("false");
-    expect(card.className).toContain("bg-[#F3F4F6]");
+    expect(card.className).toContain("bg-surface-soft");
     expect(container.querySelector("svg")).toBeNull();
   });
 
@@ -37,7 +38,7 @@ describe("TechnicalAreaCard", () => {
     );
     const card = screen.getByRole("checkbox");
     expect(card.getAttribute("aria-checked")).toBe("true");
-    expect(card.className).toContain("bg-[#FEE2E2]");
+    expect(card.className).toContain("bg-interaction");
     expect(container.querySelector("svg")).not.toBeNull();
   });
 

@@ -55,7 +55,7 @@ export function CandidateListItem({ candidate, selected, onSelect }: CandidateLi
               </span>
             ))}
             {isDiscarded && (
-              <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-medium text-destructive">
+              <span className="px-2 py-0.5 text-[10px] font-medium text-ink-soft">
                 Descartado
               </span>
             )}

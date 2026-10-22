@@ -1,3 +1,4 @@
+import { Pencil, Trash2 } from "lucide-react";
 import { FileText, TriangleAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,7 @@ export function CertificationCard({
           ) : (
             <Badge
               variant="outline"
-              className="h-6 gap-1.5 border-amber-300 bg-amber-50 px-2.5 text-[12px] font-semibold text-amber-800"
+              className="h-6 gap-1.5 border-border bg-surface-soft px-2.5 text-[12px] font-semibold text-ink-soft"
             >
               <TriangleAlert aria-hidden="true" />
               Sin documento de respaldo
@@ -51,9 +52,9 @@ export function CertificationCard({
           aria-label={`Editar ${certification.name}`}
           disabled={isBusy}
           onClick={() => onEdit(certification)}
-          className="h-8 px-2 text-[13px] font-semibold text-ink"
+          className="size-9 p-0 text-ink-soft"
         >
-          Editar
+          <Pencil className="size-4" aria-hidden="true" />
         </Button>
         <Button
           type="button"
@@ -61,9 +62,9 @@ export function CertificationCard({
           aria-label={`Eliminar ${certification.name}`}
           disabled={isBusy}
           onClick={() => onDelete(certification)}
-          className="h-8 px-2 text-[13px] font-semibold text-accent hover:bg-interaction hover:text-accent"
+          className="size-9 p-0 text-ink-soft hover:bg-interaction hover:text-ink"
         >
-          Eliminar
+          <Trash2 className="size-4" aria-hidden="true" />
         </Button>
       </div>
     </article>

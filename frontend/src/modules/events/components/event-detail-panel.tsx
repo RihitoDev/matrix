@@ -20,7 +20,7 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
   return (
     <aside
       aria-label={`Detalle de ${event.title}`}
-      className="max-h-[55dvh] min-h-0 w-full shrink-0 overflow-y-auto overscroll-contain border-t border-border bg-surface lg:h-full lg:max-h-none lg:w-[340px] lg:border-l lg:border-t-0 xl:w-[360px]"
+      className="w-full min-w-0 self-start rounded-lg border border-border bg-surface xl:sticky xl:top-6"
     >
       <Card className="gap-0 rounded-none border-0 shadow-none bg-transparent space-y-5 px-6 py-7 lg:px-7">
         <header className="space-y-3">
@@ -110,7 +110,7 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
               role="progressbar"
             >
               <div
-                className={`h-full rounded-full transition-[width] ${isFull ? 'bg-accent' : 'bg-gold'}`}
+                className={`h-full rounded-full transition-[width] ${isFull ? 'bg-ink' : 'bg-ink-soft'}`}
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
@@ -131,14 +131,15 @@ export function EventDetailPanel({ event, onClose }: EventDetailPanelProps) {
         </section>
 
         <Button
-          aria-describedby="event-capacity-description"
-          className="mt-2 min-h-11 w-full bg-accent text-white hover:bg-danger disabled:bg-muted disabled:text-text-secondary disabled:opacity-100"
-          disabled={!hasValidCapacity || isFull}
+          aria-describedby="event-registration-description"
+          className="mt-2 min-h-11 w-full bg-accent text-white hover:bg-brand-hover disabled:bg-muted disabled:text-text-secondary disabled:opacity-100"
+          disabled
           size="lg"
           type="button"
         >
-          Inscribirme
+          Inscripción no disponible
         </Button>
+        <p id="event-registration-description" className="text-xs text-text-secondary">La inscripción desde la plataforma aún no está habilitada.</p>
       </Card>
     </aside>
   );

@@ -1,4 +1,4 @@
-import { MyPassesView } from "@/modules/events/views/my-passes-view";
+import { MyPassesView } from "@/modules/events";
 
 export default function MyPassesPage() {
   return (

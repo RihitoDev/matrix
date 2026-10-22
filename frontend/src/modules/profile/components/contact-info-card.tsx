@@ -1,35 +1,31 @@
+import { Mail, MapPin, Phone } from "lucide-react";
 import type { ContactInfoCardProps } from "../types/contact-info-card-props.types";
 import { getInitials } from "../utils/get-initials";
 import { EditSectionLink } from "./edit-section-link";
 import { ProfileAvatar } from "./profile-avatar";
 import { ProfileInfoItem } from "./profile-info-item";
-import { SectionCard } from "./section-card";
 
 export function ContactInfoCard({ profile, photoUrl }: ContactInfoCardProps) {
   const fullName = (profile.fullName ?? "").trim();
   const headline = (profile.headline ?? "").trim();
 
   return (
-    <SectionCard
-      title="Datos personales y contacto"
-      action={<EditSectionLink href="/profile/personal-info" sectionName="datos personales" />}
-    >
-      <div className="flex items-start gap-8">
+    <section aria-label="Datos personales y contacto" className="overflow-hidden rounded-lg border border-border bg-surface">
+      <div className="flex flex-wrap items-center gap-6 p-6 lg:p-8">
         <ProfileAvatar label={fullName ? getInitials(fullName) : "Foto"} photoUrl={photoUrl} />
-        <div className="flex min-w-0 flex-1 flex-col gap-6">
-          <div>
-            <p className="font-tight text-[26px] font-bold text-ink">{fullName || "Tu nombre"}</p>
-            <p className={headline ? "text-[15px] text-ink-soft" : "text-[15px] text-text-secondary"}>
-              {headline || "Aún no agregaste un titular profesional"}
-            </p>
-          </div>
-          <dl className="grid grid-cols-3 gap-6">
-            <ProfileInfoItem label="Ciudad de residencia" value={profile.city} />
-            <ProfileInfoItem label="Teléfono" value={profile.phone} />
-            <ProfileInfoItem label="Correo personal" value={profile.personalEmail} />
-          </dl>
+        <div className="min-w-0 flex-1">
+          <h2 className="break-words text-2xl font-bold text-ink">{fullName || "Tu nombre"}</h2>
+          <p className="mt-2 max-w-2xl break-words text-base text-ink-soft">
+            {headline || "Aún no agregaste un titular profesional"}
+          </p>
         </div>
+        <EditSectionLink href="/profile/personal-info" sectionName="datos personales" />
       </div>
-    </SectionCard>
+      <dl className="grid gap-6 border-t border-border bg-surface-soft/50 px-6 py-5 md:grid-cols-3 lg:px-8">
+        <ProfileInfoItem icon={MapPin} label="Ciudad de residencia" value={profile.city} />
+        <ProfileInfoItem icon={Phone} label="Teléfono" value={profile.phone} />
+        <ProfileInfoItem icon={Mail} label="Correo personal" value={profile.personalEmail} />
+      </dl>
+    </section>
   );
 }

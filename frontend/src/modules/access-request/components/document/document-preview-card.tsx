@@ -46,7 +46,7 @@ export function DocumentPreviewCard() {
           variant="ghost"
           disabled={status !== "idle"}
           onClick={() => void removeDocument()}
-          className="h-9 rounded-md px-3 text-[13.5px] font-semibold text-danger"
+          className="h-9 rounded-md px-3 text-[13.5px] font-semibold text-ink-soft"
         >
           {isRemoving ? (
             "Quitando..."

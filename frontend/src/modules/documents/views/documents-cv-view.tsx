@@ -2,16 +2,16 @@
 
 import { useRef, useState, type ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
-import { ConfirmDeleteDialog } from "@/modules/profile/components/confirm-delete-dialog";
+import { ConfirmDeleteDialog } from "@/modules/profile";
 import { CvUploadCard } from "../components/cv-upload-card";
 import { ReplaceCvDialog } from "../components/replace-cv-dialog";
-import { FeedbackMessage } from "@/modules/profile/components/feedback-message";
-import { ProfilePageLayout } from "@/modules/profile/components/profile-page-layout";
+import { FeedbackMessage } from "@/modules/profile";
+import { ProfilePageLayout } from "@/modules/profile";
 import { SavedCvCard } from "../components/saved-cv-card";
 import { CV_ERROR_MESSAGES } from "../constants/cv-error-messages.constants";
 import { CV_FILE_INPUT_ACCEPT } from "../constants/cv-upload.constants";
 import { useCvDocument } from "../hooks/use-cv-document";
-import type { Feedback } from "@/modules/profile/types/feedback.types";
+import type { Feedback } from "@/modules/profile";
 import { getCvErrorMessage } from "../utils/get-cv-error-message";
 import { isCvFileRejection } from "../utils/is-cv-file-rejection";
 import { validateCvFile } from "../utils/validate-cv-file";
@@ -132,7 +132,6 @@ export function DocumentsCvView() {
 
   return (
     <ProfilePageLayout
-      activeTab="documents"
       title="Currículum Vitae"
       description="Sube tu CV para tenerlo disponible en el perfil y mantenerlo actualizado"
     >
@@ -145,7 +144,7 @@ export function DocumentsCvView() {
         className="hidden"
         onChange={handleFileChange}
       />
-      <div className="grid grid-cols-2 items-start gap-6">
+      <div className="grid grid-cols-1 items-start gap-7 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
         <CvUploadCard
           selectedFile={selectedFile}
           hasSavedCv={savedCv !== null}

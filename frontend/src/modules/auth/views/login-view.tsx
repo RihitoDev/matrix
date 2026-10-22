@@ -2,8 +2,10 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { BrandLogo } from "@/shared/components/layout/brand-logo";
 import { useRouter } from "next/navigation";
-import { CircleAlert, LoaderCircle } from "lucide-react";
+import { CircleAlert, LoaderCircle, Eye, EyeOff, ArrowLeft, ArrowRight, LockKeyhole, Mail } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +20,7 @@ import { validateLoginFields, type LoginFieldErrors } from "../utils/validate-lo
 export function LoginView() {
   const router = useRouter();
   const { login, isLoading, error } = useLogin();
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<LoginFieldErrors>({});
@@ -39,28 +42,29 @@ export function LoginView() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-surface-soft px-4 py-10">
-      <div className="mb-6 flex items-center gap-3">
-        <span className="font-tight text-3xl font-extrabold tracking-tight text-ink">UMSSY</span>
-        <span className="h-6 w-px bg-gold" aria-hidden="true" />
-        <span className="text-sm text-text-secondary">Universidad para el futuro</span>
-      </div>
-
+    <main className="grid min-h-dvh bg-surface lg:grid-cols-2">
+      <aside className="relative hidden lg:block">
+        <Image src="/images/campus-fcyt.webp" alt="" fill priority sizes="50vw" className="object-cover" />
+      </aside>
+      <div className="flex min-h-dvh flex-col px-8 py-9 lg:px-12 xl:px-16">
+        <Link href="/" className="flex items-center gap-2 self-start text-sm font-medium text-accent"><ArrowLeft className="size-4" aria-hidden="true" />Volver al inicio</Link>
+        <div className="flex flex-1 items-center justify-center py-12">
       <form
         onSubmit={handleSubmit}
         noValidate
-        className="w-full max-w-[420px] rounded-[10px] border border-border bg-surface p-6 shadow-sm sm:p-8"
+        className="w-full max-w-[440px]"
       >
-        <h1 className="font-tight text-[26px] font-extrabold text-ink">Iniciar sesión</h1>
-        <p className="mb-6 mt-1 text-[15px] text-text-secondary">
-          Comunidad verificada de la UMSS
+        <Link href="/" aria-label="UMSSY, volver al inicio" className="mb-8 inline-block"><BrandLogo priority className="w-56" /></Link>
+        <h1 className="font-tight text-4xl font-extrabold text-ink">Iniciar sesión</h1>
+        <p className="mt-3 mb-8 text-base text-text-secondary">
+          Ingresa con tu cuenta de UMSSY.
         </p>
 
         <div className="mb-4">
           <Label htmlFor="login-email" className="mb-1.5 text-[12.5px] font-semibold text-ink">
             Correo electrónico
           </Label>
-          <Input
+          <div className="relative"><Mail className="pointer-events-none absolute top-4 left-4 size-5 text-accent" aria-hidden="true" /><Input
             id="login-email"
             type="email"
             required
@@ -68,12 +72,13 @@ export function LoginView() {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             aria-invalid={fieldErrors.email ? true : undefined}
-            aria-describedby={fieldErrors.email ? "login-email-error" : undefined}
-            className="h-[42px] rounded-lg border-border bg-surface px-3 text-[15px] text-ink focus-visible:border-accent focus-visible:ring-interaction md:text-[15px]"
+            aria-describedby={fieldErrors.email ? "login-email-hint login-email-error" : "login-email-hint"}
+            className="h-13 rounded-lg border-border-strong bg-surface px-12 text-base text-ink focus-visible:border-accent focus-visible:ring-accent/15 md:text-base"
             placeholder="nombre@ejemplo.com"
-          />
+          /></div>
+          <p id="login-email-hint" className="mt-2 text-xs text-text-secondary">Usa el correo con el que solicitaste acceso.</p>
           {fieldErrors.email ? (
-            <p id="login-email-error" role="alert" className="mt-1.5 text-[13px] font-medium text-accent">
+            <p id="login-email-error" role="alert" className="mt-1.5 text-[13px] font-medium text-danger">
               {fieldErrors.email}
             </p>
           ) : null}
@@ -83,51 +88,56 @@ export function LoginView() {
           <Label htmlFor="login-password" className="mb-1.5 text-[12.5px] font-semibold text-ink">
             Contraseña
           </Label>
-          <Input
+          <div className="relative"><LockKeyhole className="pointer-events-none absolute top-4 left-4 size-5 text-accent" aria-hidden="true" /><Input
             id="login-password"
-            type="password"
+            type={isPasswordVisible ? "text" : "password"}
             required
             autoComplete="current-password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             aria-invalid={fieldErrors.password ? true : undefined}
             aria-describedby={fieldErrors.password ? "login-password-error" : undefined}
-            className="h-[42px] rounded-lg border-border bg-surface px-3 text-[15px] text-ink focus-visible:border-accent focus-visible:ring-interaction md:text-[15px]"
-            placeholder="********"
+            className="h-13 rounded-lg border-border-strong bg-surface px-12 text-base text-ink focus-visible:border-accent focus-visible:ring-accent/15 md:text-base"
+            placeholder="Tu contraseña"
           />
+          <Button type="button" variant="ghost" size="icon" aria-label={isPasswordVisible ? "Ocultar contraseña" : "Mostrar contraseña"} aria-pressed={isPasswordVisible} onClick={() => setIsPasswordVisible(!isPasswordVisible)} className="absolute top-1.5 right-1.5">{isPasswordVisible ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}</Button></div>
           {fieldErrors.password ? (
-            <p id="login-password-error" role="alert" className="mt-1.5 text-[13px] font-medium text-accent">
+            <p id="login-password-error" role="alert" className="mt-1.5 text-[13px] font-medium text-danger">
               {fieldErrors.password}
             </p>
           ) : null}
         </div>
 
         {error ? (
-          <Alert className="mb-4 border-accent/30 bg-interaction text-accent">
+          <Alert className="mb-4 border-danger/25 bg-surface text-danger">
             <CircleAlert aria-hidden="true" />
-            <AlertDescription className="font-medium text-accent">{error}</AlertDescription>
+            <AlertDescription className="font-medium text-danger">{error}</AlertDescription>
           </Alert>
         ) : null}
 
         <Button
           type="submit"
           disabled={isLoading}
-          className="h-[42px] w-full rounded-lg bg-ink text-[14.5px] font-semibold text-surface hover:bg-ink/90"
+          className="h-12 w-full rounded-lg bg-accent text-base font-semibold text-surface hover:bg-brand-hover"
         >
           {isLoading ? <LoaderCircle aria-hidden="true" className="size-4 animate-spin" /> : null}
           {isLoading ? "Ingresando..." : "Iniciar sesión"}
+          {!isLoading ? <ArrowRight aria-hidden="true" /> : null}
         </Button>
 
-        <p className="mt-5 text-center text-sm text-text-secondary">
+        <p className="mt-8 border-t border-border pt-6 text-center text-sm text-text-secondary">
           ¿Aún no tienes cuenta?{" "}
           <Link
             href="/request-access"
-            className="font-semibold text-ink underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="font-semibold text-ink underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-accent focus-visible:outline-none"
           >
-            Solicita acceso
+            Solicitar acceso
           </Link>
         </p>
-      </form>
-    </div>
+        <div className="mt-6 border-t border-border pt-6 text-center"><Link href="/workshops" className="inline-flex items-center gap-2 text-sm font-medium text-accent hover:underline">Explorar talleres sin iniciar sesión<ArrowRight className="size-4" aria-hidden="true" /></Link></div>
+      </form></div>
+        <p className="text-center text-xs text-text-secondary">UMSSY · Universidad Mayor de San Simón</p>
+      </div>
+    </main>
   );
 }

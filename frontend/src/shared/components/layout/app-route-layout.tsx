@@ -17,7 +17,6 @@ export function AppRouteLayout({ children }: AppRouteLayoutProps) {
   return (
     <SessionGate>
       <AppShell
-        fullBleed={pathname === "/events"}
         contentClassName={isChat ? "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden" : undefined
 }
       >

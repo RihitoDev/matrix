@@ -13,7 +13,7 @@ describe("getPostLoginPath", () => {
   it.each(["titulado", "estudiante", "mentor", "", "inventado", null, undefined])(
     "el rol %j va al perfil",
     (role) => {
-      expect(getPostLoginPath(role as string | null | undefined)).toBe("/profile");
+      expect(getPostLoginPath(role as string | null | undefined)).toBe("/dashboard");
     },
   );
 });

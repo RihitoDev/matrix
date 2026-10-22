@@ -1,4 +1,5 @@
-import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
+import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
+import { act, cleanup, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { profilePhotoService } from "../services/profile-photo.service";
 import { useProfilePhoto } from "./use-profile-photo";

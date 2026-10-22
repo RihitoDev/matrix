@@ -1,15 +1,18 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
+
 import { useRef, useState } from "react";
 import { EDUCATION_FEEDBACK_MESSAGES } from "../constants/education-feedback.constants";
 import { EDUCATION_CONFLICT_STATUS } from "../constants/education-http.constants";
 import { educationsService } from "../services/educations.service";
 import type { SaveEducationArguments } from "../types/save-education-arguments.types";
-import type { Feedback } from "@/modules/profile/types/feedback.types";
-import { getHttpStatus } from "@/modules/profile/utils/get-http-status";
+import type { Feedback } from "@/modules/profile";
+import { getHttpStatus } from "@/modules/profile";
 import { getEducationSaveError } from "../utils/get-education-save-error";
 
 export function useSaveEducation(onSaved: () => void | Promise<void>) {
+  const mutation = useMutation({ mutationFn: (request: () => Promise<unknown>) => request() });
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const isSavingRef = useRef(false);
@@ -24,9 +27,9 @@ export function useSaveEducation(onSaved: () => void | Promise<void>) {
     const id = args[1];
     try {
       if (args.length === 2) {
-        await educationsService.updateEducation(args[1], args[0]);
+        await mutation.mutateAsync(() => educationsService.updateEducation(args[1], args[0]));
       } else {
-        await educationsService.createEducation(args[0]);
+        await mutation.mutateAsync(() => educationsService.createEducation(args[0]));
       }
       setFeedback({
         type: "success",

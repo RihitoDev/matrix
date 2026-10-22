@@ -1,3 +1,4 @@
+import { readLocalStorage, writeLocalStorage, removeLocalStorage } from "@/shared/services/storage/browser-local-storage";
 import { MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY } from "../constants/mentorship-wizard.constants";
 import type { MentorshipWizardState } from "../types/mentorship-wizard-state.types";
 
@@ -25,7 +26,7 @@ export function saveMentorshipWizardDraft(
     return;
   }
 
-  window.localStorage.setItem(
+  writeLocalStorage(
     MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY,
     JSON.stringify(state),
   );
@@ -36,7 +37,7 @@ export function loadMentorshipWizardDraft(): MentorshipWizardState | null {
     return null;
   }
 
-  const stored = window.localStorage.getItem(
+  const stored = readLocalStorage(
     MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY,
   );
 
@@ -48,11 +49,11 @@ export function loadMentorshipWizardDraft(): MentorshipWizardState | null {
     const draft: unknown = JSON.parse(stored);
     if (isMentorshipWizardState(draft)) return draft;
   } catch {
-    window.localStorage.removeItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY);
+    removeLocalStorage(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY);
     return null;
   }
 
-  window.localStorage.removeItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY);
+  removeLocalStorage(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY);
   return null;
 }
 
@@ -61,5 +62,5 @@ export function clearMentorshipWizardDraft(): void {
     return;
   }
 
-  window.localStorage.removeItem(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY);
+  removeLocalStorage(MENTORSHIP_WIZARD_DRAFT_STORAGE_KEY);
 }

@@ -33,7 +33,7 @@ export function StepTechnicalAreas({
       </div>
 
       {!hasSelection && (
-        <p className="text-sm font-medium text-red-600" role="alert">
+        <p className="text-sm font-medium text-accent" role="alert">
           Debe seleccionarse al menos un área para continuar
         </p>
       )}

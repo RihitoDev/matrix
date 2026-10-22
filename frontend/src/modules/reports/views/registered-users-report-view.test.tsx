@@ -89,7 +89,7 @@ describe("RegisteredUsersReportView", () => {
   it("muestra el título, los botones y la primera página de usuarios", async () => {
     render(<RegisteredUsersReportView />);
 
-    expect(screen.getByRole("heading", { name: "Reporte de usuarios registrados aceptados" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Usuarios aceptados" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Exportar CSV" })).toBeDefined();
     expect(screen.getByRole("button", { name: "Gestión" })).toBeDefined();
     expect(screen.getByRole("button", { name: "actualizar" })).toBeDefined();
@@ -381,7 +381,7 @@ describe("RegisteredUsersReportView", () => {
     expect(screen.getByText("La exportación de la tabla ha sido un éxito")).toBeDefined();
   });
 
-  it("muestra el aviso verde solo cuando termina de guardarse el CSV", async () => {
+  it("muestra el aviso de éxito solo cuando termina de guardarse el CSV", async () => {
     const user = userEvent.setup();
     let finishSaving!: () => void;
     const close = vi.fn(() => new Promise<void>((resolve) => { finishSaving = resolve; }));
@@ -408,7 +408,7 @@ describe("RegisteredUsersReportView", () => {
     await act(async () => { finishSaving(); });
 
     const message = await screen.findByText("La exportación de la tabla ha sido un éxito");
-    expect(message.parentElement).toHaveClass("bg-green-50");
+    expect(message.parentElement).toHaveClass("bg-surface-soft");
     expect(screen.getByRole("button", { name: "Exportar CSV" })).toBeEnabled();
   });
 

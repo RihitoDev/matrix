@@ -1,5 +1,6 @@
 "use client";
 
+import { PageHeading } from "@/shared/components/layout";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -63,17 +64,16 @@ export function MentorAvailabilityView({ initialWeekStart }: MentorAvailabilityV
   const isEditing = Boolean(editBlockId) && !error;
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="mx-auto w-full max-w-7xl space-y-6">
       <header>
-        <p className="text-xs font-semibold text-muted-foreground">{MY_AVAILABILITY_EYEBROW}</p>
-        <h1 className="text-2xl font-bold">{MY_AVAILABILITY_TEXT.title}</h1>
+        <PageHeading title={MY_AVAILABILITY_TEXT.title} description={MY_AVAILABILITY_EYEBROW} />
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-4">
           <nav
             aria-label={MY_AVAILABILITY_TEXT.weekNavigation}
-            className="flex flex-wrap items-center gap-2"
+            className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface p-3"
           >
             <Button
               variant="outline"

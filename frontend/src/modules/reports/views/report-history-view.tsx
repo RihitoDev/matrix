@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { PageBreadcrumb } from "@/shared/components/layout";
+import { WorkspacePage } from "@/shared/components/layout/workspace-page";
 import { REPORT_HISTORY_EMPTY_TYPE_MESSAGE } from "../constants/generated-report.constants";
-import { REPORT_HISTORY_BREADCRUMB, REPORT_HISTORY_PAGE_SIZE } from "../constants/reports.constants";
+import { REPORT_HISTORY_PAGE_SIZE } from "../constants/reports.constants";
 import { ReportHistoryTable } from "../components/report-history-table";
 import { ReportTableFooter } from "../components/report-table-footer";
 import { ReportTypeFilter } from "../components/report-type-filter";
@@ -24,13 +24,9 @@ export function ReportHistoryView() {
   };
 
   return (
-    <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-2">
-        <PageBreadcrumb items={REPORT_HISTORY_BREADCRUMB} />
-        <h1 className="font-tight text-3xl font-extrabold text-ink">Historial de reportes generados</h1>
-      </header>
+    <WorkspacePage title="Historial de reportes">
 
-      <ReportTypeFilter value={reportType} onChange={handleReportTypeChange} />
+      <div className="rounded-lg border border-border bg-surface p-4"><ReportTypeFilter value={reportType} onChange={handleReportTypeChange} /></div>
 
       <ReportHistoryTable
         reports={reports}
@@ -49,6 +45,6 @@ export function ReportHistoryView() {
         onPageChange={setCurrentPage}
         onRefresh={refresh}
       />
-    </section>
+    </WorkspacePage>
   );
 }

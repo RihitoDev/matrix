@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { AxiosError, isAxiosError } from "axios";
+import { ApiError as AxiosError, isApiError as isAxiosError } from "@/shared/services/api-client";
 import { toast } from "sonner";
 import { isConnectionError } from "@/shared/utils/is-connection-error";
 import {

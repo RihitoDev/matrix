@@ -58,10 +58,8 @@ describe("RadarProfileView", () => {
     render(<AppLayout><RadarProfileView /></AppLayout>);
 
     expect(screen.getAllByRole("navigation", { name: "Menú principal" })).toHaveLength(1);
-    expect(screen.getByRole("link", { name: "Resumen del perfil" })).toHaveAttribute("href", "/profile");
-    expect(screen.getByRole("navigation", { name: "Ruta de navegación" }).textContent).toContain(
-      "Radar de afinidad",
-    );
+    expect(screen.getByRole("button", { name: "Secciones de Perfil profesional" })).toBeDefined();
+    expect(screen.queryByRole("navigation", { name: "Ruta de navegación" })).not.toBeInTheDocument();
 
   });
 

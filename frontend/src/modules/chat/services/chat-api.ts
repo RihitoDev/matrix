@@ -8,11 +8,7 @@ import {
   SendMessageResponse,
   StandardApiResponse,
 } from '../types/conversation.types';
-//import { MOCK_CONVERSATIONS } from '../mocks/mock-conversations';
 import { User } from '../types/user.types';
-import {
-  CURRENT_USER_ID
-} from '../mocks/mock-users';
 import {
   getMessagesByConversation,
   saveStoredMessage,
@@ -31,7 +27,7 @@ const DEFAULT_MESSAGE_PAGE_SIZE = 10;
 
 export function getCurrentSessionUserId(): string {
   const token = getAccessToken();
-  if (!token) return CURRENT_USER_ID;
+  if (!token) return '';
 
   try {
     const parts = token.split('.');
@@ -51,7 +47,7 @@ export function getCurrentSessionUserId(): string {
   } catch {
   }
 
-  return CURRENT_USER_ID;
+  return '';
 }
 
 export interface GetPaginatedMessagesParams {
@@ -209,7 +205,7 @@ export async function getPaginatedMessages({
       const rawMessages = (
         Array.isArray(payload.data) ? payload.data : []
       ) as RawBackendMessageItem[];
-      
+
       const combined = [...rawMessages].sort(
         (a, b) =>
           new Date(a.timestamp || a.createdAt || a.sentAt || '').getTime() -

@@ -132,8 +132,8 @@ describe("BackofficeShell", () => {
         </BackofficeShell>,
       );
 
-      expect(screen.getByText("UMSSY")).toBeInTheDocument();
-      expect(screen.getByText("Backoffice de verificación")).toBeInTheDocument();
+      expect(screen.getByRole("img", { name: "UMSSY, Acreditación y comunidad" })).toBeInTheDocument();
+
       expect(screen.getByText("PA")).toBeInTheDocument();
       expect(screen.queryByText("Registro de auditoría")).toBeNull();
       const text = document.body.textContent?.toLowerCase() ?? "";
@@ -148,7 +148,7 @@ describe("BackofficeShell", () => {
     const listRequests = vi.spyOn(requestReviewService, "listRequests");
     beforeEach(() => listRequests.mockResolvedValue({ ok: false, status: 0, message: "x" }));
 
-    it("usa un solo AppShell: una barra lateral de 248 px y el botón de menú solo en móvil", () => {
+    it("usa un solo AppShell: una barra lateral de 264 px y el botón de menú accesible", () => {
       sessionStorage.setItem("accessToken", tokenFor("administrativo"));
       const { container } = renderWithQuery(
         <BackofficeShell>
@@ -157,13 +157,13 @@ describe("BackofficeShell", () => {
       );
 
       expect(container.querySelectorAll("[data-slot='sidebar']").length).toBeLessThanOrEqual(1);
-      expect(container.querySelector("[style*='--sidebar-width: 15.5rem']")).not.toBeNull();
+      expect(container.querySelector("[style*='--sidebar-width: 16.5rem']")).not.toBeNull();
       const toggle = screen.getByRole("button", { name: /menú/i });
-      expect(toggle.parentElement).toHaveClass("md:hidden");
-      expect(screen.getByText("Contenido").parentElement).not.toHaveClass("px-8");
+      expect(toggle).toHaveAttribute("aria-expanded", "true");
+      expect(screen.getByText("Contenido").parentElement).toHaveClass("px-8");
     });
 
-    it("la barra lateral no muestra un chevron junto a la marca y el ítem activo permite la barra roja en el borde", () => {
+    it("la barra lateral no muestra un chevron junto a la marca y el ítem activo muestra un punto claro", () => {
       sessionStorage.setItem("accessToken", tokenFor("administrativo"));
       renderWithQuery(
         <BackofficeShell>
@@ -171,11 +171,11 @@ describe("BackofficeShell", () => {
         </BackofficeShell>,
       );
 
-      const brand = screen.getByText("UMSSY").parentElement as HTMLElement;
+      const brand = screen.getByRole("img", { name: "UMSSY, Acreditación y comunidad" }).parentElement as HTMLElement;
       expect(brand.querySelector("svg")).toBeNull();
       expect(screen.queryByText("›")).toBeNull();
-      expect(screen.getByRole("link", { name: /Solicitudes/ }).className).toContain("overflow-visible");
-      expect(screen.getByRole("link", { name: /Solicitudes/ }).className).toContain("data-active:before:-left-3");
+      expect(screen.getByRole("link", { name: /Solicitudes/ }).className).toContain("data-active:bg-surface/8");
+      expect(screen.getByRole("link", { name: /Solicitudes/ }).className).toContain("data-active:before:rounded-full");
     });
   });
 });

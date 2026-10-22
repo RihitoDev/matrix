@@ -1,4 +1,5 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { cleanup, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { MentorDirectoryItem } from "../../types/mentor-directory.types";
 import { MentorCard } from "./mentor-card";
@@ -59,10 +60,10 @@ describe("MentorCard", () => {
     expect(screen.getByText("Ingeniería · UMSS")).toBeVisible();
     const availability = screen.getByText("Disponible para mentoría");
     expect(availability).toBeVisible();
-    expect(availability).toHaveClass("bg-emerald-50", "text-emerald-800");
+    expect(availability).toHaveClass("border-transparent", "text-ink-soft");
     expect(availability.querySelector('[aria-hidden="true"]')).toHaveClass(
       "rounded-full",
-      "bg-emerald-600",
+      "bg-ink-soft",
     );
     const header = availability.parentElement;
     expect(header).toHaveClass("flex-wrap");
@@ -78,7 +79,7 @@ describe("MentorCard", () => {
     render(<MentorCard mentor={mentor} />);
     expect(screen.queryByText(/Ingeniería/)).not.toBeInTheDocument();
     expect(screen.getByText("No disponible")).toHaveClass(
-      "bg-surface-soft",
+      "border-transparent",
       "text-text-secondary",
     );
     expect(screen.queryByText("Disponible para mentoría")).not.toBeInTheDocument();

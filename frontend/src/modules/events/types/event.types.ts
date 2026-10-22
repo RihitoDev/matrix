@@ -1,4 +1,4 @@
-export type { EventCategoryItem } from '../../event-categories/types/event-category-item.types';
+export type { EventCategoryItem } from '@/modules/event-categories';
 export type { EventItem } from './event-item.types';
 export type { EventsListResponse } from './events-list-response.types';
 export type { GetEventsParams } from './get-events-params.types';

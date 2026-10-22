@@ -2,12 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PageBreadcrumb } from "@/shared/components/layout";
 import { JobRecommendationCard } from "../components/job-recommendation-card";
 import { JobsEmptyState } from "../components/jobs-empty-state";
 import {
   JOB_MATCHING_MESSAGES,
-  RECOMMENDED_JOBS_BREADCRUMB,
 } from "../constants/job-matching.constants";
 import { useRecommendedJobs } from "../hooks/use-recommended-jobs";
 
@@ -17,10 +15,9 @@ export function RecommendedJobsView() {
   const { data, isPending, isError, refetch } = useRecommendedJobs();
 
   return (
-    <section className="flex flex-col gap-6">
+    <section className="mx-auto flex w-full max-w-7xl flex-col gap-6">
       <header className="flex flex-col gap-2">
-        <PageBreadcrumb items={RECOMMENDED_JOBS_BREADCRUMB} />
-        <h1 className="font-tight text-3xl font-extrabold text-ink">
+        <h1 className="font-tight text-3xl font-bold text-ink">
           {JOB_MATCHING_MESSAGES.pageTitle}
         </h1>
         <p className="text-base text-text-secondary">

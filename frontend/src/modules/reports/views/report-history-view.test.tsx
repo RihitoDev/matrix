@@ -55,11 +55,10 @@ describe("ReportHistoryView", () => {
     vi.restoreAllMocks();
   });
 
-  it("muestra el título, el breadcrumb y los reportes de la primera página", async () => {
+  it("muestra un título y los reportes de la primera página", async () => {
     render(<ReportHistoryView />);
 
-    expect(screen.getByRole("heading", { name: "Historial de reportes generados" })).toBeDefined();
-    expect(screen.getByRole("link", { name: "Inicio" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Historial de reportes" })).toBeDefined();
     expect(screen.getAllByTestId("skeleton-row")).toHaveLength(10);
 
     await waitFor(() => {
@@ -72,18 +71,6 @@ describe("ReportHistoryView", () => {
     expect(reportsService.getReportHistory).toHaveBeenCalledWith({ page: 1, limit: 10 });
   });
 
-  it("la ruta de navegación identifica la ubicación del historial (CA 35)", () => {
-    render(<ReportHistoryView />);
-
-    const breadcrumb = screen.getByRole("navigation", { name: "Ruta de navegación" });
-    const steps = within(breadcrumb)
-      .getAllByRole("listitem")
-      .map((item) => item.textContent);
-
-    expect(steps).toEqual(["Inicio", "Reportes Analíticos", "Historial de reportes generados"]);
-    expect(within(breadcrumb).getByRole("link", { name: "Inicio" }).getAttribute("href")).toBe("/backoffice");
-    expect(within(breadcrumb).getByText("Historial de reportes generados").getAttribute("aria-current")).toBe("page");
-  });
 
   it("muestra las columnas en el orden definido y una fila independiente por reporte", async () => {
     render(<ReportHistoryView />);

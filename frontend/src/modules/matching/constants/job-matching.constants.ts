@@ -14,13 +14,13 @@ export const JOB_MATCHING_QUERY_KEYS = {
 };
 
 export const RECOMMENDED_JOBS_BREADCRUMB: BreadcrumbEntry[] = [
-  { label: "UMSSY", href: "/" },
+  { label: "UMSSY", href: "/dashboard" },
   { label: "Empleos" },
   { label: "Vacantes" },
 ];
 
 export const JOB_DETAIL_BREADCRUMB: BreadcrumbEntry[] = [
-  { label: "UMSSY", href: "/" },
+  { label: "UMSSY", href: "/dashboard" },
   { label: "Empleos" },
   { label: "Vacantes", href: JOBS_ROUTE },
   { label: "Ver vacante" },

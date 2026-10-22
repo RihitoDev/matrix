@@ -1,4 +1,5 @@
-import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { act, cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CERTIFICATION_DOCUMENT_MESSAGES } from "../config/certification-document.config";
@@ -46,6 +47,7 @@ async function renderView() {
   await act(async () => {
     render(<CertificationsView />);
   });
+  await waitFor(() => expect(screen.queryByText("Cargando certificaciones...")).not.toBeInTheDocument());
   return userEvent.setup();
 }
 

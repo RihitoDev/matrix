@@ -63,7 +63,7 @@ export function ContactSearchModal({ isOpen, onClose, onSelectContact }: Contact
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-slate-900 font-heading text-base font-medium">
+          <DialogTitle className="text-ink font-heading text-base font-medium">
             Nueva conversación
           </DialogTitle>
         </DialogHeader>
@@ -89,7 +89,7 @@ export function ContactSearchModal({ isOpen, onClose, onSelectContact }: Contact
           aria-label="Lista de contactos"
         >
           {isSearching ? (
-            <div className="text-center text-slate-500 py-6 text-sm" role="status">
+            <div className="text-center text-text-secondary py-6 text-sm" role="status">
               Buscando...
             </div>
           ) : results.length > 0 ? (
@@ -107,8 +107,8 @@ export function ContactSearchModal({ isOpen, onClose, onSelectContact }: Contact
                   onMouseEnter={() => setSelectedIndex(index)}
                   className={`flex items-center gap-3 p-2.5 rounded-lg transition-colors text-left outline-none cursor-pointer ${
                     isSelected
-                      ? 'bg-slate-100 ring-2 ring-slate-400/50'
-                      : 'hover:bg-slate-50 focus-visible:bg-slate-100 focus-visible:ring-2 focus-visible:ring-slate-400'
+                      ? 'bg-surface-soft ring-2 ring-slate-400/50'
+                      : 'hover:bg-surface-soft focus-visible:bg-surface-soft focus-visible:ring-2 focus-visible:ring-slate-400'
                   }`}
                 >
                   {user.avatarUrl ? (
@@ -118,16 +118,16 @@ export function ContactSearchModal({ isOpen, onClose, onSelectContact }: Contact
                       className="w-10 h-10 rounded-full object-cover shrink-0"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-sm shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-border text-ink-soft flex items-center justify-center font-bold text-sm shrink-0">
                       {getInitials(user.fullName)}
                     </div>
                   )}
                   <div className="flex flex-col overflow-hidden">
-                    <span className="font-medium text-slate-800 text-sm truncate">
+                    <span className="font-medium text-ink text-sm truncate">
                       {user.fullName}
                     </span>
                     {user.headline && (
-                      <span className="text-xs text-slate-500 truncate">
+                      <span className="text-xs text-text-secondary truncate">
                         {user.headline}
                       </span>
                     )}
@@ -137,7 +137,7 @@ export function ContactSearchModal({ isOpen, onClose, onSelectContact }: Contact
             })
           ) : (
             searchTerm.trim().length >= 2 && (
-              <div className="text-center text-slate-500 py-6 text-sm">
+              <div className="text-center text-text-secondary py-6 text-sm">
                 No se encontraron usuarios
               </div>
             )

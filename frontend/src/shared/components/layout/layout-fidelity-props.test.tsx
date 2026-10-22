@@ -24,10 +24,10 @@ describe("props opcionales del layout compartido", () => {
       </AppShell>,
     );
 
-    expect(screen.getByText("Universidad para el futuro")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "UMSSY, Acreditación y comunidad" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /menú/i })).toBeInTheDocument();
     expect(screen.getByText("Ana Pérez")).toBeInTheDocument();
-    expect(screen.getByText("Contenido").parentElement).toHaveClass("px-8", "pb-8");
+    expect(screen.getByText("Contenido").parentElement).toHaveClass("px-8", "py-8");
     expect(screen.queryByLabelText(/pendientes/)).toBeNull();
   });
 

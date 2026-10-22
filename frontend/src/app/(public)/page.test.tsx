@@ -1,38 +1,21 @@
-import { render, screen, waitFor } from '@testing-library/react'
-import { describe, it, expect, vi, afterEach } from 'vitest'
-import { apiClient } from '@/shared/services/api-client'
-import Home from './page'
-
-describe('Home Page', () => {
-  afterEach(() => {
-    vi.restoreAllMocks()
-  })
-
-  it('renderiza el título principal y muestra la respuesta GET del backend via Axios', async () => {
-    vi.spyOn(apiClient, 'get').mockResolvedValueOnce({
-      data: {
-        statusCode: 200,
-        data: 'Hello World!',
-        detail: 'Solicitud procesada correctamente',
-        ok: true,
-      },
-    })
-
-    render(<Home />)
-    expect(screen.getByText('UMSSY')).toBeDefined()
-
-    await waitFor(() => {
-      expect(screen.getByText('Hello World!')).toBeDefined()
-    })
-  })
-
-  it('muestra mensaje de error si falla la petición con Axios', async () => {
-    vi.spyOn(apiClient, 'get').mockRejectedValueOnce(new Error('Network error'))
-
-    render(<Home />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Error connecting to backend')).toBeDefined()
-    })
-  })
-})
+import { screen } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { eventsService } from "@/modules/events";
+import Home from "./page";
+afterEach(() => vi.restoreAllMocks());
+describe("Public landing", () => {
+ it("offers discovery before requesting an account", async () => {
+   vi.spyOn(eventsService,"getEvents").mockResolvedValue({data:[],page:1,offset:0});
+   render(<Home />);
+   expect(screen.getByRole("heading", {level:1})).toHaveTextContent("Tu comunidad.");
+   expect(screen.getByRole("link", {name:"Explorar talleres"})).toHaveAttribute("href","#workshops");
+   expect(await screen.findByText("Aún no hay talleres publicados. Vuelve pronto.")).toBeInTheDocument();
+ });
+ it("offers a retry when published workshops cannot be loaded", async () => {
+   vi.spyOn(eventsService,"getEvents").mockRejectedValue(new Error("offline"));
+   render(<Home />);
+   expect(await screen.findByRole("button", {name:"Volver a intentar"})).toBeInTheDocument();
+   expect(screen.queryByText("Botón de ejemplo")).not.toBeInTheDocument();
+ });
+});

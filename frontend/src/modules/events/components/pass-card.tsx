@@ -16,20 +16,21 @@ export function PassCard({
   return (
     <Card className="gap-0 border-0 bg-transparent p-0 shadow-none">
       <Button
+        variant="ghost"
         type="button"
         aria-pressed={Boolean(isSelected)}
         onClick={onClick}
-        className={`h-auto items-stretch whitespace-normal w-full min-w-0 text-left p-5 rounded-[20px] transition-all flex flex-col gap-4 ${
+        className={`h-auto items-stretch whitespace-normal w-full min-w-0 text-left p-5 rounded-lg transition-all flex flex-col gap-4 ${
           isSelected
-            ? 'bg-ink text-surface'
+            ? 'bg-ink text-surface hover:bg-ink-soft'
             : 'bg-surface text-ink border border-border hover:border-border-strong'
         }`}
       >
         <div
           className={`text-xs font-semibold px-2.5 py-1 rounded-md w-fit flex items-center gap-1.5 ${
             isSelected
-              ? 'bg-white/10 text-gold'
-              : 'bg-surface-soft text-text-secondary'
+              ? 'text-surface/85'
+              : 'text-text-secondary'
           }`}
         >
           <Check className="w-3 h-3" /> {status}

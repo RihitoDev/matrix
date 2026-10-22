@@ -32,7 +32,7 @@ function getLevelClass(level: ReviewAffinityLevel): string {
       return "bg-accent";
 
     case "Avanzado":
-      return "bg-gold";
+      return "bg-ink-soft";
 
     case "Intermedio":
       return "bg-ink-soft";
@@ -290,7 +290,7 @@ export function ReviewProfileDetail({
                 className={`mt-4 rounded-lg border px-4 py-3 text-sm ${
                   localAction === "approved"
                     ? "border-border bg-surface-soft text-ink"
-                    : "border-destructive/20 bg-destructive/10 text-destructive"
+                    : "border-border bg-surface-soft text-ink"
                 }`}
               >
                 {localAction === "approved"

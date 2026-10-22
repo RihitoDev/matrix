@@ -7,9 +7,9 @@ import type { SummaryCardsProps } from "../../types/summary-cards-props.types";
 
 const CONTAINER_CLASS = "grid grid-cols-2 gap-px overflow-hidden rounded-[10px] border border-border bg-border lg:grid-cols-4";
 const CELL_CLASS = "flex flex-col gap-1 bg-surface px-5 py-4";
-const TITLE_CLASS = "text-[15px] text-text-secondary";
-const VALUE_CLASS = "font-tight text-[32px] font-bold leading-tight text-ink";
-const NOTE_CLASS = "text-[14px] text-text-secondary";
+const TITLE_CLASS = "text-sm text-text-secondary";
+const VALUE_CLASS = "font-tight text-2xl font-bold leading-tight text-ink";
+const NOTE_CLASS = "text-xs leading-relaxed text-text-secondary";
 
 const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
 

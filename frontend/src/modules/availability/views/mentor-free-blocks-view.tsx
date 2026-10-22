@@ -23,7 +23,7 @@ export function MentorFreeBlocksView({ mentorId }: MentorFreeBlocksViewProps) {
   const goToNextWeek = () => setWeekStart(addWeeks(weekStart, 1));
 
   return (
-    <div className="space-y-4 p-6">
+    <div className="mx-auto w-full max-w-7xl space-y-6">
       <header>
         <p className="text-xs font-semibold text-muted-foreground">
           {MENTOR_FREE_BLOCKS_TEXT.eyebrow}

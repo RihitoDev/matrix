@@ -87,7 +87,7 @@ function CertificationDocumentViewerBody({
         <DialogFooter className="mx-0 mb-0 rounded-b-2xl border-t-0 bg-transparent p-0">
           <Button
             type="button"
-            className="h-11 bg-accent px-5 text-[14px] font-semibold text-white hover:bg-danger"
+            className="h-11 bg-accent px-5 text-[14px] font-semibold text-white hover:bg-brand-hover"
             onClick={handleDownload}
           >
             <Download aria-hidden="true" className="size-4" />

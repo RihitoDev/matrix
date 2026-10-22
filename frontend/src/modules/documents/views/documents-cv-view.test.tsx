@@ -1,4 +1,7 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { createQueryClient } from "@/shared/services/query-client";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -46,6 +49,7 @@ async function renderView() {
   await act(async () => {
     render(<DocumentsCvView />);
   });
+  await waitFor(() => expect(screen.queryByText("Cargando tu CV...")).not.toBeInTheDocument());
 }
 
 async function chooseAndConfirm(user: ReturnType<typeof userEvent.setup>, file: File) {
@@ -72,29 +76,17 @@ describe("DocumentsCvView", () => {
     vi.clearAllMocks();
   });
 
-  it("renders the cv title in the header and the main heading", async () => {
+  it("renders the cv title once in the main heading", async () => {
     await renderView();
 
     expect(screen.getByRole("heading", { level: 1, name: "Currículum Vitae" })).toBeInTheDocument();
-    expect(screen.getAllByText("Currículum Vitae")).toHaveLength(2);
+    expect(screen.getAllByText("Currículum Vitae")).toHaveLength(1);
     expect(screen.queryByText("Currículum PDF")).not.toBeInTheDocument();
     expect(
       screen.getByText("Sube tu CV para tenerlo disponible en el perfil y mantenerlo actualizado"),
     ).toBeInTheDocument();
   });
 
-  it("shows the profile tabs with Documentos active", async () => {
-    await renderView();
-
-    const documentsTab = screen.getByRole("link", { name: "Documentos" });
-
-    expect(screen.getByRole("link", { name: "Datos personales" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Presentación" })).toBeInTheDocument();
-    expect(screen.getByText("Trayectoria")).toBeInTheDocument();
-    expect(documentsTab).toHaveAttribute("href", "/profile/documents");
-    expect(documentsTab).toHaveAttribute("aria-current", "page");
-    expect(screen.getAllByText("Documentos")).toHaveLength(1);
-  });
 
   it("does not show the steps indicator nor the certifications link", async () => {
     await renderView();
@@ -104,7 +96,7 @@ describe("DocumentsCvView", () => {
   });
 
   it("renders the same loading state in the server html to avoid a hydration mismatch", () => {
-    const html = renderToString(<DocumentsCvView />);
+    const html = renderToString(<QueryClientProvider client={createQueryClient()}><DocumentsCvView /></QueryClientProvider>);
 
     expect(html).toContain('aria-busy="true"');
     expect(html).not.toContain("Seleccionar PDF");
@@ -122,7 +114,7 @@ describe("DocumentsCvView", () => {
       pendingLoad.resolve(UPLOADED_CV);
     });
 
-    expect(screen.queryByText("Cargando tu CV...")).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText("Cargando tu CV...")).not.toBeInTheDocument());
     expect(screen.getByText("CV_Valeria_Quispe.pdf")).toBeInTheDocument();
     expect(screen.getByText("Ya tienes un CV guardado")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Seleccionar PDF" })).not.toBeInTheDocument();

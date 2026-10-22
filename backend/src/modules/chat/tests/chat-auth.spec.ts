@@ -69,12 +69,7 @@ describe('Chat access', () => {
   it.each([ChatController, ConversationController, MessageController, UserSearchController])(
     'protects all endpoints of %p with the same chat roles', (controller) => {
       expect(Reflect.getMetadata(GUARDS_METADATA, controller)).toEqual([JwtAuthGuard, RolesGuard]);
-      expect(Reflect.getMetadata(ROLES_KEY, controller)).toEqual([
-        'titulado',
-        'mentor',
-        'estudiante',
-        'empresa',
-      ]);
+      expect(Reflect.getMetadata(ROLES_KEY, controller)).toEqual(['titulado', 'estudiante', 'mentor', 'empresa']);
     },
   );
 });

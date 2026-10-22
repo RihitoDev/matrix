@@ -1,4 +1,4 @@
-import type { EventCategoryItem } from '../../event-categories/types/event-category-item.types';
+import type { EventCategoryItem } from '@/modules/event-categories';
 
 export interface EventItem {
   id: string;

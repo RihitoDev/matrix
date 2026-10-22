@@ -1,4 +1,5 @@
-import { act, cleanup, renderHook } from '@testing-library/react';
+import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
+import { act, cleanup } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { authService } from '../services/auth.service';
 import { useLogin } from './use-login';

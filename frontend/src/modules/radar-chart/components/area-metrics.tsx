@@ -42,7 +42,7 @@ export function AreaMetrics({ score, level, gap, globalAverage }: AreaMetricsPro
               className={cn(
                 METRIC_VALUE_CLASS,
                 "inline-flex items-center gap-1 whitespace-nowrap",
-                gap < 0 ? "text-danger" : "text-ink",
+                gap < 0 ? "text-ink-soft" : "text-ink",
               )}
             >
               {gap > 0 && <ArrowUpRight className={GAP_ICON_CLASS} aria-hidden="true" />}

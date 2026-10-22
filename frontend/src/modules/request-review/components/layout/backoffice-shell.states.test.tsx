@@ -21,7 +21,7 @@ vi.mock("../../services/request-review.service", () => ({
   requestReviewService: { listRequests: vi.fn().mockResolvedValue({ ok: false, status: 0, message: "x" }) },
 }));
 
-const FORBIDDEN_TEXTS = ["Universidad para el futuro", "Mentorías", "Inicio"];
+const FORBIDDEN_TEXTS = ["Universidad para el futuro", "Mentorías"];
 
 describe("BackofficeShell: nunca pinta el shell por defecto", () => {
   beforeEach(() => stubMatchMedia());
@@ -40,8 +40,8 @@ describe("BackofficeShell: nunca pinta el shell por defecto", () => {
         </BackofficeShell>,
       );
 
-      expect(screen.getByText("UMSSY")).toBeInTheDocument();
-      expect(screen.getByText("Backoffice de verificación")).toBeInTheDocument();
+      expect(screen.getByRole("img", { name: "UMSSY, Acreditación y comunidad" })).toBeInTheDocument();
+
       expect(screen.getByTestId("backoffice-session-skeleton")).toBeInTheDocument();
       expect(screen.queryByText("Contenido protegido")).toBeNull();
       for (const text of FORBIDDEN_TEXTS) expect(screen.queryByText(text)).toBeNull();

@@ -39,7 +39,7 @@ describe("KpiCards", () => {
 
     const variation = within(getCard("Afinidad global")).getByText("-0,5 vs. anterior");
 
-    expect(variation.className.split(" ")).toContain("text-danger");
+    expect(variation.className.split(" ")).toContain("text-ink-soft");
   });
 
   it("shows no trend arrow when there is no variation", () => {

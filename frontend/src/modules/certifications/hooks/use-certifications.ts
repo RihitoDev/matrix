@@ -1,60 +1,32 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CERTIFICATION_FEEDBACK_MESSAGES } from "../config/certification-feedback.config";
 import { certificationsService } from "../services/certifications.service";
-import type { Certification } from "../types/certification.types";
-import type { CertificationsResult } from "../types/certifications-result.types";
 import { sortCertifications } from "../utils/sort-certifications";
 
-async function requestCertifications(): Promise<CertificationsResult> {
-  try {
-    const certifications = await certificationsService.getCertifications();
-    return { certifications: sortCertifications(certifications), error: null };
-  } catch {
-    return { certifications: null, error: CERTIFICATION_FEEDBACK_MESSAGES.loadError };
-  }
-}
-
 export function useCertifications() {
-  const [certifications, setCertifications] = useState<Certification[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const requestIdRef = useRef(0);
-
-  function applyResult(result: CertificationsResult) {
-    if (result.certifications) {
-      setCertifications(result.certifications);
-    }
-    setError(result.error);
-    setIsLoading(false);
-  }
-
+  const queryClient = useQueryClient();
+  const mountedRef = useRef(false);
   useEffect(() => {
-    const requestId = ++requestIdRef.current;
-
-    async function loadCertifications() {
-      const result = await requestCertifications();
-      if (requestId === requestIdRef.current) {
-        applyResult(result);
-      }
-    }
-
-    void loadCertifications();
-
-    return () => {
-      requestIdRef.current += 1;
-    };
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
   }, []);
-
-  const reload = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
-    setIsLoading(true);
-    const result = await requestCertifications();
-    if (requestId === requestIdRef.current) {
-      applyResult(result);
-    }
-  }, []);
-
-  return { certifications, isLoading, error, reload };
+  const queryKey = ["certifications", "certifications"];
+  const query = useQuery({
+    queryKey,
+    queryFn: async ({ signal }) => {
+      signal.throwIfAborted();
+      const items = await certificationsService.getCertifications();
+      return sortCertifications(items);
+    },
+  });
+  async function reload() {
+    if (!mountedRef.current) return;
+    await queryClient.cancelQueries({ queryKey, exact: true });
+    await query.refetch();
+  }
+  return { certifications: query.data ?? [], isLoading: query.isFetching,
+    error: query.isError && !query.isFetching ? CERTIFICATION_FEEDBACK_MESSAGES.loadError : null, reload };
 }

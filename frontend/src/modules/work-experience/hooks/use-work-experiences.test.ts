@@ -1,4 +1,5 @@
-import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
+import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
+import { act, cleanup, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
 import { workExperienceService } from "../services/work-experience.service";
@@ -40,8 +41,8 @@ describe("useWorkExperiences", () => {
     expect(result.current.isLoading).toBe(true);
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.experiences).toEqual([EXPERIENCE]);
-    expect(result.current.error).toBeNull();
+    await waitFor(() => expect(result.current.experiences).toEqual([EXPERIENCE]));
+    await waitFor(() => expect(result.current.error).toBeNull());
   });
 
   it("shows an error when the experiences cannot be loaded", async () => {
@@ -64,14 +65,14 @@ describe("useWorkExperiences", () => {
     await act(async () => {
       await result.current.reload();
     });
-    expect(result.current.experiences).toEqual(latest);
+    await waitFor(() => expect(result.current.experiences).toEqual(latest));
 
     await act(async () => {
       initialLoad.resolve([]);
       await initialLoad.promise;
     });
 
-    expect(result.current.experiences).toEqual(latest);
+    await waitFor(() => expect(result.current.experiences).toEqual(latest));
   });
 
   it("does not update the state when a reload finishes after unmounting", async () => {
@@ -90,7 +91,7 @@ describe("useWorkExperiences", () => {
     reloadRequest.resolve([]);
     await pendingReload;
 
-    expect(result.current.experiences).toEqual([EXPERIENCE]);
+    await waitFor(() => expect(result.current.experiences).toEqual([EXPERIENCE]));
   });
 
   it("does not request the list again after unmounting", async () => {

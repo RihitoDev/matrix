@@ -167,6 +167,6 @@ describe("RequestInboxView", () => {
     const card = container.querySelector("section > div.overflow-hidden");
     expect(card).toHaveClass("relative", "w-full", "min-w-0", "overflow-hidden");
     expect(container.querySelector("[data-slot='table-container']")).toHaveClass("w-full", "overflow-x-auto");
-    expect(container.querySelector("section")).toHaveClass("p-8");
+    expect(container.querySelector("section")).not.toHaveClass("p-8");
   });
 });

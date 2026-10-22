@@ -7,7 +7,7 @@ export function ProfileAvatar({ label, size = "lg", photoUrl }: ProfileAvatarPro
       aria-hidden="true"
       className={cn(
         "flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-surface-soft font-semibold text-ink-soft",
-        size === "sm" ? "h-10 w-10 text-[12.5px]" : "h-32 w-32 text-[15px]",
+        size === "sm" ? "h-10 w-10 text-[12.5px]" : "size-24 text-2xl",
       )}
     >
       {photoUrl ? (

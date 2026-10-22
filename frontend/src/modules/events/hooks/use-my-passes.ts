@@ -1,43 +1,25 @@
-'use client';
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { registrationsService } from '../services/registrations.service';
-import type { Registration } from '../types/registration.types';
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { isApiError } from "@/shared/services/api-client";
+import { registrationsService } from "../services/registrations.service";
+
 export function useMyPasses() {
-  const [registrations, setRegistrations] = useState<Registration[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [reload, setReload] = useState(0);
-  useEffect(() => {
-    const controller = new AbortController();
-    registrationsService
-      .getMine(controller.signal)
-      .then((items) => {
-        if (!controller.signal.aborted) setRegistrations(items);
-      })
-      .catch((cause: unknown) => {
-        if (controller.signal.aborted) return;
-        setError(
-          axios.isAxiosError(cause) && cause.response?.status === 401
-            ? 'La sesión ha expirado. Inicia sesión nuevamente.'
-            : cause instanceof Error && !axios.isAxiosError(cause)
-              ? cause.message
-              : 'No se pudieron cargar tus inscripciones. Inténtalo nuevamente.',
-        );
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setIsLoading(false);
-      });
-    return () => controller.abort();
-  }, [reload]);
+  const query = useQuery({
+    queryKey: ["events", "my-passes"],
+    queryFn: ({ signal }) => registrationsService.getMine(signal),
+  });
+  const cause = query.error;
   return {
-    registrations,
-    isLoading,
-    error,
-    retry: () => {
-      setError(null);
-      setIsLoading(true);
-      setReload((value) => value + 1);
-    },
+    registrations: query.data ?? [],
+    isLoading: query.isFetching,
+    error: query.isError && !query.isFetching
+      ? isApiError(cause) && cause.response?.status === 401
+        ? "La sesión ha expirado. Inicia sesión nuevamente."
+        : cause instanceof Error && !isApiError(cause)
+          ? cause.message
+          : "No se pudieron cargar tus inscripciones. Inténtalo nuevamente."
+      : null,
+    retry: () => { void query.refetch(); },
   };
 }

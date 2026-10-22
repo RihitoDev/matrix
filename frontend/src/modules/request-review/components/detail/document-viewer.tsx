@@ -58,7 +58,7 @@ export function DocumentViewer({ url, mimeType, fileName, caption }: DocumentVie
           <img
             src={url}
             alt="Documento de respaldo"
-            className="max-h-[32rem] max-w-full origin-center bg-surface shadow-lg transition-transform"
+            className="max-h-[32rem] max-w-full origin-center bg-surface shadow-sm transition-transform"
             style={{ transform: `scale(${scale}) rotate(${rotation}deg)` }}
           />
         )}

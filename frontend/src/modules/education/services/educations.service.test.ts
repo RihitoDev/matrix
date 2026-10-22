@@ -3,7 +3,8 @@ import { apiClient } from "@/shared/services/api-client";
 import type { EducationItem } from "../types/education-item.types";
 import { educationsService } from "./educations.service";
 
-vi.mock("@/shared/services/api-client", () => ({
+vi.mock("@/shared/services/api-client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/shared/services/api-client")>()),
   apiClient: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
 }));
 

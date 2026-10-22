@@ -1,9 +1,9 @@
 import { apiClient } from "@/shared/services/api-client";
 import { CV_ENDPOINT, CV_UPLOAD_FIELD_NAME } from "../constants/cv-api.constants";
-import type { ApiResponse } from "@/modules/profile/types/api-response.types";
+import type { ApiResponse } from "@/modules/profile";
 import type { CvResponse } from "../types/cv-response.types";
 import type { SavedCv } from "../types/saved-cv.types";
-import { getAuthHeaders } from "@/modules/profile/utils/get-auth-headers";
+import { getAuthHeaders } from "@/modules/profile";
 import { toSavedCv } from "../utils/to-saved-cv";
 
 export const documentsService = {

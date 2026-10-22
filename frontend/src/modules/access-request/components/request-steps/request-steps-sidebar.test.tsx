@@ -37,15 +37,15 @@ describe("RequestStepsSidebar", () => {
     expect(items[3].querySelector('span[aria-hidden="true"]')).toBeNull();
   });
 
-  it("resalta el primer paso por defecto con el círculo relleno de rojo y sin franja en la fila", () => {
+  it("resalta el primer paso por defecto con el indicador claro sobre azul y sin franja en la fila", () => {
     render(<RequestStepsSidebar />);
 
     const items = screen.getAllByRole("listitem");
     expect(items[0]).toHaveAttribute("aria-current", "step");
     expect(items[0]).not.toHaveClass("bg-interaction");
-    expect(screen.getByText("1")).toHaveClass("bg-accent", "text-surface");
+    expect(screen.getByText("1")).toHaveClass("bg-surface", "text-accent");
     items.slice(1).forEach((item) => expect(item).not.toHaveAttribute("aria-current"));
-    expect(screen.getByText("2")).not.toHaveClass("bg-accent");
+    expect(screen.getByText("2")).not.toHaveClass("bg-surface");
     expect(screen.getByText("2")).toHaveClass("border-surface/35");
   });
 
@@ -55,11 +55,11 @@ describe("RequestStepsSidebar", () => {
     const items = screen.getAllByRole("listitem");
     expect(items[2]).toHaveAttribute("aria-current", "step");
     expect(items[0]).not.toHaveAttribute("aria-current");
-    expect(screen.getByText("3")).toHaveClass("bg-accent");
+    expect(screen.getByText("3")).toHaveClass("bg-surface");
     // Los pasos anteriores ya no muestran su número: aparecen como completados
     expect(screen.queryByText("1")).toBeNull();
     expect(items[0].querySelector("svg")).not.toBeNull();
-    expect(screen.getByText("4")).not.toHaveClass("bg-accent");
+    expect(screen.getByText("4")).not.toHaveClass("bg-surface");
   });
 
   it("marca el paso 1 como completado con un check accesible cuando el paso actual es el 2", () => {
@@ -71,7 +71,7 @@ describe("RequestStepsSidebar", () => {
     expect(items[0]).toHaveTextContent("Paso completado");
     expect(screen.queryByText("1")).toBeNull();
     expect(items[1]).toHaveAttribute("aria-current", "step");
-    expect(screen.getByText("2")).toHaveClass("bg-accent");
+    expect(screen.getByText("2")).toHaveClass("bg-surface");
     expect(screen.getByText("3")).toHaveClass("border-surface/35");
     expect(screen.getByText("4")).toHaveClass("border-surface/35");
     expect(items[2]).not.toHaveTextContent("Paso completado");
@@ -86,7 +86,7 @@ describe("RequestStepsSidebar", () => {
     expect(items[1]).toHaveTextContent("Paso completado");
     expect(items[2]).toHaveAttribute("aria-current", "step");
     expect(items[2]).not.toHaveTextContent("Paso completado");
-    expect(screen.getByText("3")).toHaveClass("bg-accent");
+    expect(screen.getByText("3")).toHaveClass("bg-surface");
     expect(items[3]).not.toHaveAttribute("aria-current");
     expect(items[3]).not.toHaveTextContent("Paso completado");
     expect(screen.getByText("4")).toHaveClass("border-surface/35");
@@ -98,7 +98,7 @@ describe("RequestStepsSidebar", () => {
     expect(screen.queryByText("Paso completado")).toBeNull();
   });
 
-  it("muestra en el pie el escudo dorado y el aviso de privacidad", () => {
+  it("muestra en el pie el escudo institucional y el aviso de privacidad", () => {
     const { container } = render(<RequestStepsSidebar />);
 
     expect(
@@ -106,14 +106,14 @@ describe("RequestStepsSidebar", () => {
         "Tus documentos se guardan cifrados y solo los revisa el personal autorizado de la carrera."
       )
     ).toBeInTheDocument();
-    expect(container.querySelector("svg.text-gold")).not.toBeNull();
+    expect(container.querySelector("svg.lucide-shield-check")).not.toBeNull();
   });
 
-  it("ocupa todo el ancho por debajo de lg y 380 px de alto completo desde lg", () => {
+  it("ocupa todo el ancho por debajo de lg y 320 px de alto completo desde lg", () => {
     const { container } = render(<RequestStepsSidebar />);
 
     const aside = container.querySelector("aside");
-    expect(aside).toHaveClass("w-full", "lg:w-95", "2xl:w-110", "lg:min-h-screen");
+    expect(aside).toHaveClass("w-full", "lg:w-80", "2xl:w-80", "lg:min-h-screen");
     expect(aside?.className).not.toMatch(/\bmd:/);
   });
 

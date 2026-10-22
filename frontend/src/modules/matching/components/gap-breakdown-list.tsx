@@ -30,7 +30,7 @@ export function GapBreakdownList({ axes, gaps }: GapBreakdownListProps) {
               <div className="min-w-0">
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                   <div
-                    className={cn("h-full rounded-full", isGap ? "bg-amber-500" : "bg-emerald-500")}
+                    className={cn("h-full rounded-full", isGap ? "bg-ink-soft/50" : "bg-ink")}
                     style={{ width: `${Math.min(100, (Math.abs(delta) / AXIS_MAX_SCORE) * 100 * 2.5)}%` }}
                   />
                 </div>
@@ -38,7 +38,7 @@ export function GapBreakdownList({ axes, gaps }: GapBreakdownListProps) {
               <span
                 className={cn(
                   "text-right font-medium tabular-nums",
-                  isGap ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"
+                  isGap ? "text-ink-soft" : "font-semibold text-ink"
                 )}
               >
                 {formatDelta(delta)}

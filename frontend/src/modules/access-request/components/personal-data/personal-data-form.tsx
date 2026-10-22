@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
+import { FormFieldset } from "@/shared/components/layout/form-fieldset";
 import { Mail } from "lucide-react";
 import { useAccessRequestForm } from "../../contexts/access-request-context";
 import { SIS_CODE_LENGTH } from "../../constants/personal-data-rules.constants";
@@ -53,7 +54,8 @@ export function PersonalDataForm() {
     <div className="flex w-full flex-col gap-5">
       <PersonalDataIntro />
 
-      <form noValidate onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 md:grid-cols-2 2xl:gap-x-8 2xl:gap-y-6">
+      <form noValidate onSubmit={handleSubmit} className="space-y-6 rounded-lg border border-border bg-surface p-6">
+        <FormFieldset title="Identidad"><div className="grid gap-5 md:grid-cols-2">
         <PersonalDataField
           id="firstName"
           {...bind("firstName")}
@@ -85,6 +87,8 @@ export function PersonalDataForm() {
           placeholder="Ej. 201904512"
         />
 
+        </div></FormFieldset>
+        <FormFieldset title="Contacto"><div className="grid gap-5 md:grid-cols-2">
         <PersonalDataField
           id="email"
           {...bind("email")}
@@ -112,6 +116,8 @@ export function PersonalDataForm() {
           placeholder="Ej. 70712345"
         />
 
+        </div></FormFieldset>
+        <FormFieldset title="Datos complementarios"><div className="grid gap-5 md:grid-cols-2">
         <PersonalDataField
           id="birthDate"
           {...bind("birthDate")}
@@ -133,6 +139,7 @@ export function PersonalDataForm() {
 
         <CareerSelect />
 
+        </div></FormFieldset>
         <PersonalDataFormActions />
       </form>
     </div>

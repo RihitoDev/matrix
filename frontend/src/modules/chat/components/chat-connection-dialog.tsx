@@ -21,18 +21,18 @@ export function ChatConnectionDialog({
         aria-modal="true"
         aria-labelledby="chat-error-title"
         aria-describedby="chat-error-description"
-        className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl"
+        className="w-full max-w-sm rounded-xl bg-white p-6 shadow-sm"
       >
         <h2
           id="chat-error-title"
-          className="text-lg font-semibold text-[#0B1F2E]"
+          className="text-lg font-semibold text-ink"
         >
           Error de conexión
         </h2>
 
         <p
           id="chat-error-description"
-          className="mt-3 text-sm text-slate-600"
+          className="mt-3 text-sm text-text-secondary"
         >
           No pudimos cargar tus conversaciones.
           Comprueba tu conexión con el servidor
@@ -43,7 +43,7 @@ export function ChatConnectionDialog({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm"
+            className="rounded-lg border border-border-strong px-4 py-2 text-sm"
           >
             Cerrar
           </button>
@@ -51,7 +51,7 @@ export function ChatConnectionDialog({
           <button
             type="button"
             onClick={onRetry}
-            className="rounded-lg bg-[#0B1F2E] px-4 py-2 text-sm text-white"
+            className="rounded-lg bg-ink px-4 py-2 text-sm text-white"
           >
             Reintentar
           </button>

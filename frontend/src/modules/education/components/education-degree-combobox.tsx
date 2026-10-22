@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { getFieldErrorProps } from '@/modules/profile/utils/get-field-error-props';
+import { getFieldErrorProps } from '@/modules/profile';
 import { EDUCATION_DEGREE_TEXTS } from '../constants/education-degree-ui.constants';
 import type { EducationDegreeComboboxProps } from '../types/education-degree-combobox-props.types';
 import { normalizeEducationText } from '../utils/normalize-education-text';

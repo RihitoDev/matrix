@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/shared/components/layout/brand-logo";
 import { Check, ShieldCheck } from "lucide-react";
 import type { RequestStepsSidebarProps } from "../../types/request-steps-sidebar-props.types";
 
@@ -14,8 +15,9 @@ const STEPS = [
 
 export function RequestStepsSidebar({ currentStep = 1 }: RequestStepsSidebarProps) {
   return (
-    <aside className="flex w-full flex-col justify-between gap-10 bg-ink px-9 py-10 text-surface lg:min-h-screen lg:w-95 2xl:w-110">
+    <aside className="flex w-full flex-col justify-between gap-10 bg-sidebar px-8 py-8 text-surface lg:min-h-screen lg:w-80 2xl:w-80">
       <div>
+        <div className="mb-8 rounded-md bg-surface px-4 py-5"><BrandLogo className="w-full" priority /></div>
         <h2 className="text-[22px] font-bold">Solicitud de acceso</h2>
         <p className="mt-2 mb-[22px] max-w-75 text-[13px] text-surface/65">
           Cuatro pasos para unirte a la comunidad verificada de la carrera.
@@ -34,7 +36,7 @@ export function RequestStepsSidebar({ currentStep = 1 }: RequestStepsSidebarProp
                     <span
                       className={`flex size-7.5 shrink-0 items-center justify-center rounded-full border text-sm font-semibold ${
                         isActive
-                          ? "border-accent bg-accent text-surface"
+                          ? "border-surface bg-surface text-accent"
                           : isCompleted
                             ? "border-surface bg-surface text-ink"
                             : "border-surface/35 text-surface/70"
@@ -74,7 +76,7 @@ export function RequestStepsSidebar({ currentStep = 1 }: RequestStepsSidebarProp
       </div>
 
       <div className="flex items-start gap-3 border-t border-surface/12 pt-[18px]">
-        <ShieldCheck aria-hidden="true" className="size-5 shrink-0 text-gold" />
+        <ShieldCheck aria-hidden="true" className="size-5 shrink-0 text-surface/85" />
         <p className="text-[13px] text-surface/72">
           Tus documentos se guardan cifrados y solo los revisa el personal autorizado de la
           carrera.

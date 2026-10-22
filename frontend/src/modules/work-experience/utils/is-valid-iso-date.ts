@@ -1,4 +1,4 @@
-import { ISO_DATE_PATTERN } from "@/modules/profile/constants/validation.constants";
+import { ISO_DATE_PATTERN } from "@/modules/profile";
 
 export function isValidIsoDate(value: string): boolean {
   if (!ISO_DATE_PATTERN.test(value)) {

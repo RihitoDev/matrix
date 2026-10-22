@@ -18,7 +18,7 @@ describe("AreaCertificationList", () => {
     cleanup();
   });
 
-  it("renders every certification as a gold card with issuer and year", () => {
+  it("renders every certification as a neutral card with issuer and year", () => {
     render(<AreaCertificationList certifications={certifications} />);
 
     const items = within(screen.getByRole("list", { name: "Certificaciones" })).getAllByRole("listitem");
@@ -28,7 +28,7 @@ describe("AreaCertificationList", () => {
     expect(within(items[0]).getByText("Amazon Web Services · 2023")).toBeDefined();
     expect(within(items[1]).getByText("Scrum.org · 2021")).toBeDefined();
     items.forEach((item) => {
-      expect(item.className).toContain("border-l-gold");
+      expect(item.className).toContain("border-border");
     });
   });
 

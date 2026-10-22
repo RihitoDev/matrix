@@ -1,7 +1,7 @@
 export function isRouteActive(
   pathname: string,
   href: string,
-  activePathPatterns: RegExp[] = [],
+  activePathPatterns: readonly RegExp[] = [],
 ): boolean {
   return (
     pathname === href ||

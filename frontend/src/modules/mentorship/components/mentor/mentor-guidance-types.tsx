@@ -24,15 +24,15 @@ export function MentorGuidanceTypes({
 
   if (orientationTypes.length === 0) {
     return (
-      <Card className="gap-0 overflow-visible rounded-xl border border-umssy-border bg-white py-0 text-base ring-0">
+      <Card className="gap-0 overflow-visible rounded-xl border border-border bg-white py-0 text-base ring-0">
         <CardHeader className="px-6 pt-6">
           <CardTitle
             role="heading"
             aria-level={2}
-            className="flex items-center gap-2 text-xl font-bold text-umssy-ink"
+            className="flex items-center gap-2 text-xl font-bold text-ink"
           >
             <Compass
-              className="size-5 shrink-0 text-umssy-red"
+              className="size-5 shrink-0 text-accent"
               aria-hidden="true"
             />
             Tipos de orientación
@@ -40,7 +40,7 @@ export function MentorGuidanceTypes({
         </CardHeader>
 
         <CardContent className="px-6 pb-6 pt-4">
-          <p className="text-umssy-secondary">
+          <p className="text-text-secondary">
             Este mentor todavía no registró tipos de orientación.
           </p>
         </CardContent>
@@ -53,15 +53,15 @@ export function MentorGuidanceTypes({
     orientationTypes[0];
 
   return (
-    <Card className="gap-0 overflow-visible rounded-xl border border-umssy-border bg-white py-0 text-base ring-0">
+    <Card className="gap-0 overflow-visible rounded-xl border border-border bg-white py-0 text-base ring-0">
       <CardHeader className="px-6 pt-6">
         <CardTitle
           role="heading"
           aria-level={2}
-          className="flex items-center gap-2 text-xl font-bold text-umssy-ink"
+          className="flex items-center gap-2 text-xl font-bold text-ink"
         >
           <Compass
-            className="size-5 shrink-0 text-umssy-red"
+            className="size-5 shrink-0 text-accent"
             aria-hidden="true"
           />
           Tipos de orientación
@@ -89,7 +89,7 @@ export function MentorGuidanceTypes({
             <ToggleGroupItem
               key={guidance.id}
               value={String(guidance.id)}
-              className="h-auto min-w-0 max-w-full cursor-pointer whitespace-normal [overflow-wrap:anywhere] rounded-lg border-umssy-border bg-white px-4 py-2 text-sm font-semibold text-umssy-secondary shadow-sm hover:border-umssy-red hover:bg-umssy-background focus-visible:border-umssy-red focus-visible:ring-umssy-red/30 aria-pressed:border-umssy-red aria-pressed:bg-umssy-red-soft aria-pressed:text-umssy-ink"
+              className="h-auto min-w-0 max-w-full cursor-pointer whitespace-normal [overflow-wrap:anywhere] rounded-lg border-border bg-white px-4 py-2 text-sm font-semibold text-text-secondary shadow-sm hover:border-accent hover:bg-surface-soft focus-visible:border-accent focus-visible:ring-accent/30 aria-pressed:border-accent aria-pressed:bg-interaction aria-pressed:text-ink"
             >
               {guidance.name}
             </ToggleGroupItem>
@@ -97,8 +97,8 @@ export function MentorGuidanceTypes({
         </ToggleGroup>
 
         {selectedGuidance.description && (
-          <div className="mt-5 rounded-lg bg-umssy-background p-4">
-            <p className="whitespace-pre-line [overflow-wrap:anywhere] text-sm leading-6 text-umssy-ink">
+          <div className="mt-5 rounded-lg bg-surface-soft p-4">
+            <p className="whitespace-pre-line [overflow-wrap:anywhere] text-sm leading-6 text-ink">
               {selectedGuidance.description}
             </p>
           </div>

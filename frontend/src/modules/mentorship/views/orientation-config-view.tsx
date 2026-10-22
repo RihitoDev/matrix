@@ -1,8 +1,7 @@
 "use client";
 
-import axios from "axios";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AlertCircle, CheckCircle2, LoaderCircle } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import {
@@ -24,81 +23,23 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Breadcrumbs } from "@/shared/components/layout";
-import { ORIENTATION_CONFIG_BREADCRUMB_ITEMS } from "../constants/orientation-config-breadcrumb.constants";
-import {
-  getMentorOrientationTypes,
-  getOrientationTypes,
-  updateMentorOrientationTypes,
-} from "../services/orientation-type.service";
-import type { OrientationTypeResponse } from "../types/orientation-type-response.types";
+import { useOrientationConfig } from "../hooks/use-orientation-config";
 
 export function OrientationConfigView() {
-  const [orientationTypes, setOrientationTypes] = useState<
-    OrientationTypeResponse[]
-  >([]);
-  const [savedIds, setSavedIds] = useState<string[]>([]);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [hasLoadError, setHasLoadError] = useState(false);
-  const [isMentorActive, setIsMentorActive] = useState(true);
-  const [loadAttempt, setLoadAttempt] = useState(0);
+  const { orientationTypes, savedIds, isLoading, isSaving, hasLoadError, isMentorActive, retry, save } = useOrientationConfig();
+  const [draftIds, setSelectedIds] = useState<string[] | null>(null);
+  const selectedIds = draftIds ?? savedIds;
   const [showToast, setShowToast] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    Promise.allSettled([
-      getOrientationTypes(controller.signal),
-      getMentorOrientationTypes(controller.signal),
-    ])
-      .then(([catalogResult, selectedOrientationsResult]) => {
-        if (controller.signal.aborted) return;
-
-        if (catalogResult.status === "rejected") {
-          setHasLoadError(true);
-          return;
-        }
-
-        if (selectedOrientationsResult.status === "rejected") {
-          const error: unknown = selectedOrientationsResult.reason;
-
-          if (axios.isAxiosError(error) && error.response?.status === 404) {
-            setIsMentorActive(false);
-            return;
-          }
-
-          setHasLoadError(true);
-          return;
-        }
-
-        const ids = selectedOrientationsResult.value.map(
-          (orientation) => orientation.id,
-        );
-        setOrientationTypes(catalogResult.value);
-        setSavedIds(ids);
-        setSelectedIds(ids);
-        setIsMentorActive(true);
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => controller.abort();
-  }, [loadAttempt]);
 
   const handleCheckboxChange = (id: string) => {
     setErrorMessage(null);
     setShowToast(false);
     setSelectedIds((previous) =>
-      previous.includes(id)
-        ? previous.filter((item) => item !== id)
-        : [...previous, id],
+      (previous ?? savedIds).includes(id)
+        ? (previous ?? savedIds).filter((item) => item !== id)
+        : [...(previous ?? savedIds), id],
     );
   };
 
@@ -110,12 +51,10 @@ export function OrientationConfigView() {
       return;
     }
 
-    setIsSaving(true);
     setShowToast(false);
     const idsToSave = [...selectedIds];
     try {
-      await updateMentorOrientationTypes(idsToSave);
-      setSavedIds(idsToSave);
+      await save(idsToSave);
       setErrorMessage(null);
       setShowToast(true);
     } catch {
@@ -123,7 +62,6 @@ export function OrientationConfigView() {
         "No se pudieron guardar los cambios. Intente nuevamente.",
       );
     } finally {
-      setIsSaving(false);
       setIsConfirmModalOpen(false);
     }
   };
@@ -136,16 +74,16 @@ export function OrientationConfigView() {
 
   if (isLoading) {
     return (
-      <main className="min-h-full bg-background px-4 py-8 sm:px-8">
+      <main className="mx-auto min-h-full max-w-7xl bg-background">
         <Card
-          className="mx-auto max-w-3xl gap-0 rounded-xl border border-gray-100 bg-white py-0 shadow-sm ring-0"
+          className="mx-auto max-w-3xl gap-0 rounded-xl border border-border bg-white py-0 shadow-none ring-0"
           aria-busy="true"
         >
           <CardHeader className="gap-0 p-6 sm:p-8">
             <CardTitle
               role="heading"
               aria-level={1}
-              className="text-2xl font-bold tracking-tight text-ink"
+              className="font-tight text-3xl font-bold tracking-tight text-ink"
             >
               Editar tipos de orientación
             </CardTitle>
@@ -160,13 +98,13 @@ export function OrientationConfigView() {
 
   if (!isMentorActive) {
     return (
-      <main className="min-h-full bg-background px-4 py-8 sm:px-8">
-        <Card className="mx-auto max-w-3xl gap-0 rounded-xl border border-gray-100 bg-white py-0 shadow-sm ring-0">
+      <main className="mx-auto min-h-full max-w-7xl bg-background">
+        <Card className="mx-auto max-w-3xl gap-0 rounded-xl border border-border bg-white py-0 shadow-none ring-0">
           <CardHeader className="gap-0 p-6 pb-0 sm:p-8 sm:pb-0">
             <CardTitle
               role="heading"
               aria-level={1}
-              className="text-2xl font-bold tracking-tight text-ink"
+              className="font-tight text-3xl font-bold tracking-tight text-ink"
             >
               Editar tipos de orientación
             </CardTitle>
@@ -180,7 +118,7 @@ export function OrientationConfigView() {
               href="/mentorship"
               className={buttonVariants({
                 className:
-                  "h-10 rounded-lg bg-red-600 px-6 text-sm font-semibold text-white hover:bg-red-700 active:translate-y-0",
+                  "h-10 rounded-lg bg-accent px-6 text-sm font-semibold text-white hover:bg-brand-hover active:translate-y-0",
               })}
             >
               Activar participación como mentor
@@ -194,30 +132,28 @@ export function OrientationConfigView() {
   return (
     <div className="min-h-full w-full bg-background">
       <div className="flex w-full flex-col">
-        <div className="mx-auto flex w-full max-w-[1180px] flex-col gap-6 px-4 py-8 sm:px-8">
-          <Breadcrumbs items={ORIENTATION_CONFIG_BREADCRUMB_ITEMS} />
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
 
           <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold tracking-tight text-ink">
+            <h1 className="font-tight text-3xl font-bold tracking-tight text-ink">
               Editar tipos de orientación
             </h1>
-            <p className="pl-2 text-sm text-text-secondary">
+            <p className="text-sm text-text-secondary">
               Selecciona los tipos de orientación que deseas brindar.
             </p>
           </div>
 
-          <Card className="w-full max-w-3xl gap-6 rounded-xl border border-gray-100 bg-white py-0 shadow-sm ring-0">
+          <Card className="w-full max-w-none gap-6 rounded-xl border border-border bg-white py-0 shadow-none ring-0">
             <CardContent className="flex flex-col gap-6 px-4 pt-4 sm:px-8 sm:pt-8">
               {hasLoadError && (
-                <Alert className="flex items-center justify-between gap-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                <Alert className="flex items-center justify-between gap-4 rounded-lg border border-danger/20 bg-interaction p-4 text-sm text-danger">
                   <span>No se pudieron cargar los tipos de orientación.</span>
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => {
-                      setIsLoading(true);
-                      setHasLoadError(false);
-                      setLoadAttempt((attempt) => attempt + 1);
+                      setSelectedIds(null);
+                      retry();
                     }}
                   >
                     Reintentar
@@ -226,8 +162,8 @@ export function OrientationConfigView() {
               )}
 
               {!hasLoadError && errorMessage && (
-                <Alert className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                  <AlertCircle size={20} className="shrink-0 text-red-600" />
+                <Alert className="flex items-center gap-3 rounded-lg border border-danger/20 bg-interaction p-4 text-sm text-danger">
+                  <AlertCircle size={20} className="shrink-0 text-accent" />
                   <span>{errorMessage}</span>
                 </Alert>
               )}
@@ -243,10 +179,10 @@ export function OrientationConfigView() {
                         key={option.id}
                         className={`group flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-4 transition-colors ${
                           !isSelected
-                            ? "border-transparent bg-gray-50/50 hover:bg-gray-50"
+                            ? "border-transparent bg-surface-soft/50 hover:bg-gray-50"
                             : isSaved
-                              ? "border-green-200 bg-green-50/50"
-                              : "border-red-200 bg-red-50/50"
+                              ? "border-border bg-surface-soft/50"
+                              : "border-accent bg-interaction/50"
                         }`}
                       >
                         <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -272,12 +208,12 @@ export function OrientationConfigView() {
                               handleCheckboxChange(option.id)
                             }
                             aria-labelledby={`orientation-label-${option.id}`}
-                            className={`size-5 border-0 bg-gray-200 text-transparent data-checked:text-white [&_[data-slot=checkbox-indicator]>svg]:size-4 ${
+                            className={`size-5 border-0 bg-border text-transparent data-checked:text-white [&_[data-slot=checkbox-indicator]>svg]:size-4 ${
                               !isSelected
                                 ? ""
                                 : isSaved
-                                  ? "data-checked:bg-green-600"
-                                  : "data-checked:bg-red-600"
+                                  ? "data-checked:bg-ink-soft"
+                                  : "data-checked:bg-accent"
                             }`}
                           />
                         </div>
@@ -287,12 +223,12 @@ export function OrientationConfigView() {
                 </div>
               )}
             </CardContent>
-            <CardFooter className="mx-4 flex items-center justify-between gap-4 border-t border-gray-100 bg-transparent px-0 pb-4 pt-4 sm:mx-8 sm:pb-8">
+            <CardFooter className="mx-4 flex items-center justify-between gap-4 border-t border-border bg-transparent px-0 pb-4 pt-4 sm:mx-8 sm:pb-8">
               <Link
                 href="/mentors/participation"
                 className={buttonVariants({
                   className:
-                    "h-10 rounded-lg bg-gray-100 px-6 text-sm font-semibold text-ink hover:bg-gray-200 active:translate-y-0",
+                    "h-10 rounded-lg bg-surface-soft px-6 text-sm font-semibold text-ink hover:bg-interaction active:translate-y-0",
                 })}
               >
                 Volver
@@ -301,7 +237,7 @@ export function OrientationConfigView() {
                 type="button"
                 onClick={handleOpenConfirmModal}
                 disabled={selectedIds.length === 0 || isSaving || hasLoadError}
-                className="h-10 rounded-lg bg-red-600 px-6 text-sm font-semibold text-white shadow-sm hover:bg-red-700 active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
+                className="h-10 rounded-lg bg-accent px-6 text-sm font-semibold text-white shadow-none hover:bg-brand-hover active:translate-y-0 disabled:pointer-events-auto disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSaving ? "Guardando..." : "Guardar cambios"}
               </Button>
@@ -316,7 +252,7 @@ export function OrientationConfigView() {
           if (!isSaving) setIsConfirmModalOpen(open);
         }}
       >
-        <AlertDialogContent className="max-w-md gap-0 rounded-2xl border border-border bg-surface p-8 text-ink shadow-lg ring-0 data-[size=default]:max-w-md data-[size=default]:sm:max-w-md">
+        <AlertDialogContent className="max-w-md gap-0 rounded-2xl border border-border bg-surface p-8 text-ink shadow-none ring-0 data-[size=default]:max-w-md data-[size=default]:sm:max-w-md">
           <AlertDialogHeader className="place-items-start text-left">
             <AlertDialogTitle className="font-tight text-[22px] font-bold text-ink">
               ¿Guardar cambios?
@@ -337,7 +273,7 @@ export function OrientationConfigView() {
               type="button"
               onClick={handleSave}
               disabled={isSaving}
-              className="h-12 bg-accent px-6 text-[14px] font-semibold text-white hover:bg-danger"
+              className="h-12 bg-accent px-6 text-[14px] font-semibold text-white hover:bg-brand-hover"
             >
               {isSaving ? (
                 <LoaderCircle aria-hidden="true" className="animate-spin" />
@@ -350,10 +286,10 @@ export function OrientationConfigView() {
 
       {showToast && (
         <Alert
-          className="fixed right-4 bottom-4 left-4 z-50 flex w-auto items-center gap-3 rounded-xl border-0 bg-gray-900 px-6 py-3 text-white shadow-xl sm:right-8 sm:bottom-8 sm:left-auto"
+          className="fixed right-4 bottom-4 left-4 z-50 flex w-auto items-center gap-3 rounded-xl border-0 bg-ink px-6 py-3 text-white shadow-none sm:right-8 sm:bottom-8 sm:left-auto"
           role="status"
         >
-          <CheckCircle2 size={20} className="text-amber-400" />
+          <CheckCircle2 size={20} className="text-ink-soft" />
           <span className="text-sm font-medium">
             Tipos de orientación actualizados correctamente
           </span>

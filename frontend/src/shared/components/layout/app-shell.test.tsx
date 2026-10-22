@@ -24,7 +24,7 @@ describe("AppShell", () => {
       </AppShell>,
     );
 
-    expect(screen.getByText("UMSSY")).toBeDefined();
+    expect(screen.getByRole("img", { name: "UMSSY, Acreditación y comunidad" })).toBeDefined();
     expect(screen.getByText("Contenido de la página")).toBeDefined();
     expect(document.querySelector('[data-slot="sidebar-footer"]')).toBeNull();
     expect(screen.queryByText("Alejandro Vargas")).toBeNull();

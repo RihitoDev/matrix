@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { Certification } from "./certification.types";
-import type { UploadedDocumentInfo } from "@/modules/profile/types/uploaded-document-info.types";
+import type { UploadedDocumentInfo } from "@/modules/profile";
 
 export interface CertificationDocumentsPanelProps {
   certifications?: Certification[];

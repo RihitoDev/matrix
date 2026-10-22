@@ -21,7 +21,7 @@ export function TechnicalAreaCard({
       className={[
         "flex w-full flex-col items-start gap-3 rounded-lg border p-4 text-left transition-colors",
         isSelected
-          ? "border-red-600 bg-red-50"
+          ? "border-accent bg-interaction"
           : "border-border bg-surface hover:border-slate-300",
       ].join(" ")}
       aria-pressed={isSelected}
@@ -30,7 +30,7 @@ export function TechnicalAreaCard({
         <div
           className={[
             "flex h-10 w-10 items-center justify-center rounded-md",
-            isSelected ? "bg-red-600 text-white" : "bg-white text-slate-600",
+            isSelected ? "bg-accent text-white" : "bg-white text-slate-600",
           ].join(" ")}
         >
           <Server className="h-5 w-5" aria-hidden />
@@ -40,7 +40,7 @@ export function TechnicalAreaCard({
           className={[
             "flex h-5 w-5 items-center justify-center rounded border",
             isSelected
-              ? "border-red-600 bg-red-600 text-white"
+              ? "border-accent bg-accent text-white"
               : "border-slate-300 bg-white",
           ].join(" ")}
         >

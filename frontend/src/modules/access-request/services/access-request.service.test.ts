@@ -3,7 +3,8 @@ import { apiClient } from "@/shared/services/api-client";
 import type { AccessRequestPayload } from "../types/access-request.types";
 import { accessRequestService } from "./access-request.service";
 
-vi.mock("@/shared/services/api-client", () => ({ apiClient: { request: vi.fn() } }));
+vi.mock("@/shared/services/api-client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { request: vi.fn() } }));
 
 const request = vi.mocked(apiClient.request);
 

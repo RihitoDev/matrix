@@ -4,7 +4,8 @@ import type { WorkExperienceItem } from "../types/work-experience-item.types";
 import type { WorkExperiencePayload } from "../types/work-experience-payload.types";
 import { workExperienceService } from "./work-experience.service";
 
-vi.mock("@/shared/services/api-client", () => ({
+vi.mock("@/shared/services/api-client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/shared/services/api-client")>()),
   apiClient: {
     get: vi.fn(),
     post: vi.fn(),

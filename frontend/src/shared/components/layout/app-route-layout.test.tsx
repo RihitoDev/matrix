@@ -40,7 +40,7 @@ describe("AppRouteLayout", () => {
   });
 
   it.each([
-    ["/events", "true"],
+    ["/events", "false"],
     ["/events/my-passes", "false"],
   ])("keeps the main navigation on workshop pages %s", (pathname, fullBleed) => {
     route.pathname = pathname;

@@ -4,10 +4,10 @@ import {
   MY_SKILLS_ENDPOINT,
   SKILLS_CATALOG_ENDPOINT,
 } from "../constants/skills.constants";
-import type { ApiResponse } from "@/modules/profile/types/api-response.types";
+import type { ApiResponse } from "@/modules/profile";
 import type { SkillItem } from "../types/skill-item.types";
 import type { SkillResponse } from "../types/skill-response.types";
-import { getAuthHeaders } from "@/modules/profile/utils/get-auth-headers";
+import { getAuthHeaders } from "@/modules/profile";
 import { toSkillItem } from "../utils/to-skill-item";
 
 export const skillsService = {

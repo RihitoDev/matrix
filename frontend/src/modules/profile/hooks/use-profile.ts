@@ -1,42 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import type { SetStateAction } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PROFILE_FEEDBACK_MESSAGES } from "../constants/profile-feedback.constants";
 import { profileService } from "../services/profile.service";
 import type { ProfileResponse } from "../types/profile-response.types";
 import { getProfileErrorMessage } from "../utils/get-profile-error-message";
 
 export function useProfile() {
-  const [profile, setProfile] = useState<ProfileResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let isActive = true;
-
-    async function loadProfile() {
-      try {
-        const loadedProfile = await profileService.getProfile();
-        if (isActive) {
-          setProfile(loadedProfile);
-        }
-      } catch (loadError) {
-        if (isActive) {
-          setError(getProfileErrorMessage(loadError, PROFILE_FEEDBACK_MESSAGES.loadError));
-        }
-      } finally {
-        if (isActive) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    void loadProfile();
-
-    return () => {
-      isActive = false;
-    };
-  }, []);
-
-  return { profile, isLoading, error, setProfile };
+  const queryClient = useQueryClient();
+  const queryKey = ["profile", "me"];
+  const query = useQuery({ queryKey, queryFn: () => profileService.getProfile() });
+  function setProfile(value: SetStateAction<ProfileResponse | null>) {
+    queryClient.setQueryData<ProfileResponse | null>(queryKey, (current) =>
+      typeof value === "function" ? value(current ?? null) : value,
+    );
+  }
+  return {
+    profile: query.data ?? null,
+    isLoading: query.isPending,
+    error: query.error ? getProfileErrorMessage(query.error, PROFILE_FEEDBACK_MESSAGES.loadError) : null,
+    setProfile,
+  };
 }

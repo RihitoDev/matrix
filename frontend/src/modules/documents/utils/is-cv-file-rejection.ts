@@ -1,5 +1,5 @@
 import { CV_FILE_REJECTION_STATUSES } from "../constants/cv-error-messages.constants";
-import { getHttpStatus } from "@/modules/profile/utils/get-http-status";
+import { getHttpStatus } from "@/modules/profile";
 
 export function isCvFileRejection(error: unknown): boolean {
   const status = getHttpStatus(error);

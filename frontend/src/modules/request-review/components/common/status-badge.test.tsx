@@ -7,15 +7,15 @@ describe("StatusBadge", () => {
   afterEach(() => cleanup());
 
   it.each([
-    ["pending", "Pendiente", ["border-gold", "bg-surface"]],
-    ["in_review", "En revisión", ["border-ink", "bg-surface-soft"]],
-    ["approved", "Aprobada", ["bg-ink", "text-surface"]],
-    ["rejected", "Rechazada", ["bg-interaction", "text-accent"]],
-  ] as Array<[ReviewStatus, string, string[]]>)("%s se muestra como pastilla con su texto, icono y clases de token", (status, label, classes) => {
+    ["pending", "Pendiente", ["text-text-secondary"]],
+    ["in_review", "En revisión", ["text-ink-soft"]],
+    ["approved", "Aprobada", ["text-ink"]],
+    ["rejected", "Rechazada", ["text-danger"]],
+  ] as Array<[ReviewStatus, string, string[]]>)("%s se muestra con su texto, icono y clases de token", (status, label, classes) => {
     const { container } = render(<StatusBadge status={status} />);
 
     const badge = screen.getByText(label);
-    expect(badge).toHaveClass("rounded-full", "font-semibold", ...classes);
+    expect(badge).toHaveClass("font-semibold", ...classes);
     expect(container.querySelector("svg[aria-hidden='true']")).not.toBeNull();
   });
 

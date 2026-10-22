@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { AppShell } from "@/shared/components/layout";
-import { SidebarToggleButton } from "@/shared/components/layout/sidebar-toggle-button";
 import { useBackofficeSession } from "../../hooks/use-backoffice-session";
 import { useBackofficeUser } from "../../hooks/use-backoffice-user";
 import { useStatusCounts } from "../../hooks/use-status-counts";
@@ -14,10 +13,6 @@ import type { BackofficeShellProps } from "../../types/backoffice-shell-props.ty
 
 const PENDING_ONLY: readonly ReviewStatus[] = ["pending"];
 const NONE: readonly ReviewStatus[] = [];
-
-// Ítem activo con fondo tenue y barra roja en el borde izquierdo (sin el fondo rojo por defecto)
-const ITEM_CLASS =
-  "overflow-visible data-active:bg-surface/10 data-active:before:-left-3 data-active:before:w-1 data-active:before:bg-accent";
 
 export function BackofficeShell({ children }: BackofficeShellProps) {
   const { state, logout } = useBackofficeSession();
@@ -44,15 +39,8 @@ export function BackofficeShell({ children }: BackofficeShellProps) {
     <AppShell
       brand={<BackofficeBrand />}
       sidebarFooter={<BackofficeUserFooter user={user} onLogout={logout} />}
-      sidebarItemClassName={ITEM_CLASS}
       sidebarItemBadges={badges}
-      sidebarWidth="15.5rem"
-      header={
-        <div className="px-4 py-2 md:hidden">
-          <SidebarToggleButton />
-        </div>
-      }
-      contentClassName=""
+      sidebarWidth="16.5rem"
     >
       {state === "allowed" ? children : <BackofficeSessionSkeleton />}
     </AppShell>

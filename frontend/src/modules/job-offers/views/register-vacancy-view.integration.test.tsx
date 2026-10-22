@@ -9,7 +9,8 @@ import { RegisterVacancyView } from "./register-vacancy-view";
 
 const push = vi.fn();
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
-vi.mock("@/shared/services/api-client", () => ({ apiClient: { get: vi.fn(), post: vi.fn() } }));
+vi.mock("@/shared/services/api-client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { get: vi.fn(), post: vi.fn() } }));
 vi.mock("@/components/ui/select", () => ({
   Select: ({ children, onValueChange }: { children: React.ReactNode; onValueChange?: (value: string) => void }) => (
     <div data-testid="select" onClick={() => onValueChange?.("Tiempo completo")}>{children}</div>

@@ -139,7 +139,7 @@ describe("RequestDetailView", () => {
     expect(getRequestDetail).toHaveBeenCalledTimes(2);
   });
 
-  it("muestra las migas, el nombre con la pastilla de estado y el subtítulo con la carrera y la fecha larga", async () => {
+  it("muestra el regreso, el nombre con el texto de estado y el subtítulo con la carrera y la fecha larga", async () => {
     getRequestDetail.mockResolvedValue({
       ok: true,
       data: { ...detail, history: { ...openedHistory, openedBy: "Carla Montaño", reviewedBy: "Carla Montaño" } },
@@ -148,9 +148,9 @@ describe("RequestDetailView", () => {
     renderWithQuery(<RequestDetailView id="id-1" />);
 
     expect(await screen.findByRole("heading", { name: "José Luis Pérez" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Solicitudes de acceso" })).toHaveAttribute("href", "/backoffice/solicitudes");
-    expect(screen.getByText("SOL-2026-0001")).toHaveClass("font-semibold");
-    expect(screen.getByText("En revisión")).toHaveClass("rounded-full");
+    expect(screen.queryByRole("link", { name: "Solicitudes de acceso" })).not.toBeInTheDocument();
+    expect(screen.getByText("SOL-2026-0001")).toHaveClass("font-medium");
+    expect(screen.getByText("En revisión")).toHaveClass("text-ink-soft");
     expect(screen.getByText(/Licenciatura en Ingeniería de Sistemas\. Solicitud enviada el 22 de septiembre de 2026, 09:14\./)).toBeInTheDocument();
     expect(screen.getByText("Historial de esta solicitud")).toBeInTheDocument();
     expect(screen.getByText("Abierta por Carla Montaño")).toBeInTheDocument();
@@ -169,14 +169,14 @@ describe("RequestDetailView", () => {
     expect(screen.getByText("Licenciatura en Ingeniería de Sistemas.")).toBeInTheDocument();
   });
 
-  it("estructura: raíz de ancho completo, relleno de 32 px, cuadrícula de dos columnas y contraste con tabla fija", async () => {
+  it("estructura: raíz de ancho completo, relleno heredado del contenedor, cuadrícula de dos columnas y contraste con tabla fija", async () => {
     getRequestDetail.mockResolvedValue({ ok: true, data: detail });
     getDocumentBlob.mockResolvedValue({ ok: true, data: new Blob(["%PDF"]) });
     const { container } = renderWithQuery(<RequestDetailView id="id-1" />);
     await screen.findByRole("heading", { name: "José Luis Pérez" });
 
     expect(container.firstElementChild).toHaveClass("w-full", "min-w-0");
-    expect(container.querySelector("section")).toHaveClass("p-8", "w-full", "min-w-0");
+    expect(container.querySelector("section")).toHaveClass("w-full", "min-w-0", "gap-6");
     expect(container.querySelector(".grid")?.className).toContain("lg:grid-cols-[minmax(0,1.37fr)_minmax(0,1fr)]");
     expect(container.querySelector("table")).toHaveClass("table-fixed");
     expect(screen.getByText("En el documento")).toBeInTheDocument();

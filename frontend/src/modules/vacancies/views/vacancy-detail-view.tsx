@@ -1,3 +1,4 @@
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { vacancies } from "../data/vacancies";
 import type { VacancyDetailViewProps } from "../types/vacancy-detail-view-props.types";
@@ -19,7 +20,7 @@ export function VacancyDetailView({ id }: VacancyDetailViewProps) {
             href="/vacancies"
             className="mt-6 inline-block rounded-md bg-ink px-4 py-2 text-surface"
           >
-            ← Volver a vacantes
+            <ArrowLeft className="mr-2 inline size-4" aria-hidden="true" />Volver a vacantes
           </Link>
         </div>
       </main>
@@ -27,16 +28,16 @@ export function VacancyDetailView({ id }: VacancyDetailViewProps) {
   }
 
   return (
-    <main className="min-h-full bg-surface-soft p-6">
-      <div className="mx-auto w-full max-w-3xl">
+    <main className="min-h-full bg-surface-soft">
+      <div className="mx-auto w-full max-w-5xl">
         <Link
           href="/vacancies"
           className="mb-6 inline-block text-sm font-medium"
         >
-          ← Volver a vacantes
+          <ArrowLeft className="mr-2 inline size-4" aria-hidden="true" />Volver a vacantes
         </Link>
 
-        <article className="rounded-lg bg-surface p-8 shadow-sm">
+        <article className="rounded-lg border border-border bg-surface p-8">
           <h1 className="text-3xl font-bold">
             {vacancy.cargo}
           </h1>
@@ -55,7 +56,7 @@ export function VacancyDetailView({ id }: VacancyDetailViewProps) {
             </p>
           </div>
 
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <div className="my-7 grid gap-5 border-y border-border py-6 sm:grid-cols-2">
             <div>
               <h3 className="font-semibold">
                 Salario

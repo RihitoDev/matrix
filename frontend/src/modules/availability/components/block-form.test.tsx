@@ -184,7 +184,7 @@ describe("BlockForm", () => {
       initialValues: { startAt: "2026-10-13T22:00:00.000Z", endAt: "2026-10-14T00:00:00.000Z" },
     })
 
-    expect(screen.getByText("Martes 13 de octubre")).toHaveClass("bg-danger/10")
+    expect(screen.getByText("Martes 13 de octubre")).toHaveClass("bg-interaction")
     const card = screen.getByText("Editar bloque").closest('[data-slot="card"]')
     expect(card).toHaveClass("ring-1", "ring-border-strong")
     expect(screen.queryByText("Los días anteriores a hoy no se pueden elegir.")).not.toBeInTheDocument()

@@ -1,4 +1,4 @@
-import { SHORT_MONTH_LABELS } from "@/modules/profile/config/short-month-labels.config";
+import { SHORT_MONTH_LABELS } from "@/modules/profile";
 
 export function formatIssueDate(isoDate: string): string {
   const [year, month, day] = isoDate.split("-");

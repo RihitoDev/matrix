@@ -1,4 +1,4 @@
-import type { RoleTag } from "@/modules/auth/types/auth-types";
+import type { RoleTag } from "@/modules/auth";
 
 export interface UserTypeFilterProps {
   value?: RoleTag;

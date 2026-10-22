@@ -4,7 +4,7 @@ import {
   ISSUING_ORGANIZATION_MAX_LENGTH,
 } from "../config/certification-validation.config";
 import { CERTIFICATION_MIN_ISSUE_DATE } from "../constants/certification-form.constants";
-import { BUSINESS_TIMEZONE, ISO_DATE_PATTERN } from "@/modules/profile/constants/validation.constants";
+import { BUSINESS_TIMEZONE, ISO_DATE_PATTERN } from "@/modules/profile";
 import type { CertificationErrors } from "../types/certification-errors.types";
 import type { CreateCertificationDto } from "../types/create-certification-dto.types";
 

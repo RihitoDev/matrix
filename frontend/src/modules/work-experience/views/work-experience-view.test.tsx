@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WORK_EXPERIENCE_FEEDBACK_MESSAGES } from "../config/work-experience-feedback.config";
@@ -48,15 +49,11 @@ describe("WorkExperienceView", () => {
   it("shows the saved experiences with their period", async () => {
     render(<WorkExperienceView />);
 
-    expect(screen.getByRole("heading", { level: 1, name: "Trayectoria" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "Experiencia laboral" })).toBeInTheDocument();
     expect(screen.getByText("Cargando experiencia laboral...")).toBeInTheDocument();
     expect(await screen.findByText("Desarrolladora web junior")).toBeInTheDocument();
     expect(screen.getByText(/Mar 2025 – Actualidad/)).toBeInTheDocument();
     expect(screen.getByText(/Mar 2023 – Dic 2024/)).toBeInTheDocument();
-    expect(screen.getByText("Experiencia laboral").closest("li")).toHaveAttribute(
-      "aria-current",
-      "step",
-    );
   });
 
   it("shows the empty message when there are no experiences", async () => {

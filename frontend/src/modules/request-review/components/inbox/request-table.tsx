@@ -12,7 +12,7 @@ import { formatRelativeTime } from "../../utils/format-relative-time";
 import { StatusBadge } from "../common/status-badge";
 import type { RequestTableProps } from "../../types/request-table-props.types";
 
-const HEAD_CLASS = "h-10 px-5 lg:px-4 text-[12.5px] font-semibold text-text-secondary";
+const HEAD_CLASS = "h-10 px-5 lg:px-4 text-[11.5px] font-semibold text-ink-soft";
 const CELL_CLASS = "px-5 lg:px-4 text-[14.5px] text-ink";
 const WRAP_CLASS = "lg:whitespace-normal";
 const TABLE_COLUMN_COUNT = 7;

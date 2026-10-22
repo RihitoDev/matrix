@@ -42,7 +42,7 @@ export function ConfirmDiscardDialog({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
-            className="bg-danger text-surface hover:bg-danger/90"
+            className="bg-ink text-surface hover:bg-ink-soft"
             onClick={onConfirm}
           >
             Sí, descartar

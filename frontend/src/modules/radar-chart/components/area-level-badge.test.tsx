@@ -8,11 +8,11 @@ describe("AreaLevelBadge", () => {
   });
 
   it.each([
-    ["Bajo", "bg-surface-soft", "bg-border-strong"],
-    ["Medio", "bg-gold/10", "bg-gold"],
-    ["Alto", "bg-ink", "bg-surface"],
-    ["Experto", "bg-accent", "bg-surface"],
-  ] as const)("styles the %s level with brand colors and a dot", (level, badgeClass, dotClass) => {
+    ["Bajo", "text-text-secondary", "bg-border-strong"],
+    ["Medio", "text-ink-soft", "bg-ink-soft"],
+    ["Alto", "text-ink", "bg-ink-soft"],
+    ["Experto", "text-ink", "bg-ink"],
+  ] as const)("styles the %s level with neutral text and a dot", (level, badgeClass, dotClass) => {
     render(<AreaLevelBadge level={level} />);
 
     const badge = screen.getByText(level);
@@ -23,12 +23,12 @@ describe("AreaLevelBadge", () => {
     expect(dot?.getAttribute("aria-hidden")).toBe("true");
   });
 
-  it("uses dark text on the gold badge to keep enough contrast", () => {
+  it("uses ink text without a colored background", () => {
     render(<AreaLevelBadge level="Medio" />);
 
     const badge = screen.getByText("Medio");
 
-    expect(badge.className).toContain("color-mix");
+    expect(badge.className).toContain("text-ink-soft");
     expect(badge.className).not.toContain("text-surface");
   });
 });

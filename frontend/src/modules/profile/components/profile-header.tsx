@@ -2,12 +2,18 @@ import type { ProfileHeaderProps } from "../types/profile-header-props.types";
 
 export function ProfileHeader({ title }: ProfileHeaderProps) {
   return (
-    <header className="flex items-center justify-between gap-6 border-b border-border bg-surface px-10 py-4">
-      <div>
-        <p className="text-[12.5px] font-semibold text-text-secondary">Comunidad / Mi perfil</p>
-        <p className="font-tight text-[20px] font-bold text-ink">{title}</p>
-      </div>
-      <span className="text-[12.5px] font-semibold text-ink-soft">Egresado aprobado</span>
+    <header className="border-b border-border px-8 py-3">
+      <nav aria-label="Ubicación en el perfil" className="flex items-center gap-2 text-xs text-text-secondary">
+        <span>Comunidad</span>
+        <span aria-hidden="true">/</span>
+        <span>Mi perfil</span>
+        {title !== "Mi perfil" ? (
+          <>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page" className="font-medium text-ink">{title}</span>
+          </>
+        ) : null}
+      </nav>
     </header>
   );
 }

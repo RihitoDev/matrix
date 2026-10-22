@@ -149,7 +149,9 @@ describe("PersonalDataForm", () => {
 
     expect(container.firstElementChild?.className).not.toMatch(/max-w-/);
     expect(screen.getByRole("heading", { level: 1 })).toHaveClass("text-3xl", "2xl:text-4xl");
-    expect(container.querySelector("form")).toHaveClass("2xl:gap-x-8", "2xl:gap-y-6");
+    expect(screen.getByRole("group", { name: "Identidad" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Contacto" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Datos complementarios" })).toBeInTheDocument();
     expect(screen.getByText("Carrera")).toHaveClass("2xl:text-base");
   });
 

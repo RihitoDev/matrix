@@ -1,11 +1,14 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
+
 import { useState } from "react";
 import { isApiError } from "@/shared/services/api-client";
 import { authService } from "../services/auth.service";
 import type { LoginPayload, LoginResponse } from "../types/auth-types";
 
 export function useLogin() {
+  const mutation = useMutation({ mutationFn: (request: () => Promise<LoginResponse>) => request() });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -13,7 +16,7 @@ export function useLogin() {
     setIsLoading(true);
     setError(null);
     try {
-      return await authService.login(payload);
+      return await mutation.mutateAsync(() => authService.login(payload));
     } catch (cause: unknown) {
       if (isApiError(cause)) {
         if (!cause.response) {

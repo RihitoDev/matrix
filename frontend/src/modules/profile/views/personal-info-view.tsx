@@ -24,9 +24,8 @@ export function PersonalInfoView() {
 
   return (
     <ProfilePageLayout
-      activeTab="personal-info"
       title="Datos personales y contacto"
-      description="Registra tu información para que la comunidad pueda identificarte y contactarte."
+      description="Mantén tus datos de contacto actualizados."
     >
       {isLoading ? (
         <p role="status" className="text-[15px] text-text-secondary">

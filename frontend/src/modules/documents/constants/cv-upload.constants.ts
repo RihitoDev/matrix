@@ -1,4 +1,4 @@
-import { CV_ALLOWED_EXTENSIONS, CV_ALLOWED_TYPES } from "@/modules/profile/config/file-upload.config";
+import { CV_ALLOWED_EXTENSIONS, CV_ALLOWED_TYPES } from "@/modules/profile";
 
 export const CV_FILE_TYPE_LABEL = "PDF";
 

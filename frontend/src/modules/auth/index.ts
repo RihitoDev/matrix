@@ -9,3 +9,5 @@ export { getSessionRoles } from "./utils/get-session-roles";
 export type { SessionResponse } from "./types/session-response.types";
 export type { RoleTag } from "./types/auth-types";
 export { getRolesLabel } from "./utils/get-session-role-label";
+
+export { SessionLogoutMenuItem } from "./components/session-logout-menu-item";

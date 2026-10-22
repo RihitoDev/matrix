@@ -50,18 +50,18 @@ describe("Button", () => {
   it("renders the destructive variant with its class", () => {
     render(<Button variant="destructive">Eliminar</Button>)
     const button = screen.getByRole("button", { name: "Eliminar" })
-    expect(button.className).toContain("bg-destructive/10")
+    expect(button.className).toContain("bg-ink")
   })
 
   it("renders the small size with its class", () => {
     render(<Button size="sm">Pequeño</Button>)
     const button = screen.getByRole("button", { name: "Pequeño" })
-    expect(button.className).toContain("h-7")
+    expect(button.className).toContain("h-8")
   })
 
   it("buttonVariants returns a string with the given options", () => {
     const classes = buttonVariants({ variant: "ghost", size: "lg" })
     expect(typeof classes).toBe("string")
-    expect(classes).toContain("h-9")
+    expect(classes).toContain("h-11")
   })
 })

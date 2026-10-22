@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-vi.mock('@/shared/services/api-client', () => ({
+vi.mock("@/shared/services/api-client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/shared/services/api-client")>()),
   apiClient: {
     get: vi.fn(),
     post: vi.fn(),
@@ -254,9 +255,15 @@ describe('chat-api — getOrCreateConversation (HU-2, backend integration)', () 
 
 describe('chat-api — getMessages', () => {
   it('debe retornar los mensajes de una conversacion ordenados del mas antiguo al mas reciente', async () => {
+    apiClientMock.get.mockResolvedValueOnce({ data: {
+      data: [
+        { id: 'later', conversationId: 'conv-1', senderId: 'u1', content: 'Segundo', createdAt: '2026-10-20T12:00:00Z' },
+        { id: 'earlier', conversationId: 'conv-1', senderId: 'u1', content: 'Primero', createdAt: '2026-10-20T11:00:00Z' },
+      ], nextCursor: null, hasMore: false,
+    } });
     const messages = await getMessages('conv-1');
 
-    expect(messages.length).toBeGreaterThan(0);
+    expect(messages).toHaveLength(2);
     for (let i = 0; i < messages.length - 1; i++) {
       const current = new Date(
         messages[i].createdAt,

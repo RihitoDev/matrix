@@ -47,7 +47,7 @@ export function EditBlockPanel({ block, onClose }: EditBlockPanelProps) {
           type="button"
           variant="outline"
           size="lg"
-          className="w-full border-danger text-danger hover:bg-danger/10 hover:text-danger"
+          className="w-full border-border-strong text-ink hover:bg-interaction hover:text-ink"
           disabled={!isEditable}
           onClick={() => setIsDeleteOpen(true)}
         >

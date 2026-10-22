@@ -4,7 +4,8 @@ import { COMPANY_ID, DOCKER, PYTHON, VALID_CONDITIONS } from "../testing/vacancy
 import { toJobOfferPayload } from "../utils/to-job-offer-payload";
 import { jobOffersService } from "./job-offers.service";
 
-vi.mock("@/shared/services/api-client", () => ({ apiClient: { get: vi.fn(), post: vi.fn() } }));
+vi.mock("@/shared/services/api-client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/shared/services/api-client")>()), apiClient: { get: vi.fn(), post: vi.fn() } }));
 
 describe("jobOffersService", () => {
   beforeEach(() => {

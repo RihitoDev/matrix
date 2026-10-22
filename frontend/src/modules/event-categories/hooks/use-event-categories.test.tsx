@@ -1,4 +1,5 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
+import { act, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useEventCategories } from './use-event-categories';
@@ -62,9 +63,8 @@ describe('useEventCategories', () => {
     const { result } = renderHook(() => useEventCategories());
     await waitFor(() => expect(result.current.error).toBeTruthy());
     act(() => result.current.retry());
-    expect(result.current.isLoading).toBe(true);
-    expect(result.current.error).toBeNull();
     await waitFor(() => expect(result.current.categories).toHaveLength(1));
+    expect(result.current.error).toBeNull();
     expect(result.current.isLoading).toBe(false);
     expect(eventCategoriesService.getAll).toHaveBeenCalledTimes(2);
   });

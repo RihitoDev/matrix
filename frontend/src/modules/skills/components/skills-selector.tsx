@@ -8,12 +8,12 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { CUSTOM_SKILL_HINT, CUSTOM_SKILL_HINT_ID, SKILL_NAME_MAX_LENGTH, SKILLS_UI_TEXTS } from "../constants/skills.constants";
 import type { SkillsSelectorProps } from "../types/skills-selector-props.types";
-import { getFieldErrorId, getFieldErrorProps } from "@/modules/profile/utils/get-field-error-props";
+import { getFieldErrorId, getFieldErrorProps } from "@/modules/profile";
 import { formatSkillName } from "../utils/format-skill-name";
 import { validateCustomSkill } from "../utils/validate-custom-skill";
-import { FeedbackMessage } from "@/modules/profile/components/feedback-message";
-import { FormField } from "@/modules/profile/components/form-field";
-import { SectionCard } from "@/modules/profile/components/section-card";
+import { FeedbackMessage } from "@/modules/profile";
+import { FormField } from "@/modules/profile";
+import { SectionCard } from "@/modules/profile";
 import { SkillBadge } from "./skill-badge";
 
 export function SkillsSelector({
@@ -67,7 +67,7 @@ export function SkillsSelector({
   };
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
       <SectionCard title={SKILLS_UI_TEXTS.searchCardTitle}>
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-5">
@@ -79,7 +79,7 @@ export function SkillsSelector({
                 value={searchTerm}
                 disabled={isMutateDisabled}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+                className="h-11"
               />
             </FormField>
 
@@ -87,7 +87,7 @@ export function SkillsSelector({
               <h4 className="text-[11.5px] font-semibold tracking-wide text-text-secondary uppercase">
                 {SKILLS_UI_TEXTS.suggestionsTitle}
               </h4>
-              <ul className="max-h-64 divide-y divide-border overflow-y-auto">
+              <ul className="max-h-96 divide-y divide-border overflow-y-auto">
                 {(filteredCatalog ?? []).length === 0 ? (
                   <li className="py-3 text-[13px] text-text-secondary">{SKILLS_UI_TEXTS.emptyCatalog}</li>
                 ) : (
@@ -139,7 +139,7 @@ export function SkillsSelector({
                     setCustomSkillName(event.target.value);
                     setCustomSkillError("");
                   }}
-                  className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+                  className="h-11"
                   {...getFieldErrorProps("custom-skill", customSkillError)}
                   aria-describedby={[CUSTOM_SKILL_HINT_ID, customSkillError ? getFieldErrorId("custom-skill") : null]
                     .filter(Boolean)
@@ -201,7 +201,7 @@ export function SkillsSelector({
             type="button"
             onClick={onSave}
             disabled={isSaving || hasLoadError}
-            className={cn("h-12 bg-accent px-6 text-[14px] font-semibold text-white hover:bg-danger", "w-full")}
+            className={cn("h-10 bg-accent px-4 text-sm text-white hover:bg-brand-hover", "w-full")}
           >
             {isSaving ? <LoaderCircle aria-hidden="true" className="animate-spin" /> : null}
             {isSaving ? SKILLS_UI_TEXTS.savingButton : SKILLS_UI_TEXTS.saveButton}

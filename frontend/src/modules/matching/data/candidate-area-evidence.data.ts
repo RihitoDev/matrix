@@ -1,7 +1,7 @@
-import type { AreaDetail, AreaId } from "@/modules/radar-chart/types/area-detail.types";
-import { AREA_DETAILS } from "@/modules/radar-chart/data/area-details.data";
-import { calculateGap } from "@/modules/radar-chart/utils/calculate-gap";
-import { getAreaLevel } from "@/modules/radar-chart/utils/get-area-level";
+import type { AreaDetail, AreaId } from "@/modules/radar-chart";
+import { AREA_DETAILS } from "@/modules/radar-chart";
+import { calculateGap } from "@/modules/radar-chart";
+import { getAreaLevel } from "@/modules/radar-chart";
 import type { Candidate } from "../types/matching-types";
 import { AFFINITY_AXES } from "./matching.data";
 

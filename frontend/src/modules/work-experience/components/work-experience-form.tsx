@@ -17,12 +17,13 @@ import {
 import type { WorkExperienceErrors } from "../types/work-experience-errors.types";
 import type { WorkExperienceFormProps } from "../types/work-experience-form-props.types";
 import type { WorkExperienceFormValues } from "../types/work-experience-form-values.types";
-import { getFieldErrorProps } from "@/modules/profile/utils/get-field-error-props";
+import { getFieldErrorProps } from "@/modules/profile";
 import { getTodayIsoDate } from "../utils/get-today-iso-date";
 import { validateWorkExperience } from "../utils/validate-work-experience";
-import { FeedbackMessage } from "@/modules/profile/components/feedback-message";
-import { FormField } from "@/modules/profile/components/form-field";
-import { SectionCard } from "@/modules/profile/components/section-card";
+import { FeedbackMessage } from "@/modules/profile";
+import { FormField } from "@/modules/profile";
+import { FormFieldset } from "@/shared/components/layout/form-fieldset";
+import { SectionCard } from "@/modules/profile";
 
 export function WorkExperienceForm({
   initialValues,
@@ -67,6 +68,7 @@ export function WorkExperienceForm({
   return (
     <SectionCard title={title}>
       <form aria-label={title} noValidate onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <FormFieldset title="Puesto y empresa">
         <FormField id="work-experience-companyName" error={errors.companyName} label="Empresa" isRequired>
           <Input
             id="work-experience-companyName"
@@ -78,7 +80,7 @@ export function WorkExperienceForm({
             value={values.companyName}
             disabled={isPending}
             onChange={handleChange}
-            className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+            className="h-11"
           />
         </FormField>
         <FormField id="work-experience-position" error={errors.position} label="Cargo" isRequired>
@@ -92,12 +94,14 @@ export function WorkExperienceForm({
             value={values.position}
             disabled={isPending}
             onChange={handleChange}
-            className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+            className="h-11"
           />
           <p className="mt-1 text-right text-[12px] text-text-secondary">
             {values.position.length}/{WORK_EXPERIENCE_POSITION_MAX_LENGTH}
           </p>
         </FormField>
+        </FormFieldset>
+        <FormFieldset title="Periodo y funciones">
         <div className="grid grid-cols-2 gap-5">
           <FormField id="work-experience-startDate" error={errors.startDate} label="Desde" isRequired>
             <Input
@@ -110,7 +114,7 @@ export function WorkExperienceForm({
               value={values.startDate}
               disabled={isPending}
               onChange={handleChange}
-              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+              className="h-11"
             />
           </FormField>
           <FormField id="work-experience-endDate" error={errors.endDate} label="Hasta">
@@ -124,7 +128,7 @@ export function WorkExperienceForm({
               value={values.endDate}
               disabled={isPending || values.isCurrent}
               onChange={handleChange}
-              className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+              className="h-11"
             />
           </FormField>
         </div>
@@ -154,19 +158,20 @@ export function WorkExperienceForm({
             value={values.description}
             disabled={isPending}
             onChange={handleChange}
-            className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 resize-y py-3 field-sizing-fixed min-h-0 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+            className="min-h-36 resize-y field-sizing-fixed text-sm"
           />
           <p className="mt-1 text-right text-[12px] text-text-secondary">
             {values.description.length}/{WORK_EXPERIENCE_DESCRIPTION_MAX_LENGTH}
           </p>
         </FormField>
 
+        </FormFieldset>
         <FeedbackMessage feedback={feedback} />
-        <div className="flex justify-end gap-3 pt-2">
+        <div className="flex flex-wrap justify-end gap-3 border-t border-border pt-5">
           <Button
             type="button"
             variant="outline"
-            className="h-12 border-border-strong bg-surface px-6 text-[14px] font-semibold text-ink hover:bg-surface-soft"
+            className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
             disabled={isPending}
             onClick={onCancel}
           >
@@ -174,7 +179,7 @@ export function WorkExperienceForm({
           </Button>
           <Button
             type="submit"
-            className={cn("h-12 bg-accent px-6 text-[14px] font-semibold text-white hover:bg-danger", "min-w-44")}
+            className={cn("h-10 bg-accent px-4 text-sm text-white hover:bg-brand-hover", "min-w-44")}
             disabled={isPending}
           >
             {isPending ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : null}

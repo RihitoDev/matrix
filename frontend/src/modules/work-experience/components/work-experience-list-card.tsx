@@ -1,8 +1,9 @@
+import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { WorkExperienceListCardProps } from "../types/work-experience-list-card-props.types";
 import { formatWorkPeriod } from "../utils/format-work-period";
 import { sortWorkExperiences } from "../utils/sort-work-experiences";
-import { SectionCard } from "@/modules/profile/components/section-card";
+import { SectionCard } from "@/modules/profile";
 
 export function WorkExperienceListCard({
   experiences = [],
@@ -40,21 +41,21 @@ export function WorkExperienceListCard({
                 type="button"
                 variant="ghost"
                 aria-label={`Editar ${experience.position}`}
-                className="h-8 px-2 text-[13px] font-semibold text-ink"
+                className="size-9 p-0 text-ink-soft"
                 disabled={isBusy}
                 onClick={() => onEdit?.(experience)}
               >
-                Editar
+                <Pencil className="size-4" aria-hidden="true" />
               </Button>
               <Button
                 type="button"
                 variant="ghost"
                 aria-label={`Eliminar ${experience.position}`}
-                className="h-8 px-2 text-[13px] font-semibold text-accent hover:bg-interaction hover:text-accent"
+                className="size-9 p-0 text-ink-soft hover:bg-interaction hover:text-ink"
                 disabled={isBusy}
                 onClick={() => onDelete?.(experience)}
               >
-                Eliminar
+                <Trash2 className="size-4" aria-hidden="true" />
               </Button>
             </div>
           </li>

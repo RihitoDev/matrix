@@ -19,13 +19,13 @@ export function StepActions({
   className = "border-t border-border px-6 py-4",
 }: StepActionsProps) {
   return (
-    <div className={`flex items-center justify-between ${className}`}>
+    <div className={`flex flex-wrap items-center justify-between gap-3 ${className}`}>
       <Button
         type="button"
         variant="outline"
         onClick={onSecondary}
         disabled={isBusy}
-        className="h-auto px-6 py-2.5 text-sm font-semibold text-gray-700"
+        className="h-auto px-6 py-2.5 text-sm font-semibold text-ink"
       >
         {secondaryLabel}
       </Button>
@@ -34,7 +34,7 @@ export function StepActions({
         onClick={onPrimary}
         disabled={isBusy}
         aria-busy={isBusy}
-        className="h-auto bg-[#E50000] px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-700"
+        className="h-auto bg-accent px-6 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover"
       >
         {primaryLabel}
       </Button>

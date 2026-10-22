@@ -4,7 +4,7 @@ import {
   CV_ERROR_MESSAGES_BY_STATUS,
 } from "../constants/cv-error-messages.constants";
 import type { CvErrorResponse } from "../types/cv-error-response.types";
-import { getHttpStatus } from "@/modules/profile/utils/get-http-status";
+import { getHttpStatus } from "@/modules/profile";
 
 function getErrorCode(error: unknown): unknown {
   return (error as CvErrorResponse).response?.data?.data?.code;

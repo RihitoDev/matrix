@@ -1,4 +1,5 @@
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
+import { act, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CERTIFICATION_FEEDBACK_MESSAGES } from "../config/certification-feedback.config";
 import { certificationsService } from "../services/certifications.service";
@@ -46,8 +47,8 @@ describe("useCertifications", () => {
     expect(result.current.isLoading).toBe(true);
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.certifications).toEqual([NEWEST, MIDDLE, OLDEST]);
-    expect(result.current.error).toBeNull();
+    await waitFor(() => expect(result.current.certifications).toEqual([NEWEST, MIDDLE, OLDEST]));
+    await waitFor(() => expect(result.current.error).toBeNull());
   });
 
   it("reports an error when the certifications cannot be loaded", async () => {
@@ -56,8 +57,8 @@ describe("useCertifications", () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.certifications).toEqual([]);
-    expect(result.current.error).toBe(CERTIFICATION_FEEDBACK_MESSAGES.loadError);
+    await waitFor(() => expect(result.current.certifications).toEqual([]));
+    await waitFor(() => expect(result.current.error).toBe(CERTIFICATION_FEEDBACK_MESSAGES.loadError));
   });
 
   it("reloads the certifications on demand", async () => {
@@ -71,7 +72,7 @@ describe("useCertifications", () => {
     });
 
     expect(certificationsService.getCertifications).toHaveBeenCalledTimes(2);
-    expect(result.current.certifications).toEqual([NEWEST, OLDEST]);
+    await waitFor(() => expect(result.current.certifications).toEqual([NEWEST, OLDEST]));
   });
 
   it("keeps the previous list and clears the error after a successful reload", async () => {
@@ -84,8 +85,8 @@ describe("useCertifications", () => {
       await result.current.reload();
     });
 
-    expect(result.current.error).toBeNull();
-    expect(result.current.certifications).toEqual([MIDDLE]);
+    await waitFor(() => expect(result.current.error).toBeNull());
+    await waitFor(() => expect(result.current.certifications).toEqual([MIDDLE]));
   });
 
   it("ignores a response that arrives after a newer request", async () => {
@@ -103,7 +104,7 @@ describe("useCertifications", () => {
       await firstRequest.promise;
     });
 
-    expect(result.current.certifications).toEqual([NEWEST]);
+    await waitFor(() => expect(result.current.certifications).toEqual([NEWEST]));
   });
 
   it("ignores the response after unmounting", async () => {
@@ -117,6 +118,6 @@ describe("useCertifications", () => {
       await request.promise;
     });
 
-    expect(result.current.certifications).toEqual([]);
+    await waitFor(() => expect(result.current.certifications).toEqual([]));
   });
 });

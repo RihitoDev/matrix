@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties } from "react";
 import { cn } from "cn";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { SIDEBAR_STYLE } from "@/shared/constants/sidebar.constants";
@@ -9,17 +9,7 @@ import type { NavigationItem } from "@/shared/types/navigation-item.types";
 import { AppSidebar } from "./app-sidebar";
 import { SessionUserCard } from "@/modules/auth";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
-import { SidebarToggleButton } from "./sidebar-toggle-button";
-
-interface AppShellExtras {
-  brand?: ReactNode;
-  sidebarFooter?: ReactNode;
-  sidebarItemClassName?: string;
-  sidebarItemBadges?: Record<string, ReactNode>;
-  sidebarWidth?: string;
-  header?: ReactNode;
-  contentClassName?: string;
-}
+import { AppHeader } from "./app-header";
 
 export function AppShell({
   children,
@@ -33,7 +23,7 @@ export function AppShell({
   sidebarWidth,
   header,
   contentClassName,
-}: AppShellProps & AppShellExtras) {
+}: AppShellProps) {
   return (
     <SidebarProvider
       style={
@@ -62,22 +52,12 @@ export function AppShell({
           contentClassName && "h-dvh min-h-0 overflow-hidden",
         )}
       >
-        {header ?? (
-          <header
-            className={
-              fullBleed
-                ? "absolute left-4 top-3 z-10 flex items-center"
-                : "flex items-center px-4 py-3"
-            }
-          >
-            <SidebarToggleButton />
-          </header>
-        )}
+        {header ?? <AppHeader />}
         <div
           className={cn(
             "flex-1",
             contentClassName ??
-              (fullBleed ? "flex min-w-0 flex-col" : "px-8 pb-8"),
+              (fullBleed ? "flex min-w-0 flex-col" : "px-8 py-8"),
           )}
         >
           {children}

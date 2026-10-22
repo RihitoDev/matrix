@@ -66,7 +66,7 @@ export function DeleteBlockDialog({
             {DELETE_BLOCK_TEXT.cancel}
           </AlertDialogCancel>
           <AlertDialogAction
-            className="bg-danger p-5 text-surface hover:bg-danger/90"
+            className="bg-ink p-5 text-surface hover:bg-ink-soft"
             disabled={isDeleting}
             onClick={handleConfirm}
           >

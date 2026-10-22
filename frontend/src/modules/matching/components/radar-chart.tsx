@@ -9,8 +9,8 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { AffinityRadarAxisTick } from "@/modules/radar-chart/components/affinity-radar-axis-tick";
-import { AffinityRadarDot } from "@/modules/radar-chart/components/affinity-radar-dot";
+import { AffinityRadarAxisTick } from "@/modules/radar-chart";
+import { AffinityRadarDot } from "@/modules/radar-chart";
 import type { AffinityAxisId } from "../types/matching-types";
 
 /**

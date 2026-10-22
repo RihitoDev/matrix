@@ -1,4 +1,5 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { cleanup, fireEvent,  screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { saveAccessToken } from "@/shared/services/storage/access-token-storage";
 import { useLogin } from "../hooks/use-login";
@@ -44,7 +45,7 @@ describe("LoginView", () => {
     fireEvent.change(screen.getByPlaceholderText("nombre@ejemplo.com"), {
       target: { value: "person@example.com" },
     });
-    fireEvent.change(screen.getByPlaceholderText("********"), {
+    fireEvent.change(screen.getByPlaceholderText("Tu contraseña"), {
       target: { value: "secret" },
     });
     fireEvent.submit(screen.getByRole("button", { name: "Iniciar sesión" }).closest("form")!);
@@ -55,7 +56,7 @@ describe("LoginView", () => {
         password: "secret",
       });
       expect(saveAccessToken).toHaveBeenCalledWith("returned-token");
-      expect(push).toHaveBeenCalledWith("/profile");
+      expect(push).toHaveBeenCalledWith("/dashboard");
     });
   });
 
@@ -68,11 +69,11 @@ describe("LoginView", () => {
     vi.mocked(useLogin).mockReturnValue({ login, isLoading: false, error: null });
     render(<LoginView />);
     fireEvent.change(screen.getByPlaceholderText("nombre@ejemplo.com"), { target: { value: "person@example.com" } });
-    fireEvent.change(screen.getByPlaceholderText("********"), { target: { value: "secret" } });
+    fireEvent.change(screen.getByPlaceholderText("Tu contraseña"), { target: { value: "secret" } });
     fireEvent.submit(screen.getByRole("button", { name: "Iniciar sesión" }).closest("form")!);
 
     await waitFor(() => expect(push).toHaveBeenCalledTimes(1));
-    expect(push).toHaveBeenCalledWith("/profile");
+    expect(push).toHaveBeenCalledWith("/dashboard");
     expect(replace).not.toHaveBeenCalled();
   });
 
@@ -88,7 +89,7 @@ describe("LoginView", () => {
     vi.mocked(useLogin).mockReturnValue({ login: login as ReturnType<typeof useLogin>["login"], isLoading: false, error: null });
     render(<LoginView />);
     fireEvent.change(screen.getByPlaceholderText("nombre@ejemplo.com"), { target: { value: "person@example.com" } });
-    fireEvent.change(screen.getByPlaceholderText("********"), { target: { value: "secret" } });
+    fireEvent.change(screen.getByPlaceholderText("Tu contraseña"), { target: { value: "secret" } });
     fireEvent.submit(screen.getByRole("button", { name: "Iniciar sesión" }).closest("form")!);
   }
 
@@ -101,8 +102,8 @@ describe("LoginView", () => {
 
   it.each([
     ['/login?next=/events/my-passes', '/events/my-passes'],
-    ['/login?next=https://example.com', '/profile'],
-    ['/login?next=//example.com', '/profile'],
+    ['/login?next=https://example.com', '/dashboard'],
+    ['/login?next=//example.com', '/dashboard'],
   ])('respeta el retorno seguro desde %s hacia %s', async (url, destination) => {
     window.history.replaceState({}, '', url);
     await submitLogin(vi.fn().mockResolvedValue({ accessToken: 't', roleTag: 'titulado' }));
@@ -112,11 +113,11 @@ describe("LoginView", () => {
   });
 
   it.each([
-    ['/login?next=%2Freports%2Fhistory%3Fx%3D1', '/profile'],
+    ['/login?next=%2Freports%2Fhistory%3Fx%3D1', '/dashboard'],
     ['/login?next=/profile/documents', '/profile/documents'],
-    ['/login?next=/backoffice/solicitudes', '/profile'],
-    ['/login?next=/%5Cevil.com', '/profile'],
-    ['/login?next=/login', '/profile'],
+    ['/login?next=/backoffice/solicitudes', '/dashboard'],
+    ['/login?next=/%5Cevil.com', '/dashboard'],
+    ['/login?next=/login', '/dashboard'],
   ])('vuelve a la ruta privada válida pedida desde %s hacia %s', async (url, destination) => {
     window.history.replaceState({}, '', url);
     await submitLogin(vi.fn().mockResolvedValue({ accessToken: 't', roleTag: 'titulado' }));
@@ -150,7 +151,7 @@ describe("LoginView", () => {
   it.each(["titulado", "estudiante", "mentor", "empresa", "", "desconocido"])("el rol %j va a su portal", async (roleTag) => {
     await submitLogin(vi.fn().mockResolvedValue({ accessToken: "t", roleTag }));
 
-    await waitFor(() => expect(push).toHaveBeenCalledWith(roleTag === "empresa" ? "/recruiters" : "/profile"));
+    await waitFor(() => expect(push).toHaveBeenCalledWith(roleTag === "empresa" ? "/recruiters" : "/dashboard"));
     expect(push).toHaveBeenCalledTimes(1);
   });
 
@@ -181,7 +182,7 @@ describe("LoginView", () => {
     render(<LoginView />);
 
     fireEvent.change(screen.getByPlaceholderText("nombre@ejemplo.com"), { target: { value: "lionel.messi" } });
-    fireEvent.change(screen.getByPlaceholderText("********"), { target: { value: "Clave-Segura-9" } });
+    fireEvent.change(screen.getByPlaceholderText("Tu contraseña"), { target: { value: "Clave-Segura-9" } });
     fireEvent.submit(screen.getByRole("button", { name: "Iniciar sesión" }).closest("form")!);
 
     expect(await screen.findByText("Ingresa un correo electrónico válido")).toBeInTheDocument();
@@ -199,7 +200,7 @@ describe("LoginView", () => {
     expect(await screen.findByText("Ingresa tu correo electrónico")).toBeInTheDocument();
 
     fireEvent.change(screen.getByPlaceholderText("nombre@ejemplo.com"), { target: { value: "lionel.messi@gmail.com" } });
-    fireEvent.change(screen.getByPlaceholderText("********"), { target: { value: "Clave-Segura-9" } });
+    fireEvent.change(screen.getByPlaceholderText("Tu contraseña"), { target: { value: "Clave-Segura-9" } });
     fireEvent.submit(form);
 
     await waitFor(() => expect(login).toHaveBeenCalledTimes(1));
@@ -222,14 +223,14 @@ describe("LoginView", () => {
     expect(screen.getByLabelText("Contraseña")).toHaveAttribute("autocomplete", "current-password");
     expect(screen.queryByRole("combobox", { name: "Rol" })).toBeNull();
     expect(screen.getByRole("heading", { name: "Iniciar sesión" })).toBeInTheDocument();
-    expect(screen.getByText("Universidad para el futuro")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "UMSSY, Acreditación y comunidad" })).toBeInTheDocument();
   });
 
   it("enlaza a la solicitud de acceso", () => {
     vi.mocked(useLogin).mockReturnValue({ login: vi.fn(), isLoading: false, error: null });
     render(<LoginView />);
 
-    expect(screen.getByRole("link", { name: "Solicita acceso" })).toHaveAttribute("href", "/request-access");
+    expect(screen.getByRole("link", { name: "Solicitar acceso" })).toHaveAttribute("href", "/request-access");
   });
 
   it("muestra el error en una alerta accesible", () => {
@@ -259,4 +260,18 @@ describe("LoginView", () => {
     await submitLogin(vi.fn().mockResolvedValue({ accessToken: "multi", roleTag: "administrativo", roles: ["administrativo", "mentor"] }));
     await waitFor(() => expect(push).toHaveBeenCalledWith("/mentor/availability"));
   });
+  it("reveals and hides the password without changing it or submitting", () => {
+    const login=vi.fn();
+    vi.mocked(useLogin).mockReturnValue({login,isLoading:false,error:null});
+    render(<LoginView />);
+    const input=screen.getByLabelText("Contraseña");
+    fireEvent.change(input,{target:{value:"secreto"}});
+    fireEvent.click(screen.getByRole("button",{name:"Mostrar contraseña"}));
+    expect(input).toHaveAttribute("type","text");
+    expect(input).toHaveValue("secreto");
+    fireEvent.click(screen.getByRole("button",{name:"Ocultar contraseña"}));
+    expect(input).toHaveAttribute("type","password");
+    expect(login).not.toHaveBeenCalled();
+  });
+
 });

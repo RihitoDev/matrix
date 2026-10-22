@@ -1,5 +1,5 @@
-import { BAD_REQUEST_STATUS } from "@/modules/profile/constants/http-status.constants";
-import { getHttpStatus } from "@/modules/profile/utils/get-http-status";
+import { BAD_REQUEST_STATUS } from "@/modules/profile";
+import { getHttpStatus } from "@/modules/profile";
 import { CORRUPTED_FILE_ERROR_CODE } from "../constants/certification-form.constants";
 import type { CertificationUploadError } from "../types/certification-upload-error.types";
 

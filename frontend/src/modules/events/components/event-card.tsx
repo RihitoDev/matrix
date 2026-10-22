@@ -15,11 +15,11 @@ import type { EventCardProps } from '../types/event.types';
 const categoryBadge = cva('text-xs font-semibold px-3 py-1 rounded-full', {
   variants: {
     category: {
-      tecnologia: 'bg-slate-200/80 text-ink',
-      'ia & datos': 'bg-amber-100/80 text-amber-800',
-      diseno: 'bg-slate-200/80 text-ink',
-      seguridad: 'bg-interaction text-danger',
-      other: 'bg-slate-200/80 text-ink',
+      tecnologia: 'bg-surface-soft text-ink',
+      'ia & datos': 'bg-surface-soft text-ink-soft',
+      diseno: 'bg-surface-soft text-ink',
+      seguridad: 'bg-surface-soft text-ink-soft',
+      other: 'bg-surface-soft text-ink',
     },
   },
   defaultVariants: { category: 'other' },
@@ -71,9 +71,9 @@ export function EventCard({
         onClick={handleCardClick}
         onKeyDown={handleKeyDown}
         className={cn(
-          'h-auto w-full items-stretch whitespace-normal bg-surface border rounded-2xl p-5 flex flex-col justify-between gap-4 shadow-2xs transition-colors cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          'h-auto w-full items-stretch whitespace-normal bg-surface border rounded-lg p-5 flex flex-col justify-between gap-4 transition-colors cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-ring',
           isSelected
-            ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500 hover:bg-blue-50'
+            ? 'border-accent bg-interaction ring-1 ring-accent hover:bg-interaction'
             : 'border-border hover:border-border-strong',
         )}
       >
@@ -85,7 +85,7 @@ export function EventCard({
           {isFull && (
             <span
               data-testid="event-full-badge"
-              className="text-xs font-semibold px-3 py-1 rounded-full bg-interaction text-danger"
+              className="text-xs font-semibold px-3 py-1 text-ink-soft"
             >
               Lleno
             </span>
@@ -121,13 +121,13 @@ export function EventCard({
               aria-valuenow={progressPercentage}
               aria-valuemin={0}
               aria-valuemax={100}
-              className="flex-1 bg-slate-200/80 h-2 rounded-full overflow-hidden"
+              className="flex-1 bg-surface-soft h-2 rounded-full overflow-hidden"
             >
               <div
                 data-testid="event-capacity-bar"
                 className={cn(
                   'h-full rounded-full transition-all',
-                  isFull ? 'bg-accent' : 'bg-gold',
+                  isFull ? 'bg-ink' : 'bg-ink-soft',
                 )}
                 style={{ width: `${progressPercentage}%` }}
               />

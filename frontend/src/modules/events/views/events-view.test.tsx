@@ -1,10 +1,5 @@
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  within,
-} from "@testing-library/react";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { cleanup, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useEvent } from "../hooks/use-event";
 import { useEvents } from "../hooks/use-events";
@@ -99,7 +94,7 @@ describe("EventsView", () => {
     const card = within(screen.getByRole("region", { name: /listado de talleres/i }))
       .getByRole("button", { name: /desarrollo web con react/i });
     fireEvent.click(card);
-    expect(screen.getByRole("button", { name: "Inscribirme" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Inscripción no disponible" })).toBeInTheDocument();
     if (method === "button") {
       fireEvent.click(screen.getByRole("button", { name: "Cerrar detalle del taller" }));
     } else if (method === "escape") {
@@ -120,7 +115,7 @@ describe("EventsView", () => {
       fireEvent.click(screen.getByRole("region", { name: /listado de talleres/i }));
     }
     expect(card).toHaveAttribute("aria-pressed", "false");
-    expect(screen.queryByRole("button", { name: "Inscribirme" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Inscripción no disponible" })).not.toBeInTheDocument();
     expect(useEvent).toHaveBeenLastCalledWith(null);
     expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
   });
@@ -138,7 +133,7 @@ describe("EventsView", () => {
     fireEvent.click(within(card).getByRole("heading"));
     fireEvent.click(screen.getByRole("complementary", { name: "Detalle de Desarrollo Web con React" }));
     expect(card).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Inscribirme" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Inscripción no disponible" })).toBeInTheDocument();
   });
   it("renders only the workshop list until a workshop is selected", () => {
     render(<EventsView />);
@@ -326,7 +321,7 @@ describe("EventsView", () => {
     expect(useEvent).toHaveBeenLastCalledWith(MOCK_EVENTS[0].id);
     expect(screen.getByRole("status")).toHaveTextContent("Cargando detalle");
     expect(
-      screen.queryByRole("button", { name: "Inscribirme" }),
+      screen.queryByRole("button", { name: "Inscripción no disponible" }),
     ).not.toBeInTheDocument();
   });
 

@@ -1,7 +1,6 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { profileService } from "@/modules/profile";
@@ -9,12 +8,11 @@ import { SidebarUserCard } from "@/shared/components/layout/sidebar-user-card";
 import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 import { useAuth } from "@/shared/contexts/auth-context";
 import { getRolesLabel } from "../utils/get-session-role-label";
-import { endSession } from "../utils/session";
+import { useLogout } from "../hooks/use-logout";
 
 export function SessionUserCard() {
-  const router = useRouter();
+  const handleLogout = useLogout();
   const { roles } = useAuth();
-  const queryClient = useQueryClient();
   const accessToken = getAccessToken();
   const { data: profile, isPending } = useQuery({
     queryKey: ["session-profile", accessToken],
@@ -30,12 +28,6 @@ export function SessionUserCard() {
     .join(" ")
     .trim();
 
-  function handleLogout() {
-    endSession();
-    queryClient.clear();
-    router.replace("/login");
-  }
-
   return (
     <SidebarUserCard
       user={{
@@ -46,13 +38,12 @@ export function SessionUserCard() {
         <Button
           type="button"
           variant="ghost"
-          size="icon-sm"
           aria-label="Cerrar sesión"
           title="Cerrar sesión"
           onClick={handleLogout}
-          className="shrink-0 text-surface/80 hover:bg-surface/10 hover:text-surface"
+          className="w-full justify-start text-surface/80 hover:bg-surface/10 hover:text-surface"
         >
-          <LogOut strokeWidth={1.75} aria-hidden="true" />
+          <LogOut strokeWidth={1.75} aria-hidden="true" />Cerrar sesión
         </Button>
       )}
     />

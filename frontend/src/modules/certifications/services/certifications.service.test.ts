@@ -4,7 +4,8 @@ import { ACCESS_TOKEN_STORAGE_KEY } from "@/modules/profile/config/auth-storage.
 import type { Certification } from "../types/certification.types";
 import type { CreateCertificationDto } from "../types/create-certification-dto.types";
 
-vi.mock("@/shared/services/api-client", () => ({
+vi.mock("@/shared/services/api-client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/shared/services/api-client")>()),
   apiClient: {
     get: vi.fn(),
     post: vi.fn(),

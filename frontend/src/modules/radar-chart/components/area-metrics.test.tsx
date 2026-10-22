@@ -36,12 +36,12 @@ describe("AreaMetrics", () => {
     expect(gap.querySelector("svg.lucide-arrow-up-right")).not.toBeNull();
   });
 
-  it("shows a negative gap with a minus sign and a down icon in the danger color", () => {
+  it("shows a negative gap with a minus sign and a down icon with neutral text", () => {
     render(<AreaMetrics score={4.5} level="Medio" gap={-1.8} globalAverage={6.25} />);
 
     const gap = screen.getByText("-1,8");
 
-    expect(gap.className).toContain("text-danger");
+    expect(gap.className).toContain("text-ink-soft");
     expect(gap.querySelector("svg.lucide-arrow-down-right")).not.toBeNull();
   });
 

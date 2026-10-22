@@ -1,20 +1,11 @@
-import { SESSION_TOKEN_KEY } from "../constants/request-review.constants";
+import { getAccessToken, clearAccessToken } from "@/shared/services/storage/access-token-storage";
 
-// TODO: alinear el almacenamiento del token con shared/services/storage
 export function getSessionToken(): string | null {
-  try {
-    return sessionStorage.getItem(SESSION_TOKEN_KEY);
-  } catch {
-    return null;
-  }
+  return getAccessToken();
 }
 
 export function clearSession(): void {
-  try {
-    sessionStorage.removeItem(SESSION_TOKEN_KEY);
-  } catch {
-    // Sin acceso al almacenamiento no hay nada que borrar
-  }
+  clearAccessToken();
 }
 
 // Solo para decidir qué pantalla mostrar: la autorización real la hace el backend

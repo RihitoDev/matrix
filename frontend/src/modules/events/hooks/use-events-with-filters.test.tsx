@@ -1,5 +1,6 @@
+import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, renderHook, waitFor } from '@testing-library/react';
+import { cleanup, waitFor } from "@testing-library/react";
 
 import { useEvents } from './use-events';
 import { eventsService } from '../services/events.service';

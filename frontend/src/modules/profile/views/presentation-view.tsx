@@ -18,9 +18,8 @@ export function PresentationView() {
 
   return (
     <ProfilePageLayout
-      activeTab="presentation"
       title="Presentación profesional"
-      description="Escribe cómo quieres presentarte ante egresados, mentores y empresas."
+      description="Cuenta qué haces y qué buscas."
     >
       {isLoading ? (
         <p role="status" className="text-[15px] text-text-secondary">

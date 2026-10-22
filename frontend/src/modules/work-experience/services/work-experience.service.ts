@@ -1,9 +1,9 @@
 import { apiClient } from "@/shared/services/api-client";
 import { WORK_EXPERIENCES_ENDPOINT } from "../config/work-experience-api.config";
-import type { ApiResponse } from "@/modules/profile/types/api-response.types";
+import type { ApiResponse } from "@/modules/profile";
 import type { WorkExperienceItem } from "../types/work-experience-item.types";
 import type { WorkExperiencePayload } from "../types/work-experience-payload.types";
-import { getAuthHeaders } from "@/modules/profile/utils/get-auth-headers";
+import { getAuthHeaders } from "@/modules/profile";
 
 export const workExperienceService = {
   getWorkExperiences: async (): Promise<WorkExperienceItem[]> => {

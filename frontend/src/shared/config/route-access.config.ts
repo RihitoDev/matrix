@@ -1,6 +1,7 @@
 import type { RouteAccessRule } from "@/shared/types/route-access-rule.types";
 
 export const APP_ROUTE_ACCESS: readonly RouteAccessRule[] = [
+  { pattern: /^\/dashboard\/?$/, roles: ["titulado", "estudiante", "mentor", "empresa", "administrativo"] },
   { pattern: /^\/backoffice(?:\/|$)/, roles: ["administrativo"] },
   { pattern: /^\/affinity-radar\/review-queue\/?$/, roles: ["administrativo"] },
   { pattern: /^\/recruiters(?:\/|$)/, roles: ["empresa"] },
@@ -8,7 +9,7 @@ export const APP_ROUTE_ACCESS: readonly RouteAccessRule[] = [
   { pattern: /^\/area-detail(?:-interaction)?-preview\/?$/, roles: ["empresa"] },
   { pattern: /^\/profile\/radar\/?$/, roles: ["titulado", "mentor"] },
   { pattern: /^\/profile(?:\/|$)/, roles: ["titulado", "estudiante", "mentor", "empresa"] },
-  { pattern: /^\/chat(?:\/|$)/, roles: ["titulado", "mentor", "estudiante", "empresa"] },
+  { pattern: /^\/chat(?:\/|$)/, roles: ["titulado", "estudiante", "mentor", "empresa"] },
   { pattern: /^\/events(?:\/|$)/, roles: ["titulado", "mentor"] },
   { pattern: /^\/vacancies(?:\/|$)/, roles: ["titulado", "estudiante", "mentor"] },
   { pattern: /^\/mentor\/availability\/?$/, roles: ["mentor"] },

@@ -11,16 +11,16 @@ function callProxy(path: string, cookieValue?: string) {
 }
 
 describe("Root proxy", () => {
-  it("redirects anonymous users from the root to login", () => {
+  it("serves the public landing page to anonymous visitors", () => {
     const response = callProxy("/");
-    expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe(`${BASE_ORIGIN}/login`);
+    expect(response.status).toBe(200);
+    expect(response.headers.get("location")).toBeNull();
   });
 
-  it.each(["1", "0"])("sends the root to login even when the session marker is %s, because the proxy does not know the role", (marker) => {
+  it.each(["1", "0"])("keeps the landing public when the session marker is %s", (marker) => {
     const response = callProxy("/", marker);
-    expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe(`${BASE_ORIGIN}/login`);
+    expect(response.status).toBe(200);
+    expect(response.headers.get("location")).toBeNull();
   });
 
   it("matches only the root, leaving authentication to route layouts", () => {

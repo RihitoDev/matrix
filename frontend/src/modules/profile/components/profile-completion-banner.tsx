@@ -1,23 +1,27 @@
-import { CircleAlert } from "lucide-react";
+import { UserRoundPen } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export function ProfileCompletionBanner() {
+interface ProfileCompletionBannerProps {
+  hasContactInfo?: boolean;
+}
+
+export function ProfileCompletionBanner({ hasContactInfo = false }: ProfileCompletionBannerProps) {
   return (
     <div
       role="status"
-      className="flex items-center justify-between gap-6 rounded-2xl border border-accent/30 bg-interaction px-8 py-5"
+      className="flex items-center justify-between gap-6 rounded-lg bg-interaction px-5 py-4"
     >
       <div className="flex items-center gap-3">
-        <CircleAlert aria-hidden="true" className="size-5 shrink-0 text-accent" />
+        <UserRoundPen aria-hidden="true" className="size-5 shrink-0 text-accent" />
         <p className="text-[15px] text-ink">
-          Completa tu perfil para que egresados, mentores y empresas puedan identificarte y contactarte.
+          Completa tu perfil para que la comunidad te conozca.
         </p>
       </div>
       <Link
-        href="/profile/personal-info"
-        className={cn(buttonVariants(), "h-12 bg-accent px-6 text-[14px] font-semibold text-white hover:bg-danger", "h-10 shrink-0 px-5")}
+        href={hasContactInfo ? "/profile/presentation" : "/profile/personal-info"}
+        className={cn(buttonVariants(), "h-10 bg-accent px-4 text-sm text-white hover:bg-brand-hover", "h-10 shrink-0 px-5")}
       >
         Completar perfil
       </Link>

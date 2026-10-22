@@ -1,5 +1,5 @@
 import { renderWithQuery as render } from "@/shared/testing/render-with-query";
-import { cleanup, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { profileService } from "@/modules/profile/services/profile.service";
 import { saveAccessToken, clearAccessToken } from "@/shared/services/storage/access-token-storage";
@@ -44,7 +44,7 @@ describe("MentorDirectoryView", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: "Directorio de mentores",
+        name: "Encuentra un mentor",
       }),
     ).toBeDefined();
   });
@@ -111,4 +111,19 @@ describe("MentorDirectoryView", () => {
     expect(screen.queryByText("Ver mi perfil")).not.toBeInTheDocument();
     expect(getProfile).not.toHaveBeenCalled();
   });
+  it("combines accent-insensitive search, area and availability filters and can reset them",async()=>{
+    vi.spyOn(directoryService,"getMentorDirectory").mockResolvedValue(mentors);
+    render(<MentorDirectoryView />);
+    await screen.findByRole("link",{name:/Ver perfil de María/});
+    fireEvent.change(screen.getByRole("searchbox",{name:"Buscar mentor"}),{target:{value:"maria"}});
+    expect(screen.queryByRole("link",{name:/Ver perfil de Carlos/})).not.toBeInTheDocument();
+    fireEvent.change(screen.getByRole("combobox",{name:"Área"}),{target:{value:"Backend"}});
+    fireEvent.click(screen.getByRole("checkbox",{name:"Con disponibilidad"}));
+    expect(screen.getByRole("link",{name:/Ver perfil de María/})).toBeInTheDocument();
+    fireEvent.change(screen.getByRole("searchbox",{name:"Buscar mentor"}),{target:{value:"noexiste"}});
+    expect(screen.getByText("No hay mentores con estos filtros")).toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole("button",{name:"Limpiar filtros"})[0]);
+    expect(screen.getByRole("link",{name:/Ver perfil de Carlos/})).toBeInTheDocument();
+  });
+
 });

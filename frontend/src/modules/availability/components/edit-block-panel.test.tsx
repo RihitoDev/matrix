@@ -41,7 +41,7 @@ describe("EditBlockPanel", () => {
     expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeInTheDocument()
     expect(
       screen.getByRole("button", { name: "Eliminar bloque" }),
-    ).toHaveClass("border-danger", "text-danger")
+    ).toHaveClass("border-border-strong", "text-ink")
     expect(
       screen.queryByText("Solo se puede editar si el bloque no tiene ninguna cita asociada."),
     ).not.toBeInTheDocument()

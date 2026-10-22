@@ -1,9 +1,6 @@
-import { ACCESS_TOKEN_STORAGE_KEY } from "../config/auth-storage.config";
+import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 
 export function getAuthHeaders(): Record<string, string> {
-  if (typeof window === "undefined") {
-    return {};
-  }
-  const token = window.sessionStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+  const token = getAccessToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }

@@ -2,11 +2,11 @@ import { apiClient } from "@/shared/services/api-client";
 import { EDUCATIONS_ENDPOINT, EDUCATION_INSTITUTIONS_ENDPOINT } from "../constants/education-api.constants";
 import { EDUCATION_INSTITUTION_TEXTS } from "../constants/education-institutions.constants";
 import type { EducationInstitution } from "../types/education-institution.types";
-import type { ApiResponse } from "@/modules/profile/types/api-response.types";
+import type { ApiResponse } from "@/modules/profile";
 import type { EducationItem } from "../types/education-item.types";
 import type { EducationPayload } from "../types/education-payload.types";
 import type { UpdateEducationPayload } from "../types/update-education-payload.types";
-import { getAuthHeaders } from "@/modules/profile/utils/get-auth-headers";
+import { getAuthHeaders } from "@/modules/profile";
 
 export const educationsService = {
   getInstitutions: async (): Promise<EducationInstitution[]> => {

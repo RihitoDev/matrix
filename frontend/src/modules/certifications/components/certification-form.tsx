@@ -8,8 +8,8 @@ import type { CertificationDocumentChange } from "../types/certification-documen
 import type { CertificationErrors } from "../types/certification-errors.types";
 import type { CertificationFormProps } from "../types/certification-form-props.types";
 import type { CreateCertificationDto } from "../types/create-certification-dto.types";
-import { getFieldErrorProps } from "@/modules/profile/utils/get-field-error-props";
-import { trimFormValues } from "@/modules/profile/utils/trim-form-values";
+import { getFieldErrorProps } from "@/modules/profile";
+import { trimFormValues } from "@/modules/profile";
 import {
   CERTIFICATION_NAME_MAX_LENGTH,
   CERTIFICATION_VALIDATION_MESSAGES,
@@ -19,7 +19,8 @@ import { CERTIFICATION_MIN_ISSUE_DATE } from "../constants/certification-form.co
 import { readCertificateFile } from "../utils/read-certificate-file";
 import { getTodayIsoDate, validateCertification } from "../utils/validate-certification";
 import { CertificationDocumentField } from "./certification-document-field";
-import { FormField } from "@/modules/profile/components/form-field";
+import { FormFieldset } from "@/shared/components/layout/form-fieldset";
+import { FormField } from "@/modules/profile";
 
 const EMPTY_CERTIFICATION_VALUES: CreateCertificationDto = {
   name: "",
@@ -155,6 +156,7 @@ export function CertificationForm({
   return (
     <form aria-label={title} noValidate onSubmit={handleSubmit} className="flex flex-col gap-5">
       <h3 className="font-tight text-[18px] font-bold text-ink">{title}</h3>
+      <FormFieldset title="Certificación">
       <FormField
         id="certification-name"
         label="Nombre de la certificación"
@@ -170,7 +172,7 @@ export function CertificationForm({
           value={values.name}
           disabled={isBusy}
           onChange={handleChange}
-          className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+          className="h-11"
           {...getFieldErrorProps("certification-name", errors.name)}
         />
       </FormField>
@@ -190,7 +192,7 @@ export function CertificationForm({
             value={values.issuingOrganization}
             disabled={isBusy}
             onChange={handleChange}
-            className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+            className="h-11"
             {...getFieldErrorProps("certification-issuingOrganization", errors.issuingOrganization)}
           />
         </FormField>
@@ -209,11 +211,13 @@ export function CertificationForm({
             value={values.issueDate}
             disabled={isBusy}
             onChange={handleChange}
-            className="w-full rounded-lg border border-border bg-surface px-4 text-[15px] text-ink placeholder:text-text-secondary/70 focus:border-ink-soft focus:ring-2 focus:ring-ink/10 focus:outline-none disabled:opacity-60 aria-invalid:border-accent aria-invalid:focus:ring-accent/15 h-12 md:text-[15px] focus-visible:border-ink-soft focus-visible:ring-2 focus-visible:ring-ink/10 aria-invalid:ring-0"
+            className="h-11"
             {...getFieldErrorProps("certification-issueDate", errors.issueDate)}
           />
         </FormField>
       </div>
+      </FormFieldset>
+      <FormFieldset title="Documento de respaldo">
       <CertificationDocumentField
         id={isEditing ? "edit-certification-document" : "create-certification-document"}
         selectedFile={selectedFile}
@@ -227,13 +231,14 @@ export function CertificationForm({
         onClearFile={handleClearFile}
         onRemoveCurrent={handleRemoveCurrentDocument}
       />
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+      </FormFieldset>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-5">
         <p className="text-[13px] text-text-secondary">* Campos obligatorios</p>
         <div className="flex gap-3">
           <Button
             type="button"
             variant="outline"
-            className="h-12 border-border-strong bg-surface px-6 text-[14px] font-semibold text-ink hover:bg-surface-soft"
+            className="h-10 border-border-strong px-4 text-sm text-ink hover:bg-surface-soft"
             disabled={isBusy}
             onClick={handleCancel}
           >
@@ -241,7 +246,7 @@ export function CertificationForm({
           </Button>
           <Button
             type="submit"
-            className="h-12 min-w-44 bg-accent px-6 text-[14px] font-semibold text-white hover:bg-danger"
+            className="h-10 min-w-40 bg-accent px-4 text-sm text-white hover:bg-brand-hover"
             disabled={isBusy || isReadingFile}
           >
             {isBusy ? <Loader2 aria-hidden="true" className="size-4 animate-spin" /> : null}

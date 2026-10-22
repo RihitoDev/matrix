@@ -1,12 +1,14 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { CERTIFICATION_FEEDBACK_MESSAGES } from "../config/certification-feedback.config";
 import { certificationsService } from "../services/certifications.service";
 import type { Certification } from "../types/certification.types";
-import type { Feedback } from "@/modules/profile/types/feedback.types";
+import type { Feedback } from "@/modules/profile";
 
 export function useDeleteCertification(onSuccess?: (certification: Certification) => void) {
+  const mutation = useMutation({ mutationFn: (id: string) => certificationsService.deleteCertification(id) });
   const [isDeleting, setIsDeleting] = useState(false);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
@@ -14,7 +16,7 @@ export function useDeleteCertification(onSuccess?: (certification: Certification
     setIsDeleting(true);
     setFeedback(null);
     try {
-      await certificationsService.deleteCertification(certification.id);
+      await mutation.mutateAsync(certification.id);
       setFeedback({ type: "success", message: CERTIFICATION_FEEDBACK_MESSAGES.deleteSuccess });
       onSuccess?.(certification);
       return true;

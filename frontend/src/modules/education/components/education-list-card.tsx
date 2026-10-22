@@ -1,10 +1,11 @@
+import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EDUCATION_FEEDBACK_MESSAGES } from "../constants/education-feedback.constants";
 import { EDUCATION_UI_TEXTS } from "../constants/education-ui.constants";
 import type { EducationListCardProps } from "../types/education-list-card-props.types";
 import { formatEducationPeriod } from "../utils/format-education-period";
-import { FeedbackMessage } from "@/modules/profile/components/feedback-message";
-import { SectionCard } from "@/modules/profile/components/section-card";
+import { FeedbackMessage } from "@/modules/profile";
+import { SectionCard } from "@/modules/profile";
 
 export function EducationListCard({
   educations = [],
@@ -51,9 +52,9 @@ export function EducationListCard({
                   aria-label={`${EDUCATION_UI_TEXTS.editButton} ${education.degree}`}
                   disabled={isBusy}
                   onClick={() => onEdit?.(education)}
-                  className="h-8 px-2 text-[13px] font-semibold text-ink"
+                  className="size-9 p-0 text-ink-soft"
                 >
-                  {EDUCATION_UI_TEXTS.editButton}
+                  <Pencil className="size-4" aria-hidden="true" />
                 </Button>
                 <Button
                   type="button"
@@ -61,9 +62,9 @@ export function EducationListCard({
                   aria-label={`${EDUCATION_UI_TEXTS.deleteButton} ${education.degree}`}
                   disabled={isBusy}
                   onClick={() => onDelete?.(education)}
-                  className="h-8 px-2 text-[13px] font-semibold text-accent hover:bg-interaction hover:text-accent"
+                  className="size-9 p-0 text-ink-soft hover:bg-interaction hover:text-ink"
                 >
-                  {EDUCATION_UI_TEXTS.deleteButton}
+                  <Trash2 className="size-4" aria-hidden="true" />
                 </Button>
               </div>
             </li>

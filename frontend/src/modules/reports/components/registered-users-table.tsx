@@ -1,7 +1,7 @@
 import { FileText } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDate } from "@/shared/utils/date.utils";
-import { DOCUMENT_TYPE_LABELS } from "@/modules/request-review/constants/request-review.constants";
+import { DOCUMENT_TYPE_LABELS } from "@/modules/request-review";
 import { EMPTY_DOCUMENT_LABEL, USER_TYPE_LABELS } from "../constants/registered-users.constants";
 import { EMAIL_SEARCH_NO_RESULTS_MESSAGE } from "../constants/reports.constants";
 import {

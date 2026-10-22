@@ -1,6 +1,5 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import {
   Sidebar,
@@ -17,13 +16,6 @@ import { SidebarBrand } from "./sidebar-brand";
 import { SidebarNavItem } from "./sidebar-nav-item";
 import { SidebarUserCard } from "./sidebar-user-card";
 
-interface AppSidebarExtras {
-  brand?: ReactNode;
-  footer?: ReactNode;
-  itemClassName?: string;
-  itemBadges?: Record<string, ReactNode>;
-}
-
 export function AppSidebar({
   items = SIDEBAR_NAVIGATION,
   user,
@@ -31,7 +23,7 @@ export function AppSidebar({
   footer,
   itemClassName,
   itemBadges,
-}: AppSidebarProps & AppSidebarExtras) {
+}: AppSidebarProps) {
   const pathname = usePathname();
   const { roles } = useAuth();
   const visibleItems = filterNavigationByRoles(items, roles);
@@ -39,15 +31,15 @@ export function AppSidebar({
   return (
     <Sidebar
       collapsible="offcanvas"
-      className="border-ink bg-ink text-surface *:data-[slot=sidebar-inner]:bg-ink"
+      className="border-sidebar bg-sidebar text-surface *:data-[slot=sidebar-inner]:bg-sidebar"
     >
-      <SidebarHeader className="p-2">
+      <SidebarHeader className="mb-4 border-b border-surface/10 px-3 pb-5 pt-4">
         {brand ?? <SidebarBrand />}
       </SidebarHeader>
 
       <SidebarContent className="px-3">
         <nav aria-label="Menú principal">
-          <SidebarMenu className="gap-1">
+          <SidebarMenu className="gap-1.5">
             {visibleItems.map((item) => (
               <SidebarNavItem
                 key={item.label}
@@ -62,10 +54,10 @@ export function AppSidebar({
       </SidebarContent>
 
       {footer ? (
-        <SidebarFooter className="px-3 py-4">{footer}</SidebarFooter>
+        <SidebarFooter className="mt-4 border-t border-surface/10 px-3 py-4">{footer}</SidebarFooter>
       ) : (
         user && (
-          <SidebarFooter className="px-3 py-4">
+          <SidebarFooter className="mt-4 border-t border-surface/10 px-3 py-4">
             <SidebarUserCard user={user} />
           </SidebarFooter>
         )

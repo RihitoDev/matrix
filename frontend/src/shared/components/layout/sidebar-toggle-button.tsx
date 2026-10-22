@@ -12,9 +12,9 @@ export function SidebarToggleButton() {
       onClick={toggleSidebar}
       aria-label={open ? "Cerrar menú" : "Abrir menú"}
       aria-expanded={open}
-      className="rounded-md p-2 text-ink transition-colors hover:bg-ink/5"
+      className="rounded-md p-2 text-ink-soft transition-colors hover:bg-ink/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
     >
-      <Menu className="size-6" aria-hidden="true" />
+      <Menu className="size-5" aria-hidden="true" />
     </button>
   );
 }

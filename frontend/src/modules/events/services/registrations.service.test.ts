@@ -1,13 +1,17 @@
+import { getAccessToken } from "@/shared/services/storage/access-token-storage";
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { apiClient } from '@/shared/services/api-client';
 import { registrationsService } from './registrations.service';
 
-vi.mock('@/shared/services/api-client', () => ({
+vi.mock("@/shared/services/api-client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/shared/services/api-client")>()),
   apiClient: { defaults: { baseURL: 'http://localhost/api' }, get: vi.fn() },
 }));
 
-describe('registrationsService', () => {
+vi.mock('@/shared/services/storage/access-token-storage', () => ({ getAccessToken: vi.fn() }));
+
+describe('registrationsService' , () => {
   beforeEach(() => {
     apiClient.defaults.baseURL = 'http://localhost/api';
     const values = new Map<string, string>();
@@ -16,9 +20,10 @@ describe('registrationsService', () => {
       setItem: (key: string, value: string) => values.set(key, value),
     });
     vi.clearAllMocks();
+    vi.mocked(getAccessToken).mockReturnValue(null);
   });
   it('envía el token de sesión y devuelve las inscripciones del backend', async () => {
-    sessionStorage.setItem('accessToken', 'signed-token');
+    vi.mocked(getAccessToken).mockReturnValue('signed-token');
     const items = [
       {
         id: 'registration-1',
@@ -40,7 +45,7 @@ describe('registrationsService', () => {
     });
   });
   it('rechaza la URL ausente sin enviar la solicitud', async () => {
-    sessionStorage.setItem('accessToken', 'token');
+    vi.mocked(getAccessToken).mockReturnValue('token');
     apiClient.defaults.baseURL = undefined;
     await expect(registrationsService.getMine()).rejects.toThrow(
       'URL del backend',

@@ -1,5 +1,5 @@
+import { readLocalStorage, writeLocalStorage, removeLocalStorage, canUseLocalStorage } from "@/shared/services/storage/browser-local-storage";
 import { Message, MessageStatus } from '../types/conversation.types';
-import { MOCK_MESSAGES } from '../mocks/mock-messages';
 
 export const CHAT_MESSAGES_STORAGE_KEY = 'umssy_chat_messages_v1';
 export const CHAT_READ_STATUS_STORAGE_KEY = 'umssy_chat_read_status_v1';
@@ -7,23 +7,6 @@ export const CHAT_READ_STATUS_STORAGE_KEY = 'umssy_chat_read_status_v1';
 // Memoria cache en caso de entorno SSR o indisponibilidad de localStorage
 let memoryMessageCache: Message[] | null = null;
 let memoryConversationReadStateCache: Record<string, number> | null = null;
-
-/**
- * Determina si el entorno actual dispone de la API de localStorage
- */
-function isLocalStorageAvailable(): boolean {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-  try {
-    const testKey = '__storage_test__';
-    window.localStorage.setItem(testKey, testKey);
-    window.localStorage.removeItem(testKey);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 /**
  * Clona profundamente una coleccion de mensajes para evitar mutaciones externas
@@ -34,22 +17,21 @@ function cloneMessages(messages: Message[]): Message[] {
 
 /**
  * Obtiene la lista completa de mensajes almacenados.
- * Si el almacenamiento local esta vacio, se inicializa con los datos mock base.
+ * El almacenamiento vacío no se completa con mensajes ficticios.
  */
 export function getStoredMessages(): Message[] {
-  if (!isLocalStorageAvailable()) {
+  if (!canUseLocalStorage()) {
     if (!memoryMessageCache) {
-      memoryMessageCache = cloneMessages(MOCK_MESSAGES);
+      memoryMessageCache = [];
     }
     return cloneMessages(memoryMessageCache);
   }
 
   try {
-    const serializedData = window.localStorage.getItem(CHAT_MESSAGES_STORAGE_KEY);
+    const serializedData = readLocalStorage(CHAT_MESSAGES_STORAGE_KEY);
     if (!serializedData) {
-      // Inicializacion con los datos mock por defecto
-      const initialMessages = cloneMessages(MOCK_MESSAGES);
-      window.localStorage.setItem(
+      const initialMessages: Message[] = [];
+      writeLocalStorage(
         CHAT_MESSAGES_STORAGE_KEY,
         JSON.stringify(initialMessages)
       );
@@ -63,9 +45,9 @@ export function getStoredMessages(): Message[] {
       return cloneMessages(parsedData);
     }
 
-    // Si los datos eran invalidos, reiniciar con los datos mock
-    const fallbackMessages = cloneMessages(MOCK_MESSAGES);
-    window.localStorage.setItem(
+    // Si los datos eran invalidos, reiniciar con los una lista vacía
+    const fallbackMessages: Message[] = [];
+    writeLocalStorage(
       CHAT_MESSAGES_STORAGE_KEY,
       JSON.stringify(fallbackMessages)
     );
@@ -73,7 +55,7 @@ export function getStoredMessages(): Message[] {
     return cloneMessages(fallbackMessages);
   } catch {
     if (!memoryMessageCache) {
-      memoryMessageCache = cloneMessages(MOCK_MESSAGES);
+      memoryMessageCache = [];
     }
     return cloneMessages(memoryMessageCache);
   }
@@ -111,9 +93,9 @@ export function saveStoredMessage(message: Message): Message {
 
   memoryMessageCache = updatedMessages;
 
-  if (isLocalStorageAvailable()) {
+  if (canUseLocalStorage()) {
     try {
-      window.localStorage.setItem(
+      writeLocalStorage(
         CHAT_MESSAGES_STORAGE_KEY,
         JSON.stringify(updatedMessages)
       );
@@ -157,16 +139,16 @@ export function rehydrateStoredMessages(): Message[] {
 }
 
 /**
- * Restablece el almacenamiento local a los datos mock base y limpia el estado de lectura.
+ * Restablece el almacenamiento local a los una lista vacía y limpia el estado de lectura.
  */
 export function clearStoredMessages(): void {
-  const initialMessages = cloneMessages(MOCK_MESSAGES);
+  const initialMessages: Message[] = [];
   memoryMessageCache = initialMessages;
   clearStoredConversationReadState();
 
-  if (isLocalStorageAvailable()) {
+  if (canUseLocalStorage()) {
     try {
-      window.localStorage.setItem(
+      writeLocalStorage(
         CHAT_MESSAGES_STORAGE_KEY,
         JSON.stringify(initialMessages)
       );
@@ -181,12 +163,12 @@ export function clearStoredMessages(): void {
  * Devuelve un diccionario donde la clave es conversationId y el valor es unreadCount.
  */
 export function getStoredConversationReadState(): Record<string, number> {
-  if (!isLocalStorageAvailable()) {
+  if (!canUseLocalStorage()) {
     return memoryConversationReadStateCache ? { ...memoryConversationReadStateCache } : {};
   }
 
   try {
-    const serialized = window.localStorage.getItem(CHAT_READ_STATUS_STORAGE_KEY);
+    const serialized = readLocalStorage(CHAT_READ_STATUS_STORAGE_KEY);
     if (!serialized) {
       return memoryConversationReadStateCache ? { ...memoryConversationReadStateCache } : {};
     }
@@ -212,9 +194,9 @@ export function setStoredConversationUnreadCount(
   currentState[conversationId] = Math.max(0, unreadCount);
   memoryConversationReadStateCache = currentState;
 
-  if (isLocalStorageAvailable()) {
+  if (canUseLocalStorage()) {
     try {
-      window.localStorage.setItem(
+      writeLocalStorage(
         CHAT_READ_STATUS_STORAGE_KEY,
         JSON.stringify(currentState)
       );
@@ -238,9 +220,9 @@ export function markStoredConversationAsRead(conversationId: string): void {
  */
 export function clearStoredConversationReadState(): void {
   memoryConversationReadStateCache = null;
-  if (isLocalStorageAvailable()) {
+  if (canUseLocalStorage()) {
     try {
-      window.localStorage.removeItem(CHAT_READ_STATUS_STORAGE_KEY);
+      removeLocalStorage(CHAT_READ_STATUS_STORAGE_KEY);
     } catch {
       // Manejo silencioso
     }

@@ -45,7 +45,7 @@ describe("useRedirectAuthenticated", () => {
   it.each([
     [["administrativo"], "/backoffice/solicitudes"],
     [["empresa"], "/recruiters"],
-    [["titulado"], "/profile"],
+    [["titulado"], "/dashboard"],
   ])("sends %j to %s", (roles, path) => {
     vi.mocked(useAuth).mockReturnValue(authState(roles));
     renderHook(() => useRedirectAuthenticated());
@@ -63,7 +63,7 @@ describe("useRedirectAuthenticated", () => {
     window.history.replaceState({}, "", "/login?next=/backoffice/solicitudes");
     vi.mocked(useAuth).mockReturnValue(authState(["titulado"]));
     renderHook(() => useRedirectAuthenticated());
-    expect(replace).toHaveBeenCalledWith("/profile");
+    expect(replace).toHaveBeenCalledWith("/dashboard");
   });
 
   it("redirects once even if the component renders again with a new array of the same roles", () => {
@@ -83,7 +83,7 @@ describe("useRedirectAuthenticated", () => {
     rerender();
 
     expect(replace).toHaveBeenCalledTimes(1);
-    expect(replace).toHaveBeenCalledWith("/profile");
+    expect(replace).toHaveBeenCalledWith("/dashboard");
   });
 
   it("does not redirect when the session is closed after a rejected validation", () => {

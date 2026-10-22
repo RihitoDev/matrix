@@ -1,4 +1,7 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { createQueryClient } from "@/shared/services/query-client";
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getMentorTechnicalAreas } from "../services/technical-areas.service";
@@ -33,7 +36,7 @@ describe("ParticipationView", () => {
   });
 
   it("mantiene un estado inicial estable mientras resuelve la participación", () => {
-    const html = renderToString(<ParticipationView />);
+    const html = renderToString(<QueryClientProvider client={createQueryClient()}><ParticipationView /></QueryClientProvider>);
 
     expect(html).toContain("Cargando participación...");
     expect(html).not.toContain("Mi participación como mentor");

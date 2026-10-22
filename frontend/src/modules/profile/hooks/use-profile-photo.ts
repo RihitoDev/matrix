@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   PHOTO_ERROR_MESSAGES,
@@ -10,6 +11,9 @@ import { getHttpStatus } from "../utils/get-http-status";
 import { validatePhotoFile } from "../utils/validate-photo-file";
 
 export function useProfilePhoto() {
+  const photoQuery = useQuery({ queryKey: ["profile", "photo"], queryFn: () => profilePhotoService.getPhoto(), enabled: false });
+  const refetchPhoto = photoQuery.refetch;
+  const photoMutation = useMutation({ mutationFn: (request: () => Promise<void>) => request() });
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -24,7 +28,7 @@ export function useProfilePhoto() {
   const busyRef = useRef(false);
   const requestIdRef = useRef(0);
 
-  // Object URLs keep the image in memory until they are revoked.
+  // Las URLs de objetos deben liberarse para no retener archivos en memoria.
   function replacePhotoUrl(blob: Blob | null) {
     if (photoUrlRef.current) {
       URL.revokeObjectURL(photoUrlRef.current);
@@ -48,7 +52,8 @@ export function useProfilePhoto() {
     setIsLoading(true);
     setLoadError(null);
     try {
-      const photo = await profilePhotoService.getPhoto();
+      const result = await refetchPhoto({ throwOnError: true });
+      const photo = result.data ?? null;
       if (mountedRef.current && requestId === requestIdRef.current) {
         replacePhotoUrl(photo);
       }
@@ -61,7 +66,7 @@ export function useProfilePhoto() {
         setIsLoading(false);
       }
     }
-  }, []);
+  }, [refetchPhoto]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -77,7 +82,7 @@ export function useProfilePhoto() {
     };
   }, [reloadPhoto]);
 
-  // Shows the chosen file as a preview; nothing is uploaded until confirmPhoto.
+  // La selección solo prepara la vista previa; la carga requiere confirmación.
   function selectPhoto(file: File) {
     if (busyRef.current) return;
     const validationError = validatePhotoFile(file);
@@ -111,7 +116,7 @@ export function useProfilePhoto() {
     setIsLoading(false);
     setError(null);
     try {
-      await request();
+      await photoMutation.mutateAsync(request);
       if (!mountedRef.current || requestId !== requestIdRef.current) return;
       onSuccess();
       setLoadError(null);

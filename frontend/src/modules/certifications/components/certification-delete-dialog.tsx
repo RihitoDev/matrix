@@ -1,5 +1,5 @@
 import type { CertificationDeleteDialogProps } from "../types/certification-delete-dialog-props.types";
-import { ConfirmDeleteDialog } from "@/modules/profile/components/confirm-delete-dialog";
+import { ConfirmDeleteDialog } from "@/modules/profile";
 
 export function CertificationDeleteDialog({
   certification,

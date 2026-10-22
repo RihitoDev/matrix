@@ -4,13 +4,13 @@ import {
   CERTIFICATIONS_ENDPOINT,
   getCertificationDocumentEndpoint,
 } from "../config/certification-api.config";
-import { NOT_FOUND_STATUS } from "@/modules/profile/constants/http-status.constants";
-import type { ApiResponse } from "@/modules/profile/types/api-response.types";
+import { NOT_FOUND_STATUS } from "@/modules/profile";
+import type { ApiResponse } from "@/modules/profile";
 import type { Certification } from "../types/certification.types";
 import type { CreateCertificationDto } from "../types/create-certification-dto.types";
 import type { UpdateCertificationDto } from "../types/update-certification-dto.types";
-import { getAuthHeaders } from "@/modules/profile/utils/get-auth-headers";
-import { getHttpStatus } from "@/modules/profile/utils/get-http-status";
+import { getAuthHeaders } from "@/modules/profile";
+import { getHttpStatus } from "@/modules/profile";
 
 export const certificationsService = {
   getCertifications: async (): Promise<Certification[]> => {

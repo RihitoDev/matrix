@@ -1,4 +1,5 @@
-import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
+import { renderHookWithQuery as renderHook } from "@/shared/testing/render-hook-with-query";
+import { act, cleanup, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { documentsService } from "../services/documents.service";
 import type { SavedCv } from "../types/saved-cv.types";
@@ -36,15 +37,15 @@ describe("useCvDocument", () => {
 
     expect(result.current.isLoading).toBe(true);
     await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(result.current.savedCv).toEqual(SAVED_CV);
-    expect(result.current.loadError).toBeNull();
+    await waitFor(() => expect(result.current.savedCv).toEqual(SAVED_CV));
+    await waitFor(() => expect(result.current.loadError).toBeNull());
   });
 
   it("exposes null when the user has no cv", async () => {
     const { result } = renderHook(() => useCvDocument());
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(result.current.savedCv).toBeNull();
+    await waitFor(() => expect(result.current.savedCv).toBeNull());
   });
 
   it("exposes a spanish error when loading fails", async () => {
@@ -53,8 +54,8 @@ describe("useCvDocument", () => {
     const { result } = renderHook(() => useCvDocument());
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(result.current.loadError).toBe("No se pudo cargar tu CV. Intenta de nuevo más tarde.");
-    expect(result.current.savedCv).toBeNull();
+    await waitFor(() => expect(result.current.loadError).toBe("No se pudo cargar tu CV. Intenta de nuevo más tarde."));
+    await waitFor(() => expect(result.current.savedCv).toBeNull());
   });
 
   it("ignores the load result after unmounting", async () => {
@@ -91,8 +92,8 @@ describe("useCvDocument", () => {
     });
 
     expect(documentsService.uploadCv).toHaveBeenCalledWith(file);
-    expect(result.current.savedCv).toEqual(SAVED_CV);
-    expect(result.current.loadError).toBeNull();
+    await waitFor(() => expect(result.current.savedCv).toEqual(SAVED_CV));
+    await waitFor(() => expect(result.current.loadError).toBeNull());
   });
 
   it("does not let a late initial load overwrite a cv uploaded meanwhile", async () => {
@@ -110,7 +111,7 @@ describe("useCvDocument", () => {
       resolveLoad(null);
     });
 
-    expect(result.current.savedCv).toEqual(SAVED_CV);
+    await waitFor(() => expect(result.current.savedCv).toEqual(SAVED_CV));
     expect(result.current.isLoading).toBe(false);
   });
 
@@ -129,7 +130,7 @@ describe("useCvDocument", () => {
       resolveLoad(SAVED_CV);
     });
 
-    expect(result.current.savedCv).toBeNull();
+    await waitFor(() => expect(result.current.savedCv).toBeNull());
   });
 
   it("keeps the current cv when the upload fails", async () => {
@@ -144,7 +145,7 @@ describe("useCvDocument", () => {
       ).rejects.toEqual({ response: { status: 415 } });
     });
 
-    expect(result.current.savedCv).toEqual(SAVED_CV);
+    await waitFor(() => expect(result.current.savedCv).toEqual(SAVED_CV));
   });
 
   it("clears the cv after deleting it", async () => {
@@ -158,6 +159,6 @@ describe("useCvDocument", () => {
     });
 
     expect(documentsService.deleteCv).toHaveBeenCalledTimes(1);
-    expect(result.current.savedCv).toBeNull();
+    await waitFor(() => expect(result.current.savedCv).toBeNull());
   });
 });

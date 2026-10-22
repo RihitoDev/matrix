@@ -1,4 +1,4 @@
-import { CERTIFICATE_ALLOWED_EXTENSIONS } from "@/modules/profile/config/file-upload.config";
+import { CERTIFICATE_ALLOWED_EXTENSIONS } from "@/modules/profile";
 
 export const CERTIFICATE_FILE_ACCEPT = CERTIFICATE_ALLOWED_EXTENSIONS.join(",");
 

@@ -1,4 +1,4 @@
-import { isAxiosError } from "axios";
+import { isApiError as isAxiosError } from "@/shared/services/api-client";
 import { EDUCATION_FEEDBACK_MESSAGES } from "../constants/education-feedback.constants";
 import { EDUCATION_CONFLICT_STATUS, EDUCATION_DUPLICATE_CODE, EDUCATION_WRITE_CONFLICT_CODE } from "../constants/education-http.constants";
 

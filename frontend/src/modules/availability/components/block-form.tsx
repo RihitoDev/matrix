@@ -22,7 +22,7 @@ import { formatDayAndMonth, formatLongDate, getBoliviaToday, toCalendarDate, toD
 
 function RequiredMark() {
   return (
-    <span aria-hidden="true" className="text-destructive">
+    <span aria-hidden="true" className="text-ink-soft">
       *
     </span>
   );
@@ -102,7 +102,7 @@ export function BlockForm({
   return (
     <Card
       className={cn(
-        "w-full [--card-spacing:--spacing(4)] sm:[--card-spacing:--spacing(6)]",
+        "w-full rounded-lg border border-border bg-surface [--card-spacing:--spacing(6)] shadow-none",
         mode === "edit" && "ring-1 ring-border-strong",
       )}
     >
@@ -126,7 +126,7 @@ export function BlockForm({
                       aria-hidden="true"
                       className={cn(
                         "flex h-10 items-center rounded-lg border border-transparent px-3 text-sm font-medium",
-                        "bg-danger/10 text-ink",
+                        "bg-interaction text-ink",
                       )}
                     >
                       {date ? formatDayAndMonth(date) : ""}
@@ -231,7 +231,7 @@ export function BlockForm({
 
         <CardFooter
           className={cn(
-            "flex-col-reverse gap-2 bg-transparent",
+            "flex-col-reverse gap-3 border-t border-border bg-transparent",
             mode === "edit" ? "items-stretch" : "sm:flex-row sm:justify-end",
           )}
         >
@@ -248,7 +248,7 @@ export function BlockForm({
             type="submit"
             size="lg"
             className={cn(
-              "w-full bg-accent text-surface hover:bg-danger",
+              "w-full bg-accent text-surface hover:bg-brand-hover",
               mode !== "edit" && "sm:w-auto",
             )}
             disabled={isSubmitting || disabled}

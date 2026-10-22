@@ -8,10 +8,9 @@ import { CertificationDocumentViewer } from "../components/certification-documen
 import { CertificationDocumentsPanel } from "../components/certification-documents-panel";
 import { CertificationForm } from "../components/certification-form";
 import { DEFAULT_DOCUMENT_TITLE } from "../constants/certification-form.constants";
-import { FeedbackMessage } from "@/modules/profile/components/feedback-message";
-import { ProfilePageLayout } from "@/modules/profile/components/profile-page-layout";
-import { SectionCard } from "@/modules/profile/components/section-card";
-import { TrajectorySteps } from "@/modules/profile/components/trajectory-steps";
+import { FeedbackMessage } from "@/modules/profile";
+import { ProfilePageLayout } from "@/modules/profile";
+import { SectionCard } from "@/modules/profile";
 import { useCertificationDocument } from "../hooks/use-certification-document";
 import { useCertifications } from "../hooks/use-certifications";
 import { useDeleteCertification } from "../hooks/use-delete-certification";
@@ -19,7 +18,7 @@ import { useSaveCertification } from "../hooks/use-save-certification";
 import type { Certification } from "../types/certification.types";
 import type { CertificationDocumentChange } from "../types/certification-document-change.types";
 import type { CreateCertificationDto } from "../types/create-certification-dto.types";
-import type { Feedback } from "@/modules/profile/types/feedback.types";
+import type { Feedback } from "@/modules/profile";
 
 function toFormValues(certification: Certification): CreateCertificationDto {
   return {
@@ -158,7 +157,7 @@ export function CertificationsView() {
         <div className="flex flex-col items-start gap-4 py-3">
           <p className="text-[14px] text-text-secondary">Aún no has agregado certificaciones.</p>
           {!isCreating && renderAddButton(
-            "h-11 bg-accent px-5 text-[14px] font-semibold text-white hover:bg-danger",
+            "h-11 bg-accent px-5 text-[14px] font-semibold text-white hover:bg-brand-hover",
           )}
         </div>
       );
@@ -183,13 +182,11 @@ export function CertificationsView() {
 
   return (
     <ProfilePageLayout
-      activeTab="trajectory"
-      title="Trayectoria"
-      description="Muestra tus estudios, experiencia, habilidades y certificaciones"
+      title="Certificaciones"
+      description="Gestiona tus certificaciones y sus documentos de respaldo."
     >
-      <TrajectorySteps activeStep="certifications" />
       {visibleFeedback ? <FeedbackMessage feedback={visibleFeedback} /> : null}
-      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 items-start gap-7 xl:grid-cols-[minmax(280px,0.9fr)_minmax(0,1.3fr)]">
         <SectionCard title="Tus certificaciones">
           <div className="flex flex-col gap-6">
             <section

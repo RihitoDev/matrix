@@ -1,5 +1,6 @@
+import { renderWithQuery as render } from "@/shared/testing/render-with-query";
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { screen, fireEvent, cleanup } from "@testing-library/react";
 import { ChatRoom } from '../components/chat-room';
 import { MessageInputBar } from '../components/message-input-bar';
 import { Conversation, Message } from '../types/conversation.types';
