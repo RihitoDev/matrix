@@ -104,7 +104,7 @@ export function MessageInputBar({
               data-testid="character-counter"
               className={`text-[11px] font-medium tracking-tight select-none ${
                 characterCount >= maxLength
-                  ? 'font-bold text-[#E30613]'
+                  ? 'font-bold text-accent text-[#E30613]'
                   : 'text-[#5B6470]'
               }`}
             >

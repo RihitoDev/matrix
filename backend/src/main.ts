@@ -16,8 +16,11 @@ async function bootstrap(): Promise<void> {
     .map((origin) => origin.trim())
     .filter((origin) => origin.length > 0);
 
+  const isWildcard = corsOrigins.length === 0 || corsOrigins.includes('*');
+
   app.enableCors({
-    origin: corsOrigins,
+    origin: isWildcard ? true : corsOrigins,
+    credentials: true,
     exposedHeaders: ['Content-Disposition'],
   });
   app.setGlobalPrefix('api');
