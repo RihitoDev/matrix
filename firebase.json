@@ -1,0 +1,15 @@
+{
+  "hosting": {
+    "public": "frontend/public",
+    "cleanUrls": true,
+    "rewrites": [
+      {
+        "source": "**",
+        "run": {
+          "serviceId": "umssy-frontend",
+          "region": "us-central1"
+        }
+      }
+    ]
+  }
+}

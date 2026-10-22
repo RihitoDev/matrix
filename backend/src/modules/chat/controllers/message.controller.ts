@@ -28,7 +28,7 @@ import {
 
 @Controller('chat/messages')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('titulado', 'mentor')
+@Roles('titulado', 'mentor', 'estudiante', 'empresa')
 @UseInterceptors(ResponseInterceptor)
 export class MessageController {
   constructor(private readonly messageService: MessageService) {}

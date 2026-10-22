@@ -65,5 +65,25 @@ describe('buildDatabaseConnectionString', () => {
       'postgresql://user:password_db@postgres:5432/app_db',
     );
   });
+
+  it('formatea correctamente sockets de Cloud SQL y codifica caracteres especiales', () => {
+    stubDbEnv({
+      DB_USER: 'postgres',
+      DB_PASSWORD: 'RihitoGG#5700',
+      DB_HOST: '/cloudsql/daty-76e04:us-central1:umsy-db',
+      DB_NAME: 'umsy-database',
+      DB_SCHEMA: 'public',
+    });
+
+    const migrationsUrl = buildDatabaseConnectionString('migrations');
+    expect(migrationsUrl).toBe(
+      'postgresql://postgres:RihitoGG%235700@localhost/umsy-database?schema=public&host=/cloudsql/daty-76e04:us-central1:umsy-db',
+    );
+
+    const runtimeUrl = buildDatabaseConnectionString('runtime');
+    expect(runtimeUrl).toBe(
+      'postgresql://postgres:RihitoGG%235700@localhost/umsy-database?host=/cloudsql/daty-76e04:us-central1:umsy-db',
+    );
+  });
 });
 

@@ -3,6 +3,7 @@ node_modules
 .next/
 
 .pnpm-store/
+.firebase/
 /especificacion GENERAL proyecto IS.pdf
 powershell.cmd
 CLAUDE.md

@@ -1,0 +1,18 @@
+runConfig:
+  cpu: 1
+  memoryMiB: 1024
+  minInstances: 0
+  maxInstances: 10
+  concurrency: 80
+
+env:
+  - variable: NEXT_PUBLIC_APP_ENV
+    value: prod
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NEXT_PUBLIC_API_URL_PROD
+    value: https://umssy-backend-466552952154.us-central1.run.app/api
+    availability:
+      - BUILD
+      - RUNTIME

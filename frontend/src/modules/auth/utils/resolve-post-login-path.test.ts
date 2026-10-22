@@ -7,10 +7,14 @@ describe("resolvePostLoginPath", () => {
     expect(resolvePostLoginPath(role, "/vacancies/abc?tab=details")).toBe("/vacancies/abc?tab=details");
   });
 
+  it.each(["titulado", "mentor", "estudiante", "empresa"])("el rol %s puede volver a /chat", (role) => {
+    expect(resolvePostLoginPath(role, "/chat")).toBe("/chat");
+  });
+
   it("does not return users to another role's view or to unknown routes", () => {
-    expect(resolvePostLoginPath(["estudiante"], "/chat")).toBe("/profile");
+    expect(resolvePostLoginPath(["estudiante"], "/recruiters")).toBe("/profile");
     expect(resolvePostLoginPath(["empresa"], "/vacancies/abc")).toBe("/recruiters");
-    expect(resolvePostLoginPath(["empresa"], "/chat")).toBe("/recruiters");
+    expect(resolvePostLoginPath(["empresa"], "/profile/radar")).toBe("/recruiters");
     expect(resolvePostLoginPath(["empresa"], "/profile")).toBe("/profile");
     expect(resolvePostLoginPath(["titulado"], "/matching")).toBe("/profile");
     expect(resolvePostLoginPath(["titulado"], "/reports/history")).toBe("/profile");
