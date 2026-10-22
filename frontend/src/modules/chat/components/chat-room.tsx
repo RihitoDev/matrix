@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -9,22 +8,17 @@ import {
 } from "react";
 import type { KeyboardEvent } from "react";
 import Image from "next/image";
-
 import { Button } from "@/components/ui/button";
-
 import type {
   Conversation,
   Message,
 } from "../types/conversation.types";
-
 import { MessageInputBar } from "./message-input-bar";
 import { ChatErrorState } from "./chat-error-state";
-
 import {
   getInitials,
   formatMessageDateSeparator,
 } from "../utils/date-formatter";
-
 import { isContentValidForSend } from "../utils/unicode-counter";
 
 interface ChatRoomProps {
@@ -60,15 +54,11 @@ function getMessageDate(message: Message): string {
 
 function formatMessageTime(value?: string | null): string {
   if (!value) return "";
-
   const date = new Date(value);
-
   if (Number.isNaN(date.getTime())) return "";
-
   const hours = date.getHours();
   const minutes = String(date.getMinutes()).padStart(2, "0");
   const hour = String(hours % 12 || 12).padStart(2, "0");
-
   return `${hour}:${minutes} ${hours >= 12 ? "PM" : "AM"}`;
 }
 
@@ -77,17 +67,14 @@ function isSameDay(
   secondDate?: string | null,
 ): boolean {
   if (!firstDate || !secondDate) return false;
-
   const first = new Date(firstDate);
   const second = new Date(secondDate);
-
   if (
     Number.isNaN(first.getTime()) ||
     Number.isNaN(second.getTime())
   ) {
     return false;
   }
-
   return (
     first.getFullYear() === second.getFullYear() &&
     first.getMonth() === second.getMonth() &&
@@ -101,25 +88,21 @@ function shouldShowDateSeparator(
   hasMoreMessages: boolean,
 ): boolean {
   const currentMessage = messages[index];
-
   if (!currentMessage) return false;
-
   if (index === 0) {
     return !hasMoreMessages;
   }
-
   const previousMessage = messages[index - 1];
-
   return !isSameDay(
     getMessageDate(previousMessage),
     getMessageDate(currentMessage),
   );
 }
-
 /**
  * Desplaza el contenedor al final.
  * Funciona tanto en navegadores como en JSDOM.
  */
+
 function scrollToBottom(
   container: HTMLDivElement,
   behavior: ScrollBehavior = "smooth",
@@ -161,65 +144,47 @@ function ChatRoomContent({
   const [inputText, setInputText] = useState("");
   const [sendError, setSendError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const containerRef = useRef<HTMLDivElement | null>(null);
   const anchorRef = useRef<ScrollAnchor | null>(null);
-
   const loadingOlderRef = useRef(false);
   const sendPendingRef = useRef(false);
-
   const firstScrollDoneRef = useRef(false);
   const nearBottomRef = useRef(true);
   const scrollAfterSendRef = useRef(false);
-
   const previousFirstIdRef = useRef<string | null>(null);
   const previousLastIdRef = useRef<string | null>(null);
-
   const showInitialLoading =
     isLoadingMessages && messages.length === 0;
-
   const getMessageElement = useCallback(
     (messageId: string): HTMLElement | null => {
       const container = containerRef.current;
-
       if (!container) return null;
-
       const elements =
         container.querySelectorAll<HTMLElement>(
           "[data-message-id]",
         );
-
       for (const element of elements) {
         if (element.dataset.messageId === messageId) {
           return element;
         }
       }
-
       return null;
     },
     [],
   );
-
   const captureAnchor = useCallback(() => {
     const container = containerRef.current;
-
     if (!container) return;
-
     const containerRect = container.getBoundingClientRect();
-
     const elements =
       container.querySelectorAll<HTMLElement>(
         "[data-message-id]",
       );
-
     for (const element of elements) {
       const rect = element.getBoundingClientRect();
-
       if (rect.bottom > containerRect.top) {
         const messageId = element.dataset.messageId;
-
         if (!messageId) continue;
-
         anchorRef.current = {
           messageId,
           offsetTop: rect.top - containerRect.top,
@@ -227,11 +192,9 @@ function ChatRoomContent({
           scrollHeight: container.scrollHeight,
           firstMessageId: previousFirstIdRef.current,
         };
-
         return;
       }
     }
-
     // Respaldo cuando no se pueden medir las posiciones.
     anchorRef.current = {
       messageId: "",
@@ -241,7 +204,6 @@ function ChatRoomContent({
       firstMessageId: previousFirstIdRef.current,
     };
   }, []);
-
   const loadOlderMessages = useCallback(async () => {
     if (
       !onLoadMoreMessages ||
@@ -251,13 +213,9 @@ function ChatRoomContent({
     ) {
       return;
     }
-
     captureAnchor();
-
     if (!anchorRef.current) return;
-
     loadingOlderRef.current = true;
-
     try {
       await onLoadMoreMessages();
     } catch {
@@ -270,24 +228,18 @@ function ChatRoomContent({
     isLoadingMoreMessages,
     captureAnchor,
   ]);
-
   const handleScroll = () => {
     const container = containerRef.current;
-
     if (!container) return;
-
     const distanceToBottom =
       container.scrollHeight -
       container.scrollTop -
       container.clientHeight;
-
     nearBottomRef.current =
       distanceToBottom <= BOTTOM_THRESHOLD;
-
     if (loadingOlderRef.current) {
       return;
     }
-
     if (
       container.scrollTop <= TOP_THRESHOLD &&
       !showInitialLoading &&
@@ -297,48 +249,36 @@ function ChatRoomContent({
       void loadOlderMessages();
     }
   };
-
   useLayoutEffect(() => {
     const container = containerRef.current;
-
     if (!container || showInitialLoading) return;
-
     const firstId = messages[0]?.id ?? null;
     const lastId = messages[messages.length - 1]?.id ?? null;
-
     const previousLastId = previousLastIdRef.current;
     const anchor = anchorRef.current;
-
     if (loadingOlderRef.current && anchor) {
       const olderMessagesAdded =
         firstId !== null &&
         firstId !== anchor.firstMessageId;
-
       if (olderMessagesAdded) {
         const anchorElement = anchor.messageId
           ? getMessageElement(anchor.messageId)
           : null;
-
         if (anchorElement) {
           const containerRect =
             container.getBoundingClientRect();
-
           const elementRect =
             anchorElement.getBoundingClientRect();
-
           const currentOffset =
             elementRect.top - containerRect.top;
-
           container.scrollTop +=
             currentOffset - anchor.offsetTop;
         } else {
           const heightDifference =
             container.scrollHeight - anchor.scrollHeight;
-
           container.scrollTop =
             anchor.scrollTop + heightDifference;
         }
-
         loadingOlderRef.current = false;
         anchorRef.current = null;
       } else if (
@@ -353,7 +293,6 @@ function ChatRoomContent({
       messages.length > 0
     ) {
       scrollToBottom(container, "auto");
-
       firstScrollDoneRef.current = true;
       nearBottomRef.current = true;
     } else if (
@@ -366,11 +305,9 @@ function ChatRoomContent({
         nearBottomRef.current
       ) {
         scrollToBottom(container, "smooth");
-
         scrollAfterSendRef.current = false;
       }
     }
-
     previousFirstIdRef.current = firstId;
     previousLastIdRef.current = lastId;
   }, [
@@ -380,7 +317,6 @@ function ChatRoomContent({
     hasMoreMessages,
     getMessageElement,
   ]);
-
   const handleSend = async () => {
     if (
       !isContentValidForSend(inputText) ||
@@ -391,17 +327,12 @@ function ChatRoomContent({
     ) {
       return;
     }
-
     const content = inputText.trim();
-
     if (!content) return;
-
     sendPendingRef.current = true;
     scrollAfterSendRef.current = true;
-
     setIsSubmitting(true);
     setSendError(false);
-
     try {
       await onSendMessage(content);
     } catch {
@@ -413,19 +344,15 @@ function ChatRoomContent({
       sendPendingRef.current = false;
       setIsSubmitting(false);
     }
-
     // El envío terminó correctamente.
     setSendError(false);
     setInputText("");
-
     // El scroll no debe interpretarse como un error de envío.
     const container = containerRef.current;
-
     if (container) {
       scrollToBottom(container, "smooth");
     }
   };
-
   const handleInputKeyDown = (
     event: KeyboardEvent<HTMLTextAreaElement>,
   ) => {
@@ -434,7 +361,6 @@ function ChatRoomContent({
       void handleSend();
     }
   };
-
   return (
     <div
       data-testid="chat-room"
@@ -468,7 +394,6 @@ function ChatRoomContent({
               />
             </svg>
           </Button>
-
           <div className="relative shrink-0">
             {conversation.contact.avatarUrl ? (
               <Image
@@ -484,7 +409,6 @@ function ChatRoomContent({
                 {getInitials(conversation.contact.fullName)}
               </div>
             )}
-
             {conversation.contact.isOnline && (
               <span
                 data-testid="online-indicator"
@@ -493,7 +417,6 @@ function ChatRoomContent({
               />
             )}
           </div>
-
           <div>
             <h3
               data-testid="chat-contact-name"
@@ -501,7 +424,6 @@ function ChatRoomContent({
             >
               {conversation.contact.fullName}
             </h3>
-
             <span className="text-xs font-medium text-emerald-600">
               {conversation.contact.isOnline
                 ? "En línea"
@@ -510,7 +432,6 @@ function ChatRoomContent({
           </div>
         </div>
       </header>
-
       <div
         ref={containerRef}
         data-testid="messages-container"
@@ -535,7 +456,6 @@ function ChatRoomContent({
             }
           />
         )}
-
         {isLoadingMoreMessages && (
           <div
             role="status"
@@ -547,7 +467,6 @@ function ChatRoomContent({
             </span>
           </div>
         )}
-
         {!hasMoreMessages &&
           messages.length > 0 &&
           !showInitialLoading && (
@@ -560,7 +479,6 @@ function ChatRoomContent({
               </span>
             </div>
           )}
-
         {showInitialLoading ? (
           <div
             role="status"
@@ -576,7 +494,6 @@ function ChatRoomContent({
             <p className="text-sm font-medium">
               Sala de chat con {conversation.contact.fullName}
             </p>
-
             <p className="mt-1 text-xs text-slate-400">
               Aún no hay mensajes. Envía el primero para comenzar.
             </p>
@@ -586,20 +503,13 @@ function ChatRoomContent({
             {messages.map((message, index) => {
               const isOwn =
                 message.senderId === currentUserId;
-
-              const senderName = isOwn
-                ? "Tú"
-                : conversation.contact.fullName;
-
               const messageDate = getMessageDate(message);
-
               const showDateSeparator =
                 shouldShowDateSeparator(
                   messages,
                   index,
                   hasMoreMessages,
                 );
-
               return (
                 <div
                   key={message.id}
@@ -611,17 +521,14 @@ function ChatRoomContent({
                       className="my-5 flex items-center gap-3"
                     >
                       <div className="h-px flex-1 bg-[#E3E7EC]" />
-
                       <span className="text-center text-[11px] font-semibold whitespace-nowrap text-[#5B6470]">
                         {formatMessageDateSeparator(
                           messageDate,
                         )}
                       </span>
-
                       <div className="h-px flex-1 bg-[#E3E7EC]" />
                     </div>
                   )}
-
                   <div
                     data-testid={`message-item-${message.id}`}
                     className={`flex w-full min-w-0 ${
@@ -637,20 +544,9 @@ function ChatRoomContent({
                           : "rounded-tl-xs border border-[#E3E7EC] bg-white text-[#0B1F2E]"
                       }`}
                     >
-                      <p
-                        className={`mb-1 text-xs font-semibold ${
-                          isOwn
-                            ? "text-slate-200"
-                            : "text-[#2563EB]"
-                        }`}
-                      >
-                        {senderName}
-                      </p>
-
                       <p className="leading-relaxed [overflow-wrap:anywhere] break-words whitespace-pre-wrap">
                         {message.content}
                       </p>
-
                       <div
                         className={`mt-1 flex items-center justify-end gap-1.5 text-[10px] ${
                           isOwn
@@ -661,7 +557,6 @@ function ChatRoomContent({
                         <span>
                           {formatMessageTime(messageDate)}
                         </span>
-
                         {isOwn && (
                           <span className="font-medium">
                             {message.status === "sending"
@@ -679,10 +574,8 @@ function ChatRoomContent({
             })}
           </div>
         )}
-
         <div data-testid="messages-scroll-anchor" />
       </div>
-
       {sendError && (
         <div
           role="alert"
@@ -694,7 +587,6 @@ function ChatRoomContent({
           </p>
         </div>
       )}
-
       <MessageInputBar
         value={inputText}
         onChange={setInputText}
